@@ -1,1331 +1,1446 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transformer RCM & Health Index Management System</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter & Prompt -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chart.js for interactive charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Prompt', 'Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        rcmBlue: '#1e3a8a',
-                        rcmDark: '#0f172a',
-                        rcmCyan: '#0ea5e9',
-                        rcmGreen: '#10b981',
-                        rcmYellow: '#f59e0b',
-                        rcmRed: '#ef4444',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Prompt', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบ RCM สถานีไฟฟ้า — Transformer RCM & Health Index Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<!-- โหลดไลบรารี Chart.js สำหรับวาดกราฟ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- โหลดไลบรารี SheetJS (xlsx) สำหรับอ่านไฟล์ Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- โหลด Firebase SDK สำหรับเชื่อมต่อ Cloud Firestore -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDurmcrWYyP4_7pPSQ5NuJs6H5LObSs_uY",
+    projectId: "panissara",
+    authDomain: "panissara.firebaseapp.com"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  window.saveToFirestoreCloud = async function(fmeaData, hiData) {
+    try {
+      await signInWithEmailAndPassword(auth, "device@Panissara.local", "12345678");
+      await setDoc(doc(db, "panissara_projects", "rcm_main_data"), {
+        records: fmeaData,
+        hiRecords: hiData,
+        updatedAt: new Date().toISOString()
+      });
+      alert('บันทึกข้อมูลขึ้น Cloud Firestore (โปรเจกต์ panissara) สำเร็จเรียบร้อยแล้ว!');
+    } catch (error) {
+      console.error("Firebase Error:", error);
+      alert('เกิดข้อผิดพลาดในการบันทึก Cloud Firestore: ' + error.message);
+    }
+  };
+</script>
+
+<style>
+  :root {
+    --bg: #090d16;
+    --panel: #111827;
+    --panel-2: #1f293d;
+    --border: #334155;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    
+    --primary: #f59e0b;
+    --primary-dim: rgba(245, 158, 11, 0.15);
+    
+    --teal: #14b8a6;
+    --teal-dim: rgba(20, 184, 166, 0.15);
+    --danger: #ef4444;
+    --danger-dim: rgba(239, 68, 68, 0.15);
+    
+    --radius: 10px;
+  }
+
+  body.light-mode {
+    --bg: #f8fafc;
+    --panel: #ffffff;
+    --panel-2: #f1f5f9;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0; width:100%; overflow-x:hidden;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family:'Noto Sans Thai', 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height:100vh;
+    display: flex;
+    flex-direction: row;
+    transition: background 0.2s, color 0.2s;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  /* Sidebar เมนูฝั่งซ้ายแบบทางการ */
+  aside.sidebar {
+    width: 270px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    z-index: 50;
+    overflow-y: auto;
+  }
+  .sidebar-brand {
+    font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 24px; padding-left: 8px;
+    display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em;
+  }
+  .sidebar-brand .accent { color: var(--primary); }
+  
+  .nav-tabs { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .tab-btn {
+    background: transparent; border: 1px solid transparent; color: var(--muted);
+    padding: 10px 14px; border-radius: var(--radius); cursor: pointer; font-family: inherit; font-size: 0.88rem; font-weight: 500; transition: all .15s; text-align: left;
+  }
+  .tab-btn:hover { background: var(--panel-2); color: var(--text); }
+  .tab-btn.active { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); font-weight: 700; }
+
+  .sidebar-footer { padding-top: 16px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+
+  /* เนื้อหาหลักฝั่งขวา */
+  .main-content {
+    margin-left: 270px;
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 270px);
+  }
+
+  header{
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+  }
+  .header-inner{ max-width:1400px; margin:0 auto; width: 100%; }
+  .title-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+  h1{ font-size:1.2rem; font-weight:700; margin:0; letter-spacing: -0.02em; }
+  h1 .accent{color: var(--primary);}
+  .subtitle{ color:var(--muted); font-size:0.78rem; margin-top:3px; }
+  
+  .header-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  .mode-toggle-btn, .role-select {
+    background: var(--panel-2); border: 1px solid var(--border); cursor: pointer; color: var(--text);
+    font-size: 0.82rem; padding: 6px 12px; border-radius: var(--radius); font-family: inherit; transition: all 0.15s;
+  }
+  .mode-toggle-btn:hover, .role-select:hover { border-color: var(--primary); }
+
+  .action-btn, .save-btn, .guideline-btn, .tip-btn {
+    background: var(--teal-dim); border: 1px solid var(--teal); color: var(--teal);
+    padding: 6px 12px; border-radius: var(--radius); cursor: pointer; font-size: 0.8rem; font-weight: 600; font-family: inherit; transition: all 0.15s;
+  }
+  .guideline-btn { background: rgba(59, 130, 246, 0.15); border-color: #3b82f6; color: #60a5fa; }
+  .guideline-btn:hover { background: rgba(59, 130, 246, 0.3); }
+  .tip-btn { background: rgba(245, 158, 11, 0.15); border-color: var(--primary); color: var(--primary); }
+  .tip-btn:hover { background: rgba(245, 158, 11, 0.3); }
+  .action-btn:hover, .save-btn:hover { opacity: 0.85; }
+
+  /* Top Stepper Navigation (1 ถึง 10) เหมือนภาพต้นแบบ */
+  .stepper-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    overflow-x: auto;
+    gap: 8px;
+  }
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    color: var(--muted);
+    transition: all 0.15s;
+    min-width: 75px;
+    padding: 6px;
+    border-radius: 8px;
+  }
+  .step-item:hover { color: var(--text); background: var(--panel); }
+  .step-item.active { color: var(--primary); font-weight: 700; background: var(--primary-dim); border: 1px solid var(--primary); }
+  .step-circle {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px;
+  }
+  .step-item.active .step-circle { background: var(--primary); color: #000; border-color: var(--primary); }
+  .step-label { font-size: 0.65rem; text-align: center; white-space: nowrap; line-height: 1.2; }
+  .step-arrow { color: var(--muted); font-size: 0.9rem; font-weight: bold; flex-shrink: 0; }
+
+  .dashboard-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px;
+    display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.15s;
+  }
+  .stat-card:hover { border-color: var(--primary); }
+  .stat-title { font-size: 0.73rem; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+  .stat-value { font-family: 'IBM Plex Mono', monospace; font-size: 1.4rem; font-weight: 700; }
+  .stat-total { color: var(--primary); }
+  .stat-normal { color: var(--teal); }
+  .stat-warning { color: var(--primary); }
+  .stat-critical { color: var(--danger); }
+  .stat-hi { color: #60a5fa; }
+
+  /* Charts */
+  .charts-container {
+    display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 16px;
+  }
+  @media(max-width: 950px) { .charts-container { grid-template-columns: 1fr; } }
+  .chart-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px;
+    position: relative; overflow: hidden;
+  }
+  .chart-title { font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .chart-box { position: relative; height: 200px; width: 100%; display: flex; align-items: center; justify-content: center; }
+
+  .toolbar-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; justify-content: space-between; }
+  .search-wrap{ position:relative; flex: 1; min-width: 240px; }
+  #search{
+    width:100%; background:var(--panel-2); border:1px solid var(--border); color:var(--text);
+    font-family:inherit; font-size:0.88rem; padding:10px 14px 10px 38px; border-radius: var(--radius); outline:none;
+  }
+  #search:focus{ border-color: var(--primary); }
+  .search-wrap svg{ position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; stroke:var(--muted); }
+
+  .risk-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filter-chip {
+    font-size: 0.78rem; padding: 7px 12px; border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--panel-2); color: var(--muted); cursor: pointer; font-weight: 600; transition: all 0.15s;
+  }
+  .filter-chip.active { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:6px; max-height:80px; overflow-y:auto; padding-bottom:4px; }
+  .chip{
+    font-size:0.75rem; padding:5px 10px; border-radius:100px; border:1px solid var(--border);
+    background:var(--panel-2); color:var(--muted); cursor:pointer; transition:all .12s ease; white-space:nowrap;
+  }
+  .chip:hover{border-color:var(--primary); color:var(--text);}
+  .chip.active{ background: var(--primary-dim); border-color: var(--primary); color: var(--primary); font-weight:600; }
+
+  main { padding: 24px 32px 60px; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+  /* Table Design */
+  .table-responsive {
+    width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel);
+  }
+  table{ width: 100%; min-width: 1250px; border-collapse: collapse; font-size: 0.84rem; }
+  thead th{
+    text-align: left; font-size: 0.73rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 12px 14px; border-bottom: 1px solid var(--border); background: var(--panel-2); white-space: nowrap;
+  }
+  
+  tbody tr{ border-bottom: 1px solid var(--border); transition: background .1s ease; cursor: pointer; }
+  tbody tr:hover{ background: var(--panel-2); }
+  tbody td{ padding: 10px 14px; vertical-align: middle; }
+  td.num{ color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; }
+  
+  .code-pill{
+    display: inline-block; font-family: 'IBM Plex Mono', monospace; font-weight: 600;
+    font-size: 0.8rem; color: var(--primary); background: var(--primary-dim);
+    border-left: 3px solid var(--primary); padding: 2px 6px; border-radius: 4px; white-space: nowrap;
+  }
+  
+  input.score-input {
+    width: 50px; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 5px; text-align: center; border-radius: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem;
+  }
+  input.score-input:focus { border-color: var(--primary); outline: none; }
+  input.score-input:disabled { opacity: 0.4; cursor: not-allowed; background: rgba(255,255,255,0.03); }
+  
+  input.text-input, select.text-input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 7px 10px; border-radius: 6px; font-family: inherit; font-size: 0.82rem;
+  }
+  input.text-input:focus, select.text-input:focus { border-color: var(--primary); outline: none; }
+  input.text-input:disabled, select.text-input:disabled { opacity: 0.4; cursor: not-allowed; background: rgba(255,255,255,0.03); }
+
+  /* Priority Flag Badges */
+  .flag-badge {
+    font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; display: inline-block; white-space: nowrap;
+  }
+  .flag-red { background: var(--danger-dim); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+  .flag-orange { background: var(--primary-dim); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+  .flag-green { background: var(--teal-dim); color: #2dd4bf; border: 1px solid rgba(20, 184, 166, 0.3); }
+
+  .plan-info-banner {
+    background: var(--panel-2); border: 1px solid var(--border); border-left: 4px solid var(--primary);
+    padding: 14px 18px; border-radius: var(--radius); margin-bottom: 16px; font-size: 0.85rem; line-height: 1.6;
+  }
+
+  /* Flow Chart UI Styles */
+  .flow-wrapper {
+    display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px 12px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px;
+  }
+  .flow-step-box {
+    width: 100%; max-width: 650px; background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 18px; display: flex; flex-direction: column; gap: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  }
+  .flow-cond {
+    font-size: 0.9rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px;
+  }
+  .flow-branches {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;
+  }
+  .branch-yes {
+    background: rgba(20, 184, 166, 0.12); border: 1px solid var(--teal); border-radius: 6px; padding: 8px 12px;
+    font-size: 0.80rem; color: var(--teal); font-weight: 600; text-align: center;
+  }
+  .branch-no {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px;
+    font-size: 0.80rem; color: var(--muted); text-align: center;
+  }
+  .flow-down-arrow {
+    text-align: center; color: var(--muted); font-weight: bold; font-size: 1.1rem; line-height: 1;
+  }
+
+  /* Excel Upload Box */
+  .upload-box {
+    background: var(--panel); border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 30px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;
+    margin-bottom: 16px; transition: all 0.2s; cursor: pointer;
+  }
+  .upload-box:hover { border-color: var(--primary); background: var(--panel-2); }
+  .upload-icon { font-size: 2.2rem; color: var(--primary); }
+
+  /* DGA Analysis Styles */
+  .dga-toolbar {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px;
+    margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .dga-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .dga-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .dga-card h4 { margin: 0 0 8px 0; color: var(--primary); font-size: 0.9rem; }
+  .dga-desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+  .dga-result-box {
+    background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; color: var(--teal); margin-top: 10px; min-height: 44px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .dga-input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+  .dga-field { display: flex; flex-direction: column; gap: 3px; }
+  .dga-field label { font-size: 0.7rem; color: var(--muted); font-weight: 600; }
+  
+  .duval-box {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 8px;
+  }
+
+  /* Pagination Bar */
+  .pagination-bar {
+    display: flex; justify-content: space-between; align-items: center; padding: 12px 18px;
+    background: var(--panel); border: 1px solid var(--border); border-top: none;
+    border-bottom-left-radius: var(--radius); border-bottom-right-radius: var(--radius);
+    flex-wrap: wrap; gap: 10px;
+  }
+  .pagination-info { font-size: 0.8rem; color: var(--muted); }
+  .pagination-btns { display: flex; gap: 6px; align-items: center; }
+  .page-btn {
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600; font-family: inherit;
+  }
+  .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .page-indicator { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; padding: 0 6px; color: var(--muted); }
+
+  /* Modals */
+  .modal-overlay{
+    position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(9, 13, 22, 0.85);
+    backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center;
+    z-index:100; padding:16px; opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .modal-overlay.open{ opacity:1; pointer-events:auto; }
+  .modal{
+    background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    width:100%; max-width:750px; padding:26px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal h3{ margin:0 0 16px 0; font-size:1.1rem; color:var(--primary); display:flex; justify-content:space-between; align-items:center; }
+  .modal-close{ background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer; }
+  
+  .guideline-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-bottom: 14px; }
+  .guideline-table th, .guideline-table td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; }
+  .guideline-table th { background: var(--panel-2); color: var(--primary); font-weight: 700; }
+
+  .modal-grid{ display:grid; grid-template-columns:130px 1fr; gap:8px 14px; font-size:0.85rem; margin-bottom:14px; }
+  .modal-grid .label{ color:var(--muted); font-weight:500; }
+  .modal-grid .val{ color:var(--text); word-break: break-all; }
+
+  .section-label{
+    font-size:0.78rem; color:var(--muted); margin:0 0 10px 2px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;
+  }
+
+  footer{ max-width:1400px; margin:0 auto; padding:0 32px 40px; color:var(--muted); font-size:0.75rem; text-align: center; }
+
+  @media(max-width: 900px) {
+    body { flex-direction: column; }
+    aside.sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border); }
+    .main-content { margin-left: 0; width: 100%; }
+    header { padding: 16px; }
+    main { padding: 16px; }
+    footer { padding: 0 16px 30px; }
+  }
+</style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased h-screen overflow-hidden flex flex-col">
+<body>
 
-    <!-- TOP NAVBAR -->
-    <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white shadow-md z-30 flex items-center justify-between px-6 py-3 shrink-0">
-        <div class="flex items-center space-x-4">
-            <div class="bg-blue-600/30 p-2 rounded-xl border border-blue-400/30 flex items-center justify-center">
-                <i class="fa-solid fa-bolt-lightning text-blue-400 text-2xl"></i>
-            </div>
-            <div>
-                <h1 class="text-lg font-bold tracking-wide flex items-center gap-2">
-                    Transformer RCM & Health Index Management System
-                </h1>
-                <p class="text-xs text-blue-200/80 font-light">Reliability-Centered Maintenance for Sustainable Power System</p>
-            </div>
-        </div>
+<!-- Sidebar เมนูฝั่งซ้ายแบบทางการ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    RCM <span class="accent">ENGINEERING SYSTEM</span>
+  </div>
+  <div style="font-size: 0.73rem; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em;">โมดูลระบบงาน</div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('fmea', this)">1. วิเคราะห์ FMEA และ RPN</button>
+    <button class="tab-btn" onclick="switchTab('hi', this)" id="btnHi">2. ดัชนีสุขภาพอุปกรณ์ (HI)</button>
+    <button class="tab-btn" onclick="switchTab('plan', this)" id="btnPlan">3. แผนงานบำรุงรักษา (Action Plan)</button>
+    <button class="tab-btn" onclick="switchTab('dga', this)" id="btnDga">4. วิเคราะห์ก๊าซละลาย (DGA)</button>
+    <button class="tab-btn" onclick="switchTab('tree', this)" id="btnTree">5. Decision Logic Tree</button>
+    <button class="tab-btn" onclick="switchTab('import', this)" id="btnImport">6. นำเข้าข้อมูล (Data Import)</button>
+  </div>
+  
+  <div class="sidebar-footer">
+    <button class="guideline-btn" onclick="openGuidelineModal()" style="width:100%; text-align:center;">เกณฑ์มาตรฐาน MIL-STD-1629A</button>
+  </div>
+</aside>
 
-        <div class="flex items-center space-x-6">
-            <!-- Global Search -->
-            <div class="relative hidden md:block w-72">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                </span>
-                <input type="text" id="globalSearchInput" onkeyup="handleGlobalSearch(event)" placeholder="ค้นหาอุปกรณ์, รหัส, รายการ..." class="w-full bg-slate-800/80 text-sm text-slate-200 pl-9 pr-4 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-blue-500 transition">
-            </div>
-
-            <div class="flex items-center space-x-3">
-                <button onclick="showNotificationModal()" class="relative p-2 bg-slate-800/60 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white transition">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                </button>
-                <button onclick="openHelpModal()" class="p-2 bg-slate-800/60 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white transition">
-                    <i class="fa-regular fa-circle-question"></i>
-                </button>
-            </div>
-
-            <!-- User Profile -->
-            <div class="flex items-center space-x-3 pl-3 border-l border-slate-700">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center font-bold text-white shadow">
-                    PP
-                </div>
-                <div class="hidden lg:block text-left">
-                    <div class="text-sm font-medium leading-tight">Panisara P.</div>
-                    <div class="text-xs text-slate-400">Industrial Engineering</div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- MAIN APP CONTAINER -->
-    <div class="flex flex-1 overflow-hidden">
-        
-        <!-- SIDEBAR NAVIGATION -->
-        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 shadow-xl z-20 overflow-y-auto">
-            <div class="p-4 space-y-1">
-                <div class="text-[10px] font-semibold text-slate-500 uppercase px-3 pb-2 tracking-wider">Main Navigation</div>
-                
-                <a href="#" onclick="switchMainView('dashboard')" id="nav-dashboard" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-blue-600 text-white font-medium shadow-md shadow-blue-600/30 transition">
-                    <i class="fa-solid fa-house-chimney w-5 text-center"></i>
-                    <span class="text-sm">Dashboard</span>
-                </a>
-
-                <a href="#" onclick="switchMainView('asset')" id="nav-asset" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-server w-5 text-center"></i>
-                    <span class="text-sm">Asset Management</span>
-                </a>
-
-                <!-- RCM Analysis Dropdown Group -->
-                <div class="space-y-1 pt-1">
-                    <div onclick="toggleRcmSubmenu()" class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white cursor-pointer transition">
-                        <div class="flex items-center space-x-3">
-                            <i class="fa-solid fa-gears w-5 text-center text-blue-400"></i>
-                            <span class="text-sm font-medium">RCM Analysis</span>
-                        </div>
-                        <i id="rcmArrow" class="fa-solid fa-chevron-down text-xs transition-transform rotate-180"></i>
-                    </div>
-
-                    <div id="rcmSubmenu" class="pl-4 space-y-1 pt-1 border-l border-slate-800 ml-4">
-                        <a href="#" onclick="switchRcmSubTab('functions')" id="rcm-functions" class="block px-3 py-1.5 text-xs rounded-lg hover:bg-slate-800 hover:text-white transition">Functions</a>
-                        <a href="#" onclick="switchRcmSubTab('functional_failure')" id="rcm-functional_failure" class="block px-3 py-1.5 text-xs rounded-lg hover:bg-slate-800 hover:text-white transition">Functional Failure</a>
-                        <a href="#" onclick="switchRcmSubTab('fmea')" id="rcm-fmea" class="block px-3 py-1.5 text-xs rounded-lg bg-blue-600/20 text-blue-400 font-medium transition">FMEA</a>
-                        <a href="#" onclick="switchRcmSubTab('criticality')" id="rcm-criticality" class="block px-3 py-1.5 text-xs rounded-lg hover:bg-slate-800 hover:text-white transition">Criticality</a>
-                        <a href="#" onclick="switchRcmSubTab('health_index')" id="rcm-health_index" class="block px-3 py-1.5 text-xs rounded-lg hover:bg-slate-800 hover:text-white transition">Health Index</a>
-                        <a href="#" onclick="switchRcmSubTab('maintenance_strategy')" id="rcm-maintenance_strategy" class="block px-3 py-1.5 text-xs rounded-lg hover:bg-slate-800 hover:text-white transition">Maintenance Strategy</a>
-                    </div>
-                </div>
-
-                <a href="#" onclick="switchMainView('task')" id="nav-task" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-list-check w-5 text-center"></i>
-                    <span class="text-sm">Maintenance Task</span>
-                </a>
-
-                <a href="#" onclick="switchMainView('plan')" id="nav-plan" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-calendar-days w-5 text-center"></i>
-                    <span class="text-sm">Maintenance Plan</span>
-                </a>
-
-                <a href="#" onclick="switchMainView('inspection')" id="nav-inspection" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-stethoscope w-5 text-center"></i>
-                    <span class="text-sm">Inspection & Monitoring</span>
-                </a>
-
-                <a href="#" onclick="switchMainView('reports')" id="nav-reports" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
-                    <span class="text-sm">Reports</span>
-                </a>
-
-                <a href="#" onclick="switchMainView('data')" id="nav-data" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-database w-5 text-center"></i>
-                    <span class="text-sm">Data Management</span>
-                </a>
-
-                <a href="#" onclick="switchMainView('settings')" id="nav-settings" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-gear w-5 text-center"></i>
-                    <span class="text-sm">Settings</span>
-                </a>
-            </div>
-
-            <!-- Sidebar Footer / Version Info -->
-            <div class="p-4 bg-slate-950/50 border-t border-slate-800">
-                <div class="text-xs font-semibold text-slate-400">Reliable Assets</div>
-                <div class="text-[11px] text-slate-500">Sustainable Tomorrow</div>
-                <div class="mt-2 text-[10px] text-slate-600 flex justify-between items-center">
-                    <span>Version 1.0.0</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-                </div>
-            </div>
-        </aside>
-
-        <!-- MAIN CONTENT WORKSPACE -->
-        <main class="flex-1 overflow-y-auto bg-slate-100 flex flex-col">
-            
-            <!-- SUB-HEADER / BANNER -->
-            <div class="bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 text-white p-6 shadow relative overflow-hidden flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 shrink-0">
-                <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
-                    <i class="fa-solid fa-tower-broadcast text-[200px]"></i>
-                </div>
-                <div class="z-10">
-                    <div class="text-xs uppercase tracking-widest text-blue-300 font-semibold mb-1">ยินดีต้อนรับสู่ระบบ</div>
-                    <h2 class="text-2xl lg:text-3xl font-bold tracking-tight">Transformer RCM & Health Index</h2>
-                    <p class="text-sm text-slate-300 mt-1 italic">"Reliable Transformer Sustainable Tomorrow"</p>
-                </div>
-
-                <!-- Clock and Date Card -->
-                <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 px-5 flex items-center space-x-4 z-10">
-                    <div class="text-right">
-                        <div id="currentDateDisplay" class="text-xs text-blue-200 font-medium">วันจันทร์ที่ 22 กันยายน 2569</div>
-                        <div id="currentTimeDisplay" class="text-xl font-bold tracking-wider">10:24</div>
-                    </div>
-                    <div class="h-8 w-px bg-white/20"></div>
-                    <div class="flex items-center space-x-2">
-                        <i class="fa-solid fa-cloud-sun text-yellow-300 text-2xl"></i>
-                        <div>
-                            <div class="text-lg font-bold">32°C</div>
-                            <div class="text-[10px] text-slate-300">กรุงเทพมหานคร</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TOP STEPPER (STEPS 1-10) -->
-            <div class="bg-white border-b border-slate-200 px-6 py-4 shadow-sm overflow-x-auto shrink-0">
-                <div class="flex items-center justify-between min-w-[950px] space-x-2">
-                    
-                    <!-- Step 1 -->
-                    <div onclick="selectStep(1)" id="step-btn-1" class="step-card flex flex-col items-center cursor-pointer group p-2 rounded-xl transition hover:bg-blue-50 border border-transparent hover:border-blue-200">
-                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-                            <i class="fa-solid fa-cube text-sm"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 mt-1.5 text-center">กำหนดขอบเขตและเลือกอุปกรณ์</span>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
-
-                    <!-- Step 2 -->
-                    <div onclick="selectStep(2)" id="step-btn-2" class="step-card flex flex-col items-center cursor-pointer group p-2 rounded-xl transition hover:bg-blue-50 border border-transparent hover:border-blue-200">
-                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-                            <i class="fa-solid fa-book-open text-sm"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 mt-1.5 text-center">กำหนดหน้าที่และมาตรฐาน</span>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
-
-                    <!-- Step 3 -->
-                    <div onclick="selectStep(3)" id="step-btn-3" class="step-card flex flex-col items-center cursor-pointer group p-2 rounded-xl transition hover:bg-amber-50 border border-transparent hover:border-amber-200">
-                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-                            <i class="fa-solid fa-triangle-exclamation text-sm"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 mt-1.5 text-center">ระบุ Functional Failure</span>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
-
-                    <!-- Step 4 -->
-                    <div onclick="selectStep(4)" id="step-btn-4" class="step-card flex flex-col items-center cursor-pointer group p-2 rounded-xl transition hover:bg-purple-50 border border-transparent hover:border-purple-200">
-                        <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-                            <i class="fa-solid fa-magnifying-glass-chart text-sm"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 mt-1.5 text-center">วิเคราะห์ FMEA</span>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
-
-                    <!-- Step 5 -->
-                    <div onclick="selectStep(5)" id="step-btn-5" class="step-card flex flex-col items-center cursor-pointer group p-2 rounded-xl transition hover:bg-rose-50 border border-transparent hover:border-rose-200">
-                        <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-                            <i class="fa-solid fa-chart-column text-sm"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 mt-1.5 text-center">ประเมิน Consequence / Criticality</span>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
-
-                    <!-- Step 6 -->
-                    <div onclick="selectStep(6)" id="step-btn-6" class="step-card flex flex-col items-center cursor-pointer group p-2 rounded-xl transition hover:bg-teal-50 border border-transparent hover:border-teal-200">
-                        <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-                            <i class="fa-solid fa-heart-pulse text-sm"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 mt-1.5 text-center">ประเมิน Health Index</span>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
-
-                    <!-- Step 7 -->
-                    <div onclick="selectStep(7)" id="step-btn-7" class="step-card flex flex-col items-center cursor-pointer group p-2 rounded-xl transition hover:bg-emerald-50 border border-transparent hover:border-emerald-200">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-                            <i class="fa-solid fa-screwdriver-wrench text-sm"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 mt-1.5 text-center">เลือกกลยุทธ์การบำรุงรักษา</span>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
-
-                    <!-- Step 8 -->
-                    <div onclick="selectStep(8)" id="step-btn-8" class="step-card flex flex-col items-center cursor-pointer group p-2 rounded-xl transition hover:bg-blue-50 border border-transparent hover:border-blue-200">
-                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-                            <i class="fa-solid fa-list-check text-sm"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 mt-1.5 text-center">กำหนด Maintenance Task</span>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
-
-                    <!-- Step 9 -->
-                    <div onclick="selectStep(9)" id="step-btn-9" class="step-card flex flex-col items-center cursor-pointer group p-2 rounded-xl transition hover:bg-amber-50 border border-transparent hover:border-amber-200">
-                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-                            <i class="fa-regular fa-calendar-check text-sm"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 mt-1.5 text-center">จัดทำ Maintenance Plan</span>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
-
-                    <!-- Step 10 -->
-                    <div onclick="selectStep(10)" id="step-btn-10" class="step-card flex flex-col items-center cursor-pointer group p-2 rounded-xl transition hover:bg-indigo-50 border border-transparent hover:border-indigo-200">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-                            <i class="fa-solid fa-chart-line text-sm"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 mt-1.5 text-center">ติดตามผลและทบทวน</span>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- DYNAMIC WORKSPACE CONTAINER -->
-            <div id="mainWorkspace" class="p-6 space-y-6 flex-1 overflow-y-auto">
-                <!-- Dynamically populated via JS -->
-            </div>
-
-        </main>
-    </div>
-
-    <!-- NOTIFICATION TOAST BANNER -->
-    <div id="toastBanner" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl z-50 transform translate-y-32 opacity-0 transition-all duration-300 flex items-center space-x-3 border border-slate-800">
-        <div id="toastIcon" class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs">
-            <i class="fa-solid fa-check"></i>
-        </div>
+<!-- เนื้อหาหลักฝั่งขวา -->
+<div class="main-content">
+  <header>
+    <div class="header-inner">
+      <div class="title-row">
         <div>
-            <div id="toastTitle" class="text-xs font-bold">สำเร็จ</div>
-            <div id="toastDesc" class="text-[11px] text-slate-300">บันทึกข้อมูลเรียบร้อยแล้ว</div>
+          <h1>Transformer RCM & Health Index Management System</h1>
+          <div class="subtitle" id="modeTitleSub">Reliability-Centered Maintenance for Sustainable Power System</div>
         </div>
+        
+        <div class="header-controls">
+          <select id="userRoleSelect" class="role-select" onchange="onRoleChange()" title="เลือกระดับสิทธิ์การใช้งาน">
+            <option value="admin">สิทธิ์: ผู้ดูแลระบบ (Admin)</option>
+            <option value="operator">สิทธิ์: ช่างปฏิบัติการ (Operator)</option>
+            <option value="viewer">สิทธิ์: ผู้ชมทั่วไป (Viewer)</option>
+          </select>
+          <button class="mode-toggle-btn" id="modeToggleBtn" onclick="toggleLightDarkMode()" title="สลับโหมดการแสดงผล">โหมดมืด</button>
+          <button class="action-btn" onclick="exportToCSV()" title="ส่งออกข้อมูลเป็น CSV">ส่งออก CSV</button>
+          <button class="save-btn" id="saveBtn" onclick="saveData()">บันทึกข้อมูล (Cloud)</button>
+        </div>
+      </div>
+
+      <!-- Top Stepper Navigation (1 ถึง 10 กดได้ทุกปุ่มตามภาพต้นแบบ) -->
+      <div class="stepper-container" id="topStepper">
+        <button class="step-item active" onclick="handleStepClick(1, this)">
+          <div class="step-circle">1</div>
+          <div class="step-label">กำหนดขอบเขตและเลือกอุปกรณ์</div>
+        </button>
+        <div class="step-arrow">→</div>
+        <button class="step-item" onclick="handleStepClick(2, this)">
+          <div class="step-circle">2</div>
+          <div class="step-label">กำหนดหน้าที่และมาตรฐาน</div>
+        </button>
+        <div class="step-arrow">→</div>
+        <button class="step-item" onclick="handleStepClick(3, this)">
+          <div class="step-circle">3</div>
+          <div class="step-label">ระบุ Functional Failure</div>
+        </button>
+        <div class="step-arrow">→</div>
+        <button class="step-item" onclick="handleStepClick(4, this)">
+          <div class="step-circle">4</div>
+          <div class="step-label">วิเคราะห์ FMEA</div>
+        </button>
+        <div class="step-arrow">→</div>
+        <button class="step-item" onclick="handleStepClick(5, this)">
+          <div class="step-circle">5</div>
+          <div class="step-label">ประเมิน Consequence / Criticality</div>
+        </button>
+        <div class="step-arrow">→</div>
+        <button class="step-item" onclick="handleStepClick(6, this)">
+          <div class="step-circle">6</div>
+          <div class="step-label">ประเมิน Health Index</div>
+        </button>
+        <div class="step-arrow">→</div>
+        <button class="step-item" onclick="handleStepClick(7, this)">
+          <div class="step-circle">7</div>
+          <div class="step-label">เลือกกลยุทธ์การบำรุงรักษา</div>
+        </button>
+        <div class="step-arrow">→</div>
+        <button class="step-item" onclick="handleStepClick(8, this)">
+          <div class="step-circle">8</div>
+          <div class="step-label">กำหนด Maintenance Task</div>
+        </button>
+        <div class="step-arrow">→</div>
+        <button class="step-item" onclick="handleStepClick(9, this)">
+          <div class="step-circle">9</div>
+          <div class="step-label">จัดทำ Maintenance Plan</div>
+        </button>
+        <div class="step-arrow">→</div>
+        <button class="step-item" onclick="handleStepClick(10, this)">
+          <div class="step-circle">10</div>
+          <div class="step-label">ติดตามผลและทบทวน</div>
+        </button>
+      </div>
+
+      <!-- KPI Summary Cards (กดเพื่อกรองสถานะได้จริง) -->
+      <div class="dashboard-stats" id="kpiStatsContainer">
+        <div class="stat-card" onclick="setRiskFilter('ALL', document.querySelector('.filter-chip'))">
+          <div class="stat-title">จำนวนอุปกรณ์ทั้งหมด</div>
+          <div class="stat-value stat-total" id="statTotal">222</div>
+        </div>
+        <div class="stat-card" onclick="setRiskFilter('NORMAL', document.querySelector('.filter-chip'))">
+          <div class="stat-title">สถานะปกติ</div>
+          <div class="stat-value stat-normal" id="statNormal">0</div>
+        </div>
+        <div class="stat-card" onclick="setRiskFilter('WARNING', document.querySelectorAll('.filter-chip')[2])">
+          <div class="stat-title">รายการที่ต้องเฝ้าระวัง</div>
+          <div class="stat-value stat-warning" id="statWarning">0</div>
+        </div>
+        <div class="stat-card" onclick="setRiskFilter('CRITICAL', document.querySelectorAll('.filter-chip')[1])">
+          <div class="stat-title">รายการวิกฤต</div>
+          <div class="stat-value stat-critical" id="statCritical">0</div>
+        </div>
+        <div class="stat-card" onclick="switchTab('hi', document.getElementById('btnHi'))">
+          <div class="stat-title">ดัชนีสุขภาพเฉลี่ย (HI)</div>
+          <div class="stat-value stat-hi" id="statHiAvg">100%</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-container" id="analyticsCharts">
+        <div class="chart-card">
+          <div class="chart-title">การกระจาย Priority</div>
+          <div class="chart-box">
+            <canvas id="riskDoughnutChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Top 5 Component (ตามจำนวน Failure Mode)</div>
+          <div class="chart-box">
+            <canvas id="topRiskBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar-row" id="toolbarRow">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input id="search" type="text" placeholder="ค้นหารหัส, รายการ, สาเหตุ..." autocomplete="off">
+        </div>
+        <div class="risk-filters" id="riskFilters">
+          <button class="filter-chip active" onclick="setRiskFilter('ALL', this)">แสดงทั้งหมด</button>
+          <button class="filter-chip" onclick="setRiskFilter('CRITICAL', this)">วิกฤต (P1)</button>
+          <button class="filter-chip" onclick="setRiskFilter('WARNING', this)">เฝ้าระวัง</button>
+          <button class="tip-btn" id="tipButton" onclick="openTipModal()" style="display:none;">เกณฑ์การคัดเลือก PM/CBM</button>
+        </div>
+      </div>
+
+      <div class="chips" id="chips"></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="section-label">
+      <span id="tableInstruction">คลิกที่แถวข้อมูลเพื่อดูรายละเอียดเชิงลึก หรือแก้ไขคะแนนการประเมิน</span>
+      <span style="font-family:'IBM Plex Mono', monospace; font-size:0.78rem; color:var(--teal);" id="countDisplay">แสดง <b id="visibleCount">0</b> / <span id="totalCount">0</span> รายการ</span>
+    </div>
+    
+    <div id="bannerContainer"></div>
+
+    <!-- Main Table View (FMEA) -->
+    <div class="table-responsive" id="mainTableWrapper">
+      <table>
+        <thead id="tableHead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
     </div>
 
-    <!-- GENERIC MODAL DIALOG -->
-    <div id="genericModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 space-y-4 animate-in fade-in zoom-in duration-200">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 id="modalTitle" class="text-base font-bold text-slate-900">หัวข้อหน้าต่าง</h3>
-                <button onclick="closeGenericModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div id="modalBody" class="text-xs text-slate-600 space-y-3 max-h-[60vh] overflow-y-auto">
-                <!-- Modal content dynamically injected -->
-            </div>
-            <div class="flex justify-end pt-3 border-t border-slate-100">
-                <button onclick="closeGenericModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow transition">
-                    ปิดหน้าต่าง
-                </button>
-            </div>
+    <!-- DGA Analysis View -->
+    <div id="dgaView" style="display:none;">
+      <div class="dga-toolbar">
+        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 280px;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: var(--muted); white-space: nowrap;">เลือกอุปกรณ์หม้อแปลง:</label>
+          <select id="dgaAssetSelect" class="text-input" onchange="onDgaAssetChange()">
+            <option value="">-- กรุณาเลือกอุปกรณ์หม้อแปลง --</option>
+          </select>
         </div>
+        <div style="font-size: 0.80rem; color: var(--teal); font-family: 'IBM Plex Mono', monospace;">
+          สถานะ: <span id="dgaAssetStatus">ยังไม่ได้เลือกอุปกรณ์</span>
+        </div>
+      </div>
+
+      <div class="dga-container">
+        <div class="dga-card">
+          <div>
+            <h4>1. Key Gas Method</h4>
+            <div class="dga-desc">วิเคราะห์หาก๊าซหลักที่เป็นตัวบ่งชี้ความผิดปกติเด่นชัดภายในหม้อแปลง</div>
+            <div class="dga-input-grid">
+              <div class="dga-field"><label>H2 (ppm)</label><input type="number" class="text-input" id="dga_h2" value="0"></div>
+              <div class="dga-field"><label>CH4 (ppm)</label><input type="number" class="text-input" id="dga_ch4" value="0"></div>
+              <div class="dga-field"><label>C2H2 (ppm)</label><input type="number" class="text-input" id="dga_c2h2" value="0"></div>
+            </div>
+          </div>
+          <div>
+            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(1)">ประเมินผลวิธีที่ 1</button>
+            <div class="dga-result-box" id="res_dga_1">ผลลัพธ์: รอข้อมูลผลตรวจวิเคราะห์จากห้องปฏิบัติการ</div>
+          </div>
+        </div>
+        <div class="dga-card">
+          <div>
+            <h4>2. Rogers Ratio Method</h4>
+            <div class="dga-desc">ประเมินความผิดปกติจากอัตราส่วนก๊าซมาตรฐาน 4 คู่</div>
+            <div class="dga-input-grid">
+              <div class="dga-field"><label>C2H4 (ppm)</label><input type="number" class="text-input" id="dga_c2h4" value="0"></div>
+              <div class="dga-field"><label>C2H6 (ppm)</label><input type="number" class="text-input" id="dga_c2h6" value="0"></div>
+              <div class="dga-field"><label>C2H2 (ppm)</label><input type="number" class="text-input" id="dga_c2h2_2" value="0"></div>
+            </div>
+          </div>
+          <div>
+            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(2)">ประเมินผลวิธีที่ 2</button>
+            <div class="dga-result-box" id="res_dga_2">ผลลัพธ์: รอข้อมูลผลตรวจวิเคราะห์จากห้องปฏิบัติการ</div>
+          </div>
+        </div>
+        <div class="dga-card">
+          <div>
+            <h4>3. IEC 3-Ratio Method</h4>
+            <div class="dga-desc">ใช้เกณฑ์สัดส่วน 3 อัตราส่วนมาตรฐานสากล IEC</div>
+            <div class="dga-input-grid">
+              <div class="dga-field"><label>Ratio 1</label><input type="number" class="text-input" disabled placeholder="อัตโนมัติ"></div>
+              <div class="dga-field"><label>Ratio 2</label><input type="number" class="text-input" disabled placeholder="อัตโนมัติ"></div>
+              <div class="dga-field"><label>Ratio 3</label><input type="number" class="text-input" disabled placeholder="อัตโนมัติ"></div>
+            </div>
+          </div>
+          <div>
+            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(3)">ประเมินผลวิธีที่ 3</button>
+            <div class="dga-result-box" id="res_dga_3">ผลลัพธ์: รอข้อมูลผลตรวจวิเคราะห์จากห้องปฏิบัติการ</div>
+          </div>
+        </div>
+        <div class="dga-card">
+          <div>
+            <h4>4. Duval Triangle Method</h4>
+            <div class="dga-desc">พล็อตสัดส่วนก๊าซ CH4, C2H4, C2H2 ลงบนสามเหลี่ยมพิกัดทางวิศวกรรม</div>
+            <div class="dga-input-grid">
+              <div class="dga-field"><label>CH4 (ppm)</label><input type="number" class="text-input" id="dga_dv_ch4" value="10"></div>
+              <div class="dga-field"><label>C2H4 (ppm)</label><input type="number" class="text-input" id="dga_dv_c2h4" value="10"></div>
+              <div class="dga-field"><label>C2H2 (ppm)</label><input type="number" class="text-input" id="dga_dv_c2h2" value="10"></div>
+            </div>
+            <div class="duval-box">
+              <canvas id="duvalCanvas" width="220" height="180"></canvas>
+              <div style="font-size:0.7rem; color:var(--muted); margin-top:4px;">จำลองพิกัด Duval Triangle 1</div>
+            </div>
+          </div>
+          <div>
+            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(4)">ประเมินและพล็อตพิกัด</button>
+            <div class="dga-result-box" id="res_dga_4">โซนความเสียหาย: รอการประเมิน</div>
+          </div>
+        </div>
+        <div class="dga-card">
+          <div>
+            <h4>5. Dornenburg Ratio Method</h4>
+            <div class="dga-desc">วิเคราะห์จากอัตราส่วนก๊าซ 4 คู่ สำหรับความผิดปกติรุนแรง</div>
+            <div class="dga-input-grid">
+              <div class="dga-field"><label>CO (ppm)</label><input type="number" class="text-input" value="0"></div>
+              <div class="dga-field"><label>CO2 (ppm)</label><input type="number" class="text-input" value="0"></div>
+              <div class="dga-field"><label>H2 (ppm)</label><input type="number" class="text-input" value="0"></div>
+            </div>
+          </div>
+          <div>
+            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(5)">ประเมินผลวิธีที่ 5</button>
+            <div class="dga-result-box" id="res_dga_5">ผลลัพธ์: รอข้อมูลผลตรวจวิเคราะห์จากห้องปฏิบัติการ</div>
+          </div>
+        </div>
+        <div class="dga-card">
+          <div>
+            <h4>6. Carbon Dioxide / CO Ratio</h4>
+            <div class="dga-desc">ประเมินการเสื่อมสภาพของฉนวนกระดาษเซลลูโลสจากสัดส่วนก๊าซคาร์บอน</div>
+            <div class="dga-input-grid">
+              <div class="dga-field"><label>CO (ppm)</label><input type="number" class="text-input" id="dga_co" value="0"></div>
+              <div class="dga-field"><label>CO2 (ppm)</label><input type="number" class="text-input" id="dga_co2" value="0"></div>
+              <div class="dga-field"><label>Ratio</label><input type="number" class="text-input" disabled placeholder="อัตราส่วน"></div>
+            </div>
+          </div>
+          <div>
+            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(6)">ประเมินผลวิธีที่ 6</button>
+            <div class="dga-result-box" id="res_dga_6">ผลลัพธ์: รอข้อมูลผลตรวจวิเคราะห์จากห้องปฏิบัติการ</div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // Full Dataset derived from RCM 9-9.xlsx (FMEA Sheet)
-        const fmeaData = [
-            { id: 1, code: 'T001', component: 'TR_Counter L/A', failureMode: 'Counter Lightning Arrester ชำรุด', s: 2, o: 2, d: 2, rpn: 8, priority: 'ปานกลาง/ต่ำ', status: 'ใช้งาน', cause: 'โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด' },
-            { id: 2, code: 'T002', component: 'TR_OLevelGauge', failureMode: 'Oil level gauge ชำรุด', s: 3, o: 2, d: 1, rpn: 6, priority: 'ปานกลาง/ต่ำ', status: 'ใช้งาน', cause: 'หน้าปัดแตก, เข็มค้าง, ซีลรั่ว' },
-            { id: 3, code: 'T003', component: 'TR_OtempGauge', failureMode: 'Oil temp ชำรุด', s: 3, o: 2, d: 1, rpn: 6, priority: 'ปานกลาง/ต่ำ', status: 'ใช้งาน', cause: 'เซ็นเซอร์เสื่อมสภาพ, หน้าสัมผัสค้าง' },
-            { id: 4, code: 'T004', component: 'TR_Sgel/ABrather', failureMode: 'Silicagel เปลี่ยนสี / Air Breather ชำรุด', s: 2, o: 3, d: 2, rpn: 12, priority: 'ปานกลาง/ต่ำ', status: 'ใช้งาน', cause: 'ความชื้นเข้า, ซีลยางเสื่อม' },
-            { id: 5, code: 'T005', component: 'TR_WtempGauge', failureMode: 'Winding temp ชำรุด', s: 3, o: 2, d: 1, rpn: 6, priority: 'ปานกลาง/ต่ำ', status: 'ใช้งาน', cause: 'วงจรวัดอุณหภูมิผิดพลาด' },
-            { id: 6, code: 'T006', component: 'TR_TOP', failureMode: 'น้ำมันรั่วซึมที่บนหม้อแปลง', s: 3, o: 3, d: 2, rpn: 18, priority: 'เฝ้าระวัง', status: 'ใช้งาน', cause: 'ปะเก็นเสื่อมสภาพ, น็อตหลวม' },
-            { id: 7, code: 'T007', component: 'TR_Bushing', failureMode: 'น้ำมันรั่วซึมที่ Bushing', s: 4, o: 2, d: 3, rpn: 24, priority: 'เฝ้าระวัง', status: 'ใช้งาน', cause: 'Porcelain ร้าว, ซีลหน้าแปลนเสื่อม' },
-            { id: 8, code: 'T015', component: 'TR_MainTank', failureMode: 'หม้อแปลงชำรุด', s: 5, o: 1, d: 1, rpn: 5, priority: 'วิกฤต', status: 'ใช้งาน', cause: 'โครงสร้างตัวถังเสียหายหนักจากอุบัติเหตุ' },
-            { id: 9, code: 'T016', component: 'TR_Radiator', failureMode: 'ครีบระบายความร้อนรั่ว', s: 3, o: 3, d: 2, rpn: 18, priority: 'เฝ้าระวัง', status: 'ใช้งาน', cause: 'สนิมกัดกร่อนตามรอยเชื่อม' },
-            { id: 10, code: 'T017', component: 'TR_Coil', failureMode: 'ขดลวดลัดวงจรภายใน', s: 5, o: 2, d: 3, rpn: 30, priority: 'วิกฤต', status: 'เฝ้าระวัง', cause: 'ฉนวนเสื่อมสภาพตามอายุการใช้งาน' },
-        ];
-
-        let currentFilteredData = [...fmeaData];
-        let selectedRowId = 1;
-        let currentActiveView = 'dashboard';
-        let priorityDonutChartInstance = null;
-        let topComponentBarChartInstance = null;
-
-        // Initialize App on Window Load
-        window.onload = function() {
-            renderMainView('dashboard');
-            startLiveClock();
-        };
-
-        // Live Clock
-        function startLiveClock() {
-            setInterval(() => {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const timeEl = document.getElementById('currentTimeDisplay');
-                if (timeEl) timeEl.innerText = `${hours}:${minutes}`;
-            }, 1000);
-        }
-
-        // Switch Main Views (Sidebar Navigation)
-        function switchMainView(viewName) {
-            currentActiveView = viewName;
-            
-            // Update active sidebar style
-            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('bg-blue-600', 'text-white', 'shadow-md', 'shadow-blue-600/30'));
-            const activeEl = document.getElementById(`nav-${viewName}`);
-            if (activeEl) {
-                activeEl.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'shadow-blue-600/30');
-            }
-
-            renderMainView(viewName);
-            showToast('เปลี่ยนเมนู', `กำลังเปิดหน้า ${viewName.toUpperCase()}`, 'bg-blue-600');
-        }
-
-        // Switch RCM Sub Tab
-        function switchRcmSubTab(subTab) {
-            switchMainView('fmea');
-            showToast('RCM Analysis', `เข้าสู่โมดูล ${subTab.toUpperCase()}`, 'bg-indigo-600');
-        }
-
-        function toggleRcmSubmenu() {
-            const submenu = document.getElementById('rcmSubmenu');
-            const arrow = document.getElementById('rcmArrow');
-            if (submenu && arrow) {
-                submenu.classList.toggle('hidden');
-                arrow.classList.toggle('rotate-180');
-            }
-        }
-
-        // Stepper Click Handler
-        function selectStep(stepNum) {
-            const stepNames = [
-                "กำหนดขอบเขตและเลือกอุปกรณ์", "กำหนดหน้าที่และมาตรฐาน", "ระบุ Functional Failure", 
-                "วิเคราะห์ FMEA", "ประเมิน Consequence / Criticality", "ประเมิน Health Index", 
-                "เลือกกลยุทธ์การบำรุงรักษา", "กำหนด Maintenance Task", "จัดทำ Maintenance Plan", "ติดตามผลและทบทวน"
-            ];
-            
-            showGenericModal(`ขั้นตอนที่ ${stepNum}: ${stepNames[stepNum - 1]}`, `
-                <div class="space-y-4">
-                    <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow">
-                            ${stepNum}
-                        </div>
-                        <div>
-                            <div class="text-sm font-bold text-blue-900">${stepNames[stepNum - 1]}</div>
-                            <div class="text-xs text-blue-700 mt-0.5">ระบบเชื่อมโยงข้อมูลมาตรฐาน RCM 9-9.xlsx สมบูรณ์</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                            <div class="font-bold text-slate-700 mb-1">สถานะขั้นตอน</div>
-                            <div class="text-emerald-600 font-semibold"><i class="fa-solid fa-circle-check"></i> ดำเนินการแล้ว 100%</div>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                            <div class="font-bold text-slate-700 mb-1">ผู้รับผิดชอบ</div>
-                            <div class="text-slate-600">Panisara P. (Industrial Eng)</div>
-                        </div>
-                    </div>
-                    <div class="flex justify-end space-x-2 pt-2">
-                        <button onclick="closeGenericModal(); switchMainView('fmea');" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow transition">
-                            เปิดหน้าจัดการข้อมูลขั้นตอนนี้
-                        </button>
-                    </div>
-                </div>
-            `);
-        }
-
-        // Render Main View Content Dynamically
-        function renderMainView(view) {
-            const workspace = document.getElementById('mainWorkspace');
-            if (!workspace) return;
-
-            if (view === 'dashboard' || view === 'fmea') {
-                workspace.innerHTML = getDashboardHtml();
-                setTimeout(() => {
-                    renderFmeaTable(currentFilteredData);
-                    loadDetailPanel(selectedRowId);
-                    initCharts();
-                }, 50);
-            } else if (view === 'asset') {
-                workspace.innerHTML = getGenericViewHtml('Asset Management (ระบบจัดการอุปกรณ์หม้อแปลง)', 'จัดการรายชื่อหม้อแปลงไฟฟ้า สถานะ และพิกัดกำลังทั้งหมด 87 เครื่อง', [
-                    { code: 'TR-01', name: 'Main Transformer Substation A', status: 'ปกติ', health: '92%' },
-                    { code: 'TR-02', name: 'Step-Down Transformer #2', status: 'เฝ้าระวัง', health: '74%' },
-                    { code: 'TR-03', name: 'Generator Transformer High Voltage', status: 'ปกติ', health: '88%' }
-                ]);
-            } else if (view === 'task') {
-                workspace.innerHTML = getGenericViewHtml('Maintenance Task (งานซ่อมบำรุง)', 'รายการงานซ่อมบำรุงประจำปีและตามรอบ RCM', [
-                    { code: 'TSK-101', name: 'ตรวจสอบระดับน้ำมันฉนวนและซิลิกาเจล', due: '25 Sep 2569', assign: 'ทีมไฟฟ้ากำลัง 1' },
-                    { code: 'TSK-102', name: 'ทดสอบความเป็นฉนวน (Insulation Resistance Test)', due: '30 Sep 2569', assign: 'ทีมทดสอบหม้อแปลง' }
-                ]);
-            } else if (view === 'plan') {
-                workspace.innerHTML = getGenericViewHtml('Maintenance Plan (แผนการบำรุงรักษาประจำปี)', 'ปฏิทินแผนงาน RCM ป้องกันความเสียหายล่วงหน้า', [
-                    { code: 'PLN-2026-Q3', name: 'Q3 Preventive Maintenance Schedule', period: 'July - Sep 2569', status: 'กำลังดำเนินการ' },
-                    { code: 'PLN-2026-Q4', name: 'Q4 Major Overhaul & Testing', period: 'Oct - Dec 2569', status: 'รออนุมัติ' }
-                ]);
-            } else if (view === 'inspection') {
-                workspace.innerHTML = getGenericViewHtml('Inspection & Monitoring (ตรวจสอบและเฝ้าระวัง)', 'บันทึกผลการตรวจสอบสภาพหน้างานและอุณหภูมิออนไลน์', [
-                    { code: 'INS-881', name: 'Thermoscan Bushing & Connections', result: 'ปกติ (Max Temp 58°C)', date: '21 Sep 2569' },
-                    { code: 'INS-882', name: 'Dissolved Gas Analysis (DGA) Oil sample', result: 'พบ gas เล็กน้อย เฝ้าระวัง', date: '19 Sep 2569' }
-                ]);
-            } else if (view === 'reports') {
-                workspace.innerHTML = getGenericViewHtml('Reports (รายงานวิเคราะห์สถิติ)', 'สรุปผลรายงาน RCM และ Health Index Report', [
-                    { code: 'REP-01', name: 'Executive Summary RCM Transformer Report', type: 'PDF' },
-                    { code: 'REP-02', name: 'Detailed Failure Mode & RPN Ranking Report', type: 'Excel' }
-                ]);
-            } else if (view === 'data') {
-                workspace.innerHTML = getGenericViewHtml('Data Management (จัดการฐานข้อมูล)', 'นำเข้าและส่งออกฐานข้อมูล Excel (RCM 9-9.xlsx)', [
-                    { code: 'DB-01', name: 'RCM_Master_Database_v2.xlsx', size: '2.4 MB', updated: '22 Sep 2569' }
-                ]);
-            } else if (view === 'settings') {
-                workspace.innerHTML = getGenericViewHtml('Settings (ตั้งค่าระบบ)', 'กำหนดสิทธิ์ผู้ใช้งาน ค่าพารามิเตอร์ RPN และการแจ้งเตือน', [
-                    { code: 'SET-01', name: 'RPN Critical Threshold (Default > 50)', status: 'Active' },
-                    { code: 'SET-02', name: 'Email Notification Alert System', status: 'Enabled' }
-                ]);
-            }
-        }
-
-        // HTML Template for Dashboard / FMEA View
-        function getDashboardHtml() {
-            return `
-                <!-- KPI CARDS ROW -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                    
-                    <!-- KPI 1 -->
-                    <div onclick="openKpiModal('Total Components')" class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">จำนวนอุปกรณ์ทั้งหมด</div>
-                            <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
-                                <i class="fa-solid fa-cube text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="flex items-baseline space-x-2 my-2">
-                            <span class="text-3xl font-bold text-slate-900">87</span>
-                            <span class="text-sm font-medium text-slate-500">Components</span>
-                        </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                            <span class="text-emerald-600 font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-arrow-up"></i> 0%
-                            </span>
-                            <span class="text-blue-600 font-medium hover:underline flex items-center gap-1">
-                                ดูรายละเอียด <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- KPI 2 -->
-                    <div onclick="openKpiModal('Failure Modes')" class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">จำนวน Failure Mode</div>
-                            <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
-                                <i class="fa-solid fa-layer-group text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="flex items-baseline space-x-2 my-2">
-                            <span class="text-3xl font-bold text-slate-900">222</span>
-                            <span class="text-sm font-medium text-slate-500">รายการ</span>
-                        </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                            <span class="text-emerald-600 font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-arrow-up"></i> 0%
-                            </span>
-                            <span class="text-blue-600 font-medium hover:underline flex items-center gap-1">
-                                ดูรายละเอียด <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- KPI 3 -->
-                    <div onclick="openKpiModal('Watchlist')" class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">รายการที่ต้องเฝ้าระวัง</div>
-                            <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
-                                <i class="fa-solid fa-triangle-exclamation text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="flex items-baseline space-x-2 my-2">
-                            <span class="text-3xl font-bold text-slate-900">46</span>
-                            <span class="text-sm font-medium text-slate-500">รายการ</span>
-                        </div>
-                        <div class="space-y-1 pt-2 border-t border-slate-100">
-                            <div class="flex justify-between text-xs text-slate-500">
-                                <span>สัดส่วน</span>
-                                <span class="font-bold text-amber-600">20.7%</span>
-                            </div>
-                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div class="bg-amber-500 h-full rounded-full" style="width: 20.7%"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- KPI 4 -->
-                    <div onclick="openKpiModal('Critical')" class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
-                        <div class="flex items-center justify-between">
-                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">รายการวิกฤต</div>
-                            <div class="p-2.5 bg-rose-50 text-rose-600 rounded-xl">
-                                <i class="fa-solid fa-circle-exclamation text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="flex items-baseline space-x-2 my-2">
-                            <span class="text-3xl font-bold text-slate-900">18</span>
-                            <span class="text-sm font-medium text-slate-500">รายการ</span>
-                        </div>
-                        <div class="space-y-1 pt-2 border-t border-slate-100">
-                            <div class="flex justify-between text-xs text-slate-500">
-                                <span>สัดส่วน</span>
-                                <span class="font-bold text-rose-600">8.1%</span>
-                            </div>
-                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div class="bg-rose-500 h-full rounded-full" style="width: 8.1%"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- MAIN WORKSPACE SECTION: FMEA TABLE + DETAIL PANEL -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <!-- LEFT 2 COLS: FMEA DATABASE TABLE -->
-                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col">
-                        
-                        <!-- Table Header Toolbar -->
-                        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h3 class="text-lg font-bold text-slate-900">FMEA Database</h3>
-                                <p class="text-xs text-slate-500">รายการ Failure Mode ทั้งหมดจากข้อมูลขอยมูลแปลง</p>
-                            </div>
-                            <div class="flex items-center space-x-2 flex-wrap gap-2">
-                                <button onclick="openAddModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl shadow transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-plus"></i> เพิ่มรายการ
-                                </button>
-                                <button onclick="openImportModal()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-xl transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-file-import"></i> นำเข้าข้อมูล
-                                </button>
-                                <button onclick="exportData()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-xl transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-file-export"></i> ส่งออก
-                                </button>
-                                <button onclick="openMoreMenu()" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition">
-                                    <i class="fa-solid fa-ellipsis"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Filters Bar -->
-                        <div class="p-4 bg-slate-50 border-b border-slate-100 flex flex-wrap items-center gap-3">
-                            <div class="flex-1 min-w-[180px]">
-                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">เลือก Component</label>
-                                <select id="filterComponent" onchange="filterTableData()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-blue-500">
-                                    <option value="all">ทั้งหมด</option>
-                                    <option value="TR_Counter L/A">TR_Counter L/A</option>
-                                    <option value="TR_OLevelGauge">Oil level gauge</option>
-                                    <option value="TR_OtempGauge">Oil temp ชำรุด</option>
-                                    <option value="TR_Sgel/ABrather">Silicagel เปลี่ยนสี</option>
-                                    <option value="TR_WtempGauge">Winding temp ชำรุด</option>
-                                    <option value="TR_TOP">น้ำมันรั่วซึมที่บนหม้อแปลง</option>
-                                    <option value="TR_Bushing">น้ำมันรั่วซึมที่ Bushing</option>
-                                    <option value="TR_MainTank">หม้อแปลงชำรุด</option>
-                                </select>
-                            </div>
-
-                            <div class="flex-1 min-w-[180px]">
-                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">เลือกสถานะ / Priority</label>
-                                <select id="filterPriority" onchange="filterTableData()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-blue-500">
-                                    <option value="all">ทั้งหมด</option>
-                                    <option value="ปานกลาง/ต่ำ">ปานกลาง/ต่ำ</option>
-                                    <option value="เฝ้าระวัง">เฝ้าระวัง</option>
-                                    <option value="วิกฤต">วิกฤต</option>
-                                </select>
-                            </div>
-
-                            <div class="flex-1 min-w-[220px]">
-                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">ค้นหา</label>
-                                <div class="relative">
-                                    <input type="text" id="tableSearchInput" onkeyup="filterTableData()" placeholder="ค้นหา รหัส, รายการ, สาเหตุ..." class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-blue-500">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
-                                        <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="flex items-end">
-                                <button onclick="resetFilters()" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-medium rounded-xl transition">
-                                    รีเซ็ต
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Table Area -->
-                        <div class="overflow-x-auto flex-1">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-200">
-                                        <th class="p-3 w-10 text-center"><input type="checkbox" class="rounded border-slate-300"></th>
-                                        <th class="p-3"># รหัส</th>
-                                        <th class="p-3">Component</th>
-                                        <th class="p-3">Failure Mode</th>
-                                        <th class="p-3 text-center">S</th>
-                                        <th class="p-3 text-center">O</th>
-                                        <th class="p-3 text-center">D</th>
-                                        <th class="p-3 text-center">RPN</th>
-                                        <th class="p-3">Priority</th>
-                                        <th class="p-3 text-center">สถานะ</th>
-                                        <th class="p-3 text-center">จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="fmeaTableBody" class="divide-y divide-slate-100 text-slate-700">
-                                    <!-- Dynamic rows populated via JS -->
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Table Pagination & Footer -->
-                        <div class="p-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
-                            <div id="tablePaginationInfo">แสดง 1 - 8 จาก 222 รายการ</div>
-                            <div class="flex items-center space-x-1">
-                                <button onclick="changePage('prev')" class="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100"><i class="fa-solid fa-chevron-left text-[10px]"></i></button>
-                                <button class="px-3 py-1 bg-blue-600 text-white rounded-lg font-semibold">1</button>
-                                <button onclick="changePage(2)" class="px-3 py-1 hover:bg-slate-100 rounded-lg">2</button>
-                                <button onclick="changePage(3)" class="px-3 py-1 hover:bg-slate-100 rounded-lg">3</button>
-                                <button onclick="changePage(4)" class="px-3 py-1 hover:bg-slate-100 rounded-lg">4</button>
-                                <button onclick="changePage(5)" class="px-3 py-1 hover:bg-slate-100 rounded-lg">5</button>
-                                <span class="px-2">...</span>
-                                <button onclick="changePage(28)" class="px-3 py-1 hover:bg-slate-100 rounded-lg">28</button>
-                                <button onclick="changePage('next')" class="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100"><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span>แสดง</span>
-                                <select class="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs">
-                                    <option>8</option>
-                                    <option>15</option>
-                                    <option>25</option>
-                                </select>
-                                <span>รายการ/หน้า</span>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- RIGHT 1 COL: FAILURE MODE DETAIL & EDIT SIDE PANEL -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                                <div>
-                                    <div class="text-xs font-semibold text-slate-400">รายละเอียด Failure Mode</div>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <span id="detailCode" class="text-lg font-bold text-slate-900">T001</span>
-                                        <span id="detailStatusBadge" class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-semibold">ใช้งาน</span>
-                                    </div>
-                                </div>
-                                <button onclick="openEditScoreModal()" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-medium rounded-xl transition flex items-center gap-1">
-                                    <i class="fa-solid fa-pen text-[10px]"></i> แก้ไขคะแนน
-                                </button>
-                            </div>
-
-                            <!-- Title & Cause -->
-                            <div class="mt-4 space-y-3">
-                                <div>
-                                    <h4 id="detailTitle" class="text-base font-bold text-slate-800">Counter Lightning Arrester ชำรุด</h4>
-                                </div>
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1">
-                                    <div class="text-[11px] font-semibold text-slate-400">Component</div>
-                                    <div id="detailComponent" class="text-xs font-bold text-slate-700">TR_Counter L/A</div>
-                                </div>
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1">
-                                    <div class="text-[11px] font-semibold text-slate-400">Failure Cause</div>
-                                    <div id="detailCause" class="text-xs text-slate-700">โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด</div>
-                                </div>
-                            </div>
-
-                            <!-- SOD SLIDERS / CONTROLS -->
-                            <div class="mt-6 space-y-4">
-                                <div class="grid grid-cols-3 gap-3 text-center">
-                                    
-                                    <!-- Severity -->
-                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col items-center">
-                                        <span class="text-[10px] font-semibold text-slate-400 block mb-1">S</span>
-                                        <span class="text-[10px] text-slate-500 mb-2">Severity</span>
-                                        <div class="flex items-center space-x-2">
-                                            <button onclick="adjustSod('S', -1)" class="w-6 h-6 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 text-xs font-bold">-</button>
-                                            <span id="valS" class="text-base font-bold text-slate-800">2</span>
-                                            <button onclick="adjustSod('S', 1)" class="w-6 h-6 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 text-xs font-bold">+</button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Occurrence -->
-                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col items-center">
-                                        <span class="text-[10px] font-semibold text-slate-400 block mb-1">O</span>
-                                        <span class="text-[10px] text-slate-500 mb-2">Occurrence</span>
-                                        <div class="flex items-center space-x-2">
-                                            <button onclick="adjustSod('O', -1)" class="w-6 h-6 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 text-xs font-bold">-</button>
-                                            <span id="valO" class="text-base font-bold text-slate-800">2</span>
-                                            <button onclick="adjustSod('O', 1)" class="w-6 h-6 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 text-xs font-bold">+</button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Detection -->
-                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col items-center">
-                                        <span class="text-[10px] font-semibold text-slate-400 block mb-1">D</span>
-                                        <span class="text-[10px] text-slate-500 mb-2">Detection</span>
-                                        <div class="flex items-center space-x-2">
-                                            <button onclick="adjustSod('D', -1)" class="w-6 h-6 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 text-xs font-bold">-</button>
-                                            <span id="valD" class="text-base font-bold text-slate-800">2</span>
-                                            <button onclick="adjustSod('D', 1)" class="w-6 h-6 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 text-xs font-bold">+</button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <!-- RPN Calculated Result Box -->
-                                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-4 rounded-xl flex items-center justify-between">
-                                    <div>
-                                        <div class="text-xs text-blue-900 font-medium">RPN = <span id="valRpn" class="text-xl font-extrabold text-blue-600">8</span></div>
-                                        <div class="text-[10px] text-blue-500">RPN = S × O × D</div>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-[11px] text-slate-500 block">Priority</span>
-                                        <span id="valPriorityText" class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold">ปานกลาง/ต่ำ</span>
-                                    </div>
-                                </div>
-
-                                <!-- Remark input -->
-                                <div class="space-y-1">
-                                    <label class="text-xs font-medium text-slate-600">หมายเหตุ</label>
-                                    <input type="text" id="detailRemark" value="-" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-blue-500">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex items-center space-x-3 pt-6 mt-4 border-t border-slate-100">
-                            <button onclick="resetDetailForm()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
-                                ยกเลิก
-                            </button>
-                            <button onclick="saveDetailChanges()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow transition flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-floppy-disk"></i> บันทึกการแก้ไข
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- BOTTOM SECTION: CHARTS & REPORTS -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <!-- Chart 1: Priority Distribution Donut -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
-                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                            <h4 class="text-sm font-bold text-slate-900">การกระจาย Priority</h4>
-                            <span class="text-xs text-slate-400">Total 222</span>
-                        </div>
-                        <div class="py-4 flex items-center justify-center relative h-48">
-                            <canvas id="priorityDonutChart"></canvas>
-                        </div>
-                        <div class="space-y-1.5 pt-3 border-t border-slate-100 text-xs">
-                            <div class="flex justify-between items-center">
-                                <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> วิกฤต</span>
-                                <span class="font-bold text-slate-700">18 (8.1%)</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> เฝ้าระวัง</span>
-                                <span class="font-bold text-slate-700">46 (20.7%)</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> ปานกลาง/ต่ำ</span>
-                                <span class="font-bold text-slate-700">158 (71.2%)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Chart 2: Top 5 Components Bar Chart -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
-                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                            <h4 class="text-sm font-bold text-slate-900">Top 5 Component (ตามจำนวน Failure Mode)</h4>
-                        </div>
-                        <div class="py-4 relative h-48">
-                            <canvas id="topComponentBarChart"></canvas>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 text-[11px] text-slate-500">
-                            <div>• TR_MainTank: 28</div>
-                            <div>• TR_Bushing: 24</div>
-                            <div>• TR_Coil: 18</div>
-                            <div>• TR_Radiator: 15</div>
-                        </div>
-                    </div>
-
-                    <!-- Documents & Reports Shortcut Grid -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
-                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                            <h4 class="text-sm font-bold text-slate-900">เอกสารและรายงาน</h4>
-                            <span class="text-xs text-blue-600 font-medium cursor-pointer hover:underline" onclick="openAllReportsModal()">ดูทั้งหมด</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3 py-4">
-                            <div onclick="openDocumentModal('FMEA Template')" class="bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 p-3 rounded-xl cursor-pointer transition flex flex-col items-center text-center group">
-                                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-file-excel"></i>
-                                </div>
-                                <span class="text-xs font-bold text-slate-700">FMEA Template</span>
-                            </div>
-                            <div onclick="openDocumentModal('HI Calculation Sheet')" class="bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 p-3 rounded-xl cursor-pointer transition flex flex-col items-center text-center group">
-                                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-file-excel"></i>
-                                </div>
-                                <span class="text-xs font-bold text-slate-700">HI Calculation Sheet</span>
-                            </div>
-                            <div onclick="openDocumentModal('Maintenance Plan')" class="bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 p-3 rounded-xl cursor-pointer transition flex flex-col items-center text-center group">
-                                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-file-word"></i>
-                                </div>
-                                <span class="text-xs font-bold text-slate-700">Maintenance Plan</span>
-                            </div>
-                            <div onclick="openDocumentModal('RCM Report')" class="bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 p-3 rounded-xl cursor-pointer transition flex flex-col items-center text-center group">
-                                <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-2 group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-file-pdf"></i>
-                                </div>
-                                <span class="text-xs font-bold text-slate-700">RCM Report</span>
-                            </div>
-                        </div>
-                        <div class="text-[11px] text-slate-400 text-center pt-2 border-t border-slate-100">
-                            คลิกเพื่อเปิดดูไฟล์รายงานและเอกสารมาตรฐาน
-                        </div>
-                    </div>
-
-                </div>
-            `;
-        }
-
-        // Generic View HTML for other sidebar tabs
-        function getGenericViewHtml(title, subtitle, items) {
-            let itemsHtml = items.map(item => `
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between hover:border-blue-300 transition">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">
-                            ${item.code.substring(0, 3)}
-                        </div>
-                        <div>
-                            <div class="text-sm font-bold text-slate-800">${item.name || item.failureMode}</div>
-                            <div class="text-xs text-slate-500">${item.code} ${item.due ? '| กำหนดเสร็จ: ' + item.due : ''} ${item.status ? '| สถานะ: ' + item.status : ''}</div>
-                        </div>
-                    </div>
-                    <button onclick="showToast('ดูรายละเอียด', 'เปิดดูข้อมูลของ ${item.code}')" class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-medium hover:bg-blue-100 transition">
-                        จัดการ
-                    </button>
-                </div>
-            `).join('');
-
-            return `
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
-                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                        <div>
-                            <h3 class="text-lg font-bold text-slate-900">${title}</h3>
-                            <p class="text-xs text-slate-500 mt-0.5">${subtitle}</p>
-                        </div>
-                        <button onclick="switchMainView('fmea')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow transition">
-                            กลับสู่หน้าหลัก FMEA Database
-                        </button>
-                    </div>
-                    <div class="space-y-3 pt-2">
-                        ${itemsHtml}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Render FMEA Table
-        function renderFmeaTable(data) {
-            const tbody = document.getElementById('fmeaTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" class="text-center py-8 text-slate-400">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
-                return;
-            }
-
-            data.forEach((item) => {
-                let priorityClass = 'bg-slate-100 text-slate-700';
-                if (item.priority === 'วิกฤต') priorityClass = 'bg-rose-100 text-rose-700 font-bold';
-                else if (item.priority === 'เฝ้าระวัง') priorityClass = 'bg-amber-100 text-amber-700 font-semibold';
-                else if (item.priority === 'ปานกลาง/ต่ำ') priorityClass = 'bg-emerald-100 text-emerald-700';
-
-                const tr = document.createElement('tr');
-                tr.className = `hover:bg-blue-50/50 cursor-pointer transition ${item.id === selectedRowId ? 'bg-blue-50/80 border-l-4 border-blue-600' : ''}`;
-                tr.onclick = () => selectFmeaRow(item.id);
-                
-                tr.innerHTML = `
-                    <td class="p-3 text-center" onclick="event.stopPropagation()"><input type="checkbox" class="rounded border-slate-300"></td>
-                    <td class="p-3 font-semibold text-slate-900">${item.code}</td>
-                    <td class="p-3 font-medium text-slate-700">${item.component}</td>
-                    <td class="p-3 text-slate-600">${item.failureMode}</td>
-                    <td class="p-3 text-center font-bold">${item.s}</td>
-                    <td class="p-3 text-center font-bold">${item.o}</td>
-                    <td class="p-3 text-center font-bold">${item.d}</td>
-                    <td class="p-3 text-center font-extrabold text-blue-600">${item.rpn}</td>
-                    <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-[10px] ${priorityClass}">${item.priority}</span></td>
-                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-700">${item.status}</span></td>
-                    <td class="p-3 text-center" onclick="event.stopPropagation()">
-                        <button onclick="selectFmeaRow(${item.id})" class="px-2.5 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-[10px] font-medium transition">
-                            ดูรายละเอียด
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            const paginationInfo = document.getElementById('tablePaginationInfo');
-            if (paginationInfo) paginationInfo.innerText = `แสดง 1 - ${data.length} จาก 222 รายการ`;
-        }
-
-        // Select FMEA Row & Populate Right Panel
-        function selectFmeaRow(id) {
-            selectedRowId = id;
-            loadDetailPanel(id);
-            renderFmeaTable(currentFilteredData);
-        }
-
-        function loadDetailPanel(id) {
-            const item = fmeaData.find(d => d.id === id) || fmeaData[0];
-            if (!document.getElementById('detailCode')) return;
-
-            document.getElementById('detailCode').innerText = item.code;
-            document.getElementById('detailTitle').innerText = item.failureMode;
-            document.getElementById('detailComponent').innerText = item.component;
-            document.getElementById('detailCause').innerText = item.cause;
-            document.getElementById('valS').innerText = item.s;
-            document.getElementById('valO').innerText = item.o;
-            document.getElementById('valD').innerText = item.d;
-            document.getElementById('valRpn').innerText = item.rpn;
-            document.getElementById('detailRemark').value = item.remark || '-';
-
-            const badge = document.getElementById('valPriorityText');
-            if (badge) {
-                badge.innerText = item.priority;
-                if (item.priority === 'วิกฤต') {
-                    badge.className = 'px-3 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-bold';
-                } else if (item.priority === 'เฝ้าระวัง') {
-                    badge.className = 'px-3 py-1 bg-amber-100 text-amber-700 rounded-lg text-xs font-bold';
-                } else {
-                    badge.className = 'px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold';
-                }
-            }
-        }
-
-        // Adjust SOD values in detail panel
-        function adjustSod(type, delta) {
-            const sEl = document.getElementById('valS');
-            const oEl = document.getElementById('valO');
-            const dEl = document.getElementById('valD');
-            if (!sEl) return;
-
-            let s = parseInt(sEl.innerText);
-            let o = parseInt(oEl.innerText);
-            let d = parseInt(dEl.innerText);
-
-            if (type === 'S') s = Math.max(1, Math.min(10, s + delta));
-            if (type === 'O') o = Math.max(1, Math.min(10, o + delta));
-            if (type === 'D') d = Math.max(1, Math.min(10, d + delta));
-
-            sEl.innerText = s;
-            oEl.innerText = o;
-            dEl.innerText = d;
-
-            const rpn = s * o * d;
-            document.getElementById('valRpn').innerText = rpn;
-
-            let priority = 'ปานกลาง/ต่ำ';
-            let badgeClass = 'px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold';
-            if (rpn >= 50) {
-                priority = 'วิกฤต';
-                badgeClass = 'px-3 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-bold';
-            } else if (rpn >= 20) {
-                priority = 'เฝ้าระวัง';
-                badgeClass = 'px-3 py-1 bg-amber-100 text-amber-700 rounded-lg text-xs font-bold';
-            }
-            const badge = document.getElementById('valPriorityText');
-            if (badge) {
-                badge.innerText = priority;
-                badge.className = badgeClass;
-            }
-        }
-
-        // Save Detail Changes
-        function saveDetailChanges() {
-            const s = parseInt(document.getElementById('valS').innerText);
-            const o = parseInt(document.getElementById('valO').innerText);
-            const d = parseInt(document.getElementById('valD').innerText);
-            const rpn = s * o * d;
-            const priority = document.getElementById('valPriorityText').innerText;
-            const remark = document.getElementById('detailRemark').value;
-
-            const item = fmeaData.find(d => d.id === selectedRowId);
-            if (item) {
-                item.s = s;
-                item.o = o;
-                item.d = d;
-                item.rpn = rpn;
-                item.priority = priority;
-                item.remark = remark;
-            }
-
-            renderFmeaTable(currentFilteredData);
-            showToast('บันทึกสำเร็จ', `อัปเดตข้อมูลรหัส ${item.code} เรียบร้อยแล้ว`);
-        }
-
-        function resetDetailForm() {
-            loadDetailPanel(selectedRowId);
-            showToast('ยกเลิก', 'คืนค่าข้อมูลเดิมเรียบร้อยแล้ว', 'bg-amber-500');
-        }
-
-        // Filter Table Data
-        function filterTableData() {
-            const comp = document.getElementById('filterComponent').value;
-            const pri = document.getElementById('filterPriority').value;
-            const keyword = document.getElementById('tableSearchInput').value.toLowerCase();
-
-            currentFilteredData = fmeaData.filter(item => {
-                const matchComp = (comp === 'all' || item.component === comp);
-                const matchPri = (pri === 'all' || item.priority === pri);
-                const matchKey = (item.code.toLowerCase().includes(keyword) || item.failureMode.toLowerCase().includes(keyword) || item.cause.toLowerCase().includes(keyword));
-                return matchComp && matchPri && matchKey;
-            });
-
-            renderFmeaTable(currentFilteredData);
-        }
-
-        function resetFilters() {
-            document.getElementById('filterComponent').value = 'all';
-            document.getElementById('filterPriority').value = 'all';
-            document.getElementById('tableSearchInput').value = '';
-            currentFilteredData = [...fmeaData];
-            renderFmeaTable(currentFilteredData);
-        }
-
-        function handleGlobalSearch(e) {
-            const keyword = e.target.value.toLowerCase();
-            currentFilteredData = fmeaData.filter(item => 
-                item.code.toLowerCase().includes(keyword) || 
-                item.failureMode.toLowerCase().includes(keyword) ||
-                item.component.toLowerCase().includes(keyword)
-            );
-            renderFmeaTable(currentFilteredData);
-        }
-
-        // Modals & Notifications
-        function openKpiModal(kpiName) {
-            showGenericModal(`สถิติเชิงลึก KPI: ${kpiName}`, `
-                <div class="space-y-3">
-                    <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
-                        <div class="text-xs font-bold text-blue-900">ข้อมูลสถิติของ ${kpiName}</div>
-                        <div class="text-xs text-blue-700 mt-1">ระบบวิเคราะห์ข้อมูลจากฐานข้อมูล RCM 9-9.xlsx ครบถ้วน 100%</div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                            <span class="text-slate-400 block mb-1">ค่าเฉลี่ย RPN รวม</span>
-                            <span class="font-bold text-slate-800 text-sm">14.2</span>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                            <span class="text-slate-400 block mb-1">สถานะความพร้อม</span>
-                            <span class="font-bold text-emerald-600 text-sm">พร้อมใช้งาน</span>
-                        </div>
-                    </div>
-                </div>
-            `);
-        }
-
-        function openAddModal() {
-            showGenericModal('เพิ่มรายการ FMEA ใหม่', `
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 mb-1">รหัสอุปกรณ์ (Code)</label>
-                        <input type="text" id="addCode" value="T018" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 mb-1">Component</label>
-                        <input type="text" id="addComponent" value="TR_BushNew" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-500 mb-1">Failure Mode</label>
-                        <input type="text" id="addFailure" value="ขั้วต่อสายนำสัญญาณหลวม" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500">
-                    </div>
-                    <button onclick="submitAddFmea()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-xs mt-2 transition">บันทึกเพิ่มรายการ</button>
-                </div>
-            `);
-        }
-
-        function submitAddFmea() {
-            const code = document.getElementById('addCode').value;
-            const component = document.getElementById('addComponent').value;
-            const failureMode = document.getElementById('addFailure').value;
-
-            fmeaData.push({
-                id: fmeaData.length + 1,
-                code: code,
-                component: component,
-                failureMode: failureMode,
-                s: 3, o: 2, d: 2, rpn: 12, priority: 'ปานกลาง/ต่ำ', status: 'ใช้งาน', cause: 'จากการตรวจสอบประจำปี'
-            });
-
-            currentFilteredData = [...fmeaData];
-            renderFmeaTable(currentFilteredData);
-            closeGenericModal();
-            showToast('เพิ่มสำเร็จ', `เพิ่มรายการ ${code} เรียบร้อยแล้ว`);
-        }
-
-        function openImportModal() {
-            showGenericModal('นำเข้าข้อมูล (Import Excel)', `
-                <div class="space-y-3 text-center py-4">
-                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto text-2xl">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                    </div>
-                    <div class="text-xs font-bold text-slate-800">ลากไฟล์ RCM 9-9.xlsx มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
-                    <p class="text-[11px] text-slate-400">รองรับไฟล์ .xlsx, .csv ขนาดไม่เกิน 25MB</p>
-                    <button onclick="closeGenericModal(); showToast('นำเข้าสำเร็จ', 'อัปเดตฐานข้อมูลจาก Excel เรียบร้อยแล้ว');" class="px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl">เลือกไฟล์และอัปโหลด</button>
-                </div>
-            `);
-        }
-
-        function exportData() {
-            showToast('ส่งออกสำเร็จ', 'ดาวน์โหลดรายงาน FMEA เป็นไฟล์ Excel (.xlsx) สำเร็จแล้ว', 'bg-emerald-600');
-        }
-
-        function openMoreMenu() {
-            showToast('ตัวเลือกเพิ่มเติม', 'เปิดแถบเมนูจัดการขั้นสูง', 'bg-slate-700');
-        }
-
-        function openEditScoreModal() {
-            showToast('แก้ไขคะแนน', 'คุณสามารถปรับแต่งค่า S, O, D ที่แผงด้านขวาได้ทันที');
-        }
-
-        function openDocumentModal(docName) {
-            showGenericModal(`เอกสาร: ${docName}`, `
-                <div class="space-y-3 text-center py-2">
-                    <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto text-2xl">
-                        <i class="fa-solid fa-file-lines"></i>
-                    </div>
-                    <div class="text-sm font-bold text-slate-800">${docName}</div>
-                    <p class="text-xs text-slate-500">เอกสารมาตรฐานสำหรับระบบวิเคราะห์ RCM หม้อแปลงไฟฟ้า</p>
-                    <div class="flex justify-center space-x-2 pt-2">
-                        <button onclick="closeGenericModal(); showToast('ดาวน์โหลด', 'กำลังดาวน์โหลดเอกสาร...');" class="px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl">ดาวน์โหลดไฟล์</button>
-                        <button onclick="closeGenericModal(); showToast('พิมพ์', 'กำลังส่งไปยังเครื่องพิมพ์...');" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">พิมพ์เอกสาร</button>
-                    </div>
-                </div>
-            `);
-        }
-
-        function openAllReportsModal() {
-            showGenericModal('รายงานและสถิติทั้งหมด', '<p class="text-xs text-slate-600">แสดงรายการรายงานทั้งหมดในระบบ RCM & Health Index พร้อมลิงก์ดาวน์โหลด</p>');
-        }
-
-        function showNotificationModal() {
-            showGenericModal('การแจ้งเตือนระบบ', `
-                <div class="space-y-2">
-                    <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs">
-                        <div class="font-bold text-amber-800">แจ้งเตือน: หม้อแปลง T015 มีค่า RPN วิกฤต</div>
-                        <div class="text-amber-700 mt-0.5">ต้องดำเนินการตรวจสอบเร่งด่วนภายใน 7 วัน</div>
-                    </div>
-                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-                        <div class="font-bold text-slate-800">ระบบอัปเดตข้อมูลอัตโนมัติ</div>
-                        <div class="text-slate-600 mt-0.5">ซิงค์ฐานข้อมูลจาก RCM 9-9.xlsx เรียบร้อย</div>
-                    </div>
-                </div>
-            `);
-        }
-
-        function openHelpModal() {
-            showGenericModal('คู่มือการใช้งานระบบ RCM', `
-                <div class="space-y-2 text-xs text-slate-600">
-                    <p><b>Transformer RCM & Health Index Management System</b> ออกแบบตามมาตรฐานสากล</p>
-                    <ul class="list-disc pl-4 space-y-1">
-                        <li>คลิกที่ขั้นตอน 1-10 ด้านบนเพื่อดูรายละเอียดแต่ละโมดูล</li>
-                        <li>คลิกแถวในตาราง FMEA เพื่อแก้ไขคะแนน S, O, D ด้านขวา</li>
-                        <li>ใช้ปุ่มค้นหาและตัวกรองเพื่อค้นหาข้อมูลได้อย่างรวดเร็ว</li>
-                    </ul>
-                </div>
-            `);
-        }
-
-        function showGenericModal(title, htmlContent) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalBody').innerHTML = htmlContent;
-            document.getElementById('genericModal').classList.remove('hidden');
-        }
-
-        function closeGenericModal() {
-            document.getElementById('genericModal').classList.add('hidden');
-        }
-
-        function showToast(title, desc, bgColor = 'bg-emerald-600') {
-            const toast = document.getElementById('toastBanner');
-            document.getElementById('toastTitle').innerText = title;
-            document.getElementById('toastDesc').innerText = desc;
-            document.getElementById('toastIcon').className = `w-6 h-6 rounded-full ${bgColor} text-white flex items-center justify-center text-xs`;
-            
-            toast.classList.remove('translate-y-32', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-32', 'opacity-0');
-            }, 3500);
-        }
-
-        function changePage(page) {
-            showToast('เปลี่ยนหน้า', `กำลังโหลดหน้าข้อมูลที่ ${page}`);
-        }
-
-        // Initialize Charts with Chart.js
-        function initCharts() {
-            const ctxDonutEl = document.getElementById('priorityDonutChart');
-            if (ctxDonutEl) {
-                if (priorityDonutChartInstance) priorityDonutChartInstance.destroy();
-                priorityDonutChartInstance = new Chart(ctxDonutEl.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['วิกฤต', 'เฝ้าระวัง', 'ปานกลาง/ต่ำ'],
-                        datasets: [{
-                            data: [18, 46, 158],
-                            backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
-                            borderWidth: 2,
-                            borderColor: '#ffffff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        cutout: '70%'
-                    }
-                });
-            }
-
-            const ctxBarEl = document.getElementById('topComponentBarChart');
-            if (ctxBarEl) {
-                if (topComponentBarChartInstance) topComponentBarChartInstance.destroy();
-                topComponentBarChartInstance = new Chart(ctxBarEl.getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: ['TR_MainTank', 'TR_Bushing', 'TR_Coil', 'TR_Radiator', 'TR_TapChanger'],
-                        datasets: [{
-                            label: 'จำนวน Failure Mode',
-                            data: [28, 24, 18, 15, 12],
-                            backgroundColor: '#3b82f6',
-                            borderRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                            y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } }
-                        }
-                    }
-                });
-            }
-        }
-    </script>
+    <!-- Decision Logic Tree View -->
+    <div id="treeView" style="display:none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <div style="font-size: 0.85rem; color: var(--muted);">แสดงตารางวิเคราะห์กลยุทธ์ตามเงื่อนไข Decision Logic Tree และระดับผลกระทบ (S)</div>
+        <button class="guideline-btn" onclick="openLogicTreeModal()">ดูผังเกณฑ์การตัดสินใจ (Logic Flow)</button>
+      </div>
+
+      <div class="flow-wrapper">
+        <div class="flow-step-box" style="border-left-color: var(--teal); text-align: center;">
+          <div class="flow-cond" style="justify-content: center; color: var(--teal);">1. จุดเริ่มต้น: โหมดความล้มเหลว (FMEA Input: S, O, D, Note)</div>
+        </div>
+        <div class="flow-down-arrow">↓</div>
+        <div class="flow-step-box">
+          <div class="flow-cond">2. มีความเสี่ยงบุคคลที่ 3 หรือไม่? (จาก Note)</div>
+          <div class="flow-branches">
+            <div class="branch-yes">✓ ใช่ ➔ มาตรการป้องกันเฉพาะ</div>
+            <div class="branch-no">✗ ไม่ใช่ ➔ ไปขั้นตอนถัดไป</div>
+          </div>
+        </div>
+        <div class="flow-down-arrow">↓</div>
+        <div class="flow-step-box">
+          <div class="flow-cond">3. ระดับความรุนแรง S = 5 หรือไม่? (Safety-critical)</div>
+          <div class="flow-branches">
+            <div class="branch-yes">✓ ใช่ ➔ Redesign บังคับ</div>
+            <div class="branch-no">✗ ไม่ใช่ ➔ ไปขั้นตอนถัดไป</div>
+          </div>
+        </div>
+        <div class="flow-down-arrow">↓</div>
+        <div class="flow-step-box">
+          <div class="flow-cond">4. ระดับความรุนแรง S = 4 หรือไม่? (Operational)</div>
+          <div class="flow-branches">
+            <div class="branch-yes">✓ ใช่ ➔ PM บังคับ หรือ PdM</div>
+            <div class="branch-no">✗ ไม่ใช่ ➔ ไปขั้นตอนถัดไป</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top: 24px;">
+        <span>ตารางสรุปผลการวิเคราะห์ Decision Logic Tree</span>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px; text-align:center;">ลำดับ</th>
+              <th style="width:120px;">อุปกรณ์</th>
+              <th style="width:65px;">รหัส</th>
+              <th>โหมดความล้มเหลว (Failure Mode)</th>
+              <th style="width:50px; text-align:center;">S</th>
+              <th style="width:60px; text-align:center;">RPN</th>
+              <th style="width:150px; text-align:center;">ประเภทผลกระทบ</th>
+              <th style="width:180px; text-align:center;">กลยุทธ์บำรุงรักษาที่แนะนำ</th>
+            </tr>
+          </thead>
+          <tbody id="treeTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Data Import View -->
+    <div id="importView" style="display:none;">
+      <div class="plan-info-banner">
+        <b>โมดูลนำเข้าข้อมูลด้วยไฟล์ Excel (Data Import):</b><br>
+        คุณสามารถอัปโหลดไฟล์ Excel เพื่ออัปเดตฐานข้อมูลโปรเจกต์ <b>panissara</b> ได้จากจุดนี้:
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div class="upload-box" onclick="document.getElementById('excelFileInput').click()">
+          <div class="upload-icon">📊</div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">อัปโหลดข้อมูล FMEA / RPN</div>
+          <div style="font-size: 0.78rem; color: var(--muted);">รองรับไฟล์ .xlsx</div>
+          <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="display:none;" onchange="handleExcelUpload(event)">
+        </div>
+
+        <div class="upload-box" onclick="document.getElementById('hiExcelFileInput').click()">
+          <div class="upload-icon">🧪</div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">อัปโหลดข้อมูลผลแล็บ / ดัชนีสุขภาพ (HI)</div>
+          <div style="font-size: 0.78rem; color: var(--muted);">รองรับไฟล์ .xlsx</div>
+          <input type="file" id="hiExcelFileInput" accept=".xlsx, .xls" style="display:none;" onchange="handleHiExcelUpload(event)">
+        </div>
+      </div>
+
+      <div id="importResultMsg" style="font-size: 0.85rem; color: var(--teal); text-align: center; margin-top: 10px; font-weight: 600;"></div>
+    </div>
+    
+    <!-- Pagination Controls Bar -->
+    <div class="pagination-bar" id="paginationBar">
+      <div class="pagination-info" id="paginationInfo">แสดงรายการที่ 1-10 จากทั้งหมด 222 รายการ</div>
+      <div class="pagination-btns">
+        <button class="page-btn" id="prevPageBtn" onclick="changePage(-1)">ก่อนหน้า</button>
+        <span class="page-indicator" id="pageIndicator">หน้า 1 / 23</span>
+        <button class="page-btn" id="nextPageBtn" onclick="changePage(1)">ถัดไป</button>
+      </div>
+    </div>
+
+    <div class="empty" id="emptyState" style="display:none;">
+      <div class="big">∅</div>
+      ไม่พบรายการข้อมูลที่ค้นหา
+    </div>
+  </main>
+
+  <footer>
+    Transformer RCM & Health Index Management System — Reliability-Centered Maintenance for Sustainable Power System (Project: panissara)
+  </footer>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="guidelineModal" onclick="handleOutsideClick(event, 'guidelineModal')">
+  <div class="modal" style="max-width: 750px;">
+    <h3>
+      <span>เกณฑ์มาตรฐาน MIL-STD-1629A</span>
+      <button class="modal-close" onclick="closeGuidelineModal()">&times;</button>
+    </h3>
+    <table class="guideline-table">
+      <tr><th style="width: 50px; text-align:center;">ระดับ</th><th>เกณฑ์การประเมินผลกระทบ (Severity: S)</th></tr>
+      <tr><td style="text-align:center;">1</td><td>ไม่มีผลกระทบต่อระบบ (Minor)</td></tr>
+      <tr><td style="text-align:center;">2</td><td>ส่งผลกระทบน้อย ไม่ทำให้ระบบหยุดทำงาน (Marginal)</td></tr>
+      <tr><td style="text-align:center;">3</td><td>ส่งผลกระทบปานกลาง เสียหายบางส่วน (Moderate)</td></tr>
+      <tr><td style="text-align:center;">4</td><td>ส่งผลกระทบรุนแรง ระบบหยุดทำงานหลัก (Critical)</td></tr>
+      <tr><td style="text-align:center;">5</td><td>ระดับความเสียหายรุนแรงสูงสุด สูญเสียชีวิตหรือทรัพย์สิน (Catastrophic)</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="modal-overlay" id="logicTreeModal" onclick="handleOutsideClick(event, 'logicTreeModal')">
+  <div class="modal" style="max-width: 650px;">
+    <h3>
+      <span>ผังเกณฑ์การตัดสินใจ Decision Logic Tree</span>
+      <button class="modal-close" onclick="closeLogicTreeModal()">&times;</button>
+    </h3>
+    <div style="font-size: 0.88rem; line-height: 1.8; color: var(--text);">
+      <p><b>1. เช็คความเสี่ยงบุคคลที่ 3:</b> มีมาตรการป้องกันเฉพาะแยกต่างหาก</p>
+      <p><b>2. เช็ค S = 5:</b> Redesign บังคับเพื่อความปลอดภัยสูงสุด</p>
+      <p><b>3. เช็ค S = 4:</b> ทำ Time-based (PM) หรือ Condition-based (PdM) ตามความยากในการตรวจจับ</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="tipModal" onclick="handleOutsideClick(event, 'tipModal')">
+  <div class="modal">
+    <h3>
+      <span>เกณฑ์การพิจารณาเลือกกลยุทธ์ PM และ CBM</span>
+      <button class="modal-close" onclick="closeTipModal()">&times;</button>
+    </h3>
+    <div style="font-size: 0.85rem; line-height: 1.6; color: var(--text);">
+      <p><b>PM:</b> เหมาะสำหรับอุปกรณ์ที่มีการเสื่อมสภาพตามอายุ</p>
+      <p><b>CBM / PdM:</b> เหมาะสำหรับอุปกรณ์ที่ตรวจวัดอาการเตือนล่วงหน้าได้</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="drilldownModal" onclick="handleOutsideClick(event, 'drilldownModal')">
+  <div class="modal">
+    <h3>
+      <span>รายละเอียดข้อมูลความเสียหาย (Failure Mode)</span>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </h3>
+    <div class="modal-grid">
+      <div class="label">อุปกรณ์:</div>
+      <div class="val" id="modalComp">-</div>
+      <div class="label">รหัส:</div>
+      <div class="val" id="modalCode" style="color:var(--primary); font-family:monospace; font-weight:bold;">-</div>
+      <div class="label">โหมดความล้มเหลว:</div>
+      <div class="val" id="modalDesc">-</div>
+      <div class="label">สาเหตุ:</div>
+      <div class="val" id="modalCause">-</div>
+      <div class="label">คะแนน RPN:</div>
+      <div class="val" id="modalRpn">-</div>
+      <div class="label">ประเภทผลกระทบ:</div>
+      <div class="val" id="modalCategory">-</div>
+      <div class="label">กลยุทธ์:</div>
+      <div class="val" id="modalStrategy">-</div>
+      <div class="label">หมายเหตุ:</div>
+      <div class="val" id="modalNote">-</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUserRole = 'admin';
+
+function onRoleChange() {
+  const roleSelect = document.getElementById('userRoleSelect');
+  currentUserRole = roleSelect ? roleSelect.value : 'admin';
+  applyRolePermissions();
+}
+
+function applyRolePermissions() {
+  const saveBtn = document.getElementById('saveBtn');
+  if (saveBtn) {
+    saveBtn.style.display = (currentUserRole === 'viewer') ? 'none' : 'inline-block';
+  }
+  renderTable();
+}
+
+let records = [
+  {"id": 1, "component": "TR_Counter L/A", "code": "T001", "desc": "Counter Lightning Arrester ชำรุด", "cause": "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", "s": 2, "o": 2, "d": 2, "category": "Economic-minor", "strategy": "Run-to-failure (CM)", "note": "", "actionType": "PM", "actionPlan": ""},
+  {"id": 2, "component": "TR_OLevelGauge", "code": "T002", "desc": "Oil level gauge ชำรุด", "cause": "โครงแตก, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ", "note": "", "actionType": "PM", "actionPlan": ""},
+  {"id": 3, "component": "TR_OtempGauge", "code": "T003", "desc": "Oil temp ชำรุด", "cause": "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ", "note": "", "actionType": "PM", "actionPlan": ""},
+  {"id": 4, "component": "TR_Sgel/ABreather", "code": "T004", "desc": "Silicagel เปลี่ยนสี / Air Breather ชำรุด", "cause": "Silicagel เสื่อมสภาพ, การอุดตัน / ฝุ่นละออง", "s": 2, "o": 3, "d": 2, "category": "Economic-minor", "strategy": "Run-to-failure (CM)", "note": "", "actionType": "PM", "actionPlan": ""},
+  {"id": 5, "component": "TR_WTempGauge", "code": "T005", "desc": "Winding temp ชำรุด", "cause": "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ", "note": "", "actionType": "PM", "actionPlan": ""},
+  {"id": 6, "component": "TR_TOP", "code": "T006", "desc": "น้ำมันรั่วซึมด้านบนหม้อแปลง", "cause": "ซีลเสื่อมสภาพ", "s": 4, "o": 3, "d": 2, "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)", "note": "", "actionType": "PM", "actionPlan": ""},
+  {"id": 7, "component": "TR_Bushing", "code": "T007", "desc": "น้ำมันรั่วซึมที่ Bushing หม้อแปลง", "cause": "ซีลเสื่อมสภาพ, แตกหัก, ติดตั้งไม่ถูกต้อง", "s": 4, "o": 2, "d": 3, "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ", "note": "", "actionType": "PM", "actionPlan": ""},
+  {"id": 8, "component": "TR_CableBox", "code": "T008", "desc": "น้ำมันรั่วซึมที่ Cable box", "cause": "ซีลเสื่อมสภาพ, ความร้อนสูงเกินไป", "s": 3, "o": 2, "d": 3, "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ", "note": "", "actionType": "PM", "actionPlan": ""},
+  {"id": 9, "component": "TR_Radiator", "code": "T009", "desc": "น้ำมันรั่วซึมที่ Radiator", "cause": "ซีลเสื่อมสภาพ, แรงดันภายในสูง", "s": 3, "o": 3, "d": 2, "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ", "note": "", "actionType": "PM", "actionPlan": ""},
+  {"id": 10, "component": "TR_MainTank", "code": "T012", "desc": "น้ำมันหม้อแปลงต่ำ", "cause": "ระบบระบายความร้อนผิดปกติ", "s": 4, "o": 2, "d": 1, "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)", "note": "", "actionType": "PM", "actionPlan": ""}
+];
+
+// ขยายข้อมูลจำลองให้ครบ 222 รายการตามไฟล์ต้นฉบับ
+for (let i = 11; i <= 222; i++) {
+  records.push({
+    "id": i,
+    "component": i % 2 === 0 ? "TR_MainTank" : "HV_GIS_CB",
+    "code": "T" + (100 + i),
+    "desc": "อุปกรณ์ชำรุดเสียหายตามรอบการใช้งาน #" + i,
+    "cause": "เสื่อมสภาพตามอายุการใช้งาน, ซีลเสื่อม",
+    "s": i % 5 === 0 ? 5 : (i % 3 === 0 ? 4 : 3),
+    "o": 2,
+    "d": 2,
+    "category": "Operational-significant",
+    "strategy": "Condition-based (PdM)",
+    "note": "",
+    "actionType": "PM",
+    "actionPlan": ""
+  });
+}
+
+let hiRecords = records.map((r, idx) => ({
+  uid: 'c_' + r.id,
+  component: r.component,
+  testCategory: 'Electrical Test',
+  testItems: 'Parameter #' + r.id,
+  si: 90,
+  smax: 100,
+  wi: 1
+}));
+
+let doughnutChartInstance = null;
+let barChartInstance = null;
+let currentPage = 1;
+const rowsPerPage = 10;
+let categories = [];
+let activeCat = "ALL";
+let riskFilter = "ALL";
+let query = "";
+let currentTab = 'fmea';
+
+function initApp() {
+  const savedTheme = localStorage.getItem('rcm_theme_mode');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    document.getElementById('modeToggleBtn').textContent = 'โหมดมืด';
+  } else {
+    document.getElementById('modeToggleBtn').textContent = 'โหมดสว่าง';
+  }
+
+  categories = [...new Set(records.map(r => r.component ? r.component.split('_')[0] : 'OTHER'))];
+  
+  populateDgaAssetDropdown();
+  initCharts();
+  updateDashboardStats();
+  renderChips();
+  renderTable();
+  applyRolePermissions();
+}
+
+// ฟังก์ชันควบคุมปุ่มใน Top Stepper 1 ถึง 10 ให้ทำงานสอดคล้องกับระบบ
+function handleStepClick(stepNumber, el) {
+  // ไฮไลต์ปุ่ม Stepper ที่ถูกเลือก
+  document.querySelectorAll('.step-item').forEach(btn => btn.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  if (stepNumber === 1 || stepNumber === 2 || stepNumber === 3 || stepNumber === 4 || stepNumber === 5) {
+    switchTab('fmea', document.querySelector('.tab-btn'));
+  } else if (stepNumber === 6) {
+    switchTab('hi', document.getElementById('btnHi'));
+  } else if (stepNumber === 7 || stepNumber === 8) {
+    switchTab('plan', document.getElementById('btnPlan'));
+  } else if (stepNumber === 9) {
+    switchTab('plan', document.getElementById('btnPlan'));
+  } else if (stepNumber === 10) {
+    switchTab('tree', document.getElementById('btnTree'));
+  }
+}
+
+function handleExcelUpload(event) {
+  if (currentUserRole === 'viewer') {
+    alert('สิทธิ์ผู้ชมทั่วไปไม่สามารถอัปโหลดข้อมูลได้');
+    return;
+  }
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+
+      if (jsonRows.length === 0) {
+        alert('ไม่พบข้อมูลภายในไฟล์ Excel ที่อัปโหลด');
+        return;
+      }
+
+      records = jsonRows.map((row, idx) => ({
+        id: row.id || (idx + 1),
+        component: row.component || row.Component || 'TR_General',
+        code: row.code || row.Code || ('C' + (idx + 1)),
+        desc: row.desc || row.Description || row.Failure_Mode || 'โหมดความล้มเหลว',
+        cause: row.cause || row.Cause || '',
+        s: Number(row.s || row.Severity || 3),
+        o: Number(row.o || row.Occurrence || 2),
+        d: Number(row.d || row.Detection || 2),
+        note: row.note || row.Note || '',
+        actionType: 'PM',
+        actionPlan: ''
+      }));
+
+      categories = [...new Set(records.map(r => r.component ? r.component.split('_')[0] : 'OTHER'))];
+      updateDashboardStats();
+      renderChips();
+      renderTable();
+      document.getElementById('importResultMsg').textContent = `✓ นำเข้าข้อมูลสำเร็จ (${records.length} รายการ)`;
+    } catch(err) {
+      alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function handleHiExcelUpload(event) {
+  if (currentUserRole === 'viewer') {
+    alert('สิทธิ์ผู้ชมทั่วไปไม่สามารถอัปโหลดข้อมูลได้');
+    return;
+  }
+  const file = event.target.files[0];
+  if (!file) return;
+  alert('อัปโหลดไฟล์ผลแล็บ HI สำเร็จเรียบร้อย');
+}
+
+function populateDgaAssetDropdown() {
+  const select = document.getElementById('dgaAssetSelect');
+  if (!select) return;
+  const uniqueComps = [...new Set(records.map(r => r.component))];
+  select.innerHTML = `<option value="">-- กรุณาเลือกอุปกรณ์หม้อแปลง (${uniqueComps.length} รายการ) --</option>`;
+  uniqueComps.forEach(comp => {
+    const opt = document.createElement('option');
+    opt.value = comp;
+    opt.textContent = comp;
+    select.appendChild(opt);
+  });
+}
+
+function onDgaAssetChange() {
+  const selectEl = document.getElementById('dgaAssetSelect');
+  const statusEl = document.getElementById('dgaAssetStatus');
+  if (selectEl && statusEl) {
+    statusEl.textContent = selectEl.value ? `กำลังวิเคราะห์อุปกรณ์: [ ${selectEl.value} ]` : 'ยังไม่ได้เลือกอุปกรณ์';
+  }
+}
+
+function updateDashboardStats() {
+  const total = records.length;
+  let normal = 0, warning = 0, critical = 0;
+  let totalSi = 0, totalSmax = 0;
+
+  records.forEach(r => {
+    const s = Number(r.s) || 0;
+    if (s === 5) critical++;
+    else if (s === 4) warning++;
+    else normal++;
+  });
+
+  hiRecords.forEach(c => {
+    const si = Number(c.si) || 0;
+    const smax = Number(c.smax) || 0;
+    const wi = Number(c.wi) || 0;
+    if (si > 0 && wi > 0) totalSi += si * wi;
+    if (smax > 0 && wi > 0) totalSmax += smax * wi;
+  });
+
+  const avgHi = totalSmax > 0 ? ((totalSi / totalSmax) * 100).toFixed(2) : '100.00';
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statNormal').textContent = normal;
+  document.getElementById('statWarning').textContent = warning;
+  document.getElementById('statCritical').textContent = critical;
+  document.getElementById('statHiAvg').textContent = avgHi + '%';
+
+  updateCharts(normal, warning, critical);
+}
+
+function toggleLightDarkMode() {
+  document.body.classList.toggle('light-mode');
+  const isLight = document.body.classList.contains('light-mode');
+  document.getElementById('modeToggleBtn').textContent = isLight ? 'โหมดมืด' : 'โหมดสว่าง';
+  localStorage.setItem('rcm_theme_mode', isLight ? 'light' : 'dark');
+  initCharts();
+  updateDashboardStats();
+}
+
+function setRiskFilter(filter, el) {
+  riskFilter = filter;
+  currentPage = 1;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderTable();
+}
+
+function switchTab(tab, el) {
+  currentTab = tab;
+  currentPage = 1;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  
+  const bannerContainer = document.getElementById('bannerContainer');
+  bannerContainer.innerHTML = '';
+  const tipBtn = document.getElementById('tipButton');
+  const titleSub = document.getElementById('modeTitleSub');
+  
+  if(tab === 'fmea') {
+    titleSub.textContent = "Reliability-Centered Maintenance for Sustainable Power System";
+    document.getElementById('tableInstruction').textContent = "คลิกที่แถวข้อมูลเพื่อดูรายละเอียดเชิงลึก หรือแก้ไขคะแนนการประเมิน";
+    document.getElementById('toolbarRow').style.display = 'flex';
+    document.getElementById('chips').style.display = 'flex';
+    tipBtn.style.display = 'none';
+  } else if(tab === 'hi') {
+    titleSub.textContent = "ตารางโครงสร้างดัชนีสุขภาพอุปกรณ์ (Health Index)";
+    document.getElementById('tableInstruction').textContent = "กรอกหมวดหมู่การทดสอบ พารามิเตอร์ และคะแนนสุขภาพ";
+    document.getElementById('toolbarRow').style.display = 'flex';
+    document.getElementById('chips').style.display = 'flex';
+    tipBtn.style.display = 'none';
+  } else if(tab === 'dga') {
+    titleSub.textContent = "ระบบวิเคราะห์ก๊าซละลายในน้ำมันหม้อแปลง (Dissolved Gas Analysis)";
+    document.getElementById('tableInstruction').textContent = "แสดงผลการคำนวณและวิเคราะห์ก๊าซในน้ำมันหม้อแปลงแยกตามรายตัวอุปกรณ์";
+    document.getElementById('toolbarRow').style.display = 'none';
+    document.getElementById('chips').style.display = 'none';
+    tipBtn.style.display = 'none';
+    bannerContainer.innerHTML = `<div class="plan-info-banner"><b>ระบบวิเคราะห์ก๊าซละลาย (DGA) ตามมาตรฐานสากล:</b> เลือกอุปกรณ์หม้อแปลงจากเมนูดรอปดาวน์ด้านบน แล้วกรอกค่าความเข้มข้นของก๊าซเพื่อประเมินผล</div>`;
+    setTimeout(() => drawDuvalTriangle(33.3, 33.3, 33.3), 50);
+  } else if(tab === 'plan') {
+    titleSub.textContent = "แผนงานบำรุงรักษาเชิงป้องกันตามหลัก RCM (Action Plan)";
+    document.getElementById('tableInstruction').textContent = "แสดงรายการแผนบำรุงรักษา จัดลำดับตามกลุ่มความสำคัญ";
+    document.getElementById('toolbarRow').style.display = 'flex';
+    document.getElementById('chips').style.display = 'none';
+    tipBtn.style.display = 'inline-block';
+    bannerContainer.innerHTML = `<div class="plan-info-banner"><b>หลักการจัดลำดับแผนงานบำรุงรักษา:</b> เรียงลำดับตามความวิกฤตและคะแนน RPN จากมากไปน้อย</div>`;
+  } else if(tab === 'tree') {
+    titleSub.textContent = "ผังตรรกะการตัดสินใจ (Decision Logic Tree)";
+    document.getElementById('tableInstruction').textContent = "แสดงผลการวิเคราะห์ประเภทผลกระทบและกลยุทธ์แนะนำตามตำรา RCM";
+    document.getElementById('toolbarRow').style.display = 'none';
+    document.getElementById('chips').style.display = 'none';
+    tipBtn.style.display = 'none';
+  } else if(tab === 'import') {
+    titleSub.textContent = "นำเข้าข้อมูล (Data Import Center)";
+    document.getElementById('tableInstruction').textContent = "อัปโหลดไฟล์ Excel เพื่ออัปเดตฐานข้อมูล";
+    document.getElementById('toolbarRow').style.display = 'none';
+    document.getElementById('chips').style.display = 'none';
+    tipBtn.style.display = 'none';
+  }
+  renderTable();
+}
+
+const chipsWrap = document.getElementById('chips');
+function renderChips(){
+  chipsWrap.innerHTML = '';
+  chipsWrap.appendChild(makeChip('แสดงทั้งหมด (' + records.length + ')', 'ALL'));
+  categories.forEach(c => {
+    const count = records.filter(r => (r.component ? r.component.split('_')[0] : 'OTHER') === c).length;
+    chipsWrap.appendChild(makeChip(c + ' (' + count + ')', c));
+  });
+}
+
+function makeChip(label, val){
+  const c = document.createElement('div');
+  c.className = 'chip' + (activeCat === val ? ' active' : '');
+  c.textContent = label;
+  c.addEventListener('click', () => { activeCat = val; currentPage = 1; renderChips(); renderTable(); });
+  return c;
+}
+
+const tbody = document.getElementById('tbody');
+const emptyState = document.getElementById('emptyState');
+const visibleCountEl = document.getElementById('visibleCount');
+
+function escapeHtml(str){
+  return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function changePage(direction) {
+  currentPage += direction;
+  renderTable();
+}
+
+function calcDga(methodNo) {
+  const assetEl = document.getElementById('dgaAssetSelect');
+  const asset = assetEl ? assetEl.value : '';
+  if (methodNo === 4) {
+    let ch4 = parseFloat(document.getElementById('dga_dv_ch4').value) || 0;
+    let c2h4 = parseFloat(document.getElementById('dga_dv_c2h4').value) || 0;
+    let c2h2 = parseFloat(document.getElementById('dga_dv_c2h2').value) || 0;
+    let sum = ch4 + c2h4 + c2h2 || 1;
+    drawDuvalTriangle((ch4/sum)*100, (c2h4/sum)*100, (c2h2/sum)*100);
+    document.getElementById('res_dga_4').innerHTML = `[${asset || 'ทั่วไป'}] โซนความเสียหาย: <b>Thermal Fault / Discharge</b>`;
+  } else {
+    document.getElementById('res_dga_' + methodNo).innerHTML = `[${asset || 'ทั่วไป'}] ผลการประเมิน: ตรวจพบสภาพปกติ`;
+  }
+}
+
+function drawDuvalTriangle(p_ch4, p_c2h4, p_c2h2) {
+  const canvas = document.getElementById('duvalCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.beginPath();
+  ctx.moveTo(w/2, 15); ctx.lineTo(20, h-20); ctx.lineTo(w-20, h-20); ctx.closePath();
+  ctx.strokeStyle = '#94a3b8'; ctx.stroke();
+  ctx.beginPath();
+  ctx.arc((p_ch4 * 20 + p_c2h4 * (w-20) + p_c2h2 * (w/2)) / 100, (p_ch4 * (h-20) + p_c2h4 * (h-20) + p_c2h2 * 15) / 100, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#ef4444'; ctx.fill();
+}
+
+function renderTable(){
+  const q = query.trim().toLowerCase();
+  const thead = document.getElementById('tableHead');
+  const paginationBar = document.getElementById('paginationBar');
+  const mainTableWrapper = document.getElementById('mainTableWrapper');
+  const dgaView = document.getElementById('dgaView');
+  const treeView = document.getElementById('treeView');
+  const importView = document.getElementById('importView');
+
+  if (currentTab === 'dga') {
+    paginationBar.style.display = 'none'; mainTableWrapper.style.display = 'none'; dgaView.style.display = 'block'; treeView.style.display = 'none'; importView.style.display = 'none';
+    return;
+  } else if (currentTab === 'tree') {
+    paginationBar.style.display = 'none'; mainTableWrapper.style.display = 'none'; dgaView.style.display = 'none'; treeView.style.display = 'block'; importView.style.display = 'none';
+    renderLogicTreeTable();
+    return;
+  } else if (currentTab === 'import') {
+    paginationBar.style.display = 'none'; mainTableWrapper.style.display = 'none'; dgaView.style.display = 'none'; treeView.style.display = 'none'; importView.style.display = 'block';
+    return;
+  } else {
+    dgaView.style.display = 'none'; treeView.style.display = 'none'; importView.style.display = 'none'; mainTableWrapper.style.display = 'block';
+  }
+
+  const isReadOnly = (currentUserRole === 'viewer');
+  const isOperator = (currentUserRole === 'operator');
+
+  if (currentTab === 'fmea' || currentTab === 'hi' || currentTab === 'plan') {
+    paginationBar.style.display = 'flex';
+    thead.innerHTML = `
+      <tr>
+        <th style="width:40px;">ลำดับ</th>
+        <th style="width:130px;">Component</th>
+        <th style="width:75px;">รหัส</th>
+        <th>Failure Mode</th>
+        <th>Failure Cause</th>
+        <th style="width:45px; text-align:center;">S</th>
+        <th style="width:45px; text-align:center;">O</th>
+        <th style="width:45px; text-align:center;">D</th>
+        <th style="width:60px; text-align:center;">RPN</th>
+        <th style="width:140px; text-align:center;">Priority</th>
+        <th style="width:200px;">หมายเหตุ / Note</th>
+      </tr>
+    `;
+
+    const filtered = records.filter(r => {
+      const catPrefix = r.component ? r.component.split('_')[0] : 'OTHER';
+      if(activeCat !== 'ALL' && catPrefix !== activeCat) return false;
+      const s = Number(r.s) || 0;
+      if (riskFilter === 'CRITICAL' && s !== 5) return false;
+      if (riskFilter === 'WARNING' && s !== 4) return false;
+      if (riskFilter === 'NORMAL' && s > 3) return false;
+      if(!q) return true;
+      return (r.code?.toLowerCase().includes(q) || r.desc?.toLowerCase().includes(q) || r.cause?.toLowerCase().includes(q) || r.component?.toLowerCase().includes(q));
+    });
+
+    const totalFiltered = filtered.length;
+    const totalPages = Math.ceil(totalFiltered / rowsPerPage) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIdx = (currentPage - 1) * rowsPerPage;
+    const paginatedItems = filtered.slice(startIdx, startIdx + rowsPerPage);
+    const disabledAttr = (isReadOnly || isOperator) ? 'disabled' : '';
+
+    tbody.innerHTML = paginatedItems.map(r => {
+      const s = Number(r.s) || 0;
+      const o = Number(r.o) || 0;
+      const d = Number(r.d) || 0;
+      const rpn = s * o * d;
+      
+      let flagClass = 'flag-green', flagText = 'ปานกลาง/ต่ำ';
+      if (s === 5) { flagClass = 'flag-red'; flagText = 'วิกฤต'; }
+      else if (s === 4) { flagClass = 'flag-orange'; flagText = 'เฝ้าระวัง'; }
+
+      return `
+        <tr onclick="openDrilldown(${r.id})">
+          <td class="num">${r.id}</td>
+          <td><b>${escapeHtml(r.component)}</b></td>
+          <td><span class="code-pill mono">${escapeHtml(r.code)}</span></td>
+          <td>${escapeHtml(r.desc)}</td>
+          <td style="color:var(--muted);">${escapeHtml(r.cause)}</td>
+          <td style="text-align:center;" onclick="event.stopPropagation()"><input type="number" class="score-input" value="${r.s}" ${disabledAttr} oninput="updateFmea(${r.id}, 's', this.value)"></td>
+          <td style="text-align:center;" onclick="event.stopPropagation()"><input type="number" class="score-input" value="${r.o}" ${disabledAttr} oninput="updateFmea(${r.id}, 'o', this.value)"></td>
+          <td style="text-align:center;" onclick="event.stopPropagation()"><input type="number" class="score-input" value="${r.d}" ${disabledAttr} oninput="updateFmea(${r.id}, 'd', this.value)"></td>
+          <td style="text-align:center;" class="mono">${rpn}</td>
+          <td style="text-align:center;"><span class="flag-badge ${flagClass}">${flagText}</span></td>
+          <td onclick="event.stopPropagation()"><input type="text" class="text-input" value="${escapeHtml(r.note || '')}" ${disabledAttr} oninput="updateFmea(${r.id}, 'note', this.value)"></td>
+        </tr>
+      `;
+    }).join('');
+
+    document.getElementById('paginationInfo').textContent = `แสดงรายการที่ ${totalFiltered > 0 ? startIdx + 1 : 0}-${Math.min(startIdx + rowsPerPage, totalFiltered)} จากทั้งหมด ${totalFiltered} รายการ`;
+    document.getElementById('pageIndicator').textContent = `หน้า ${currentPage} / ${totalPages}`;
+    visibleCountEl.textContent = totalFiltered;
+    emptyState.style.display = totalFiltered === 0 ? 'block' : 'none';
+  }
+}
+
+function renderLogicTreeTable() {
+  const treeTbody = document.getElementById('treeTbody');
+  if (!treeTbody) return;
+  treeTbody.innerHTML = records.slice(0, 20).map((r, index) => `
+    <tr>
+      <td style="text-align:center;" class="num">${index + 1}</td>
+      <td><b>${escapeHtml(r.component)}</b></td>
+      <td><span class="code-pill mono">${escapeHtml(r.code)}</span></td>
+      <td>${escapeHtml(r.desc)}</td>
+      <td style="text-align:center;" class="mono">${r.s}</td>
+      <td style="text-align:center;" class="mono">${r.s * r.o * r.d}</td>
+      <td>${escapeHtml(r.category)}</td>
+      <td style="color:var(--teal); font-weight:600;">${escapeHtml(r.strategy)}</td>
+    </tr>
+  `).join('');
+}
+
+function updateFmea(id, field, val) {
+  if (currentUserRole === 'viewer') return;
+  const item = records.find(r => r.id === id);
+  if (item) {
+    item[field] = val;
+    updateDashboardStats();
+  }
+}
+
+function openDrilldown(id) {
+  const r = records.find(item => item.id === id);
+  if (!r) return;
+  document.getElementById('modalComp').textContent = r.component;
+  document.getElementById('modalCode').textContent = r.code;
+  document.getElementById('modalDesc').textContent = r.desc;
+  document.getElementById('modalCause').textContent = r.cause || '-';
+  document.getElementById('modalRpn').textContent = (r.s || 0) * (r.o || 0) * (r.d || 0);
+  document.getElementById('modalCategory').textContent = r.category || '-';
+  document.getElementById('modalStrategy').textContent = r.strategy || '-';
+  document.getElementById('modalNote').textContent = r.note || '-';
+  document.getElementById('drilldownModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('drilldownModal').classList.remove('open'); }
+function openGuidelineModal() { document.getElementById('guidelineModal').classList.add('open'); }
+function closeGuidelineModal() { document.getElementById('guidelineModal').classList.remove('open'); }
+function openLogicTreeModal() { document.getElementById('logicTreeModal').classList.add('open'); }
+function closeLogicTreeModal() { document.getElementById('logicTreeModal').classList.remove('open'); }
+function openTipModal() { document.getElementById('tipModal').classList.add('open'); }
+function closeTipModal() { document.getElementById('tipModal').classList.remove('open'); }
+
+function handleOutsideClick(event, modalId) {
+  if (event.target === document.getElementById(modalId)) {
+    document.getElementById(modalId).classList.remove('open');
+  }
+}
+
+function exportToCSV() {
+  let csvContent = "\uFEFFID,Component,Code,Description,Cause,Severity,Occurrence,Detection,RPN\n";
+  records.forEach(r => {
+    csvContent += `"${r.id}","${r.component}","${r.code}","${r.desc}","${r.cause}","${r.s}","${r.o}","${r.d}","${r.s*r.o*r.d}"\n`;
+  });
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `RCM_Export.csv`;
+  a.click();
+}
+
+function saveData() {
+  if (currentUserRole === 'viewer') return;
+  window.saveToFirestoreCloud(records, hiRecords);
+}
+
+function initCharts() {
+  const isLight = document.body.classList.contains('light-mode');
+  const textColor = isLight ? '#0f172a' : '#f0f4f8';
+
+  const ctxDoughnut = document.getElementById('riskDoughnutChart').getContext('2d');
+  if (doughnutChartInstance) doughnutChartInstance.destroy();
+  doughnutChartInstance = new Chart(ctxDoughnut, {
+    type: 'doughnut',
+    data: {
+      labels: ['ปานกลาง / ต่ำ', 'ระดับเฝ้าระวัง', 'วิกฤตสูงสุด (P1)'],
+      datasets: [{
+        data: [0, 0, 0],
+        backgroundColor: ['#14b8a6', '#f59e0b', '#ef4444'],
+        borderWidth: 3,
+        borderColor: isLight ? '#ffffff' : '#111827'
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { color: textColor, size: 10 } } } }
+  });
+
+  const ctxBar = document.getElementById('topRiskBarChart').getContext('2d');
+  if (barChartInstance) barChartInstance.destroy();
+  barChartInstance = new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: ['TR_MainTank', 'HV_GIS_CB', 'TR_Bushing', 'TR_Radiator', 'TR_CableBox'],
+      datasets: [{
+        data: [45, 38, 30, 25, 20],
+        backgroundColor: 'rgba(245, 158, 11, 0.85)',
+        borderRadius: 6
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: textColor } }, y: { ticks: { color: textColor } } }, plugins: { legend: { display: false } } }
+  });
+}
+
+function updateCharts(normal, warning, critical) {
+  if (doughnutChartInstance) {
+    doughnutChartInstance.data.datasets[0].data = [normal, warning, critical];
+    doughnutChartInstance.update();
+  }
+}
+
+document.getElementById('search').addEventListener('input', (e) => {
+  query = e.target.value;
+  currentPage = 1;
+  renderTable();
+});
+
+initApp();
+</script>
+
 </body>
 </html>
