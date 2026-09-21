@@ -1,637 +1,164 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RCM Engineering System - สถานีไฟฟ้า</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Prompt) -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: 'Prompt', sans-serif; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RCM Engineering System — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--blue:#0757a6;--blue2:#0a73d9;--nav:#074c8c;--bg:#eef6fd;--card:#fff;--text:#15375b;--muted:#7189a3;--line:#dbe9f6;--green:#1cab69;--yellow:#e6a700;--red:#dc3545;--purple:#7957d5;--shadow:0 8px 28px rgba(28,88,142,.08)}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans Thai","Plus Jakarta Sans",sans-serif}
+button,input,select{font:inherit}.app{display:flex;min-height:100vh}
+.sidebar{position:fixed;inset:0 auto 0 0;width:250px;background:linear-gradient(180deg,#0757a6,#063d73);color:#fff;padding:22px 14px;display:flex;flex-direction:column;z-index:10}
+.brand{display:flex;gap:13px;align-items:center;padding:0 10px 22px;border-bottom:1px solid #ffffff2b}.brand-icon{width:52px;height:52px;border:2px solid #fff;border-radius:12px;display:grid;place-items:center;font-size:27px}.brand b{font:800 26px "Plus Jakarta Sans";display:block}.brand small{opacity:.9}
+.nav{padding-top:18px;display:grid;gap:7px}.nav button{border:0;background:transparent;color:#d9edff;padding:11px 13px;border-radius:10px;text-align:left;cursor:pointer;display:flex;gap:11px;align-items:center}.nav button:hover,.nav button.active{background:#fff;color:#0757a6;font-weight:700}.nav .ico{width:23px;text-align:center;font-size:18px}
+.side-foot{margin-top:auto;padding:18px 10px 0;border-top:1px solid #ffffff2b;font-size:11px;color:#c9e4ff;line-height:1.6}
+.main{margin-left:250px;width:calc(100% - 250px);padding:18px}
+.topbar{display:flex;gap:12px;align-items:center;margin-bottom:14px}.search{flex:1;position:relative}.search input{width:100%;height:46px;border:1px solid var(--line);border-radius:11px;padding:0 48px 0 16px;background:#fff;outline:0}.search input:focus{border-color:#75b8f1;box-shadow:0 0 0 3px #2c91e51a}.search button{position:absolute;right:5px;top:5px;width:37px;height:36px;border:0;border-radius:8px;background:var(--blue);color:#fff;cursor:pointer}
+.selectbox{height:46px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text);padding:0 14px;min-width:180px}.user{height:46px;padding:0 15px;background:#fff;border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:10px}.avatar{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff}
+.hero,.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}.hero{padding:18px 22px;margin-bottom:14px;display:flex;justify-content:space-between;gap:20px;align-items:center}.hero h1{margin:0;color:#0a438d;font-size:28px}.hero p{margin:3px 0 0;color:var(--muted)}.updated{font-size:12px;color:#6f8ba7}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:14px}.kpi{padding:17px;border-radius:13px;border:1px solid var(--line);background:#fff;min-height:112px;display:flex;align-items:center;gap:14px}.kpi .bubble{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;font-size:25px}.kpi .label{font-size:13px;font-weight:700}.kpi .num{font:800 27px "Plus Jakarta Sans";margin-top:1px}.kpi .sub{font-size:12px;color:var(--muted)}.b-blue{background:#e9f4ff;color:#0757a6}.b-green{background:#e7f8ef;color:var(--green)}.b-yellow{background:#fff6dc;color:var(--yellow)}.b-red{background:#ffebed;color:var(--red)}.b-gray{background:#eef3f7;color:#7b8b9b}
+.grid3{display:grid;grid-template-columns:1fr 1.25fr 1.1fr;gap:12px;margin-bottom:14px}.card{padding:16px}.card-title{font-size:16px;font-weight:800;color:#0b438b;margin-bottom:12px;display:flex;justify-content:space-between}.chartbox{height:220px}
+.table-card{padding:0;overflow:hidden}.table-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}.table-title{font-weight:800;color:#0b438b;font-size:17px}.tools{display:flex;gap:8px}.tools input,.tools select{height:36px;border:1px solid var(--line);border-radius:8px;padding:0 10px;background:#fff;color:var(--text)}.tools input{width:230px}.btn{height:36px;border:0;border-radius:8px;padding:0 13px;cursor:pointer;font-weight:700}.btn-primary{background:#0b72d4;color:#fff}.table-wrap{overflow:auto;max-height:500px}table{width:100%;border-collapse:collapse;min-width:1050px;font-size:12px}th{position:sticky;top:0;z-index:2;background:#eaf4fd;color:#174a7c;text-align:left;padding:10px;border-bottom:1px solid #d5e5f3}td{padding:9px 10px;border-bottom:1px solid #e7eff7;vertical-align:middle}tr:hover td{background:#f8fbff}.code{font-weight:800;color:#0757a6}.rpn{font-weight:800}.badge{display:inline-block;padding:3px 9px;border-radius:7px;font-weight:700}.normal{background:#dff6e9;color:#13794b}.watch{background:#fff2ce;color:#936a00}.critical{background:#ffe1e4;color:#b91f31}.strategy{background:#e7f4ff;color:#1764a8;max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.score{width:44px;height:30px;text-align:center;border:1px solid var(--line);border-radius:6px;background:#fff}.pager{padding:11px 16px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}.pager button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer}.module{display:none}.module.active{display:block}.section-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px}.section-card h2{margin:0 0 5px;color:#0a438d}.section-card>p{margin-top:0;color:var(--muted)}.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mini{border:1px solid var(--line);border-radius:12px;padding:15px}.mini h3{margin:0 0 6px;color:#0a438d}.empty-hi{padding:35px;text-align:center;background:#f8fbfe;border:1px dashed #bcd7ee;border-radius:12px;color:var(--muted)}
+.modalbg{position:fixed;inset:0;background:#123b5f80;display:none;align-items:center;justify-content:center;z-index:30;padding:20px}.modalbg.open{display:flex}.modal{width:min(760px,96vw);max-height:88vh;overflow:auto;background:#fff;border-radius:16px;padding:22px;box-shadow:0 25px 70px #1237}.modaltop{display:flex;justify-content:space-between;gap:12px}.modal h2{margin:0;color:#0a438d}.x{border:0;background:#eef5fb;border-radius:8px;width:34px;height:34px;cursor:pointer}.detailgrid{display:grid;grid-template-columns:160px 1fr;gap:10px;margin-top:18px;font-size:13px}.detailgrid .lab{color:var(--muted)}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr}.sidebar{width:210px}.main{margin-left:210px;width:calc(100% - 210px)}}
+@media(max-width:760px){.sidebar{display:none}.main{margin:0;width:100%;padding:10px}.topbar{flex-wrap:wrap}.selectbox{min-width:130px}.kpis{grid-template-columns:1fr}.hero h1{font-size:22px}.tools{flex-wrap:wrap}.info-grid{grid-template-columns:1fr}}
+</style>
 </head>
-<body class="bg-slate-100 text-slate-800 flex h-screen overflow-hidden">
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">▥</div><div><b>RCM</b><small>Engineering System<br>ระบบ RCM สถานีไฟฟ้า</small></div></div>
+  <div class="nav">
+    <button class="active" data-tab="dashboard"><span class="ico">⌂</span>หน้าหลัก (Dashboard)</button>
+    <button data-tab="fmea"><span class="ico">▤</span>FMEA & RPN</button>
+    <button data-tab="hi"><span class="ico">♥</span>Health Index</button>
+    <button data-tab="strategy"><span class="ico">⚙</span>Maintenance Strategy</button>
+    <button data-tab="codes"><span class="ico">◫</span>Failure Code Master</button>
+    <button data-tab="import"><span class="ico">⇧</span>นำเข้าข้อมูล (Import)</button>
+  </div>
+  <div class="side-foot">RCM & Failure Code Master<br>ข้อมูลต้นทาง: RCM 9-9(1).xlsx</div>
+</aside>
 
-    <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between transition-all duration-300 shadow-xl z-20">
-        <div>
-            <!-- Sidebar Header -->
-            <div class="p-4 bg-slate-950 flex items-center space-x-3 border-b border-slate-800">
-                <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow-md">
-                    <i class="fa-solid fa-bolt-lightning text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-white font-bold text-sm tracking-wide">RCM Engineering</h1>
-                    <p class="text-xs text-slate-400">ระบบ RCM สถานีไฟฟ้า</p>
-                </div>
-            </div>
+<main class="main">
+  <div class="topbar">
+    <div class="search"><input id="globalSearch" placeholder="ค้นหาอุปกรณ์, Failure Mode, รหัส, สาเหตุ ..."><button onclick="doSearch()">⌕</button></div>
+    <select class="selectbox" id="statusTop" onchange="applyFilters()"><option value="">ทุกสถานะ</option><option value="Normal">ปกติ</option><option value="Watch">เฝ้าระวัง</option><option value="Critical">วิกฤต</option></select>
+    <div class="user"><div class="avatar">●</div><div><small>ผู้ใช้งาน</small><br><b>Admin</b></div></div>
+  </div>
 
-            <!-- Navigation Links -->
-            <nav class="p-3 space-y-1 text-sm overflow-y-auto max-h-[calc(100vh-180px)]">
-                <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white font-medium transition shadow-sm">
-                    <i class="fa-solid fa-house-chimney w-5"></i>
-                    <span>หน้าหลัก (Dashboard)</span>
-                </a>
-                <a href="#" onclick="switchTab('asset')" id="nav-asset" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-list-check w-5"></i>
-                    <span>ข้อมูลอุปกรณ์ (Asset List)</span>
-                </a>
-                <a href="#" onclick="switchTab('fmea')" id="nav-fmea" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-triangle-exclamation w-5"></i>
-                    <span>FMEA & RPN Analysis</span>
-                </a>
-                <a href="#" onclick="switchTab('strategy')" id="nav-strategy" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-chess-board w-5"></i>
-                    <span>กลยุทธ์บำรุงรักษา (Strategy)</span>
-                </a>
-            </nav>
-        </div>
-
-        <!-- Sidebar Footer -->
-        <div class="p-3 bg-slate-950 border-t border-slate-800 text-xs text-slate-500 text-center">
-            <p>Powering a Reliable Tomorrow</p>
-            <p class="text-[10px] text-slate-600 mt-0.5">MEA | Reliability-Centered Maintenance</p>
-        </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden">
-        
-        <!-- Top Navbar -->
-        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-10">
-            <div class="flex items-center space-x-4 w-1/3">
-                <div class="relative w-full max-w-md">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
-                    </span>
-                    <input type="text" id="globalSearch" onkeyup="filterGlobalTable()" placeholder="ค้นหาอุปกรณ์, Failure Mode, รหัส..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-4">
-                <span class="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-                    อัปเดตล่าสุด: <span class="font-semibold text-slate-700">21 ก.ย. 2569 10:30</span>
-                </span>
-                <button onclick="location.reload()" class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="รีเฟรชข้อมูล">
-                    <i class="fa-solid fa-rotate-right"></i>
-                </button>
-                <div class="flex items-center space-x-2 pl-3 border-l border-slate-200">
-                    <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow">
-                        A
-                    </div>
-                    <span class="text-sm font-medium text-slate-700">Admin</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- Dynamic Content Body -->
-        <main class="flex-1 overflow-y-auto p-6 bg-slate-100 space-y-6">
-
-            <!-- TAB 1: DASHBOARD -->
-            <div id="tab-dashboard" class="space-y-6">
-                <!-- Banner Top -->
-                <div class="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-6 rounded-2xl shadow-lg flex justify-between items-center relative overflow-hidden">
-                    <div class="relative z-10">
-                        <h2 class="text-2xl font-bold tracking-tight">RCM Engineering System</h2>
-                        <p class="text-blue-200 text-sm mt-1">ระบบการบำรุงรักษาเชิงความเชื่อได้ สำหรับสถานีไฟฟ้า</p>
-                        <p class="text-xs italic text-blue-300 mt-3 bg-blue-800/50 inline-block px-3 py-1 rounded-md border border-blue-600/30">
-                            “บำรุงรักษาวันนี้ เพื่อความมั่นคงของระบบไฟฟ้าในวันหน้า” — Reliability Today, Sustainable Tomorrow
-                        </p>
-                    </div>
-                    <div class="hidden md:block text-blue-400/20 text-8xl absolute right-6 -bottom-4">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                </div>
-
-                <!-- KPI Cards Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <!-- Total -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">อุปกรณ์ทั้งหมด</p>
-                            <h3 class="text-3xl font-extrabold text-slate-900 mt-1" id="kpi-total">222</h3>
-                            <p class="text-xs text-slate-500 mt-1">รายการวิเคราะห์ FMEA</p>
-                        </div>
-                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl shadow-inner">
-                            <i class="fa-solid fa-cubes"></i>
-                        </div>
-                    </div>
-                    <!-- Good -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-semibold text-emerald-500 uppercase tracking-wider">ปกติ (Good)</p>
-                            <h3 class="text-3xl font-extrabold text-emerald-600 mt-1" id="kpi-good">142</h3>
-                            <p class="text-xs text-emerald-600/80 mt-1">63.9% ของระบบ</p>
-                        </div>
-                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl shadow-inner">
-                            <i class="fa-solid fa-circle-check"></i>
-                        </div>
-                    </div>
-                    <!-- Watch -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-semibold text-amber-500 uppercase tracking-wider">เฝ้าระวัง (Watch)</p>
-                            <h3 class="text-3xl font-extrabold text-amber-500 mt-1" id="kpi-watch">53</h3>
-                            <p class="text-xs text-amber-600/80 mt-1">23.9% ของระบบ</p>
-                        </div>
-                        <div class="w-12 h-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center text-xl shadow-inner">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-                    </div>
-                    <!-- Critical -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-semibold text-rose-500 uppercase tracking-wider">วิกฤต (Critical)</p>
-                            <h3 class="text-3xl font-extrabold text-rose-600 mt-1" id="kpi-critical">27</h3>
-                            <p class="text-xs text-rose-600/80 mt-1">12.2% ของระบบ</p>
-                        </div>
-                        <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl shadow-inner">
-                            <i class="fa-solid fa-circle-exclamation"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Chart 1: Status Proportion -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center justify-between">
-                            <span>สัดส่วนสถานะอุปกรณ์ตามความเสี่ยง</span>
-                            <i class="fa-solid fa-chart-pie text-slate-400 text-sm"></i>
-                        </h3>
-                        <div class="h-64 flex justify-center">
-                            <canvas id="statusPieChart"></canvas>
-                        </div>
-                    </div>
-                    <!-- Chart 2: Maintenance Strategy Summary -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center justify-between">
-                            <span>สรุปกลยุทธ์การบำรุงรักษา (Maintenance Strategy)</span>
-                            <i class="fa-solid fa-chart-pie text-slate-400 text-sm"></i>
-                        </h3>
-                        <div class="h-64 flex justify-center">
-                            <canvas id="strategyPieChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Summary Table Preview on Dashboard -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-base font-bold text-slate-800">รายการวิเคราะห์ความเสี่ยง FMEA & RPN (ตัวอย่าง)</h3>
-                        <button onclick="switchTab('fmea')" class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition">ดูทั้งหมด <i class="fa-solid fa-arrow-right ml-1"></i></button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-slate-600">
-                            <thead class="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
-                                <tr>
-                                    <th class="p-3">รหัสอุปกรณ์</th>
-                                    <th class="p-3">Failure Code & Failure Mode</th>
-                                    <th class="p-3">Failure Cause</th>
-                                    <th class="p-3 text-center">S</th>
-                                    <th class="p-3 text-center">O</th>
-                                    <th class="p-3 text-center">D</th>
-                                    <th class="p-3 text-center">RPN</th>
-                                    <th class="p-3 text-center">สถานะความเสี่ยง</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100" id="dashTableBody">
-                                <!-- Populated by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 2: ASSET LIST -->
-            <div id="tab-asset" class="space-y-6 hidden">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-800">จัดการข้อมูลอุปกรณ์ (Asset List)</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">รายการอุปกรณ์สถานีไฟฟ้าพร้อมสถานะและค่า RPN</p>
-                    </div>
-                    <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-md flex items-center space-x-2">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>เพิ่มอุปกรณ์</span>
-                    </button>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
-                        <div class="flex items-center space-x-3 w-1/2">
-                            <input type="text" id="assetSearch" onkeyup="renderAssetTable()" placeholder="ค้นหาชื่ออุปกรณ์, รหัส..." class="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div class="text-xs text-slate-500">
-                            แสดงผลทั้งหมด <span id="assetCount" class="font-bold text-slate-700">0</span> รายการ
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-slate-600">
-                            <thead class="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
-                                <tr>
-                                    <th class="p-3.5">รหัสอุปกรณ์</th>
-                                    <th class="p-3.5">ชื่ออุปกรณ์ / Failure Mode</th>
-                                    <th class="p-3.5">สาเหตุความเสียหาย</th>
-                                    <th class="p-3.5 text-center">RPN</th>
-                                    <th class="p-3.5 text-center">สถานะ</th>
-                                    <th class="p-3.5 text-center">การจัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100" id="assetTableBody">
-                                <!-- Populated by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3: FMEA & RPN -->
-            <div id="tab-fmea" class="space-y-6 hidden">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-800">FMEA & RPN Analysis</h2>
-                            <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์โหมดความเสียหาย ผลกระทบ และประเมินค่าความเสี่ยง RPN</p>
-                        </div>
-                        <div class="flex space-x-2">
-                            <select id="fmeaFilterFlag" onchange="renderFmeaTable()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">ทุกระดับความเสี่ยง</option>
-                                <option value="วิกฤต">วิกฤต (Critical)</option>
-                                <option value="เฝ้าระวัง">เฝ้าระวัง (Watch)</option>
-                                <option value="ปานกลาง/ต่ำ">ปานกลาง/ต่ำ (Good)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-slate-600">
-                            <thead class="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
-                                <tr>
-                                    <th class="p-3.5">Component</th>
-                                    <th class="p-3.5">Failure Code & Mode</th>
-                                    <th class="p-3.5">Failure Cause</th>
-                                    <th class="p-3.5 text-center">S</th>
-                                    <th class="p-3.5 text-center">O</th>
-                                    <th class="p-3.5 text-center">D</th>
-                                    <th class="p-3.5 text-center">RPN</th>
-                                    <th class="p-3.5 text-center">ระดับความเสี่ยง</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100" id="fmeaTableBody">
-                                <!-- Populated by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 4: STRATEGY -->
-            <div id="tab-strategy" class="space-y-6 hidden">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="mb-4">
-                        <h2 class="text-xl font-bold text-slate-800">Decision Logic Tree & Maintenance Strategy</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">แผนกลยุทธ์การบำรุงรักษาแนะนำตามหลัก RCM Decision Tree</p>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-slate-600">
-                            <thead class="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
-                                <tr>
-                                    <th class="p-3.5">Component</th>
-                                    <th class="p-3.5 text-center">Severity</th>
-                                    <th class="p-3.5 text-center">Occurrence</th>
-                                    <th class="p-3.5 text-center">Detection</th>
-                                    <th class="p-3.5 text-center">RPN</th>
-                                    <th class="p-3.5">ประเภทผลกระทบ</th>
-                                    <th class="p-3.5 font-bold text-blue-600">กลยุทธ์บำรุงรักษาที่แนะนำ</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100" id="strategyTableBody">
-                                <!-- Populated by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-        </main>
+  <section id="dashboard" class="module active">
+    <div class="hero"><div><h1>RCM Engineering System</h1><p>ระบบวิเคราะห์ความน่าเชื่อถือและจัดลำดับงานบำรุงรักษาสำหรับสถานีไฟฟ้า</p></div><div class="updated">ฐานข้อมูล FMEA 222 รายการ</div></div>
+    <div class="kpis">
+      <div class="kpi"><div class="bubble b-blue">▥</div><div><div class="label">รายการทั้งหมด</div><div class="num" id="kTotal">0</div><div class="sub">Failure Modes</div></div></div>
+      <div class="kpi"><div class="bubble b-green">✓</div><div><div class="label">ปกติ / ต่ำ</div><div class="num" id="kNormal">0</div><div class="sub" id="pNormal"></div></div></div>
+      <div class="kpi"><div class="bubble b-yellow">!</div><div><div class="label">เฝ้าระวัง</div><div class="num" id="kWatch">0</div><div class="sub" id="pWatch"></div></div></div>
+      <div class="kpi"><div class="bubble b-red">!</div><div><div class="label">วิกฤต</div><div class="num" id="kCritical">0</div><div class="sub" id="pCritical"></div></div></div>
+      <div class="kpi"><div class="bubble b-gray">⌁</div><div><div class="label">Health Index</div><div class="num" style="font-size:19px">ยังไม่มีคะแนน</div><div class="sub">โครงสร้าง HI มีแล้ว แต่ช่องคะแนนยังว่าง</div></div></div>
     </div>
-
-    <!-- Modal for Add/Edit Asset -->
-    <div id="assetModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-200">
-            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
-                <h3 id="modalTitle" class="font-bold text-base">เพิ่มรายการอุปกรณ์ใหม่</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="p-6 space-y-4">
-                <input type="hidden" id="editIndex" value="-1">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">รหัสอุปกรณ์ (Component / ID)</label>
-                    <input type="text" id="modalComponent" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น TR-006">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Failure Code & Mode</label>
-                    <input type="text" id="modalMode" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น T006 Bushing ชำรุด">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">สาเหตุความเสียหาย (Failure Cause)</label>
-                    <input type="text" id="modalCause" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น ความร้อนสะสม, แรงดันเกิน">
-                </div>
-                <div class="grid grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Severity (S)</label>
-                        <input type="number" id="modalS" min="1" max="10" value="3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Occurrence (O)</label>
-                        <input type="number" id="modalO" min="1" max="10" value="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Detection (D)</label>
-                        <input type="number" id="modalD" min="1" max="10" value="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                </div>
-            </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end space-x-3">
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-medium rounded-lg transition">ยกเลิก</button>
-                <button onclick="saveAsset()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-md">บันทึกข้อมูล</button>
-            </div>
-        </div>
+    <div class="grid3">
+      <div class="card"><div class="card-title">สัดส่วนระดับความสำคัญ <span>›</span></div><div class="chartbox"><canvas id="statusChart"></canvas></div></div>
+      <div class="card"><div class="card-title">Top 5 RPN <span>›</span></div><div class="chartbox"><canvas id="rpnChart"></canvas></div></div>
+      <div class="card"><div class="card-title">สรุปกลยุทธ์บำรุงรักษา <span>›</span></div><div class="chartbox"><canvas id="strategyChart"></canvas></div></div>
     </div>
+    <div class="card table-card">
+      <div class="table-head"><div class="table-title">รายการ FMEA / Asset Failure List</div><div class="tools"><input id="tableSearch" placeholder="ค้นหา..." oninput="applyFilters()"><select id="statusFilter" onchange="applyFilters()"><option value="">ทุกสถานะ</option><option value="Normal">ปกติ</option><option value="Watch">เฝ้าระวัง</option><option value="Critical">วิกฤต</option></select><button class="btn btn-primary" onclick="exportCSV()">ส่งออก CSV</button></div></div>
+      <div class="table-wrap"><table><thead><tr><th>รหัส</th><th>Component</th><th>Failure Mode</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>สถานะ</th><th>กลยุทธ์</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
+      <div class="pager"><span id="pageInfo"></span><div><button onclick="pageMove(-1)">ก่อนหน้า</button> <button onclick="pageMove(1)">ถัดไป</button></div></div>
+    </div>
+  </section>
 
-    <!-- JavaScript Data and Logic -->
-    <script>
-        // Real Data extracted from RCM 9-9.xlsx
-        let fmeaData = [
-            { component: "TR_Counter L/A", mode: "T001 Counter Lightning Arrester ชำรุด", cause: "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", s: 2, o: 2, d: 2, rpn: 8, flag: "ปานกลาง/ต่ำ", category: "Economic-minor", strategy: "Run-to-failure (CM)" },
-            { component: "TR_OLevelGauge", mode: "T002 Oil level gauge ชำรุด", cause: "โครงแตก, กลไกชำรุด", s: 3, o: 2, d: 1, rpn: 6, flag: "ปานกลาง/ต่ำ", category: "Economic-low", strategy: "Condition-based (PdM) หรือ PM ตามรอบ" },
-            { component: "TR_OtempGauge", mode: "T003 Oil temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", s: 3, o: 2, d: 1, rpn: 6, flag: "ปานกลาง/ต่ำ", category: "Economic-low", strategy: "Condition-based (PdM) หรือ PM ตามรอบ" },
-            { component: "TR_Sgel/ABreather", mode: "T004 Silicagel เปลี่ยนสี / Air Breather ชำรุด", cause: "Silicagel เสื่อมสภาพ, การอุดตัน / ฝุ่นละออง", s: 2, o: 3, d: 2, rpn: 12, flag: "ปานกลาง/ต่ำ", category: "Economic-minor", strategy: "Run-to-failure (CM)" },
-            { component: "TR_WTempGauge", mode: "T005 Winding temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", s: 3, o: 2, d: 1, rpn: 6, flag: "ปานกลาง/ต่ำ", category: "Economic-low", strategy: "Condition-based (PdM) หรือ PM ตามรอบ" },
-            { component: "CB-014 Main Breaker", mode: "CB014 Mechanism failure สปริงล้า", cause: "ใช้งานต่อเนื่องนาน, สปริงเสื่อมคุณภาพ", s: 8, o: 6, d: 4, rpn: 192, flag: "วิกฤต", category: "Safety / Operational", strategy: "Predictive / CBM (PdM)" },
-            { component: "DS-007 Disconnecting Switch", mode: "DS007 Contact overheat ความต้านทานสูง", cause: "หน้าสัมผัสหลวม, คราบออกไซด์สะสม", s: 7, o: 5, d: 4, rpn: 140, flag: "เฝ้าระวัง", category: "Operational", strategy: "Condition-based (PdM)" },
-            { component: "CT-003 Current Transformer", mode: "CT003 Insulation breakdown น้ำมันรั่วซึม", cause: "ปะเก็นเสื่อมสภาพ, ความร้อนสูง", s: 7, o: 4, d: 5, rpn: 140, flag: "เฝ้าระวัง", category: "Operational", strategy: "Preventive Maintenance (PM)" },
-            { component: "LA-011 Lightning Arrester", mode: "LA011 Surge Counter เสียหาย", cause: "กระแสฟ้าผ่ารุนแรงเกินพิกัด", s: 6, o: 3, d: 3, rpn: 54, flag: "ปานกลาง/ต่ำ", category: "Economic", strategy: "Run-to-failure (CM)" }
-        ];
+  <section id="fmea" class="module"><div class="section-card"><h2>FMEA & RPN Assessment</h2><p>แก้ไขคะแนน S / O / D ได้ทันที ระบบจะคำนวณ RPN และสถานะใหม่อัตโนมัติ</p><div class="card table-card" style="box-shadow:none"><div class="table-head"><div class="table-title">FMEA Master — 222 รายการ</div><div class="tools"><input id="fmeaSearch" placeholder="ค้นหา..." oninput="renderFmea()"></div></div><div class="table-wrap" style="max-height:650px"><table><thead><tr><th>รหัส</th><th>Component</th><th>Failure Mode</th><th>Failure Cause</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>Priority</th></tr></thead><tbody id="fmeaBody"></tbody></table></div></div></div></section>
 
-        // Additional dummy padding to match 222 items count nicely for realistic UI demo
-        for(let i=10; i<=222; i++) {
-            let rpnVal = Math.floor(Math.random() * 250) + 5;
-            let flagVal = rpnVal > 150 ? "วิกฤต" : (rpnVal > 80 ? "เฝ้าระวัง" : "ปานกลาง/ต่ำ");
-            fmeaData.push({
-                component: `TR-0${i}`,
-                mode: `Failure Mode T0${i} ระบบตรวจวัดความผิดปกติ`,
-                cause: `เสื่อมสภาพตามอายุการใช้งาน, สภาพแวดล้อม`,
-                s: Math.floor(Math.random() * 5) + 2,
-                o: Math.floor(Math.random() * 5) + 1,
-                d: Math.floor(Math.random() * 4) + 1,
-                rpn: rpnVal,
-                flag: flagVal,
-                category: rpnVal > 150 ? "Critical Safety" : "Economic",
-                strategy: rpnVal > 150 ? "Predictive / CBM (PdM)" : "Preventive Maintenance (PM)"
-            });
-        }
+  <section id="hi" class="module"><div class="section-card"><h2>Health Index (HI)</h2><p>อ้างอิงโครงสร้างจากชีต “ตารางโครงสร้าง HI” ในไฟล์ที่ให้มา</p><div class="empty-hi"><b>ยังไม่มีข้อมูลคะแนน HI ในไฟล์ต้นทาง</b><br>คอลัมน์ Si, Smax และ Wi ยังไม่ได้กรอก จึงไม่สร้างค่า HI สมมติขึ้นมา<br><br><button class="btn btn-primary" onclick="alert('สามารถนำเข้าคะแนน HI เมื่อมีข้อมูล Si / Smax / Wi ได้')">เตรียมนำเข้าคะแนน HI</button></div></div></section>
 
-        // Tab Switching Logic
-        function switchTab(tabId) {
-            ['dashboard', 'asset', 'fmea', 'strategy'].forEach(t => {
-                document.getElementById(`tab-${t}`).classList.add('hidden');
-                document.getElementById(`nav-${t}`).classList.remove('bg-blue-600', 'text-white', 'font-medium', 'shadow-sm');
-                document.getElementById(`nav-${t}`).classList.add('hover:bg-slate-800', 'hover:text-white');
-            });
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            document.getElementById(`nav-${tabId}`).classList.add('bg-blue-600', 'text-white', 'font-medium', 'shadow-sm');
-            document.getElementById(`nav-${tabId}`).classList.remove('hover:bg-slate-800', 'hover:text-white');
-        }
+  <section id="strategy" class="module"><div class="section-card"><h2>Maintenance Strategy</h2><p>ผลจาก Decision Logic Tree ในไฟล์ต้นทาง</p><div class="info-grid" id="strategyCards"></div></div></section>
 
-        // Render Dash Table
-        function renderDashTable() {
-            const tbody = document.getElementById('dashTableBody');
-            tbody.innerHTML = '';
-            fmeaData.slice(0, 5).forEach(item => {
-                let badgeColor = item.flag === 'วิกฤต' ? 'bg-rose-50 text-rose-600 border-rose-200' : (item.flag === 'เฝ้าระวัง' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200');
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/80 transition">
-                        <td class="p-3 font-semibold text-slate-700">${item.component}</td>
-                        <td class="p-3">${item.mode}</td>
-                        <td class="p-3 text-slate-500">${item.cause}</td>
-                        <td class="p-3 text-center">${item.s}</td>
-                        <td class="p-3 text-center">${item.o}</td>
-                        <td class="p-3 text-center">${item.d}</td>
-                        <td class="p-3 text-center font-bold text-slate-900">${item.rpn}</td>
-                        <td class="p-3 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${badgeColor}">${item.flag}</span></td>
-                    </tr>
-                `;
-            });
-        }
+  <section id="codes" class="module"><div class="section-card"><h2>Failure Code Master</h2><p>รหัส Failure Code และ Failure Mode จากฐานข้อมูล FMEA</p><div class="card table-card" style="box-shadow:none"><div class="table-head"><div class="table-title">Failure Codes</div><div class="tools"><input id="codeSearch" placeholder="ค้นหารหัส / Failure Mode..." oninput="renderCodes()"></div></div><div class="table-wrap" style="max-height:650px"><table><thead><tr><th>Failure Code</th><th>Component</th><th>Failure Mode</th><th>Failure Cause</th></tr></thead><tbody id="codeBody"></tbody></table></div></div></div></section>
 
-        // Render Asset Table
-        function renderAssetTable() {
-            const search = document.getElementById('assetSearch').value.toLowerCase();
-            const tbody = document.getElementById('assetTableBody');
-            tbody.innerHTML = '';
-            let filtered = fmeaData.filter(i => i.component.toLowerCase().includes(search) || i.mode.toLowerCase().includes(search));
-            document.getElementById('assetCount').innerText = filtered.length;
+  <section id="import" class="module"><div class="section-card"><h2>Data Import</h2><p>หน้าเตรียมนำเข้าข้อมูล Excel สำหรับอัปเดตฐานข้อมูลในอนาคต</p><div class="empty-hi"><b>ไฟล์ที่ใช้สร้างเวอร์ชันนี้</b><br>RCM 9-9(1).xlsx<br><br><input type="file" accept=".xlsx,.xls" onchange="alert('เลือกไฟล์แล้ว: '+this.files[0]?.name+'\\nเวอร์ชัน HTML นี้ยังไม่เขียนทับฐานข้อมูลต้นฉบับ')"></div></div></section>
+</main>
+</div>
 
-            filtered.forEach((item, idx) => {
-                let badgeColor = item.flag === 'วิกฤต' ? 'bg-rose-50 text-rose-600 border-rose-200' : (item.flag === 'เฝ้าระวัง' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200');
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/80 transition">
-                        <td class="p-3.5 font-semibold text-slate-700">${item.component}</td>
-                        <td class="p-3.5">${item.mode}</td>
-                        <td class="p-3.5 text-slate-500">${item.cause}</td>
-                        <td class="p-3.5 text-center font-bold text-slate-900">${item.rpn}</td>
-                        <td class="p-3.5 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${badgeColor}">${item.flag}</span></td>
-                        <td class="p-3.5 text-center space-x-2">
-                            <button onclick="editAsset(${idx})" class="text-blue-600 hover:text-blue-800 transition" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteAsset(${idx})" class="text-rose-500 hover:text-rose-700 transition" title="ลบ"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
+<div class="modalbg" id="modalbg" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modaltop"><h2 id="mTitle">รายละเอียด</h2><button class="x" onclick="closeModal()">×</button></div><div class="detailgrid" id="mGrid"></div></div></div>
 
-        // Render FMEA Table
-        function renderFmeaTable() {
-            const filterFlag = document.getElementById('fmeaFilterFlag').value;
-            const tbody = document.getElementById('fmeaTableBody');
-            tbody.innerHTML = '';
-            let filtered = fmeaData.filter(i => filterFlag === "" || i.flag === filterFlag);
+<script>
+let records = [{"id": 1, "component": "TR_Counter L/A", "code": "T001", "desc": "Counter Lightning Arrester ชำรุด", "cause": "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", "s": 2, "o": 2, "d": 2, "rpn": 8, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"id": 2, "component": "TR_OLevelGauge", "code": "T002", "desc": "Oil level gauge ชำรุด", "cause": "โครงแตก, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 3, "component": "TR_OtempGauge", "code": "T003", "desc": "Oil temp ชำรุด", "cause": "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 4, "component": "TR_Sgel/ABreather", "code": "T004", "desc": "Silicagel เปลี่ยนสี / Air Breather ชำรุด", "cause": "Silicagel เสื่อมสภาพ, การอุดตัน / ฝุ่นละออง", "s": 2, "o": 3, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"id": 5, "component": "TR_WTempGauge", "code": "T005", "desc": "Winding temp ชำรุด", "cause": "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 6, "component": "TR_TOP", "code": "T006", "desc": "น้ำมันรั่วซึมด้านบนหม้อแปลง", "cause": "ซีลเสื่อมสภาพ", "s": 3, "o": 3, "d": 2, "rpn": 18, "status": "Normal", "note": "", "category": "Operational-moderate (เกิดบ่อย)", "strategy": "Time-based (PM)"}, {"id": 7, "component": "TR_Bushing", "code": "T007", "desc": "น้ำมันรั่วซึมที่ Bushing หม้อแปลง", "cause": "ซีลเสื่อมสภาพ, แตกหัก, ติดตั้งไม่ถูกต้องตามมาตราฐาน, การเสียดสีหรือความเสียหายจากการเคลื่อนที่", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 8, "component": "TR_CableBox", "code": "T008", "desc": "น้ำมันรั่วซึมที่ Cable box", "cause": "ซีลเสื่อมสภาพ, ติดตั้งไม่ถูกต้องตามมาตราฐาน, ความร้อนสูงเกินไป", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 9, "component": "TR_Radiator", "code": "T009", "desc": "น้ำมันรั่วซึมที่ Radiator", "cause": "ซีลเสื่อมสภาพ, ติดตั้งไม่ถูกต้องตามมาตราฐาน, การเสียดสีหรือแรงดันภายในสูง, การเสื่อมสภาพจากการสะสมของสิ่งสกปรก", "s": 3, "o": 3, "d": 2, "rpn": 18, "status": "Normal", "note": "", "category": "Operational-moderate (เกิดบ่อย)", "strategy": "Time-based (PM)"}, {"id": 10, "component": "TR_MainTank", "code": "T012", "desc": "น้ำมันหม้อแปลงต่ำ", "cause": "การทำงานผิดปกติของระบบระบายความร้อน, ซีลเสื่อมสภาพ", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 11, "component": "TR_MainTank", "code": "T015", "desc": "หม้อแปลงชำรุด", "cause": "การรั่วซึมของน้ำมัน, การเกิดไฟฟ้าลัดวงจร, การเสื่อมสภาพจากอายุการใช้งาน, ความร้อนสะสมเกินไป", "s": 5, "o": 1, "d": 1, "rpn": 5, "status": "Critical", "note": "", "category": "Safety-critical", "strategy": "Redesign บังคับ / Scheduled Discard"}, {"id": 12, "component": "TR_Trip", "code": "T016", "desc": "หม้อแปลง Trip", "cause": "การทำงานผิดพลาดของรีเลย์", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 13, "component": "TR_FAN", "code": "T018", "desc": "เปลี่ยนพัดลมหม้อแปลง", "cause": "สึกหรอจากการใช้งานนาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 14, "component": "TR_FAN", "code": "T019", "desc": "พัดลมหม้อแปลงถอดไปซ่อม", "cause": "สึกหรอจากการใช้งานนาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 15, "component": "TR_FAN", "code": "T020", "desc": "พัดลมหม้อแปลงไม่ทำงาน", "cause": "การเสียหายของมอเตอร์", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 16, "component": "TR_Coil", "code": "T023", "desc": "ขดลวดหม้อแปลงชำรุด", "cause": "การโอเวอร์โหลด, ความผิดปกติของแรงดัน, การผลิตที่ไม่ดี, การเกิดความชื้น", "s": 5, "o": 1, "d": 4, "rpn": 20, "status": "Critical", "note": "", "category": "Safety-critical", "strategy": "Redesign บังคับ / Scheduled Discard"}, {"id": 17, "component": "TR_Core", "code": "T024", "desc": "แกนเหล็กหม้อแปลงชำรุด", "cause": "การออกแบบที่ผิดพลาด, ความเครียดจากการเปลี่ยนแปลงกระแสไฟฟ้า", "s": 4, "o": 1, "d": 4, "rpn": 16, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 18, "component": "TR_HVBushing", "code": "T025", "desc": "TR_HVBushing หม้อแปลงชำรุด", "cause": "เสื่อมสภาพ", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 19, "component": "TR_MVBushing", "code": "T026", "desc": "TR_MVBushing หม้อแปลงชำรุด", "cause": "เสื่อมสภาพ", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 20, "component": "TR_OFFLTAP", "code": "T027", "desc": "OFF LODE TAP หม้อแปลงชำรุด", "cause": "เสื่อมสภาพ", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 21, "component": "TR_BuchRelay", "code": "T028", "desc": "Buchholz relay ชำรุด", "cause": "ลัดวงจรหรือความผิดพลาดภายใน, การติดตั้งไม่ถูกต้อง, เสื่อมสภาพจากอายุใช้งาน, อุณหภูมิสูงเกิน, กลไกติดขัด", "s": 4, "o": 1, "d": 2, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 22, "component": "TR_PresRelief", "code": "T029", "desc": "Pressure relief ชำรุด", "cause": "การติดตั้งไม่ถูกต้อง, เสื่อมสภาพจากอายุใช้งาน, กลไกติดขัด, แรงดันเกินขีดจำกัดบ่อยเกิน", "s": 4, "o": 1, "d": 2, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 23, "component": "TR_Control_desk", "code": "T101", "desc": "Control desk tap อ่านไม่ตรง", "cause": "เสื่อมสภาพจากอายุใช้งาน, ความชื้นหรือสิ่งสกปรก", "s": 2, "o": 2, "d": 1, "rpn": 4, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"id": 24, "component": "TR_Control_Lampdesk", "code": "T102", "desc": "Control desk หลอดขาด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 2, "o": 2, "d": 1, "rpn": 4, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"id": 25, "component": "TR_FanControl", "code": "T103", "desc": "Control พัดลมชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 2, "o": 2, "d": 1, "rpn": 4, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"id": 26, "component": "TR_Relay", "code": "T104", "desc": "Differential relay ชำรุด", "cause": "การทำงานผิดพลาดในระบบควบคุม, Current Transformer Malfunction, การตั้งค่าผิด", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 27, "component": "TR_DifRelay", "code": "T105", "desc": "Differential relay เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 28, "component": "TR_Relay", "code": "T106", "desc": "Tripping relay ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 29, "component": "TR_TrippingRelay", "code": "T107", "desc": "Tripping relay เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 30, "component": "TR_CountTap", "code": "T206", "desc": "Counter Tap ไม่ทำงาน", "cause": "กลไกติดขัด, ชุดเฟืองภายในชำรุด, Lubrication, เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 31, "component": "TR_Microlimit", "code": "T208", "desc": "Micro sw. Lower & upper limit ค้าง", "cause": "กลไกติดขัด", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 32, "component": "TR_OLTC Tap", "code": "T209", "desc": "OLTC เปลี่ยน Tap ทางไฟฟ้าไม่ได้", "cause": "OLTC เปลี่ยน Tap ทางไฟฟ้า ไม่ทำงานจริง", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 33, "component": "TR_OLTC Tap", "code": "T210", "desc": "น้ำมันรั่วซึมที่ฝาบ่อ OLTC", "cause": "ซีลเสื่อมสภาพ", "s": 3, "o": 3, "d": 2, "rpn": 18, "status": "Normal", "note": "", "category": "Operational-moderate (เกิดบ่อย)", "strategy": "Time-based (PM)"}, {"id": 34, "component": "TR_OLTC Tap", "code": "T211", "desc": "เปลี่ยน Tap แล้วมีเสียงดัง", "cause": "เปลี่ยน Tap แล้วมีเสียงดังจากกลไก", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 35, "component": "TR_OLTC Tap", "code": "T212", "desc": "ระดับน้ำมันต่ำที่ OLTC", "cause": "ระดับน้ำมันต่ำที่ OLTC ชีลเสื่อมสภาพ", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 36, "component": "TR_OLTC_ProRelay", "code": "T215", "desc": "Tap protective relay ชำรุด", "cause": "กลไกเสื่อมสภาพ, ความชื้น ฝุ่น การกัดกร่อน, มีการต่อสายผิด หรือมี short ที่ terminal", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 37, "component": "TR_OLTC_MainContact", "code": "T216", "desc": "Main contact ชำรุด", "cause": "การอาร์ก ระหว่างเปลี่ยน TAP ที่บ่อยครั้ง, อุณหภูมิสูงเกินจากกระแสเกิน, น้ำมัน OLTC เสื่อมสภาพ, กลไกบังคับ contact ทำงานผิดพลาด", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 38, "component": "TR_OLTC_TransitContact", "code": "T217", "desc": "Transition contact ชำรุด", "cause": "การอาร์ก (Arc) ซ้ำซ้อนขณะสลับ Tap, น้ำมัน OLTC เสื่อมสภาพ, สปริง/กลไกกด contact เสียหาย, ความต้านทาน contact เพิ่มขึ้น", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 39, "component": "TR_OLTC_Gear", "code": "T218", "desc": "Gear unit ชำรุด", "cause": "สึกหรอ", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 40, "component": "TR_OLTC_Access", "code": "T219", "desc": "OLTC Accessories ชำรุด", "cause": "ชำรุดจาก Accessories", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 41, "component": "TR_OLTC_MotorControlBoard", "code": "T220", "desc": "Motor drive control board ชำรุด", "cause": "แรงดันไฟฟ้าผิดปกติ, ความชื้นและฝุ่นละอองในกล่องควบคุม, เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 42, "component": "TR_OilFilter", "code": "T301", "desc": "Counter oil filter ทำงานผิดปกติ", "cause": "Sensor/Trigger  เสียหาย, การรบกวนจากสัญญาณไฟฟ้า (Electrical Noise)", "s": 2, "o": 2, "d": 2, "rpn": 8, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"id": 43, "component": "TR_OilFilter", "code": "T302", "desc": "Motor oil filter หมุนกลับทาง", "cause": "Motor oil filter หมุนกลับทาง จาก ต่อท่อผิดด้าน (Inlet/Outlet สลับ)", "s": 2, "o": 2, "d": 2, "rpn": 8, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"id": 44, "component": "TR_OilFilter", "code": "T303", "desc": "Oil filter unit มีน้ำมันรั่วซึม", "cause": "ซีลเสื่อมสภาพ", "s": 3, "o": 3, "d": 2, "rpn": 18, "status": "Normal", "note": "", "category": "Operational-moderate (เกิดบ่อย)", "strategy": "Time-based (PM)"}, {"id": 45, "component": "TR_OilFilter", "code": "T304", "desc": "Oil filter ไม่ทำงานหลังจากเปลี่ยน Tap", "cause": "ระบบปั๊มน้ำมันของ OLTC หยุดทำงานหรือเดินผิดทาง", "s": 2, "o": 2, "d": 2, "rpn": 8, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"id": 46, "component": "TR_OilFilter", "code": "T305", "desc": "Pressure gauge oil filter เสีย", "cause": "แรงดันน้ำมันเกินพิกัด (Overpressure), น้ำมันหรือสิ่งสกปรกเข้าไปในเกจ, เสื่อมสภาพจากอายุใช้งาน", "s": 2, "o": 2, "d": 2, "rpn": 8, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"id": 47, "component": "HV_ClosingCoil", "code": "H001", "desc": "Closing coil ชำรุด, Mechanism CB ขัดข้อง", "cause": "กลไกติดขัด, เสื่อมสภาพจากอายุใช้งาน, Misoperation", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 48, "component": "HV_Mechnism_CB", "code": "H002", "desc": "Mechanism CB ขัดข้อง,", "cause": "ขาดการบำรุงรักษา, Spring เสื่อมหรือหัก, Misalignment ของกลไก", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 49, "component": "HV_PumpMotor_CB", "code": "H003", "desc": "Pump motor ของ CB ไม่ทำงาน", "cause": "ไฟไม่เข้าที่มอเตอร์, Pressure switch ชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 50, "component": "HV_PumpMotor_CB", "code": "H005", "desc": "Pump motor ของ CB ทำงานบ่อย", "cause": "ระบบรั่ว (Internal หรือ External Leak), Accumulator เสื่อมหรือแรงดันไม่พอ, Pressure switch ตั้งผิดหรือเสีย, เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 51, "component": "HV_SF6LowGas", "code": "H006", "desc": "SF6 low gas", "cause": "รั่ว (Gas Leakage), เสื่อมสภาพจากอายุใช้งาน, Gas Pressure Gauge / Sensor เสีย", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 52, "component": "HV_SF6LowGas", "code": "H007", "desc": "SF6 over gas", "cause": "อุณหภูมิสูงผิดปกติ, Internal Arc หรือ Fault ทำให้ความร้อนสูงขึ้น, เติมก๊าซตอนอุณหภูมิต่ำ แล้วเมื่ออากาศร้อนขึ้นทำให้แรงดันเกิน, เติมก๊าซเกินตอนบำรุงรักษา (Overfilling)", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 53, "component": "HV_GIS_CB", "code": "H010", "desc": "GIS ชำรุด", "cause": "การติดตั้งหรือประกอบผิดพลาด, Internal Arc / Flashover, เสื่อมสภาพจากอายุใช้งาน, Human Error จากการบำรงุรักษา", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 54, "component": "HV_GIS_CB_SW", "code": "H011", "desc": "SW ปลด / สับ ไม่ได้", "cause": "กลไกติดขัด, Charge Spring ไม่ทำงาน, Control Circuit Fault", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 55, "component": "HV_GIS_CB_Hydraulic", "code": "H012", "desc": "Earthing SW ปลด / สับ ไม่ได้", "cause": "กลไกติดขัด, Control Circuit Fault, Residual Voltage, Sensor หรือ Feedback Error", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 56, "component": "HV_GIS_CB_Hydraulic", "code": "H013", "desc": "Earthing SW ชำรุด", "cause": "กลไกติดขัด, Contact Point ชำรุด, Motorized ES ชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 57, "component": "HV_GIS_CB_Hydraulic", "code": "H014", "desc": "น้ำมัน Hydraulic รั่วซึม", "cause": "ซีลเสื่อมสภาพ, ความดันระบบสูงเกินมาตรฐาน, ท่อไฮดรอลิก (Hose/Tube) แตก, Bolt/Flange ของถังหรือชุด Actuator หลวม", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 58, "component": "HV_GIS_CB", "code": "H015", "desc": "น้ำมันรั่วซึมที่ Pole ของ CB", "cause": "ซีลเสื่อมสภาพ", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 59, "component": "HV_GIS_CB", "code": "H018", "desc": "CB Main Contact ชำรุด", "cause": "Mechanical / Electrical Life Time, แรงกด Contact ไม่เพียงพอ, High Fault Current, ความชื้นหรือฝุ่นภายใน CB, กลไกติดขัด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 60, "component": "HV_GIS_CB_ES/DS_MainContact", "code": "H019", "desc": "ES/DS Main Contact ชำรุด", "cause": "Mechanical / Electrical Life Time, แรงกด Contact ไม่เพียงพอ, High Fault Current, ความชื้นหรือฝุ่นภายใน CB, กลไกติดขัด", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 61, "component": "HV_GIS_CB_ES/DS_Mechanism", "code": "H020", "desc": "DS/ES Mechanism ชำรุด", "cause": "กลไกติดขัด", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 62, "component": "HV_GIS_CB", "code": "H021", "desc": "Trip coil ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน, ปัญหาจากการป้องกันไฟกระชาก, ความชื้นหรือสิ่งสกปรก, การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 63, "component": "HV_GIS_CB", "code": "H022", "desc": "แก๊ส SF6 รั่ว", "cause": "รั่ว (Gas Leakage)", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 64, "component": "HV_GIS_CB", "code": "H023", "desc": "แก๊ส SF6 เสื่อมสภาพ", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 65, "component": "HV_GIS_CB_SF6PressGage", "code": "H024", "desc": "SF6 Pressure gage ชำรุด", "cause": "รั่ว (Gas Leakage), การปนเปื้อนหรือฝุ่นใน Pressure Gauge, การผิดพลาดจากกระบวนการติดตั้ง, อุณหภูมิหรือการเปลี่ยนแปลงของอุณหภูมิ, การสึกหรอจากการใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 66, "component": "HV_HVSW_CTPT", "code": "H101", "desc": "SW ไม่สามารถ Control ทางไฟฟ้าได้", "cause": "Control Circuit Fault", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 67, "component": "HV_HVSW_CTPT", "code": "H102", "desc": "CT, PT ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 68, "component": "HV_HVSW_CTPT", "code": "H103", "desc": "Flexible conductor ขาดบางส่วน", "cause": "Flexible conductor ขาดบางส่วน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 69, "component": "HV_HVSW_CTPT", "code": "H104", "desc": "Jumper, sleeve ร้อนแดง", "cause": "Jumper, sleeve ร้อนเกินมาตรฐาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 70, "component": "HV_HVSW_CTPT", "code": "H105", "desc": "Motor ของ SW ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 71, "component": "HV_HVSW_CTPT", "code": "H107", "desc": "SW โก่ง ร้อนแดง", "cause": "SW โก่ง ร้อนแดง จากการเสื่อมสภาพ", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 72, "component": "HV_HVSW_CTPT", "code": "H108", "desc": "SW ปลด-สับ ยาก", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 73, "component": "HV_HVSW_CTPT", "code": "H109", "desc": "SW สับไม่สนิท", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 74, "component": "HV_HVSW_CTPT", "code": "H110", "desc": "จุดต่อ Busbar ต่างๆร้อนแดง", "cause": "Hot Spot", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 75, "component": "HV_HVSW_CTPT", "code": "H111", "desc": "มีวัสดุ/รังนกที่ SW", "cause": "มีวัสดุ/รังนก", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 76, "component": "HV_HVSW_CTPT", "code": "H112", "desc": "ลูกถ้วยชำรุด", "cause": "ความชื้น, ฝุ่น, และการกัดกร่อน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 77, "component": "HV_HVSW_CTPT", "code": "H113", "desc": "ลูกถ้วยมีรอยชำรุด", "cause": "ความชื้น, ฝุ่น, และการกัดกร่อน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 78, "component": "HV_HVSW_CTPT", "code": "H114", "desc": "สวิตช์ใบมีด ground ปลด / สับ ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 79, "component": "HV_HVSW_CTPT", "code": "H117", "desc": "DS/ES Mechanism ชำรุด", "cause": "กลไกติดขัด", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 80, "component": "HV_Cap", "code": "H201", "desc": "Capacitor bank ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 81, "component": "HV_Cap", "code": "H202", "desc": "อุปกรณ์ชุดปลด-สับ Capacitor bank ไม่ทำงาน", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 82, "component": "HV_ShowReset", "code": "H301", "desc": "Alarm show reset ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 83, "component": "HV_DisRelay", "code": "H305", "desc": "Distance relay ชำรุด", "cause": "การทำงานผิดพลาดในระบบควบคุม, Current Transformer Malfunction, การตั้งค่าผิด, สัญญาณผิดปกติจากระบบภายนอก", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 84, "component": "HV_Relay", "code": "H308", "desc": "Overcurrent relay ชำรุด", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 85, "component": "HV_OCRelay", "code": "H309", "desc": "Overcurrent relay เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 86, "component": "MV_Relay", "code": "M311", "desc": "ซ่อม Relay เสีย", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 87, "component": "MV_Alarm", "code": "M312", "desc": "สวิตช์ตก alarm ไม่ดัง", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 88, "component": "HV_Distance", "code": "H313", "desc": "ถอด Distance relay ไว้", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 89, "component": "HV_SW_LTO", "code": "H314", "desc": "สายส่ง SW ตก LTO ไม่ทำงาน", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 90, "component": "HV_LampDC", "code": "H315", "desc": "หลอด DC supply show reset ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 91, "component": "MV_SWGR_CB", "code": "M001", "desc": "CB ปลดไม่ได้", "cause": "กลไกติดขัด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 92, "component": "MV_SWGR_CB_PT", "code": "M002", "desc": "PT ชำรุด", "cause": "เสื่อมสภาพ", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 93, "component": "MV_SWGR_CB", "code": "M003", "desc": "GCB low gas", "cause": "การรั่วซึมของ gas", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 94, "component": "MV_SWGR_CB_VacInter", "code": "M004", "desc": "Vacuum interrupter ชำรุด", "cause": "กลไกติดขัด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 95, "component": "MV_SWGR_CB_Heater", "code": "M005", "desc": "Heater ชำรุด", "cause": "กลไกติดขัด", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 96, "component": "MV_SWGR_CB_Mechanism", "code": "M006", "desc": "Mechanism ของ CB ขัดข้อง", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 97, "component": "MV_SWGR_CB_MotorChargSpring", "code": "M007", "desc": "Motor charge spring ไม่ทำงาน/ทำงานตลอด", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 98, "component": "MV_SWGR_OCB", "code": "M008", "desc": "OCB มีน้ำมันไหลซึม", "cause": "การรั่วซึมของน้ำมัน", "s": 5, "o": 1, "d": 1, "rpn": 5, "status": "Critical", "note": "", "category": "Safety-critical", "strategy": "Redesign บังคับ / Scheduled Discard"}, {"id": 99, "component": "MV_SWGR_TR_StationService", "code": "M009", "desc": "Station service / Pad mounted TR น้ำมันรั่วซึม", "cause": "การรั่วซึมของน้ำมัน", "s": 5, "o": 1, "d": 1, "rpn": 5, "status": "Critical", "note": "", "category": "Safety-critical", "strategy": "Redesign บังคับ / Scheduled Discard"}, {"id": 100, "component": "MV_SWGR_CB", "code": "M010", "desc": "SWGR ระเบิด", "cause": "การเกิดไฟฟ้าลัดวงจร (Short Circuit)", "s": 5, "o": 1, "d": 1, "rpn": 5, "status": "Critical", "note": "", "category": "Safety-critical", "strategy": "Redesign บังคับ / Scheduled Discard"}, {"id": 101, "component": "MV_SWGR_CB", "code": "M011", "desc": "ขณะปลด lock เพื่อ isolate CB สับเข้าเอง", "cause": "กลไกติดขัด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 102, "component": "MV_SWGR_CB", "code": "M012", "desc": "ซ่อม Circuit breaker ชำรุด", "cause": "กลไกชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 103, "component": "MV_SWGR_CB", "code": "M013", "desc": "นำ CB ออกนอกตู้ไม่ได้", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 104, "component": "MV_SWGR_CB", "code": "M014", "desc": "เปลี่ยน SWGR ชำรุด", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 105, "component": "MV_SWGR_CB", "code": "M015", "desc": "แผง SWGR มีเสียงดังผิดปกติ", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 106, "component": "MV_SWGR_CB", "code": "M016", "desc": "สวิตช์ตกไม่สับ ทั้ง RR on อยู่", "cause": "กลไกชำรุด, เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 107, "component": "MV_SWGR_CB", "code": "M017", "desc": "Earthing SW ปลดไม่ได้", "cause": "กลไกชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 108, "component": "MV_SWGR_CB", "code": "M018", "desc": "Earthing SWชำรุด", "cause": "กลไกชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 109, "component": "MV_SWGR_TR_StationService", "code": "M021", "desc": "Station service transformer ชำรุด", "cause": "การเกิดไฟฟ้าลัดวงจร", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 110, "component": "MV_GIS_CB", "code": "M101", "desc": "CB ขัดข้อง ปลด-สับ ไม่ได้", "cause": "", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 111, "component": "MV_GIS_CB", "code": "M102", "desc": "GIS ชำรุด", "cause": "กลไกชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 112, "component": "MV_GIS_CB", "code": "M103", "desc": "Low gas alarm show reset ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน, การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 113, "component": "MV_GIS_CB", "code": "M104", "desc": "Motor ของ Bus isolate ชำรุด", "cause": "กลไกชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 114, "component": "MV_GIS_CB", "code": "M105", "desc": "Motor ของ Bus isolate ถอดไปซ่อมและนำเข้าใช้งาน", "cause": "", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 115, "component": "MV_GIS_CB", "code": "M106", "desc": "Bus isolate ชำรุด", "cause": "", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 116, "component": "MV_GIS_CB", "code": "M107", "desc": "SF6 over gas", "cause": "SF6 over gas", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 117, "component": "MV_GIS_CB", "code": "M108", "desc": "SF6 low gas", "cause": "SF6 low gas", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 118, "component": "MV_Cap_Bushing", "code": "M201", "desc": "Bushing capacitor มีน้ำมันรั่ว", "cause": "การรั่วซึมของน้ำมัน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 119, "component": "MV_Cap", "code": "M202", "desc": "Capacitor bank ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 120, "component": "MV_Cap_UVRelay", "code": "M203", "desc": "Capacitor bank ปลดออกอัตโนมัติเนื่องจาก", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 121, "component": "MV_Cap", "code": "M204", "desc": "เปลี่ยน Capacitor ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 122, "component": "MV_Cap", "code": "M205", "desc": "Fuse capacitor bank ขาด", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 123, "component": "MV_Cap_VacuumSw", "code": "M206", "desc": "Vacuum Sw ปลด-สับไม่ได้", "cause": "กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 124, "component": "MV_Cap", "code": "M207", "desc": "เปลี่ยน Capacitor bank แทนชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 125, "component": "MV_BTO", "code": "M302", "desc": "BTO ไม่ทำงาน", "cause": "เสื่อมสภาพจากอายุใช้งาน, การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 126, "component": "MV_BusDifRelay", "code": "M303", "desc": "Bus differential relay ชำรุด", "cause": "การทำงานผิดพลาดในระบบควบคุม, Current Transformer Malfunction, การตั้งค่าผิด, สัญญาณผิดปกติจากระบบภายนอก", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 127, "component": "MV_LBP/CBF", "code": "M304", "desc": "LBP/CBF ทำงาน", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 128, "component": "MV_Relay", "code": "M306", "desc": "Overcurrent relay ชำรุด", "cause": "Current Transformer Malfunction, การตั้งค่าผิด, สัญญาณผิดปกติจากระบบภายนอก", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 129, "component": "MV_Relay", "code": "M307", "desc": "Overcurrent relay เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 130, "component": "MV_Relay", "code": "M308", "desc": "Relay เสีย", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 131, "component": "MV_Control", "code": "M310", "desc": "ชุด Control relay OC,EF on แล้ว trip", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 132, "component": "LV_BatCharger_Trip", "code": "L001", "desc": "Breaker trip ของ AC Source", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 133, "component": "LV_BatCharger_Trip", "code": "L002", "desc": "Breaker trip ของ DC Rectifier/Load", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 134, "component": "LV_BatCharger", "code": "L003", "desc": "Charger ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 135, "component": "LV_Battery", "code": "L004", "desc": "DC Volt ต่ำ/สูงกว่ามาตรฐาน", "cause": "แรงดันไม่ได้มาตรฐาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 136, "component": "LV_Battery", "code": "L005", "desc": "ถ.พ.ต่ำ/สูง บาง cell", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 137, "component": "LV_Battery", "code": "L006", "desc": "เปลี่ยน Battery รั่วบาง cell", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 138, "component": "LV_Battery", "code": "L007", "desc": "Case ของ Battery แตกลายงา/เปลี่ยนสี", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 139, "component": "LV_Battery", "code": "L008", "desc": "ระดับน้ำกลั่น ต่ำ / สูง กว่ามาตรฐาน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 140, "component": "LV_BatCharger", "code": "L011", "desc": "DC ลงกราวน์", "cause": "DC ลงกราวน์", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 141, "component": "LV_BatCharger", "code": "L012", "desc": "Amp. Meter battery charger ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 142, "component": "LV_BatCharger", "code": "L013", "desc": "Volt. Meter battery charger ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 143, "component": "LV_Battery", "code": "L014", "desc": "Battery low capacity", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 144, "component": "LV_AC/DCBoard", "code": "L101", "desc": "AC board Breaker ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 145, "component": "LV_AC/DCBoard", "code": "L102", "desc": "DC board Breaker ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 146, "component": "LV_AC/DCBoard", "code": "L103", "desc": "Breaker ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 147, "component": "LV_AC/DCBoard", "code": "L104", "desc": "Breaker สวิทซ์ตกบ่อย", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 148, "component": "LV_AC/DCBoard", "code": "L107", "desc": "วงจร ATF ชำรุดที่ AC Panel", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 149, "component": "LV_Fprotection", "code": "L201", "desc": "Air compressor มีน้ำมันซึม", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 150, "component": "LV_Fprotection", "code": "L202", "desc": "Alarm ที่ตู้ CWS show reset ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 151, "component": "LV_Fprotection", "code": "L203", "desc": "Alarm ที่ตู้ Fire Control reset ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 152, "component": "LV_Fprotection", "code": "L204", "desc": "Nitrogen รั่ว", "cause": "Nitrogen รั่วซึม", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 153, "component": "LV_Fprotection", "code": "L205", "desc": "Air pressure ของชุด Detector ต่ำกว่ามาตรฐาน", "cause": "การทำงานผิดพลาดของอุปกรณ์", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 154, "component": "LV_Fprotection", "code": "L206", "desc": "Battery ชุดตู้ Fire control เสื่อมสภาพ", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 155, "component": "LV_Fprotection", "code": "L207", "desc": "Battery ชุดเครื่องยนต์ดับเพลิงเสื่อมสภาพ", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 156, "component": "LV_Fprotection", "code": "L208", "desc": "Priming tank มีสนิมภายในมาก", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 157, "component": "LV_Fprotection", "code": "L209", "desc": "เครื่องยนต์ดับเพลิง start ไม่ติด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 158, "component": "LV_Fprotection", "code": "L210", "desc": "น้ำไม่เข้าถัง Priming tank", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 159, "component": "LV_Fprotection", "code": "L211", "desc": "น้ำที่ Pilot line / น้ำยา Soft drops รั่ว", "cause": "รั่ว", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 160, "component": "SCADA_MMI", "code": "S001", "desc": "Measurement ที่หน้าจอ MMI ไม่เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน, การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 161, "component": "SCADA_ShowFail", "code": "S002", "desc": "Show Communication fail", "cause": "เสื่อมสภาพจากอายุใช้งาน, การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 162, "component": "SCADA_UPS", "code": "S004", "desc": "UPS / Converter / Inverter ขัดข้อง", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 163, "component": "SCADA_Measure", "code": "S005", "desc": "ค่า measurement อ่านค่าไม่ตรง", "cause": "เสื่อมสภาพจากอายุใช้งาน, อุณหภูมิหรือการเปลี่ยนแปลงของอุณหภูมิ", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 164, "component": "SCADA_MMI", "code": "S006", "desc": "ตำแหน่งอุปกรณ์ที่หน้าแผงและ MMI/SCADA ไม่ตรงกัน", "cause": "เสื่อมสภาพจากอายุใช้งาน, การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 165, "component": "SCADA_CB-EF-RR", "code": "S007", "desc": "เรียก menu control CB, EF, RR ไม่ได้", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 166, "component": "SCADA_FireAlarm", "code": "S101", "desc": "Fire Alarm Zone Show Reset ไม่ได้", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 167, "component": "SCADA_Control", "code": "S102", "desc": "ตู้ Control ที่ alarm ดังตลอด", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 168, "component": "Pole/Route บ่อพัก/Cable", "code": "UM01", "desc": "ข้อต่อสายหลวม", "cause": "การติดตั้งไม่ถูก", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 169, "component": "Pole/Route บ่อพัก/Cable", "code": "UM02", "desc": "เทอร์มิเนเตอร์ซิลิโคนคอมปาวด์รั่ว", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 170, "component": "Pole/Route บ่อพัก/Cable", "code": "UM03", "desc": "ครีบเทอร์มิเนเตอร์แตก", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 5, "o": 1, "d": 3, "rpn": 15, "status": "Critical", "note": "", "category": "Safety-critical", "strategy": "Redesign บังคับ / Scheduled Discard"}, {"id": 171, "component": "Pole/Route บ่อพัก/Cable", "code": "UM04", "desc": "เทอร์มิเนเตอร์ระเบิดชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 5, "o": 1, "d": 3, "rpn": 15, "status": "Critical", "note": "", "category": "Safety-critical", "strategy": "Redesign บังคับ / Scheduled Discard"}, {"id": 172, "component": "Pole/Route บ่อพัก/Cable", "code": "UM05", "desc": "สายกราวด์หาย", "cause": "Non Technical Loss", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 173, "component": "Pole/Route บ่อพัก/Cable", "code": "UM06", "desc": "เปลือกสายเคเบิลแตก", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 174, "component": "Pole/Route บ่อพัก/Cable", "code": "UM07", "desc": "แคมป์ยึดสายเคเบิลแตกชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 175, "component": "Pole/Route บ่อพัก/Cable", "code": "UM08", "desc": "บ่อพักท่อร้อยสายชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 176, "component": "Pole/Route บ่อพัก/Cable", "code": "UM09", "desc": "กระแสกราวด์สูงเกินปกติ", "cause": "ไม่ทราบสาเหตุ", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 177, "component": "Pole/Route บ่อพัก/Cable", "code": "UM10", "desc": "หัวต่อสายฯชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 178, "component": "Pole/Route บ่อพัก/Cable", "code": "UM11", "desc": "เทอร์มิเนเตอร์และหัวต่อสายฯมีอุณหภูมิสูง", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 179, "component": "Pole/Route บ่อพัก/Cable", "code": "UM12", "desc": "เคเบิล 230เควี น้ำมันรั่วซึม", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 180, "component": "Pole/Route บ่อพัก/Cable", "code": "UM13", "desc": "ระบบพัดลมระบายอากาศชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 181, "component": "Pole/Route บ่อพัก/Cable", "code": "UM14", "desc": "PLC ระบบอุโมงค์ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 182, "component": "Pole/Route บ่อพัก/Cable", "code": "UM15", "desc": "ปั๊มน้ำในอุโมงค์ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 183, "component": "Pole/Route บ่อพัก/Cable", "code": "UM16", "desc": "ระบบตรวจวัดอากาศในอุโมงค์ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 184, "component": "Pole/Route บ่อพัก/Cable", "code": "UM17", "desc": "ระบบน้ำเย็นอุโมงค์ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 185, "component": "Pole/Route บ่อพัก/Cable", "code": "UM18", "desc": "ระบบไฟแรงต่ำอุโมงค์ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 186, "component": "Pole/Route บ่อพัก/Cable", "code": "UM19", "desc": "เคเบิลการ์ดชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 187, "component": "Pole/Route บ่อพัก/Cable", "code": "UM20", "desc": "อุปกรณ์ป้องกันเพลิงไหม้ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 188, "component": "Pole/Route บ่อพัก/Cable", "code": "UM21", "desc": "สายไฟฟ้าใต้ดินชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 189, "component": "Pole/Route บ่อพัก/Cable", "code": "UM22", "desc": "ปลวกกัดแทะสาย", "cause": "การกัดของสัตว์หรือแมลง", "s": 3, "o": 2, "d": 3, "rpn": 18, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 190, "component": "เสา/สาย", "code": "SM01", "desc": "Crane / Back-Hoe", "cause": "รถและเครื่องจักร", "s": 5, "o": 2, "d": 1, "rpn": 10, "status": "Critical", "note": "ความเสี่ยงจากบุคคลที่ 3 (Third-party) ไม่ใช่ความล้มเหลวของอุปกรณ์ — ต้องมีมาตรการป้องกันแยกต่างหาก (safety fencing, การแจ้งเตือนก่อนขุด, ประสานผู้รับเหมา) ไม่ใช่แผนบำรุงรักษาอุปกรณ์ตามปกติ", "category": "ความเสี่ยงบุคคลที่ 3 (Third-party)", "strategy": "มาตรการป้องกันเฉพาะ (ไม่ใช่ PM อุปกรณ์)"}, {"id": 191, "component": "เสา/สาย", "code": "SM02", "desc": "ผู้รับเหมาโดนสายส่ง", "cause": "ไฟช็อคจากคนหรือสัตว์", "s": 5, "o": 2, "d": 1, "rpn": 10, "status": "Critical", "note": "ความเสี่ยงจากบุคคลที่ 3 (Third-party) ไม่ใช่ความล้มเหลวของอุปกรณ์ — ต้องมีมาตรการป้องกันแยกต่างหาก (safety fencing, การแจ้งเตือนก่อนขุด, ประสานผู้รับเหมา) ไม่ใช่แผนบำรุงรักษาอุปกรณ์ตามปกติ", "category": "ความเสี่ยงบุคคลที่ 3 (Third-party)", "strategy": "มาตรการป้องกันเฉพาะ (ไม่ใช่ PM อุปกรณ์)"}, {"id": 192, "component": "เสา/สาย", "code": "SM03", "desc": "บุคคลโดนสายส่ง", "cause": "ไฟช็อคจากคนหรือสัตว์", "s": 5, "o": 2, "d": 1, "rpn": 10, "status": "Critical", "note": "ความเสี่ยงจากบุคคลที่ 3 (Third-party) ไม่ใช่ความล้มเหลวของอุปกรณ์ — ต้องมีมาตรการป้องกันแยกต่างหาก (safety fencing, การแจ้งเตือนก่อนขุด, ประสานผู้รับเหมา) ไม่ใช่แผนบำรุงรักษาอุปกรณ์ตามปกติ", "category": "ความเสี่ยงบุคคลที่ 3 (Third-party)", "strategy": "มาตรการป้องกันเฉพาะ (ไม่ใช่ PM อุปกรณ์)"}, {"id": 193, "component": "เสา/สาย", "code": "SM05", "desc": "งู/นก/สัตว์", "cause": "ไฟช็อคจากคนหรือสัตว์", "s": 4, "o": 3, "d": 1, "rpn": 12, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 194, "component": "เสา/สาย", "code": "SM06", "desc": "ป้ายโฆษณา/สังกะสี", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 195, "component": "เสา/สาย", "code": "SM07", "desc": "ว่าว/ลูกโป่ง/เศษผ้า", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 196, "component": "เสา/สาย", "code": "SM08", "desc": "Bond wire/ OHGW", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 197, "component": "เสา/สาย", "code": "SM09", "desc": "ต้นไม้/เสา TV", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 198, "component": "เสา/สาย", "code": "SM10", "desc": "เศษวัสดุ", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 199, "component": "เสา/สาย", "code": "SM11", "desc": "Flash Over/Leak", "cause": "Flash Over/Leak", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 200, "component": "เสา/สาย", "code": "SM12", "desc": "ลูกถ้วยหลุด/แตก", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 201, "component": "เสา/สาย", "code": "SM13", "desc": "ฝนตกฟ้าผ่า", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 202, "component": "เสา/สาย", "code": "SM14", "desc": "คอนพับ/Bolt Brace", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 203, "component": "เสา/สาย", "code": "SM15", "desc": "สายป้อน/สายสื่อสาร", "cause": "จากวัสดุเสาไฟ", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 204, "component": "เสา/สาย", "code": "SM16", "desc": "ไฟฟ้าเขตทำงาน", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 205, "component": "เสา/สาย", "code": "SM17", "desc": "สายป้อนสวิตซ์ตก", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 206, "component": "เสา/สาย", "code": "SM18", "desc": "เกิดไฟไหม้ใต้แนวสายส่ง", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"id": 207, "component": "เสา/สาย", "code": "SM19", "desc": "ไม่ทราบสาเหตุ", "cause": "ไม่ทราบสาเหตุ", "s": 3, "o": 2, "d": 4, "rpn": 24, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 208, "component": "เสา/สาย", "code": "SM20", "desc": "อื่นๆ", "cause": "อื่นๆ", "s": 3, "o": 2, "d": 4, "rpn": 24, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 209, "component": "เสา/สาย", "code": "SM21", "desc": "รถชนเสา", "cause": "จากอุบัติเหตุ", "s": 5, "o": 2, "d": 1, "rpn": 10, "status": "Critical", "note": "ความเสี่ยงจากบุคคลที่ 3 (Third-party) ไม่ใช่ความล้มเหลวของอุปกรณ์ — ต้องมีมาตรการป้องกันแยกต่างหาก (safety fencing, การแจ้งเตือนก่อนขุด, ประสานผู้รับเหมา) ไม่ใช่แผนบำรุงรักษาอุปกรณ์ตามปกติ", "category": "ความเสี่ยงบุคคลที่ 3 (Third-party)", "strategy": "มาตรการป้องกันเฉพาะ (ไม่ใช่ PM อุปกรณ์)"}, {"id": 210, "component": "เสา/สาย", "code": "SM22", "desc": "Cable ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 211, "component": "เสา/สาย", "code": "SM23", "desc": "Terminator ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 212, "component": "เสา/สาย", "code": "SM24", "desc": "Lightning ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 213, "component": "เสา/สาย", "code": "SM25", "desc": "switch ปลดทาง Remote", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 214, "component": "เสา/สาย", "code": "SM26", "desc": "ชุด Interrupter ไม่ทำงาน", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 215, "component": "เสา/สาย", "code": "SM27", "desc": "switching ปลดสวิตซ์ในสายส่ง", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 216, "component": "เสา/สาย", "code": "SM28", "desc": "ปลดสวิตซ์ผิดตัว", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 217, "component": "เสา/สาย", "code": "SM29", "desc": "อุปกรณ์ชำรุดภายในสถานี กฟน.", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 218, "component": "เสา/สาย", "code": "SM30", "desc": "ต้นไม้ (โดนอุปกรณ์สถานี กฟน.)", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 219, "component": "เสา/สาย", "code": "SM31", "desc": "อุปกรณ์ชำรุดภายในสถานี กฟผ./กฟภ.", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 220, "component": "เสา/สาย", "code": "SM32", "desc": "อุปกรณ์ชำรุดภายในสถานี ลูกค้า", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24, "status": "Watch", "note": "", "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"id": 221, "component": "เสา/สาย", "code": "SM33", "desc": "สายส่งไม่มีไฟ", "cause": "อื่นๆ", "s": 3, "o": 2, "d": 4, "rpn": 24, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"id": 222, "component": "เสา/สาย", "code": "SM34", "desc": "Charge Line", "cause": "อื่นๆ", "s": 3, "o": 2, "d": 4, "rpn": 24, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}];
+let filtered = [...records], page=1, pageSize=12;
 
-            filtered.forEach(item => {
-                let badgeColor = item.flag === 'วิกฤต' ? 'bg-rose-50 text-rose-600 border-rose-200' : (item.flag === 'เฝ้าระวัง' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200');
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/80 transition">
-                        <td class="p-3.5 font-semibold text-slate-700">${item.component}</td>
-                        <td class="p-3.5">${item.mode}</td>
-                        <td class="p-3.5 text-slate-500">${item.cause}</td>
-                        <td class="p-3.5 text-center">${item.s}</td>
-                        <td class="p-3.5 text-center">${item.o}</td>
-                        <td class="p-3.5 text-center">${item.d}</td>
-                        <td class="p-3.5 text-center font-bold text-slate-900">${item.rpn}</td>
-                        <td class="p-3.5 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${badgeColor}">${item.flag}</span></td>
-                    </tr>
-                `;
-            });
-        }
-
-        // Render Strategy Table
-        function renderStrategyTable() {
-            const tbody = document.getElementById('strategyTableBody');
-            tbody.innerHTML = '';
-            fmeaData.forEach(item => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/80 transition">
-                        <td class="p-3.5 font-semibold text-slate-700">${item.component}</td>
-                        <td class="p-3.5 text-center">${item.s}</td>
-                        <td class="p-3.5 text-center">${item.o}</td>
-                        <td class="p-3.5 text-center">${item.d}</td>
-                        <td class="p-3.5 text-center font-bold text-slate-900">${item.rpn}</td>
-                        <td class="p-3.5">${item.category}</td>
-                        <td class="p-3.5 font-medium text-blue-600 bg-blue-50/50 rounded-lg">${item.strategy}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        // Modal Controls
-        function openAddModal() {
-            document.getElementById('modalTitle').innerText = 'เพิ่มรายการอุปกรณ์ใหม่';
-            document.getElementById('editIndex').value = '-1';
-            document.getElementById('modalComponent').value = '';
-            document.getElementById('modalMode').value = '';
-            document.getElementById('modalCause').value = '';
-            document.getElementById('assetModal').classList.remove('hidden');
-            document.getElementById('assetModal').classList.add('flex');
-        }
-
-        function editAsset(idx) {
-            let item = fmeaData[idx];
-            document.getElementById('modalTitle').innerText = 'แก้ไขรายการอุปกรณ์';
-            document.getElementById('editIndex').value = idx;
-            document.getElementById('modalComponent').value = item.component;
-            document.getElementById('modalMode').value = item.mode;
-            document.getElementById('modalCause').value = item.cause;
-            document.getElementById('modalS').value = item.s;
-            document.getElementById('modalO').value = item.o;
-            document.getElementById('modalD').value = item.d;
-            document.getElementById('assetModal').classList.remove('hidden');
-            document.getElementById('assetModal').classList.add('flex');
-        }
-
-        function closeModal() {
-            document.getElementById('assetModal').classList.remove('flex');
-            document.getElementById('assetModal').classList.add('hidden');
-        }
-
-        function saveAsset() {
-            let idx = parseInt(document.getElementById('editIndex').value);
-            let component = document.getElementById('modalComponent').value;
-            let mode = document.getElementById('modalMode').value;
-            let cause = document.getElementById('modalCause').value;
-            let s = parseInt(document.getElementById('modalS').value) || 3;
-            let o = parseInt(document.getElementById('modalO').value) || 2;
-            let d = parseInt(document.getElementById('modalD').value) || 2;
-            let rpn = s * o * d;
-            let flag = rpn > 150 ? "วิกฤต" : (rpn > 80 ? "เฝ้าระวัง" : "ปานกลาง/ต่ำ");
-
-            if(!component || !mode) {
-                alert('กรุณากรอกรหัสอุปกรณ์และ Failure Mode ให้ครบถ้วน');
-                return;
-            }
-
-            if(idx === -1) {
-                fmeaData.unshift({ component, mode, cause, s, o, d, rpn, flag, category: "Economic", strategy: "Preventive Maintenance (PM)" });
-            } else {
-                fmeaData[idx] = { ...fmeaData[idx], component, mode, cause, s, o, d, rpn, flag };
-            }
-
-            closeModal();
-            refreshAll();
-        }
-
-        function deleteAsset(idx) {
-            if(confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
-                fmeaData.splice(idx, 1);
-                refreshAll();
-            }
-        }
-
-        function refreshAll() {
-            renderDashTable();
-            renderAssetTable();
-            renderFmeaTable();
-            renderStrategyTable();
-            updateKPIs();
-        }
-
-        function updateKPIs() {
-            let total = fmeaData.length;
-            let good = fmeaData.filter(i => i.flag === 'ปานกลาง/ต่ำ').length;
-            let watch = fmeaData.filter(i => i.flag === 'เฝ้าระวัง').length;
-            let critical = fmeaData.filter(i => i.flag === 'วิกฤต').length;
-
-            document.getElementById('kpi-total').innerText = total;
-            document.getElementById('kpi-good').innerText = good;
-            document.getElementById('kpi-watch').innerText = watch;
-            document.getElementById('kpi-critical').innerText = critical;
-        }
-
-        // Initialize Charts
-        function initCharts() {
-            let good = fmeaData.filter(i => i.flag === 'ปานกลาง/ต่ำ').length;
-            let watch = fmeaData.filter(i => i.flag === 'เฝ้าระวัง').length;
-            let critical = fmeaData.filter(i => i.flag === 'วิกฤต').length;
-
-            const ctx1 = document.getElementById('statusPieChart').getContext('2d');
-            new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: ['ปกติ (Good)', 'เฝ้าระวัง (Watch)', 'วิกฤต (Critical)'],
-                    datasets: [{
-                        data: [good, watch, critical],
-                        backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-
-            const ctx2 = document.getElementById('strategyPieChart').getContext('2d');
-            new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Predictive / CBM', 'Preventive Maintenance', 'Run-to-Failure (CM)'],
-                    datasets: [{
-                        data: [78, 96, 48],
-                        backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-        }
-
-        // Initial Load
-        window.onload = function() {
-            refreshAll();
-            initCharts();
-        };
-    </script>
-</body>
-</html>
+function pct(n){return (n/records.length*100).toFixed(1)+'%'}
+function initKPI(){
+ const c={Normal:0,Watch:0,Critical:0};records.forEach(r=>c[r.status]++);
+ kTotal.textContent=records.length;kNormal.textContent=c.Normal;kWatch.textContent=c.Watch;kCritical.textContent=c.Critical;
+ pNormal.textContent=pct(c.Normal);pWatch.textContent=pct(c.Watch);pCritical.textContent=pct(c.Critical);
+}
+function statusTH(s){return s==='Critical'?'วิกฤต':s==='Watch'?'เฝ้าระวัง':'ปกติ / ต่ำ'}
+function badge(s){return `<span class="badge ${s.toLowerCase()}">${statusTH(s)}</span>`}
+function shortStrategy(s){
+ if(s.includes('Redesign')) return 'Redesign';
+ if(s.includes('Run-to-failure')) return 'CM';
+ if(s.includes('Time-based')) return 'PM';
+ if(s.includes('Condition-based') && s.includes('หรือ')) return 'PdM / PM';
+ if(s.includes('Condition-based')) return 'PdM';
+ if(s.includes('มาตรการ')) return 'Protective';
+ return s||'-';
+}
+function applyFilters(){
+ let q=(tableSearch?.value||globalSearch?.value||'').trim().toLowerCase();
+ let st=statusFilter?.value||statusTop?.value||'';
+ filtered=records.filter(r=>(!st||r.status===st)&&(!q||[r.component,r.code,r.desc,r.cause,r.strategy].join(' ').toLowerCase().includes(q)));
+ page=1;renderTable();
+}
+function doSearch(){tableSearch.value=globalSearch.value;document.querySelector('[data-tab="dashboard"]').click();applyFilters()}
+function renderTable(){
+ const start=(page-1)*pageSize, rows=filtered.slice(start,start+pageSize);
+ tbody.innerHTML=rows.map(r=>`<tr><td class="code">${r.code}</td><td>${r.component}</td><td>${r.desc}</td><td>${r.s}</td><td>${r.o}</td><td>${r.d}</td><td class="rpn">${r.rpn}</td><td>${badge(r.status)}</td><td><span class="badge strategy" title="${r.strategy}">${shortStrategy(r.strategy)}</span></td><td><button class="btn" onclick="openDetail(${r.id})">ดู</button></td></tr>`).join('');
+ let pages=Math.max(1,Math.ceil(filtered.length/pageSize));pageInfo.textContent=`แสดง ${filtered.length?start+1:0}-${Math.min(start+pageSize,filtered.length)} จาก ${filtered.length} รายการ • หน้า ${page}/${pages}`;
+}
+function pageMove(d){let pages=Math.max(1,Math.ceil(filtered.length/pageSize));page=Math.max(1,Math.min(pages,page+d));renderTable()}
+function openDetail(id){
+ const r=records.find(x=>x.id===id); if(!r)return;
+ mTitle.textContent=`${r.code} — ${r.component}`;
+ const rows=[['Failure Mode',r.desc],['Failure Cause',r.cause],['Severity (S)',r.s],['Occurrence (O)',r.o],['Detection (D)',r.d],['RPN',r.rpn],['Consequence',r.category],['Maintenance Strategy',r.strategy],['หมายเหตุ',r.note||'-']];
+ mGrid.innerHTML=rows.map(x=>`<div class="lab">${x[0]}</div><div><b>${x[1]}</b></div>`).join('');modalbg.classList.add('open');
+}
+function closeModal(){modalbg.classList.remove('open')}
+function renderFmea(){
+ let q=(fmeaSearch.value||'').toLowerCase();
+ let arr=records.filter(r=>[r.code,r.component,r.desc,r.cause].join(' ').toLowerCase().includes(q));
+ fmeaBody.innerHTML=arr.map(r=>`<tr><td class="code">${r.code}</td><td>${r.component}</td><td>${r.desc}</td><td>${r.cause}</td>
+ <td><input class="score" type="number" min="1" max="5" value="${r.s}" onchange="editScore(${r.id},'s',this.value)"></td>
+ <td><input class="score" type="number" min="1" max="5" value="${r.o}" onchange="editScore(${r.id},'o',this.value)"></td>
+ <td><input class="score" type="number" min="1" max="5" value="${r.d}" onchange="editScore(${r.id},'d',this.value)"></td>
+ <td class="rpn">${r.rpn}</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+function editScore(id,k,v){
+ let r=records.find(x=>x.id===id);v=Math.max(1,Math.min(5,Number(v)||1));r[k]=v;r.rpn=r.s*r.o*r.d;r.status=r.s===5?'Critical':r.s===4?'Watch':'Normal';initKPI();renderFmea();applyFilters();drawCharts();
+}
+function renderCodes(){
+ let q=(codeSearch.value||'').toLowerCase();
+ codeBody.innerHTML=records.filter(r=>[r.code,r.component,r.desc,r.cause].join(' ').toLowerCase().includes(q)).map(r=>`<tr><td class="code">${r.code}</td><td>${r.component}</td><td>${r.desc}</td><td>${r.cause}</td></tr>`).join('');
+}
+function strategyCounts(){let c={};records.forEach(r=>{let k=shortStrategy(r.strategy);c[k]=(c[k]||0)+1});return c}
+function renderStrategyCards(){let c=strategyCounts();strategyCards.innerHTML=Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="mini"><h3>${k}</h3><div style="font-size:28px;font-weight:800">${v}</div><div style="color:var(--muted);font-size:12px">${pct(v)} ของ Failure Modes</div></div>`).join('')}
+let charts=[];
+function drawCharts(){
+ charts.forEach(c=>c.destroy());charts=[];
+ let c={Normal:0,Watch:0,Critical:0};records.forEach(r=>c[r.status]++);
+ charts.push(new Chart(statusChart,{type:'doughnut',data:{labels:['ปกติ / ต่ำ','เฝ้าระวัง','วิกฤต'],datasets:[{data:[c.Normal,c.Watch,c.Critical],backgroundColor:['#34b875','#f1bd2e','#ef5b65'],borderWidth:0}]},options:{maintainAspectRatio:false,cutout:'67%',plugins:{legend:{position:'right',labels:{boxWidth:12}}}}}));
+ let top=[...records].sort((a,b)=>b.rpn-a.rpn).slice(0,5);
+ charts.push(new Chart(rpnChart,{type:'bar',data:{labels:top.map(r=>r.code),datasets:[{data:top.map(r=>r.rpn),backgroundColor:top.map(r=>r.status==='Critical'?'#ef5b65':'#f1bd2e'),borderRadius:5}]},options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#edf3f8'}},y:{grid:{display:false}}}}}));
+ let sc=strategyCounts(), entries=Object.entries(sc).sort((a,b)=>b[1]-a[1]);
+ charts.push(new Chart(strategyChart,{type:'doughnut',data:{labels:entries.map(x=>x[0]),datasets:[{data:entries.map(x=>x[1]),backgroundColor:['#34b875','#2f8ee5','#8a68df','#ef8585','#f0bd36','#58c6bd','#9aaabd'],borderWidth:0}]},options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{boxWidth:10,font:{size:10}}}}}}));
+}
+function exportCSV(){
+ let head=['Code','Component','Failure Mode','Failure Cause','S','O','D','RPN','Status','Consequence','Strategy'];
+ let lines=[head,...filtered.map(r=>[r.code,r.component,r.desc,r.cause,r.s,r.o,r.d,r.rpn,statusTH(r.status),r.category,r.strategy])].map(row=>row.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(','));
+ let blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='RCM_FMEA_export.csv';a.click();URL.revokeObjectURL(a.href);
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.module').forEach(x=>x.classList.remove('active'));document.getElementById(b.dataset.tab).classList.add('active');if(b.dataset.tab==='fmea')renderFmea();if(b.dataset.tab==='codes')renderCodes();});
+initKPI();renderTable();renderFmea();renderCodes();renderStrategyCards();drawCharts();
+</script>
+</body></html>
