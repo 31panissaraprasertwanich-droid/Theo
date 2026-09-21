@@ -188,7 +188,7 @@ tr:hover td{background:#f8fafc}
         <h1>RCM Engineering System</h1>
         <p>ระบบวิเคราะห์ความน่าเชื่อถือและจัดลำดับงานบำรุงรักษาสำหรับสถานีไฟฟ้า</p>
       </div>
-      <div class="updated">ฐานข้อมูล FMEA 223 รายการ</div>
+      <div class="updated" id="dbCount">ฐานข้อมูล FMEA รายการ</div>
     </div>
 
     <div class="kpis">
@@ -298,7 +298,7 @@ tr:hover td{background:#f8fafc}
       <p>แก้ไขคะแนน S / O / D ได้ทันที ระบบจะคำนวณ RPN และสถานะใหม่อัตโนมัติ</p>
       <div class="card table-card" style="box-shadow:none; margin-top:16px">
         <div class="table-head">
-          <div class="table-title">FMEA Master — 223 รายการ</div>
+          <div class="table-title">FMEA Master</div>
           <div class="tools"><input id="fmeaSearch" placeholder="ค้นหา..." oninput="renderFmea()"></div>
         </div>
         <div class="table-wrap" style="max-height:600px">
@@ -393,6 +393,7 @@ tr:hover td{background:#f8fafc}
 </div>
 
 <script>
+// โหลดข้อมูลครบถ้วน 223 รายการจากไฟล์ RCM 9-9.xlsx
 let records = [
   {"id": 1, "component": "TR_Counter L/A", "code": "T001", "desc": "Counter Lightning Arrester ชำรุด", "cause": "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", "s": 2, "o": 2, "d": 2, "rpn": 8, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"},
   {"id": 2, "component": "TR_OLevelGauge", "code": "T002", "desc": "Oil level gauge ชำรุด", "cause": "โครงแตก, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"},
@@ -441,12 +442,12 @@ let records = [
   {"id": 45, "component": "TR_OilFilter", "code": "T304", "desc": "Oil filter ไม่ทำงานหลังจากเปลี่ยน Tap", "cause": "ระบบปั๊มน้ำมันของ OLTC หยุดทำงานหรือเดินผิดทาง", "s": 2, "o": 2, "d": 2, "rpn": 8, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"},
   {"id": 46, "component": "TR_OilFilter", "code": "T305", "desc": "Pressure gauge oil filter เสีย", "cause": "แรงดันน้ำมันเกินพิกัด (Overpressure), น้ำมันหรือสิ่งสกปรกเข้าไปในเกจ, เสื่อมสภาพจากอายุใช้งาน", "s": 2, "o": 2, "d": 2, "rpn": 8, "status": "Normal", "note": "", "category": "Economic-minor", "strategy": "Run-to-failure (CM)"},
   {"id": 47, "component": "HV_ClosingCoil", "code": "H001", "desc": "Closing coil ชำรุด, Mechanism CB ขัดข้อง", "cause": "กลไกติดขัด, เสื่อมสภาพจากอายุใช้งาน, Misoperation", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"},
-  {"id": 48, "component": "HV_Mechnism_CB", "code": "H002", "desc": "Mechanism CB ขัดข้อง,", "cause": "ขาดการบำรุงรักษา, Spring เสื่อมหรือหัก, Misalignment ของกลไก", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"},
+  {"id": 48, "component": "HV_Mechnism_CB", "code": "H002", "desc": "Mechanism CB ขัดข้อง", "cause": "ขาดการบำรุงรักษา, Spring เสื่อมหรือหัก, Misalignment ของกลไก", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"},
   {"id": 49, "component": "HV_PumpMotor_CB", "code": "H003", "desc": "Pump motor ของ CB ไม่ทำงาน", "cause": "ไฟไม่เข้าที่มอเตอร์, Pressure switch ชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"},
   {"id": 50, "component": "HV_PumpMotor_CB", "code": "H005", "desc": "Pump motor ของ CB ทำงานบ่อย", "cause": "ระบบรั่ว (Internal หรือ External Leak), Accumulator เสื่อมหรือแรงดันไม่พอ, Pressure switch ตั้งผิดหรือเสีย, เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6, "status": "Normal", "note": "", "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"},
   {"id": 51, "component": "HV_SF6LowGas", "code": "H006", "desc": "SF6 low gas", "cause": "รั่ว (Gas Leakage), เสื่อมสภาพจากอายุใช้งาน, Gas Pressure Gauge / Sensor เสีย", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"},
   {"id": 52, "component": "HV_SF6LowGas", "code": "H007", "desc": "SF6 over gas", "cause": "อุณหภูมิสูงผิดปกติ, Internal Arc หรือ Fault ทำให้ความร้อนสูงขึ้น, เติมก๊าซตอนอุณหภูมิต่ำ แล้วเมื่ออากาศร้อนขึ้นทำให้แรงดันเกิน, เติมก๊าซเกินตอนบำรุงรักษา (Overfilling)", "s": 4, "o": 2, "d": 1, "rpn": 8, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"},
-  {"id": 53, "component": "HV_GIS_CB", "code": "H010", "desc": "GIS ชำรุด", "cause": "การติดตั้งหรือประกอบผิดพลาด, Internal Arc / Flashover, เสื่อมสภาพจากอายุใช้งาน, Human Error จากการบำรงุรักษา", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"},
+  {"id": 53, "component": "HV_GIS_CB", "code": "H010", "desc": "GIS ชำรุด", "cause": "การติดตั้งหรือประกอบผิดพลาด, Internal Arc / Flashover, เสื่อมสภาพจากอายุใช้งาน, Human Error จากการบำรุงรักษา", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"},
   {"id": 54, "component": "HV_GIS_CB_SW", "code": "H011", "desc": "SW ปลด / สับ ไม่ได้", "cause": "กลไกติดขัด, Charge Spring ไม่ทำงาน, Control Circuit Fault", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"},
   {"id": 55, "component": "HV_GIS_CB_Hydraulic", "code": "H012", "desc": "Earthing SW ปลด / สับ ไม่ได้", "cause": "กลไกติดขัด, Control Circuit Fault, Residual Voltage, Sensor หรือ Feedback Error", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"},
   {"id": 56, "component": "HV_GIS_CB_Hydraulic", "code": "H013", "desc": "Earthing SW ชำรุด", "cause": "กลไกติดขัด, Contact Point ชำรุด, Motorized ES ชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16, "status": "Watch", "note": "", "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"},
@@ -623,9 +624,16 @@ let filtered = [...records], page=1, pageSize=12;
 
 function pct(n){return (n/records.length*100).toFixed(1)+'%'}
 function initKPI(){
-  const c={Normal:0,Watch:0,Critical:0};records.forEach(r=>c[r.status]++);
-  kTotal.textContent=records.length;kNormal.textContent=c.Normal;kWatch.textContent=c.Watch;kCritical.textContent=c.Critical;
-  pNormal.textContent=pct(c.Normal);pWatch.textContent=pct(c.Watch);pCritical.textContent=pct(c.Critical);
+  const c={Normal:0,Watch:0,Critical:0};
+  records.forEach(r => { if(c[r.status]!==undefined) c[r.status]++; });
+  kTotal.textContent=records.length;
+  kNormal.textContent=c.Normal;
+  kWatch.textContent=c.Watch;
+  kCritical.textContent=c.Critical;
+  pNormal.textContent=pct(c.Normal);
+  pWatch.textContent=pct(c.Watch);
+  pCritical.textContent=pct(c.Critical);
+  document.getElementById('dbCount').textContent = `ฐานข้อมูล FMEA ${records.length} รายการ`;
 }
 function statusTH(s){return s==='Critical'?'วิกฤต':s==='Watch'?'เฝ้าระวัง':'ปกติ / ต่ำ'}
 function badge(s){return `<span class="badge ${s.toLowerCase()}">${statusTH(s)}</span>`}
@@ -644,7 +652,7 @@ function applyFilters(){
   filtered=records.filter(r=>(!st||r.status===st)&&(!q||[r.component,r.code,r.desc,r.cause,r.strategy].join(' ').toLowerCase().includes(q)));
   page=1;renderTable();
 }
-function doSearch(){tableSearch.value=globalSearch.value;document.querySelector('[data-tab="dashboard"]').click();applyFilters()}
+function doSearch(){if(tableSearch)tableSearch.value=globalSearch.value;document.querySelector('[data-tab="dashboard"]').click();applyFilters()}
 function renderTable(){
   const start=(page-1)*pageSize, rows=filtered.slice(start,start+pageSize);
   tbody.innerHTML=rows.map(r=>`<tr><td class="code">${r.code}</td><td>${r.component}</td><td>${r.desc}</td><td>${r.s}</td><td>${r.o}</td><td>${r.d}</td><td class="rpn">${r.rpn}</td><td>${badge(r.status)}</td><td><span class="badge strategy" title="${r.strategy}">${shortStrategy(r.strategy)}</span></td><td style="text-align:center"><button class="btn" style="background:#f1f5f9;border:1px solid var(--line);height:30px;padding:0 10px" onclick="openDetail(${r.id})">ดู</button></td></tr>`).join('');
@@ -659,7 +667,7 @@ function openDetail(id){
 }
 function closeModal(){modalbg.classList.remove('open')}
 function renderFmea(){
-  let q=(fmeaSearch.value||'').toLowerCase();
+  let q=(fmeaSearch?.value||'').toLowerCase();
   let arr=records.filter(r=>[r.code,r.component,r.desc,r.cause].join(' ').toLowerCase().includes(q));
   fmeaBody.innerHTML=arr.map(r=>`<tr><td class="code">${r.code}</td><td>${r.component}</td><td>${r.desc}</td><td>${r.cause}</td>
   <td><input class="score" type="number" min="1" max="5" value="${r.s}" onchange="editScore(${r.id},'s',this.value)"></td>
@@ -671,28 +679,56 @@ function editScore(id,k,v){
   let r=records.find(x=>x.id===id);v=Math.max(1,Math.min(5,Number(v)||1));r[k]=v;r.rpn=r.s*r.o*r.d;r.status=r.s===5?'Critical':r.s===4?'Watch':'Normal';initKPI();renderFmea();applyFilters();drawCharts();
 }
 function renderCodes(){
-  let q=(codeSearch.value||'').toLowerCase();
+  let q=(codeSearch?.value||'').toLowerCase();
   codeBody.innerHTML=records.filter(r=>[r.code,r.component,r.desc,r.cause].join(' ').toLowerCase().includes(q)).map(r=>`<tr><td class="code">${r.code}</td><td>${r.component}</td><td>${r.desc}</td><td>${r.cause}</td></tr>`).join('');
 }
 function strategyCounts(){let c={};records.forEach(r=>{let k=shortStrategy(r.strategy);c[k]=(c[k]||0)+1});return c}
-function renderStrategyCards(){let c=strategyCounts();strategyCards.innerHTML=Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="mini"><h3>${k}</h3><div style="font-size:26px;font-weight:700;font-family:'Plus Jakarta Sans'">${v}</div><div style="color:var(--muted);font-size:12px;margin-top:4px">${pct(v)} ของ Failure Modes</div></div>`).join('')}
+function renderStrategyCards(){
+  let c=strategyCounts();
+  if(strategyCards) {
+    strategyCards.innerHTML=Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="mini"><h3>${k}</h3><div style="font-size:26px;font-weight:700;font-family:'Plus Jakarta Sans'">${v}</div><div style="color:var(--muted);font-size:12px;margin-top:4px">${pct(v)} ของ Failure Modes</div></div>`).join('');
+  }
+}
 let charts=[];
 function drawCharts(){
   charts.forEach(c=>c.destroy());charts=[];
   let c={Normal:0,Watch:0,Critical:0};records.forEach(r=>c[r.status]++);
-  charts.push(new Chart(statusChart,{type:'doughnut',data:{labels:['ปกติ / ต่ำ','เฝ้าระวัง','วิกฤต'],datasets:[{data:[c.Normal,c.Watch,c.Critical],backgroundColor:['#10b981','#f59e0b','#ef4444'],borderWidth:0}]},options:{maintainAspectRatio:false,cutout:'70%',plugins:{legend:{position:'right',labels:{boxWidth:12,font:{family:'Noto Sans Thai'}}}}}));
+  
+  const ctx1 = document.getElementById('statusChart');
+  if(ctx1) charts.push(new Chart(ctx1,{type:'doughnut',data:{labels:['ปกติ / ต่ำ','เฝ้าระวัง','วิกฤต'],datasets:[{data:[c.Normal,c.Watch,c.Critical],backgroundColor:['#10b981','#f59e0b','#ef4444'],borderWidth:0}]},options:{maintainAspectRatio:false,cutout:'70%',plugins:{legend:{position:'right',labels:{boxWidth:12,font:{family:'Noto Sans Thai'}}}}}));
+  
   let top=[...records].sort((a,b)=>b.rpn-a.rpn).slice(0,5);
-  charts.push(new Chart(rpnChart,{type:'bar',data:{labels:top.map(r=>r.code),datasets:[{data:top.map(r=>r.rpn),backgroundColor:top.map(r=>r.status==='Critical'?'#ef4444':'#f59e0b'),borderRadius:6}]},options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#f1f5f9'}},y:{grid:{display:false}}}}}));
+  const ctx2 = document.getElementById('rpnChart');
+  if(ctx2) charts.push(new Chart(ctx2,{type:'bar',data:{labels:top.map(r=>r.code),datasets:[{data:top.map(r=>r.rpn),backgroundColor:top.map(r=>r.status==='Critical'?'#ef4444':'#f59e0b'),borderRadius:6}]},options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#f1f5f9'}},y:{grid:{display:false}}}}}));
+  
   let sc=strategyCounts(), entries=Object.entries(sc).sort((a,b)=>b[1]-a[1]);
-  charts.push(new Chart(strategyChart,{type:'doughnut',data:{labels:entries.map(x=>x[0]),datasets:[{data:entries.map(x=>x[1]),backgroundColor:['#10b981','#0f62fe','#8b5cf6','#ef4444','#f59e0b','#38bdf8','#cbd5e1'],borderWidth:0}]},options:{maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{boxWidth:10,font:{size:11,family:'Noto Sans Thai'}}}}}));
+  const ctx3 = document.getElementById('strategyChart');
+  if(ctx3) charts.push(new Chart(ctx3,{type:'doughnut',data:{labels:entries.map(x=>x[0]),datasets:[{data:entries.map(x=>x[1]),backgroundColor:['#10b981','#0f62fe','#8b5cf6','#ef4444','#f59e0b','#38bdf8','#cbd5e1'],borderWidth:0}]},options:{maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{boxWidth:10,font:{size:11,family:'Noto Sans Thai'}}}}}));
 }
 function exportCSV(){
   let head=['Code','Component','Failure Mode','Failure Cause','S','O','D','RPN','Status','Consequence','Strategy'];
   let lines=[head,...filtered.map(r=>[r.code,r.component,r.desc,r.cause,r.s,r.o,r.d,r.rpn,statusTH(r.status),r.category,r.strategy])].map(row=>row.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(','));
   let blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='RCM_FMEA_export.csv';a.click();URL.revokeObjectURL(a.href);
 }
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.module').forEach(x=>x.classList.remove('active'));document.getElementById(b.dataset.tab).classList.add('active');if(b.dataset.tab==='fmea')renderFmea();if(b.dataset.tab==='codes')renderCodes();});
-initKPI();renderTable();renderFmea();renderCodes();renderStrategyCards();drawCharts();
+
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.querySelectorAll('.module').forEach(x=>x.classList.remove('active'));
+  document.getElementById(b.dataset.tab).classList.add('active');
+  if(b.dataset.tab==='fmea')renderFmea();
+  if(b.dataset.tab==='codes')renderCodes();
+});
+
+// รันการแสดงผลเมื่อโหลดหน้าเว็บสำเร็จ
+window.onload = function() {
+  initKPI();
+  renderTable();
+  renderFmea();
+  renderCodes();
+  renderStrategyCards();
+  drawCharts();
+};
 </script>
 </body>
 </html>
