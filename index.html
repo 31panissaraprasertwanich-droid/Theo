@@ -1,40 +1,953 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Transformer RCM</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#f5f7fa;color:#18324d;font-family:"Segoe UI",Tahoma,sans-serif;font-size:13px}button,input,select{font:inherit}:root{--blue:#176fc1;--navy:#153b61;--line:#e0e7ee;--muted:#74879a;--bg:#f5f7fa}
-.top{height:66px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 26px;gap:28px;position:sticky;top:0;z-index:10}.brand{font-size:18px;font-weight:800;color:#143c62;white-space:nowrap}.brand span{color:#1781d7}.tabs{display:flex;align-items:center;height:100%;gap:4px}.tab{height:100%;padding:0 14px;border:0;background:transparent;color:#5c7185;cursor:pointer;border-bottom:3px solid transparent}.tab.active{color:#116db9;border-bottom-color:#1681d6;font-weight:700}.topSearch{margin-left:auto;width:300px;border:1px solid #d4e0e9;border-radius:8px;padding:9px 12px;outline:none}.avatar{width:34px;height:34px;border-radius:50%;background:#e7f2fb;color:#1475c5;display:grid;place-items:center;font-weight:800}
-.main{max-width:1480px;margin:auto;padding:20px 24px 30px}.page{display:none}.page.active{display:block}
-.heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:16px}.heading h1{font-size:25px;margin:0 0 4px}.heading p{margin:0;color:var(--muted)}.outline{border:1px solid #cad9e5;background:#fff;color:#315b7d;border-radius:8px;padding:9px 12px;cursor:pointer}.primary{border:0;background:#1679ca;color:#fff;border-radius:8px;padding:9px 13px;cursor:pointer}
-.progress{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 16px;display:flex;align-items:center;overflow:auto;margin-bottom:14px}.pstep{display:flex;align-items:center;min-width:max-content}.circle{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#edf3f8;color:#6b8195;font-size:11px;font-weight:800}.pstep.active .circle{background:#177bc9;color:#fff}.pstep b{font-size:10px;margin-left:6px}.connector{width:26px;height:1px;background:#d8e2eb;margin:0 7px}
-.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.metric{background:#fff;border:1px solid var(--line);border-radius:11px;padding:14px 16px}.metric small{color:#71869a}.metric b{display:block;font-size:25px;margin-top:4px}.metric .sub{font-size:9px;color:#8b9cab;margin-top:2px}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px}.tableCard{overflow:hidden}.tableHeader{padding:15px 17px 12px;border-bottom:1px solid var(--line)}.tableHeaderTop{display:flex;justify-content:space-between;align-items:center}.tableHeader h2{font-size:17px;margin:0}.tableHeader p{margin:3px 0 0;color:var(--muted);font-size:10px}.tools{display:grid;grid-template-columns:minmax(260px,1.6fr) 1fr 1fr auto;gap:8px;margin-top:12px}.tools input,.tools select{border:1px solid #d4e0e9;border-radius:8px;padding:9px;background:#fff;min-width:0}
-.tableWrap{overflow:auto;max-height:610px}table{border-collapse:collapse;width:100%;min-width:1050px}th{position:sticky;top:0;background:#f1f5f8;color:#536a80;text-align:left;padding:9px 10px;font-size:10px;border-bottom:1px solid #dbe4ec;z-index:2}td{padding:9px 10px;border-bottom:1px solid #edf1f4;font-size:10px;vertical-align:middle}tbody tr:hover{background:#f7fbfe}.code{font-weight:800;color:#126fb9}.num{text-align:center}.score{display:inline-grid;place-items:center;width:28px;height:25px;border-radius:6px;background:#edf5fb;font-weight:800;color:#245475}.rpn{font-weight:800}.editBtn{border:1px solid #cbdce9;background:#fff;color:#1974bc;border-radius:7px;padding:5px 8px;cursor:pointer}.editBtn:hover{background:#eaf5fd}.count{padding:9px 17px;color:#73879a;font-size:9px;border-top:1px solid var(--line)}
-.modalBg{display:none;position:fixed;inset:0;background:#102b4366;z-index:30;align-items:center;justify-content:center;padding:20px}.modalBg.show{display:flex}.modal{width:560px;max-width:100%;background:#fff;border-radius:15px;box-shadow:0 20px 70px #0b263f33;overflow:hidden}.modalHead{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.modalHead h3{margin:0;font-size:16px}.close{border:0;background:#f0f4f7;border-radius:50%;width:30px;height:30px;cursor:pointer}.modalBody{padding:18px}.fcode{font-size:20px;font-weight:800;color:#126fb9}.fmode{font-size:14px;font-weight:700;margin:4px 0 13px}.meta{background:#f7f9fb;border-radius:9px;padding:10px;font-size:10px;line-height:1.7}.scoreGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}.scoreBox{border:1px solid #dce6ee;border-radius:10px;padding:11px;text-align:center}.scoreBox label{font-size:10px;color:#667c91}.scoreBox input{width:70px;display:block;margin:8px auto 0;border:1px solid #cbdce8;border-radius:7px;padding:7px;text-align:center;font-size:20px;font-weight:800;color:#183b5d}.rpnBox{margin-top:11px;background:#eaf5fd;border-radius:10px;text-align:center;padding:11px}.rpnBox b{font-size:22px}.modalFoot{padding:13px 18px;border-top:1px solid var(--line);display:flex;justify-content:space-between}.rightBtns{display:flex;gap:7px}
-.emptyPage{padding:18px}.emptyState{min-height:420px;display:grid;place-items:center;text-align:center;color:#7c8fa2}.strategyTag{display:inline-block;background:#fff3d8;color:#936600;padding:6px 11px;border-radius:15px;margin-top:8px}
-@media(max-width:900px){.tabs{display:none}.summary{grid-template-columns:repeat(2,1fr)}.tools{grid-template-columns:1fr 1fr}.topSearch{width:220px}}
-</style></head><body>
-<header class="top"><div class="brand">Transformer <span>RCM</span></div><nav class="tabs"><button class="tab active" data-page="fmea">FMEA</button><button class="tab" data-page="criticality">Criticality</button><button class="tab" data-page="hi">Health Index</button><button class="tab" data-page="strategy">Maintenance Strategy</button><button class="tab" data-page="plan">Maintenance Plan</button><button class="tab" data-page="reports">Reports</button></nav><input id="globalSearch" class="topSearch" placeholder="⌕  ค้นหาใน FMEA..."><div class="avatar">RCM</div></header>
-<main class="main"><section class="page active" id="fmea">
-<div class="heading"><div><h1>FMEA Analysis</h1><p>Failure Mode and Effects Analysis — Transformer</p></div><button class="outline" id="resetAll">คืนคะแนนต้นฉบับ</button></div>
-<div class="progress"><div class="pstep"><span class="circle">1</span><b>Asset</b></div><span class="connector"></span><div class="pstep"><span class="circle">2</span><b>Function</b></div><span class="connector"></span><div class="pstep"><span class="circle">3</span><b>Failure</b></div><span class="connector"></span><div class="pstep active"><span class="circle">4</span><b>FMEA</b></div><span class="connector"></span><div class="pstep"><span class="circle">5</span><b>Criticality</b></div><span class="connector"></span><div class="pstep"><span class="circle">6</span><b>Health Index</b></div><span class="connector"></span><div class="pstep"><span class="circle">7</span><b>Strategy</b></div><span class="connector"></span><div class="pstep"><span class="circle">8</span><b>Task</b></div><span class="connector"></span><div class="pstep"><span class="circle">9</span><b>Plan</b></div><span class="connector"></span><div class="pstep"><span class="circle">10</span><b>Review</b></div></div>
-<div class="summary"><div class="metric"><small>Components</small><b id="componentsN">–</b><div class="sub">รายการส่วนประกอบ</div></div><div class="metric"><small>Failure Modes</small><b id="failureN">–</b><div class="sub">ข้อมูลจาก Excel</div></div><div class="metric"><small>Scored Records</small><b id="scoredN">–</b><div class="sub">มี S / O / D ครบ</div></div><div class="metric"><small>Edited Records</small><b id="editedN">0</b><div class="sub">แก้ไขใน Browser</div></div></div>
-<div class="card tableCard"><div class="tableHeader"><div class="tableHeaderTop"><div><h2>FMEA Table</h2><p>ตารางหลักสำหรับตรวจสอบและแก้ไขคะแนน S / O / D</p></div></div><div class="tools"><input id="search" placeholder="⌕ ค้นหา Code, Component, Failure Mode, Cause..."><select id="component"><option value="">ทุก Component</option></select><select id="sort"><option value="code">เรียงตาม Code</option><option value="rpn">RPN สูง → ต่ำ</option><option value="component">เรียงตาม Component</option></select><button class="outline" id="clear">ล้างตัวกรอง</button></div></div>
-<div class="tableWrap"><table><thead><tr><th>#</th><th>Failure Code</th><th>Component</th><th>Failure Mode</th><th>Failure Cause</th><th class="num">S</th><th class="num">O</th><th class="num">D</th><th class="num">RPN</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div><div class="count" id="count"></div></div></section>
-<section class="page" id="strategy"><div class="card emptyPage"><h2>Maintenance Strategy</h2><div class="emptyState"><div><div style="font-size:55px;opacity:.25">⚙</div><h3>Criteria not configured</h3><p>ยังไม่กำหนดเกณฑ์การเลือก Maintenance Strategy</p><span class="strategyTag">รอกำหนดเกณฑ์</span></div></div></div></section>
-<section class="page" id="criticality"></section><section class="page" id="hi"></section><section class="page" id="plan"></section><section class="page" id="reports"></section>
-</main>
-<div class="modalBg" id="modalBg"><div class="modal"><div class="modalHead"><h3>แก้ไขคะแนน FMEA</h3><button class="close" id="close">×</button></div><div class="modalBody"><div class="fcode" id="mCode"></div><div class="fmode" id="mMode"></div><div class="meta"><b>Component:</b> <span id="mComp"></span><br><b>Failure Cause:</b> <span id="mCause"></span></div><div class="scoreGrid"><div class="scoreBox"><label>S — Severity</label><input id="mS" type="number" min="1" max="5"></div><div class="scoreBox"><label>O — Occurrence</label><input id="mO" type="number" min="1" max="5"></div><div class="scoreBox"><label>D — Detection</label><input id="mD" type="number" min="1" max="5"></div></div><div class="rpnBox"><b>RPN = <span id="mRpn"></span></b><br><small>S × O × D</small></div></div><div class="modalFoot"><button class="outline" id="restore">คืนค่า Excel</button><div class="rightBtns"><button class="outline" id="cancel">ยกเลิก</button><button class="primary" id="save">บันทึกคะแนน</button></div></div></div></div>
-<script>
-const master=[{"component": "TR_Counter L/A", "code": "T001", "mode": "Counter Lightning Arrester ชำรุด", "cause": "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", "s": 2, "o": 2, "d": 2, "rpn": 8}, {"component": "TR_OLevelGauge", "code": "T002", "mode": "Oil level gauge ชำรุด", "cause": "โครงแตก, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "TR_OtempGauge", "code": "T003", "mode": "Oil temp ชำรุด", "cause": "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "TR_Sgel/ABreather", "code": "T004", "mode": "Silicagel เปลี่ยนสี / Air Breather ชำรุด", "cause": "Silicagel เสื่อมสภาพ, การอุดตัน / ฝุ่นละออง", "s": 2, "o": 3, "d": 2, "rpn": 12}, {"component": "TR_WTempGauge", "code": "T005", "mode": "Winding temp ชำรุด", "cause": "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "TR_TOP", "code": "T006", "mode": "น้ำมันรั่วซึมด้านบนหม้อแปลง", "cause": "ซีลเสื่อมสภาพ", "s": 3, "o": 3, "d": 2, "rpn": 18}, {"component": "TR_Bushing", "code": "T007", "mode": "น้ำมันรั่วซึมที่ Bushing หม้อแปลง", "cause": "ซีลเสื่อมสภาพ, แตกหัก, ติดตั้งไม่ถูกต้องตามมาตราฐาน, การเสียดสีหรือความเสียหายจากการเคลื่อนที่", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "TR_CableBox", "code": "T008", "mode": "น้ำมันรั่วซึมที่ Cable box", "cause": "ซีลเสื่อมสภาพ, ติดตั้งไม่ถูกต้องตามมาตราฐาน, ความร้อนสูงเกินไป", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "TR_Radiator", "code": "T009", "mode": "น้ำมันรั่วซึมที่ Radiator", "cause": "ซีลเสื่อมสภาพ, ติดตั้งไม่ถูกต้องตามมาตราฐาน, การเสียดสีหรือแรงดันภายในสูง, การเสื่อมสภาพจากการสะสมของสิ่งสกปรก", "s": 3, "o": 3, "d": 2, "rpn": 18}, {"component": "TR_MainTank", "code": "T012", "mode": "น้ำมันหม้อแปลงต่ำ", "cause": "การทำงานผิดปกติของระบบระบายความร้อน, ซีลเสื่อมสภาพ", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "TR_MainTank", "code": "T015", "mode": "หม้อแปลงชำรุด", "cause": "การรั่วซึมของน้ำมัน, การเกิดไฟฟ้าลัดวงจร, การเสื่อมสภาพจากอายุการใช้งาน, ความร้อนสะสมเกินไป", "s": 5, "o": 1, "d": 1, "rpn": 5}, {"component": "TR_Trip", "code": "T016", "mode": "หม้อแปลง Trip", "cause": "การทำงานผิดพลาดของรีเลย์", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "TR_FAN", "code": "T018", "mode": "เปลี่ยนพัดลมหม้อแปลง", "cause": "สึกหรอจากการใช้งานนาน", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_FAN", "code": "T019", "mode": "พัดลมหม้อแปลงถอดไปซ่อม", "cause": "สึกหรอจากการใช้งานนาน", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_FAN", "code": "T020", "mode": "พัดลมหม้อแปลงไม่ทำงาน", "cause": "การเสียหายของมอเตอร์", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_Coil", "code": "T023", "mode": "ขดลวดหม้อแปลงชำรุด", "cause": "การโอเวอร์โหลด, ความผิดปกติของแรงดัน, การผลิตที่ไม่ดี, การเกิดความชื้น", "s": 5, "o": 1, "d": 4, "rpn": 20}, {"component": "TR_Core", "code": "T024", "mode": "แกนเหล็กหม้อแปลงชำรุด", "cause": "การออกแบบที่ผิดพลาด, ความเครียดจากการเปลี่ยนแปลงกระแสไฟฟ้า", "s": 4, "o": 1, "d": 4, "rpn": 16}, {"component": "TR_HVBushing", "code": "T025", "mode": "TR_HVBushing หม้อแปลงชำรุด", "cause": "เสื่อมสภาพ", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "TR_MVBushing", "code": "T026", "mode": "TR_MVBushing หม้อแปลงชำรุด", "cause": "เสื่อมสภาพ", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "TR_OFFLTAP", "code": "T027", "mode": "OFF LODE TAP หม้อแปลงชำรุด", "cause": "เสื่อมสภาพ", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_BuchRelay", "code": "T028", "mode": "Buchholz relay ชำรุด", "cause": "ลัดวงจรหรือความผิดพลาดภายใน, การติดตั้งไม่ถูกต้อง, เสื่อมสภาพจากอายุใช้งาน, อุณหภูมิสูงเกิน, กลไกติดขัด", "s": 4, "o": 1, "d": 2, "rpn": 8}, {"component": "TR_PresRelief", "code": "T029", "mode": "Pressure relief ชำรุด", "cause": "การติดตั้งไม่ถูกต้อง, เสื่อมสภาพจากอายุใช้งาน, กลไกติดขัด, แรงดันเกินขีดจำกัดบ่อยเกิน", "s": 4, "o": 1, "d": 2, "rpn": 8}, {"component": "TR_Control_desk", "code": "T101", "mode": "Control desk tap อ่านไม่ตรง", "cause": "เสื่อมสภาพจากอายุใช้งาน, ความชื้นหรือสิ่งสกปรก", "s": 2, "o": 2, "d": 1, "rpn": 4}, {"component": "TR_Control_Lampdesk", "code": "T102", "mode": "Control desk หลอดขาด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 2, "o": 2, "d": 1, "rpn": 4}, {"component": "TR_FanControl", "code": "T103", "mode": "Control พัดลมชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 2, "o": 2, "d": 1, "rpn": 4}, {"component": "TR_Relay", "code": "T104", "mode": "Differential relay ชำรุด", "cause": "การทำงานผิดพลาดในระบบควบคุม, Current Transformer Malfunction, การตั้งค่าผิด", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "TR_DifRelay", "code": "T105", "mode": "Differential relay เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "TR_Relay", "code": "T106", "mode": "Tripping relay ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "TR_TrippingRelay", "code": "T107", "mode": "Tripping relay เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "TR_CountTap", "code": "T206", "mode": "Counter Tap ไม่ทำงาน", "cause": "กลไกติดขัด, ชุดเฟืองภายในชำรุด, Lubrication, เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_Microlimit", "code": "T208", "mode": "Micro sw. Lower & upper limit ค้าง", "cause": "กลไกติดขัด", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_OLTC Tap", "code": "T209", "mode": "OLTC เปลี่ยน Tap ทางไฟฟ้าไม่ได้", "cause": "OLTC เปลี่ยน Tap ทางไฟฟ้า ไม่ทำงานจริง", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_OLTC Tap", "code": "T210", "mode": "น้ำมันรั่วซึมที่ฝาบ่อ OLTC", "cause": "ซีลเสื่อมสภาพ", "s": 3, "o": 3, "d": 2, "rpn": 18}, {"component": "TR_OLTC Tap", "code": "T211", "mode": "เปลี่ยน Tap แล้วมีเสียงดัง", "cause": "เปลี่ยน Tap แล้วมีเสียงดังจากกลไก", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_OLTC Tap", "code": "T212", "mode": "ระดับน้ำมันต่ำที่ OLTC", "cause": "ระดับน้ำมันต่ำที่ OLTC ชีลเสื่อมสภาพ", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_OLTC_ProRelay", "code": "T215", "mode": "Tap protective relay ชำรุด", "cause": "กลไกเสื่อมสภาพ, ความชื้น ฝุ่น การกัดกร่อน, มีการต่อสายผิด หรือมี short ที่ terminal", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_OLTC_MainContact", "code": "T216", "mode": "Main contact ชำรุด", "cause": "การอาร์ก ระหว่างเปลี่ยน TAP ที่บ่อยครั้ง, อุณหภูมิสูงเกินจากกระแสเกิน, น้ำมัน OLTC เสื่อมสภาพ, กลไกบังคับ contact ทำงานผิดพลาด", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "TR_OLTC_TransitContact", "code": "T217", "mode": "Transition contact ชำรุด", "cause": "การอาร์ก (Arc) ซ้ำซ้อนขณะสลับ Tap, น้ำมัน OLTC เสื่อมสภาพ, สปริง/กลไกกด contact เสียหาย, ความต้านทาน contact เพิ่มขึ้น", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "TR_OLTC_Gear", "code": "T218", "mode": "Gear unit ชำรุด", "cause": "สึกหรอ", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_OLTC_Access", "code": "T219", "mode": "OLTC Accessories ชำรุด", "cause": "ชำรุดจาก Accessories", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_OLTC_MotorControlBoard", "code": "T220", "mode": "Motor drive control board ชำรุด", "cause": "แรงดันไฟฟ้าผิดปกติ, ความชื้นและฝุ่นละอองในกล่องควบคุม, เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "TR_OilFilter", "code": "T301", "mode": "Counter oil filter ทำงานผิดปกติ", "cause": "Sensor/Trigger  เสียหาย, การรบกวนจากสัญญาณไฟฟ้า (Electrical Noise)", "s": 2, "o": 2, "d": 2, "rpn": 8}, {"component": "TR_OilFilter", "code": "T302", "mode": "Motor oil filter หมุนกลับทาง", "cause": "Motor oil filter หมุนกลับทาง จาก ต่อท่อผิดด้าน (Inlet/Outlet สลับ)", "s": 2, "o": 2, "d": 2, "rpn": 8}, {"component": "TR_OilFilter", "code": "T303", "mode": "Oil filter unit มีน้ำมันรั่วซึม", "cause": "ซีลเสื่อมสภาพ", "s": 3, "o": 3, "d": 2, "rpn": 18}, {"component": "TR_OilFilter", "code": "T304", "mode": "Oil filter ไม่ทำงานหลังจากเปลี่ยน Tap", "cause": "ระบบปั๊มน้ำมันของ OLTC หยุดทำงานหรือเดินผิดทาง", "s": 2, "o": 2, "d": 2, "rpn": 8}, {"component": "TR_OilFilter", "code": "T305", "mode": "Pressure gauge oil filter เสีย", "cause": "แรงดันน้ำมันเกินพิกัด (Overpressure), น้ำมันหรือสิ่งสกปรกเข้าไปในเกจ, เสื่อมสภาพจากอายุใช้งาน", "s": 2, "o": 2, "d": 2, "rpn": 8}, {"component": "HV_ClosingCoil", "code": "H001", "mode": "Closing coil ชำรุด, Mechanism CB ขัดข้อง", "cause": "กลไกติดขัด, เสื่อมสภาพจากอายุใช้งาน, Misoperation", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "HV_Mechnism_CB", "code": "H002", "mode": "Mechanism CB ขัดข้อง,", "cause": "ขาดการบำรุงรักษา, Spring เสื่อมหรือหัก, Misalignment ของกลไก", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "HV_PumpMotor_CB", "code": "H003", "mode": "Pump motor ของ CB ไม่ทำงาน", "cause": "ไฟไม่เข้าที่มอเตอร์, Pressure switch ชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "HV_PumpMotor_CB", "code": "H005", "mode": "Pump motor ของ CB ทำงานบ่อย", "cause": "ระบบรั่ว (Internal หรือ External Leak), Accumulator เสื่อมหรือแรงดันไม่พอ, Pressure switch ตั้งผิดหรือเสีย, เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "HV_SF6LowGas", "code": "H006", "mode": "SF6 low gas", "cause": "รั่ว (Gas Leakage), เสื่อมสภาพจากอายุใช้งาน, Gas Pressure Gauge / Sensor เสีย", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "HV_SF6LowGas", "code": "H007", "mode": "SF6 over gas", "cause": "อุณหภูมิสูงผิดปกติ, Internal Arc หรือ Fault ทำให้ความร้อนสูงขึ้น, เติมก๊าซตอนอุณหภูมิต่ำ แล้วเมื่ออากาศร้อนขึ้นทำให้แรงดันเกิน, เติมก๊าซเกินตอนบำรุงรักษา (Overfilling)", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "HV_GIS_CB", "code": "H010", "mode": "GIS ชำรุด", "cause": "การติดตั้งหรือประกอบผิดพลาด, Internal Arc / Flashover, เสื่อมสภาพจากอายุใช้งาน, Human Error จากการบำรงุรักษา", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "HV_GIS_CB_SW", "code": "H011", "mode": "SW ปลด / สับ ไม่ได้", "cause": "กลไกติดขัด, Charge Spring ไม่ทำงาน, Control Circuit Fault", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "HV_GIS_CB_Hydraulic", "code": "H012", "mode": "Earthing SW ปลด / สับ ไม่ได้", "cause": "กลไกติดขัด, Control Circuit Fault, Residual Voltage, Sensor หรือ Feedback Error", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "HV_GIS_CB_Hydraulic", "code": "H013", "mode": "Earthing SW ชำรุด", "cause": "กลไกติดขัด, Contact Point ชำรุด, Motorized ES ชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "HV_GIS_CB_Hydraulic", "code": "H014", "mode": "น้ำมัน Hydraulic รั่วซึม", "cause": "ซีลเสื่อมสภาพ, ความดันระบบสูงเกินมาตรฐาน, ท่อไฮดรอลิก (Hose/Tube) แตก, Bolt/Flange ของถังหรือชุด Actuator หลวม", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "HV_GIS_CB", "code": "H015", "mode": "น้ำมันรั่วซึมที่ Pole ของ CB", "cause": "ซีลเสื่อมสภาพ", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "HV_GIS_CB", "code": "H018", "mode": "CB Main Contact ชำรุด", "cause": "Mechanical / Electrical Life Time, แรงกด Contact ไม่เพียงพอ, High Fault Current, ความชื้นหรือฝุ่นภายใน CB, กลไกติดขัด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "HV_GIS_CB_ES/DS_MainContact", "code": "H019", "mode": "ES/DS Main Contact ชำรุด", "cause": "Mechanical / Electrical Life Time, แรงกด Contact ไม่เพียงพอ, High Fault Current, ความชื้นหรือฝุ่นภายใน CB, กลไกติดขัด", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "HV_GIS_CB_ES/DS_Mechanism", "code": "H020", "mode": "DS/ES Mechanism ชำรุด", "cause": "กลไกติดขัด", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "HV_GIS_CB", "code": "H021", "mode": "Trip coil ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน, ปัญหาจากการป้องกันไฟกระชาก, ความชื้นหรือสิ่งสกปรก, การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "HV_GIS_CB", "code": "H022", "mode": "แก๊ส SF6 รั่ว", "cause": "รั่ว (Gas Leakage)", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "HV_GIS_CB", "code": "H023", "mode": "แก๊ส SF6 เสื่อมสภาพ", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "HV_GIS_CB_SF6PressGage", "code": "H024", "mode": "SF6 Pressure gage ชำรุด", "cause": "รั่ว (Gas Leakage), การปนเปื้อนหรือฝุ่นใน Pressure Gauge, การผิดพลาดจากกระบวนการติดตั้ง, อุณหภูมิหรือการเปลี่ยนแปลงของอุณหภูมิ, การสึกหรอจากการใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H101", "mode": "SW ไม่สามารถ Control ทางไฟฟ้าได้", "cause": "Control Circuit Fault", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H102", "mode": "CT, PT ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H103", "mode": "Flexible conductor ขาดบางส่วน", "cause": "Flexible conductor ขาดบางส่วน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H104", "mode": "Jumper, sleeve ร้อนแดง", "cause": "Jumper, sleeve ร้อนเกินมาตรฐาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H105", "mode": "Motor ของ SW ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H107", "mode": "SW โก่ง ร้อนแดง", "cause": "SW โก่ง ร้อนแดง จากการเสื่อมสภาพ", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H108", "mode": "SW ปลด-สับ ยาก", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H109", "mode": "SW สับไม่สนิท", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H110", "mode": "จุดต่อ Busbar ต่างๆร้อนแดง", "cause": "Hot Spot", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H111", "mode": "มีวัสดุ/รังนกที่ SW", "cause": "มีวัสดุ/รังนก", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H112", "mode": "ลูกถ้วยชำรุด", "cause": "ความชื้น, ฝุ่น, และการกัดกร่อน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H113", "mode": "ลูกถ้วยมีรอยชำรุด", "cause": "ความชื้น, ฝุ่น, และการกัดกร่อน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H114", "mode": "สวิตช์ใบมีด ground ปลด / สับ ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_HVSW_CTPT", "code": "H117", "mode": "DS/ES Mechanism ชำรุด", "cause": "กลไกติดขัด", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_Cap", "code": "H201", "mode": "Capacitor bank ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "HV_Cap", "code": "H202", "mode": "อุปกรณ์ชุดปลด-สับ Capacitor bank ไม่ทำงาน", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "HV_ShowReset", "code": "H301", "mode": "Alarm show reset ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "HV_DisRelay", "code": "H305", "mode": "Distance relay ชำรุด", "cause": "การทำงานผิดพลาดในระบบควบคุม, Current Transformer Malfunction, การตั้งค่าผิด, สัญญาณผิดปกติจากระบบภายนอก", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "HV_Relay", "code": "H308", "mode": "Overcurrent relay ชำรุด", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "HV_OCRelay", "code": "H309", "mode": "Overcurrent relay เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "MV_Relay", "code": "M311", "mode": "ซ่อม Relay เสีย", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "MV_Alarm", "code": "M312", "mode": "สวิตช์ตก alarm ไม่ดัง", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_Distance", "code": "H313", "mode": "ถอด Distance relay ไว้", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_SW_LTO", "code": "H314", "mode": "สายส่ง SW ตก LTO ไม่ทำงาน", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "HV_LampDC", "code": "H315", "mode": "หลอด DC supply show reset ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "MV_SWGR_CB", "code": "M001", "mode": "CB ปลดไม่ได้", "cause": "กลไกติดขัด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB_PT", "code": "M002", "mode": "PT ชำรุด", "cause": "เสื่อมสภาพ", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB", "code": "M003", "mode": "GCB low gas", "cause": "การรั่วซึมของ gas", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB_VacInter", "code": "M004", "mode": "Vacuum interrupter ชำรุด", "cause": "กลไกติดขัด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB_Heater", "code": "M005", "mode": "Heater ชำรุด", "cause": "กลไกติดขัด", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "MV_SWGR_CB_Mechanism", "code": "M006", "mode": "Mechanism ของ CB ขัดข้อง", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "MV_SWGR_CB_MotorChargSpring", "code": "M007", "mode": "Motor charge spring ไม่ทำงาน/ทำงานตลอด", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "MV_SWGR_OCB", "code": "M008", "mode": "OCB มีน้ำมันไหลซึม", "cause": "การรั่วซึมของน้ำมัน", "s": 5, "o": 1, "d": 1, "rpn": 5}, {"component": "MV_SWGR_TR_StationService", "code": "M009", "mode": "Station service / Pad mounted TR น้ำมันรั่วซึม", "cause": "การรั่วซึมของน้ำมัน", "s": 5, "o": 1, "d": 1, "rpn": 5}, {"component": "MV_SWGR_CB", "code": "M010", "mode": "SWGR ระเบิด", "cause": "การเกิดไฟฟ้าลัดวงจร (Short Circuit)", "s": 5, "o": 1, "d": 1, "rpn": 5}, {"component": "MV_SWGR_CB", "code": "M011", "mode": "ขณะปลด lock เพื่อ isolate CB สับเข้าเอง", "cause": "กลไกติดขัด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB", "code": "M012", "mode": "ซ่อม Circuit breaker ชำรุด", "cause": "กลไกชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB", "code": "M013", "mode": "นำ CB ออกนอกตู้ไม่ได้", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB", "code": "M014", "mode": "เปลี่ยน SWGR ชำรุด", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB", "code": "M015", "mode": "แผง SWGR มีเสียงดังผิดปกติ", "cause": "อุปกรณ์ทำงานผิดพลาด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB", "code": "M016", "mode": "สวิตช์ตกไม่สับ ทั้ง RR on อยู่", "cause": "กลไกชำรุด, เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB", "code": "M017", "mode": "Earthing SW ปลดไม่ได้", "cause": "กลไกชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_CB", "code": "M018", "mode": "Earthing SWชำรุด", "cause": "กลไกชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_SWGR_TR_StationService", "code": "M021", "mode": "Station service transformer ชำรุด", "cause": "การเกิดไฟฟ้าลัดวงจร", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_GIS_CB", "code": "M101", "mode": "CB ขัดข้อง ปลด-สับ ไม่ได้", "cause": "", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_GIS_CB", "code": "M102", "mode": "GIS ชำรุด", "cause": "กลไกชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_GIS_CB", "code": "M103", "mode": "Low gas alarm show reset ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน, การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_GIS_CB", "code": "M104", "mode": "Motor ของ Bus isolate ชำรุด", "cause": "กลไกชำรุด", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_GIS_CB", "code": "M105", "mode": "Motor ของ Bus isolate ถอดไปซ่อมและนำเข้าใช้งาน", "cause": "", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_GIS_CB", "code": "M106", "mode": "Bus isolate ชำรุด", "cause": "", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_GIS_CB", "code": "M107", "mode": "SF6 over gas", "cause": "SF6 over gas", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_GIS_CB", "code": "M108", "mode": "SF6 low gas", "cause": "SF6 low gas", "s": 4, "o": 2, "d": 2, "rpn": 16}, {"component": "MV_Cap_Bushing", "code": "M201", "mode": "Bushing capacitor มีน้ำมันรั่ว", "cause": "การรั่วซึมของน้ำมัน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "MV_Cap", "code": "M202", "mode": "Capacitor bank ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "MV_Cap_UVRelay", "code": "M203", "mode": "Capacitor bank ปลดออกอัตโนมัติเนื่องจาก", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "MV_Cap", "code": "M204", "mode": "เปลี่ยน Capacitor ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "MV_Cap", "code": "M205", "mode": "Fuse capacitor bank ขาด", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "MV_Cap_VacuumSw", "code": "M206", "mode": "Vacuum Sw ปลด-สับไม่ได้", "cause": "กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "MV_Cap", "code": "M207", "mode": "เปลี่ยน Capacitor bank แทนชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "MV_BTO", "code": "M302", "mode": "BTO ไม่ทำงาน", "cause": "เสื่อมสภาพจากอายุใช้งาน, การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "MV_BusDifRelay", "code": "M303", "mode": "Bus differential relay ชำรุด", "cause": "การทำงานผิดพลาดในระบบควบคุม, Current Transformer Malfunction, การตั้งค่าผิด, สัญญาณผิดปกติจากระบบภายนอก", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "MV_LBP/CBF", "code": "M304", "mode": "LBP/CBF ทำงาน", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "MV_Relay", "code": "M306", "mode": "Overcurrent relay ชำรุด", "cause": "Current Transformer Malfunction, การตั้งค่าผิด, สัญญาณผิดปกติจากระบบภายนอก", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "MV_Relay", "code": "M307", "mode": "Overcurrent relay เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "MV_Relay", "code": "M308", "mode": "Relay เสีย", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "MV_Control", "code": "M310", "mode": "ชุด Control relay OC,EF on แล้ว trip", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12}, {"component": "LV_BatCharger_Trip", "code": "L001", "mode": "Breaker trip ของ AC Source", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "LV_BatCharger_Trip", "code": "L002", "mode": "Breaker trip ของ DC Rectifier/Load", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "LV_BatCharger", "code": "L003", "mode": "Charger ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "LV_Battery", "code": "L004", "mode": "DC Volt ต่ำ/สูงกว่ามาตรฐาน", "cause": "แรงดันไม่ได้มาตรฐาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "LV_Battery", "code": "L005", "mode": "ถ.พ.ต่ำ/สูง บาง cell", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "LV_Battery", "code": "L006", "mode": "เปลี่ยน Battery รั่วบาง cell", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "LV_Battery", "code": "L007", "mode": "Case ของ Battery แตกลายงา/เปลี่ยนสี", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "LV_Battery", "code": "L008", "mode": "ระดับน้ำกลั่น ต่ำ / สูง กว่ามาตรฐาน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "LV_BatCharger", "code": "L011", "mode": "DC ลงกราวน์", "cause": "DC ลงกราวน์", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "LV_BatCharger", "code": "L012", "mode": "Amp. Meter battery charger ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "LV_BatCharger", "code": "L013", "mode": "Volt. Meter battery charger ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "LV_Battery", "code": "L014", "mode": "Battery low capacity", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "LV_AC/DCBoard", "code": "L101", "mode": "AC board Breaker ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "LV_AC/DCBoard", "code": "L102", "mode": "DC board Breaker ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "LV_AC/DCBoard", "code": "L103", "mode": "Breaker ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "LV_AC/DCBoard", "code": "L104", "mode": "Breaker สวิทซ์ตกบ่อย", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "LV_AC/DCBoard", "code": "L107", "mode": "วงจร ATF ชำรุดที่ AC Panel", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "LV_Fprotection", "code": "L201", "mode": "Air compressor มีน้ำมันซึม", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "LV_Fprotection", "code": "L202", "mode": "Alarm ที่ตู้ CWS show reset ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "LV_Fprotection", "code": "L203", "mode": "Alarm ที่ตู้ Fire Control reset ไม่ได้", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "LV_Fprotection", "code": "L204", "mode": "Nitrogen รั่ว", "cause": "Nitrogen รั่วซึม", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "LV_Fprotection", "code": "L205", "mode": "Air pressure ของชุด Detector ต่ำกว่ามาตรฐาน", "cause": "การทำงานผิดพลาดของอุปกรณ์", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "LV_Fprotection", "code": "L206", "mode": "Battery ชุดตู้ Fire control เสื่อมสภาพ", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "LV_Fprotection", "code": "L207", "mode": "Battery ชุดเครื่องยนต์ดับเพลิงเสื่อมสภาพ", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "LV_Fprotection", "code": "L208", "mode": "Priming tank มีสนิมภายในมาก", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "LV_Fprotection", "code": "L209", "mode": "เครื่องยนต์ดับเพลิง start ไม่ติด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "LV_Fprotection", "code": "L210", "mode": "น้ำไม่เข้าถัง Priming tank", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "LV_Fprotection", "code": "L211", "mode": "น้ำที่ Pilot line / น้ำยา Soft drops รั่ว", "cause": "รั่ว", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "SCADA_MMI", "code": "S001", "mode": "Measurement ที่หน้าจอ MMI ไม่เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน, การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "SCADA_ShowFail", "code": "S002", "mode": "Show Communication fail", "cause": "เสื่อมสภาพจากอายุใช้งาน, การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "SCADA_UPS", "code": "S004", "mode": "UPS / Converter / Inverter ขัดข้อง", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "SCADA_Measure", "code": "S005", "mode": "ค่า measurement อ่านค่าไม่ตรง", "cause": "เสื่อมสภาพจากอายุใช้งาน, อุณหภูมิหรือการเปลี่ยนแปลงของอุณหภูมิ", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "SCADA_MMI", "code": "S006", "mode": "ตำแหน่งอุปกรณ์ที่หน้าแผงและ MMI/SCADA ไม่ตรงกัน", "cause": "เสื่อมสภาพจากอายุใช้งาน, การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "SCADA_CB-EF-RR", "code": "S007", "mode": "เรียก menu control CB, EF, RR ไม่ได้", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "SCADA_FireAlarm", "code": "S101", "mode": "Fire Alarm Zone Show Reset ไม่ได้", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "SCADA_Control", "code": "S102", "mode": "ตู้ Control ที่ alarm ดังตลอด", "cause": "การทำงานผิดพลาดในระบบควบคุม", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM01", "mode": "ข้อต่อสายหลวม", "cause": "การติดตั้งไม่ถูก", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM02", "mode": "เทอร์มิเนเตอร์ซิลิโคนคอมปาวด์รั่ว", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM03", "mode": "ครีบเทอร์มิเนเตอร์แตก", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 5, "o": 1, "d": 3, "rpn": 15}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM04", "mode": "เทอร์มิเนเตอร์ระเบิดชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 5, "o": 1, "d": 3, "rpn": 15}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM05", "mode": "สายกราวด์หาย", "cause": "Non Technical Loss", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM06", "mode": "เปลือกสายเคเบิลแตก", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM07", "mode": "แคมป์ยึดสายเคเบิลแตกชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM08", "mode": "บ่อพักท่อร้อยสายชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM09", "mode": "กระแสกราวด์สูงเกินปกติ", "cause": "ไม่ทราบสาเหตุ", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM10", "mode": "หัวต่อสายฯชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM11", "mode": "เทอร์มิเนเตอร์และหัวต่อสายฯมีอุณหภูมิสูง", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM12", "mode": "เคเบิล 230เควี น้ำมันรั่วซึม", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM13", "mode": "ระบบพัดลมระบายอากาศชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM14", "mode": "PLC ระบบอุโมงค์ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM15", "mode": "ปั๊มน้ำในอุโมงค์ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM16", "mode": "ระบบตรวจวัดอากาศในอุโมงค์ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM17", "mode": "ระบบน้ำเย็นอุโมงค์ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM18", "mode": "ระบบไฟแรงต่ำอุโมงค์ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM19", "mode": "เคเบิลการ์ดชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM20", "mode": "อุปกรณ์ป้องกันเพลิงไหม้ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 1, "rpn": 6}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM21", "mode": "สายไฟฟ้าใต้ดินชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "Pole/Route บ่อพัก/Cable", "code": "UM22", "mode": "ปลวกกัดแทะสาย", "cause": "การกัดของสัตว์หรือแมลง", "s": 3, "o": 2, "d": 3, "rpn": 18}, {"component": "เสา/สาย", "code": "SM01", "mode": "Crane / Back-Hoe", "cause": "รถและเครื่องจักร", "s": 5, "o": 2, "d": 1, "rpn": 10}, {"component": "เสา/สาย", "code": "SM02", "mode": "ผู้รับเหมาโดนสายส่ง", "cause": "ไฟช็อคจากคนหรือสัตว์", "s": 5, "o": 2, "d": 1, "rpn": 10}, {"component": "เสา/สาย", "code": "SM03", "mode": "บุคคลโดนสายส่ง", "cause": "ไฟช็อคจากคนหรือสัตว์", "s": 5, "o": 2, "d": 1, "rpn": 10}, {"component": "เสา/สาย", "code": "SM05", "mode": "งู/นก/สัตว์", "cause": "ไฟช็อคจากคนหรือสัตว์", "s": 4, "o": 3, "d": 1, "rpn": 12}, {"component": "เสา/สาย", "code": "SM06", "mode": "ป้ายโฆษณา/สังกะสี", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12}, {"component": "เสา/สาย", "code": "SM07", "mode": "ว่าว/ลูกโป่ง/เศษผ้า", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12}, {"component": "เสา/สาย", "code": "SM08", "mode": "Bond wire/ OHGW", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12}, {"component": "เสา/สาย", "code": "SM09", "mode": "ต้นไม้/เสา TV", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12}, {"component": "เสา/สาย", "code": "SM10", "mode": "เศษวัสดุ", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12}, {"component": "เสา/สาย", "code": "SM11", "mode": "Flash Over/Leak", "cause": "Flash Over/Leak", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "เสา/สาย", "code": "SM12", "mode": "ลูกถ้วยหลุด/แตก", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "เสา/สาย", "code": "SM13", "mode": "ฝนตกฟ้าผ่า", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 2, "d": 1, "rpn": 8}, {"component": "เสา/สาย", "code": "SM14", "mode": "คอนพับ/Bolt Brace", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "เสา/สาย", "code": "SM15", "mode": "สายป้อน/สายสื่อสาร", "cause": "จากวัสดุเสาไฟ", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "เสา/สาย", "code": "SM16", "mode": "ไฟฟ้าเขตทำงาน", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "เสา/สาย", "code": "SM17", "mode": "สายป้อนสวิตซ์ตก", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "เสา/สาย", "code": "SM18", "mode": "เกิดไฟไหม้ใต้แนวสายส่ง", "cause": "จากภัยธรรมชาติ", "s": 4, "o": 3, "d": 1, "rpn": 12}, {"component": "เสา/สาย", "code": "SM19", "mode": "ไม่ทราบสาเหตุ", "cause": "ไม่ทราบสาเหตุ", "s": 3, "o": 2, "d": 4, "rpn": 24}, {"component": "เสา/สาย", "code": "SM20", "mode": "อื่นๆ", "cause": "อื่นๆ", "s": 3, "o": 2, "d": 4, "rpn": 24}, {"component": "เสา/สาย", "code": "SM21", "mode": "รถชนเสา", "cause": "จากอุบัติเหตุ", "s": 5, "o": 2, "d": 1, "rpn": 10}, {"component": "เสา/สาย", "code": "SM22", "mode": "Cable ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "เสา/สาย", "code": "SM23", "mode": "Terminator ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "เสา/สาย", "code": "SM24", "mode": "Lightning ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "เสา/สาย", "code": "SM25", "mode": "switch ปลดทาง Remote", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "เสา/สาย", "code": "SM26", "mode": "ชุด Interrupter ไม่ทำงาน", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "เสา/สาย", "code": "SM27", "mode": "switching ปลดสวิตซ์ในสายส่ง", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "เสา/สาย", "code": "SM28", "mode": "ปลดสวิตซ์ผิดตัว", "cause": "Technical Error", "s": 3, "o": 2, "d": 2, "rpn": 12}, {"component": "เสา/สาย", "code": "SM29", "mode": "อุปกรณ์ชำรุดภายในสถานี กฟน.", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "เสา/สาย", "code": "SM30", "mode": "ต้นไม้ (โดนอุปกรณ์สถานี กฟน.)", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "เสา/สาย", "code": "SM31", "mode": "อุปกรณ์ชำรุดภายในสถานี กฟผ./กฟภ.", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "เสา/สาย", "code": "SM32", "mode": "อุปกรณ์ชำรุดภายในสถานี ลูกค้า", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 2, "d": 3, "rpn": 24}, {"component": "เสา/สาย", "code": "SM33", "mode": "สายส่งไม่มีไฟ", "cause": "อื่นๆ", "s": 3, "o": 2, "d": 4, "rpn": 24}, {"component": "เสา/สาย", "code": "SM34", "mode": "Charge Line", "cause": "อื่นๆ", "s": 3, "o": 2, "d": 4, "rpn": 24}].map((x,i)=>({...x,id:i})),KEY="rcm_clean_table_edits";let edits={};try{edits=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}const data=master.map(x=>({...x,...(edits[x.id]||{})}));let current=null;const $=x=>document.getElementById(x);function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-function openPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(id)?.classList.add("active");document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.page===id))}document.addEventListener("click",e=>{let x=e.target.closest("[data-page]");if(x)openPage(x.dataset.page)});
-const comps=[...new Set(data.map(x=>x.component))].sort();comps.forEach(x=>component.add(new Option(x,x)));
-function filtered(){let q=search.value.trim().toLowerCase(),c=component.value,a=data.filter(x=>(!c||x.component===c)&&(!q||[x.code,x.component,x.mode,x.cause].join(" ").toLowerCase().includes(q)));if(sort.value==="rpn")a.sort((x,y)=>y.rpn-x.rpn);else if(sort.value==="component")a.sort((x,y)=>x.component.localeCompare(y.component));else a.sort((x,y)=>(x.code||"").localeCompare(y.code||"",undefined,{numeric:true}));return a}
-function render(){let a=filtered();tbody.innerHTML=a.map((x,i)=>`<tr><td>${i+1}</td><td class="code">${esc(x.code||"-")}</td><td>${esc(x.component)}</td><td>${esc(x.mode)}</td><td>${esc(x.cause)}</td><td class="num"><span class="score">${x.s}</span></td><td class="num"><span class="score">${x.o}</span></td><td class="num"><span class="score">${x.d}</span></td><td class="num rpn">${x.rpn}</td><td><button class="editBtn" data-edit="${x.id}">แก้ไข</button></td></tr>`).join("");count.textContent=`แสดง ${a.length} จาก ${data.length} รายการ`;document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>openModal(+b.dataset.edit));stats()}
-function stats(){componentsN.textContent=comps.length;failureN.textContent=data.length;scoredN.textContent=data.filter(x=>[x.s,x.o,x.d].every(v=>Number.isInteger(v)&&v>=1&&v<=5)).length;editedN.textContent=Object.keys(edits).length}
-function openModal(id){current=data.find(x=>x.id===id);mCode.textContent=current.code;mMode.textContent=current.mode;mComp.textContent=current.component;mCause.textContent=current.cause||"-";mS.value=current.s;mO.value=current.o;mD.value=current.d;live();modalBg.classList.add("show")}
-function live(){let a=+mS.value,b=+mO.value,c=+mD.value;mRpn.textContent=[a,b,c].every(v=>Number.isInteger(v)&&v>=1&&v<=5)?a*b*c:"–"}[mS,mO,mD].forEach(x=>x.oninput=live);function hide(){modalBg.classList.remove("show")}close.onclick=cancel.onclick=hide;modalBg.onclick=e=>{if(e.target===modalBg)hide()}
-save.onclick=()=>{let s=+mS.value,o=+mO.value,d=+mD.value;if(![s,o,d].every(v=>Number.isInteger(v)&&v>=1&&v<=5)){alert("S / O / D ต้องเป็นจำนวนเต็ม 1–5");return}let v={s,o,d,rpn:s*o*d};edits[current.id]=v;localStorage.setItem(KEY,JSON.stringify(edits));Object.assign(current,v);hide();render()}
-restore.onclick=()=>{let x=master.find(a=>a.id===current.id);delete edits[current.id];localStorage.setItem(KEY,JSON.stringify(edits));Object.assign(current,{s:x.s,o:x.o,d:x.d,rpn:x.rpn});hide();render()}
-resetAll.onclick=()=>{if(confirm("คืนคะแนนทั้งหมดเป็นค่าต้นฉบับจาก Excel?")){localStorage.removeItem(KEY);edits={};data.forEach(x=>{let a=master.find(m=>m.id===x.id);Object.assign(x,{s:a.s,o:a.o,d:a.d,rpn:a.rpn})});render()}}
-[search,component,sort].forEach(x=>x.oninput=render);clear.onclick=()=>{search.value="";component.value="";sort.value="code";render()};globalSearch.oninput=e=>{search.value=e.target.value;openPage("fmea");render()};
-function placeholders(){let p={criticality:["Consequence / Criticality","พื้นที่สำหรับการประเมิน Criticality"],hi:["Health Index","พื้นที่สำหรับโครงสร้าง Health Index"],plan:["Maintenance Plan","พื้นที่สำหรับจัดทำ Maintenance Plan"],reports:["Reports","พื้นที่สำหรับรายงานและการทบทวน"]};Object.entries(p).forEach(([id,a])=>{$(id).innerHTML=`<div class="card emptyPage"><h2>${a[0]}</h2><div class="emptyState"><div><div style="font-size:44px">▧</div><h3>${a[1]}</h3></div></div></div>`})}placeholders();render();
-</script></body></html>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transformer RCM & Health Index Management System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                        sidebar: '#0d1b2a',
+                        sidebarHover: '#1b263b',
+                        accentBlue: '#3b82f6',
+                        cardBg: '#ffffff',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-[#0A192F] text-slate-300 flex flex-col justify-between select-none shadow-xl z-20 flex-shrink-0">
+        <div>
+            <!-- Logo area -->
+            <div class="p-4 border-b border-slate-800 flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i class="fa-solid fa-bolt-lightning text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-base tracking-wide">RCM SYSTEM</h1>
+                    <p class="text-[10px] text-slate-400">Reliability-Centered Maintenance & Health Index</p>
+                </div>
+            </div>
+
+            <!-- Menu items -->
+            <nav class="p-3 space-y-1 text-sm overflow-y-auto max-h-[calc(100vh-140px)]">
+                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white font-medium shadow-sm transition">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 text-slate-300 transition">
+                    <i class="fa-solid fa-server w-5 text-center"></i>
+                    <span>Asset Management</span>
+                </a>
+                
+                <!-- RCM Analysis with Submenu -->
+                <div class="space-y-1">
+                    <button onclick="toggleSubmenu()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-slate-800 text-slate-300 transition">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-gears w-5 text-center"></i>
+                            <span>RCM Analysis</span>
+                        </div>
+                        <i id="rcm-arrow" class="fa-solid fa-chevron-down text-xs transition-transform rotate-180"></i>
+                    </button>
+                    <div id="rcm-submenu" class="pl-8 space-y-1 text-xs text-slate-400">
+                        <a href="#" class="block py-1.5 hover:text-white transition">Functions</a>
+                        <a href="#" class="block py-1.5 hover:text-white transition">Functional Failure</a>
+                        <a href="#" class="block py-1.5 text-white font-medium bg-slate-800/60 rounded px-2">FMEA</a>
+                        <a href="#" class="block py-1.5 hover:text-white transition">Criticality</a>
+                        <a href="#" class="block py-1.5 hover:text-white transition">Health Index</a>
+                        <a href="#" class="block py-1.5 hover:text-white transition">Maintenance Strategy</a>
+                    </div>
+                </div>
+
+                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 text-slate-300 transition">
+                    <i class="fa-solid fa-list-check w-5 text-center"></i>
+                    <span>Maintenance Task</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 text-slate-300 transition">
+                    <i class="fa-solid fa-calendar-days w-5 text-center"></i>
+                    <span>Maintenance Plan</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 text-slate-300 transition">
+                    <i class="fa-solid fa-eye w-5 text-center"></i>
+                    <span>Inspection & Monitoring</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 text-slate-300 transition">
+                    <i class="fa-solid fa-file-lines w-5 text-center"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 text-slate-300 transition">
+                    <i class="fa-solid fa-database w-5 text-center"></i>
+                    <span>Data Management</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 text-slate-300 transition">
+                    <i class="fa-solid fa-gear w-5 text-center"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Version Footer -->
+        <div class="p-4 border-t border-slate-800 text-xs text-slate-400">
+            <p class="font-semibold text-slate-300">Reliable Assets</p>
+            <p>Sustainable Tomorrow</p>
+            <div class="mt-2 text-[10px] text-slate-500">Version 1.0.0</div>
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-10 flex-shrink-0">
+            <div class="flex items-center space-x-4">
+                <h2 class="text-lg font-bold text-slate-800 tracking-tight">Transformer RCM & Health Index Management System</h2>
+                <span class="text-xs bg-blue-50 text-blue-700 font-medium px-2.5 py-1 rounded-full border border-blue-100">Reliability-Centered Maintenance for Sustainable Power System</span>
+            </div>
+            
+            <div class="flex items-center space-x-5">
+                <!-- Search Box -->
+                <div class="relative hidden md:block w-64">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" placeholder="ค้นหาอุปกรณ์, รหัส, รายการ..." class="w-full bg-slate-50 border border-slate-200 text-xs rounded-full pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                </div>
+
+                <!-- Notifications -->
+                <button class="relative text-slate-500 hover:text-slate-700 transition">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">3</span>
+                </button>
+
+                <!-- Help -->
+                <button class="text-slate-500 hover:text-slate-700 transition">
+                    <i class="fa-regular fa-circle-question text-lg"></i>
+                </button>
+
+                <!-- User Profile -->
+                <div class="flex items-center space-x-3 border-l pl-4 border-slate-200">
+                    <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow">
+                        PP
+                    </div>
+                    <div class="hidden sm:block text-left">
+                        <div class="text-xs font-bold text-slate-800">Panisara P.</div>
+                        <div class="text-[10px] text-slate-500">Industrial Engineering</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Content Body -->
+        <main class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-100">
+
+            <!-- Welcome & Substation Banner -->
+            <div class="relative bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 rounded-2xl p-6 text-white overflow-hidden shadow-lg">
+                <!-- Background overlay image / substation silhouette effect -->
+                <div class="absolute right-0 bottom-0 opacity-20 pointer-events-none transform translate-x-10 translate-y-5">
+                    <i class="fa-solid fa-tower-broadcast text-[200px]"></i>
+                </div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div>
+                        <p class="text-xs text-blue-300 font-medium uppercase tracking-wider mb-1">ยินดีต้อนรับสู่ระบบ</p>
+                        <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight">Transformer RCM & Health Index</h2>
+                        <p class="text-sm text-slate-300 mt-1">เพิ่มความเชื่อถือได้ของระบบไฟฟ้า เพื่อเมืองที่ยั่งยืน</p>
+                        <p class="text-xs italic text-blue-200 mt-3 bg-white/10 px-3 py-1.5 rounded-lg inline-block backdrop-blur-sm">
+                            “Reliable Transformer Sustainable Tomorrow”
+                        </p>
+                    </div>
+
+                    <!-- Date, Time & Weather Widget -->
+                    <div class="flex items-center space-x-6 bg-white/10 backdrop-blur-md px-5 py-3.5 rounded-xl border border-white/10">
+                        <div>
+                            <p class="text-[11px] text-slate-300 font-medium" id="current-date">วันจันทร์ที่ 22 กันยายน 2569</p>
+                            <div class="text-2xl font-bold tracking-tight" id="current-time">10:24</div>
+                        </div>
+                        <div class="border-l border-white/20 pl-5 flex items-center space-x-3">
+                            <div class="text-amber-400 text-2xl">
+                                <i class="fa-solid fa-sun animate-spin" style="animation-duration: 20s;"></i>
+                            </div>
+                            <div>
+                                <div class="text-lg font-bold">32°C</div>
+                                <div class="text-[10px] text-slate-300">กรุงเทพมหานคร</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-white/10 text-center md:text-right">
+                    <span class="text-xs italic text-slate-300">“Maintenance Today For a Brighter Tomorrow”</span>
+                </div>
+            </div>
+
+            <!-- RCM 10 Steps Workflow -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-3 items-center">
+                    
+                    <!-- Step 1 -->
+                    <div class="flex flex-col items-center text-center p-2 rounded-xl bg-blue-50/70 border border-blue-200 group hover:shadow-md transition cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow mb-2">1</div>
+                        <div class="text-blue-600 mb-1"><i class="fa-solid fa-cubes text-sm"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-700 leading-tight">กำหนดขอบเขตและเลือกอุปกรณ์</span>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex flex-col items-center text-center p-2 rounded-xl bg-slate-50 border border-slate-200 hover:bg-blue-50/50 transition cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shadow mb-2">2</div>
+                        <div class="text-slate-600 mb-1"><i class="fa-solid fa-book-open text-sm"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-700 leading-tight">กำหนดหน้าที่และมาตรฐาน</span>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-center text-center p-2 rounded-xl bg-amber-50/70 border border-amber-200 hover:shadow-md transition cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-amber-500 text-white font-bold text-xs flex items-center justify-center shadow mb-2">3</div>
+                        <div class="text-amber-600 mb-1"><i class="fa-solid fa-triangle-exclamation text-sm"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-700 leading-tight">ระบุ Functional Failure</span>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="flex flex-col items-center text-center p-2 rounded-xl bg-purple-50/70 border border-purple-200 hover:shadow-md transition cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center shadow mb-2">4</div>
+                        <div class="text-purple-600 mb-1"><i class="fa-solid fa-magnifying-glass-chart text-sm"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-700 leading-tight">วิเคราะห์ FMEA</span>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="flex flex-col items-center text-center p-2 rounded-xl bg-rose-50/70 border border-rose-200 hover:shadow-md transition cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center shadow mb-2">5</div>
+                        <div class="text-rose-600 mb-1"><i class="fa-solid fa-chart-bar text-sm"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-700 leading-tight">ประเมิน Criticality</span>
+                    </div>
+
+                    <!-- Step 6 -->
+                    <div class="flex flex-col items-center text-center p-2 rounded-xl bg-sky-50/70 border border-sky-200 hover:shadow-md transition cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center shadow mb-2">6</div>
+                        <div class="text-sky-600 mb-1"><i class="fa-solid fa-heart-pulse text-sm"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-700 leading-tight">ประเมิน Health Index</span>
+                    </div>
+
+                    <!-- Step 7 -->
+                    <div class="flex flex-col items-center text-center p-2 rounded-xl bg-emerald-50/70 border border-emerald-200 hover:shadow-md transition cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow mb-2">7</div>
+                        <div class="text-emerald-600 mb-1"><i class="fa-solid fa-gears text-sm"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-700 leading-tight">เลือกกลยุทธ์การบำรุงรักษา</span>
+                    </div>
+
+                    <!-- Step 8 -->
+                    <div class="flex flex-col items-center text-center p-2 rounded-xl bg-slate-50 border border-slate-200 hover:bg-blue-50/50 transition cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shadow mb-2">8</div>
+                        <div class="text-slate-600 mb-1"><i class="fa-solid fa-list-check text-sm"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-700 leading-tight">กำหนด Maintenance Task</span>
+                    </div>
+
+                    <!-- Step 9 -->
+                    <div class="flex flex-col items-center text-center p-2 rounded-xl bg-amber-50/50 border border-amber-200 hover:shadow-md transition cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center shadow mb-2">9</div>
+                        <div class="text-amber-600 mb-1"><i class="fa-solid fa-calendar-check text-sm"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-700 leading-tight">จัดทำ Maintenance Plan</span>
+                    </div>
+
+                    <!-- Step 10 -->
+                    <div class="flex flex-col items-center text-center p-2 rounded-xl bg-indigo-50/70 border border-indigo-200 hover:shadow-md transition cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow mb-2">10</div>
+                        <div class="text-indigo-600 mb-1"><i class="fa-solid fa-chart-line text-sm"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-700 leading-tight">ติดตามผลและทบทวน</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Summary KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                
+                <!-- Card 1 -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500">จำนวนอุปกรณ์ทั้งหมด</p>
+                            <h3 class="text-3xl font-bold text-slate-800 mt-1">87 <span class="text-xs font-normal text-slate-500">Components</span></h3>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl shadow-inner">
+                            <i class="fa-solid fa-cubes"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span class="text-emerald-600 font-semibold flex items-center gap-1"><i class="fa-solid fa-arrow-up"></i> 0%</span>
+                        <a href="#" class="text-blue-600 font-semibold hover:underline flex items-center gap-1">ดูรายละเอียด <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500">จำนวน Failure Mode</p>
+                            <h3 class="text-3xl font-bold text-slate-800 mt-1">222 <span class="text-xs font-normal text-slate-500">รายการ</span></h3>
+                        </div>
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl shadow-inner">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span class="text-emerald-600 font-semibold flex items-center gap-1"><i class="fa-solid fa-arrow-up"></i> 0%</span>
+                        <a href="#" class="text-blue-600 font-semibold hover:underline flex items-center gap-1">ดูรายละเอียด <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500">รายการที่ต้องเฝ้าระวัง</p>
+                            <h3 class="text-3xl font-bold text-amber-600 mt-1">46 <span class="text-xs font-normal text-slate-500">รายการ</span></h3>
+                        </div>
+                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl shadow-inner">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100">
+                        <div class="flex justify-between text-xs text-slate-500 mb-1">
+                            <span>สัดส่วน</span>
+                            <span class="font-bold text-amber-600">20.7%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="bg-amber-500 h-full rounded-full" style="width: 20.7%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-500">รายการวิกฤต</p>
+                            <h3 class="text-3xl font-bold text-rose-600 mt-1">18 <span class="text-xs font-normal text-slate-500">รายการ</span></h3>
+                        </div>
+                        <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl shadow-inner">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100">
+                        <div class="flex justify-between text-xs text-slate-500 mb-1">
+                            <span>สัดส่วน</span>
+                            <span class="font-bold text-rose-600">8.1%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="bg-rose-500 h-full rounded-full" style="width: 8.1%"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Main Content Grid: FMEA Database & Failure Mode Detail Panel -->
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                
+                <!-- FMEA Database Table (2 Columns in XL) -->
+                <div class="xl:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-slate-200 gap-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">FMEA Database</h3>
+                            <p class="text-xs text-slate-500">รายการ Failure Mode ทั้งหมดจากข้อมูลหม้อแปลง</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3.5 py-2 rounded-lg shadow-sm flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-plus text-xs"></i> เพิ่มรายการ
+                            </button>
+                            <button class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium px-3.5 py-2 rounded-lg shadow-sm flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-file-import text-xs text-blue-600"></i> นำเข้าข้อมูล
+                            </button>
+                            <button class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium px-3.5 py-2 rounded-lg shadow-sm flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-file-export text-xs text-emerald-600"></i> ส่งออก
+                            </button>
+                            <button class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs px-2.5 py-2 rounded-lg shadow-sm transition">
+                                <i class="fa-solid fa-ellipsis"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Controls -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 py-4">
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-500 mb-1">เลือก Component</label>
+                            <select class="w-full bg-slate-50 border border-slate-200 text-xs rounded-lg px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>ทั้งหมด</option>
+                                <option>TR_Counter L/A</option>
+                                <option>TR_OLevelGauge</option>
+                                <option>TR_OtempGauge</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-500 mb-1">เลือกสถานะ / Priority</label>
+                            <select class="w-full bg-slate-50 border border-slate-200 text-xs rounded-lg px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>ทั้งหมด</option>
+                                <option>ปกติ</option>
+                                <option>เฝ้าระวัง</option>
+                                <option>วิกฤต</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end space-x-2">
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                </span>
+                                <input type="text" placeholder="ค้นหา รหัส, รายการ, สาเหตุ..." class="w-full bg-slate-50 border border-slate-200 text-xs rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <button class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs px-3 py-2 rounded-lg transition" title="รีเซ็ต">
+                                รีเซ็ต
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- FMEA Table -->
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-y border-slate-200">
+                                    <th class="py-2.5 px-3 w-8 text-center"><input type="checkbox" class="rounded border-slate-300"></th>
+                                    <th class="py-2.5 px-3 font-semibold">รหัส</th>
+                                    <th class="py-2.5 px-3 font-semibold">Component</th>
+                                    <th class="py-2.5 px-3 font-semibold">Failure Mode</th>
+                                    <th class="py-2.5 px-3 font-semibold text-center">S</th>
+                                    <th class="py-2.5 px-3 font-semibold text-center">O</th>
+                                    <th class="py-2.5 px-3 font-semibold text-center">D</th>
+                                    <th class="py-2.5 px-3 font-semibold text-center">RPN</th>
+                                    <th class="py-2.5 px-3 font-semibold">Priority</th>
+                                    <th class="py-2.5 px-3 font-semibold text-center">สถานะ</th>
+                                    <th class="py-2.5 px-3 font-semibold text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-700">
+                                <!-- Row 1 (Selected) -->
+                                <tr class="bg-blue-50/60 hover:bg-blue-50 font-medium transition cursor-pointer" onclick="selectRow(this, 'T001', 'Counter Lightning Arrester ชำรุด', 'TR_Counter L/A', 8, 'ปานกลาง/ต่ำ')">
+                                    <td class="py-3 px-3 text-center"><input type="checkbox" checked class="rounded border-slate-300"></td>
+                                    <td class="py-3 px-3 font-bold text-blue-700">T001</td>
+                                    <td class="py-3 px-3">TR_Counter L/A</td>
+                                    <td class="py-3 px-3">Counter Lightning Arrester ชำรุด</td>
+                                    <td class="py-3 px-3 text-center font-bold">2</td>
+                                    <td class="py-3 px-3 text-center font-bold">2</td>
+                                    <td class="py-3 px-3 text-center font-bold">2</td>
+                                    <td class="py-3 px-3 text-center font-bold text-blue-700">8</td>
+                                    <td class="py-3 px-3"><span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded">ปานกลาง/ต่ำ</span></td>
+                                    <td class="py-3 px-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded">ใช้งาน</span></td>
+                                    <td class="py-3 px-3 text-center">
+                                        <button class="bg-blue-600 text-white text-[10px] px-2.5 py-1 rounded shadow-sm hover:bg-blue-700 transition">ดูรายละเอียด</button>
+                                    </td>
+                                </tr>
+                                <!-- Row 2 -->
+                                <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="selectRow(this, 'T002', 'Oil level gauge ชำรุด', 'TR_OLevelGauge', 6, 'ปานกลาง/ต่ำ')">
+                                    <td class="py-3 px-3 text-center"><input type="checkbox" class="rounded border-slate-300"></td>
+                                    <td class="py-3 px-3 font-bold text-slate-800">T002</td>
+                                    <td class="py-3 px-3">TR_OLevelGauge</td>
+                                    <td class="py-3 px-3">Oil level gauge ชำรุด</td>
+                                    <td class="py-3 px-3 text-center">3</td>
+                                    <td class="py-3 px-3 text-center">2</td>
+                                    <td class="py-3 px-3 text-center">1</td>
+                                    <td class="py-3 px-3 text-center font-bold">6</td>
+                                    <td class="py-3 px-3"><span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded">ปานกลาง/ต่ำ</span></td>
+                                    <td class="py-3 px-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded">ใช้งาน</span></td>
+                                    <td class="py-3 px-3 text-center">
+                                        <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] px-2.5 py-1 rounded transition">ดูรายละเอียด</button>
+                                    </td>
+                                </tr>
+                                <!-- Row 3 -->
+                                <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="selectRow(this, 'T003', 'Oil temp ชำรุด', 'TR_OtempGauge', 6, 'ปานกลาง/ต่ำ')">
+                                    <td class="py-3 px-3 text-center"><input type="checkbox" class="rounded border-slate-300"></td>
+                                    <td class="py-3 px-3 font-bold text-slate-800">T003</td>
+                                    <td class="py-3 px-3">TR_OtempGauge</td>
+                                    <td class="py-3 px-3">Oil temp ชำรุด</td>
+                                    <td class="py-3 px-3 text-center">3</td>
+                                    <td class="py-3 px-3 text-center">2</td>
+                                    <td class="py-3 px-3 text-center">1</td>
+                                    <td class="py-3 px-3 text-center font-bold">6</td>
+                                    <td class="py-3 px-3"><span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded">ปานกลาง/ต่ำ</span></td>
+                                    <td class="py-3 px-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded">ใช้งาน</span></td>
+                                    <td class="py-3 px-3 text-center">
+                                        <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] px-2.5 py-1 rounded transition">ดูรายละเอียด</button>
+                                    </td>
+                                </tr>
+                                <!-- Row 4 -->
+                                <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="selectRow(this, 'T004', 'Silicagel เปลี่ยนสี / Air Breather ชำรุด', 'TR_Sgel/ABreather', 12, 'ปานกลาง/ต่ำ')">
+                                    <td class="py-3 px-3 text-center"><input type="checkbox" class="rounded border-slate-300"></td>
+                                    <td class="py-3 px-3 font-bold text-slate-800">T004</td>
+                                    <td class="py-3 px-3">TR_Sgel/ABreather</td>
+                                    <td class="py-3 px-3">Silicagel เปลี่ยนสี / Air Breather ชำรุด</td>
+                                    <td class="py-3 px-3 text-center">2</td>
+                                    <td class="py-3 px-3 text-center">3</td>
+                                    <td class="py-3 px-3 text-center">2</td>
+                                    <td class="py-3 px-3 text-center font-bold">12</td>
+                                    <td class="py-3 px-3"><span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded">ปานกลาง/ต่ำ</span></td>
+                                    <td class="py-3 px-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded">ใช้งาน</span></td>
+                                    <td class="py-3 px-3 text-center">
+                                        <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] px-2.5 py-1 rounded transition">ดูรายละเอียด</button>
+                                    </td>
+                                </tr>
+                                <!-- Row 5 -->
+                                <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="selectRow(this, 'T005', 'Winding temp ชำรุด', 'TR_WtempGauge', 6, 'ปานกลาง/ต่ำ')">
+                                    <td class="py-3 px-3 text-center"><input type="checkbox" class="rounded border-slate-300"></td>
+                                    <td class="py-3 px-3 font-bold text-slate-800">T005</td>
+                                    <td class="py-3 px-3">TR_WtempGauge</td>
+                                    <td class="py-3 px-3">Winding temp ชำรุด</td>
+                                    <td class="py-3 px-3 text-center">3</td>
+                                    <td class="py-3 px-3 text-center">2</td>
+                                    <td class="py-3 px-3 text-center">1</td>
+                                    <td class="py-3 px-3 text-center font-bold">6</td>
+                                    <td class="py-3 px-3"><span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded">ปานกลาง/ต่ำ</span></td>
+                                    <td class="py-3 px-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded">ใช้งาน</span></td>
+                                    <td class="py-3 px-3 text-center">
+                                        <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] px-2.5 py-1 rounded transition">ดูรายละเอียด</button>
+                                    </td>
+                                </tr>
+                                <!-- Row 6 -->
+                                <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="selectRow(this, 'T006', 'น้ำมันรั่วซึมที่บนหม้อแปลงจอม', 'TR_TOP', 18, 'เฝ้าระวัง')">
+                                    <td class="py-3 px-3 text-center"><input type="checkbox" class="rounded border-slate-300"></td>
+                                    <td class="py-3 px-3 font-bold text-slate-800">T006</td>
+                                    <td class="py-3 px-3">TR_TOP</td>
+                                    <td class="py-3 px-3">น้ำมันรั่วซึมที่บนหม้อแปลงจอม</td>
+                                    <td class="py-3 px-3 text-center">3</td>
+                                    <td class="py-3 px-3 text-center">3</td>
+                                    <td class="py-3 px-3 text-center">2</td>
+                                    <td class="py-3 px-3 text-center font-bold text-amber-600">18</td>
+                                    <td class="py-3 px-3"><span class="bg-amber-100 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded">เฝ้าระวัง</span></td>
+                                    <td class="py-3 px-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded">ใช้งาน</span></td>
+                                    <td class="py-3 px-3 text-center">
+                                        <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] px-2.5 py-1 rounded transition">ดูรายละเอียด</button>
+                                    </td>
+                                </tr>
+                                <!-- Row 7 -->
+                                <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="selectRow(this, 'T007', 'น้ำมันรั่วซึมที่ Bushing', 'TR_Bushing', 24, 'เฝ้าระวัง')">
+                                    <td class="py-3 px-3 text-center"><input type="checkbox" class="rounded border-slate-300"></td>
+                                    <td class="py-3 px-3 font-bold text-slate-800">T007</td>
+                                    <td class="py-3 px-3">TR_Bushing</td>
+                                    <td class="py-3 px-3">น้ำมันรั่วซึมที่ Bushing</td>
+                                    <td class="py-3 px-3 text-center">4</td>
+                                    <td class="py-3 px-3 text-center">2</td>
+                                    <td class="py-3 px-3 text-center">3</td>
+                                    <td class="py-3 px-3 text-center font-bold text-amber-600">24</td>
+                                    <td class="py-3 px-3"><span class="bg-amber-100 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded">เฝ้าระวัง</span></td>
+                                    <td class="py-3 px-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded">ใช้งาน</span></td>
+                                    <td class="py-3 px-3 text-center">
+                                        <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] px-2.5 py-1 rounded transition">ดูรายละเอียด</button>
+                                    </td>
+                                </tr>
+                                <!-- Row 8 -->
+                                <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="selectRow(this, 'T015', 'หม้อแปลงชำรุด', 'TR_MainTank', 5, 'วิกฤต')">
+                                    <td class="py-3 px-3 text-center"><input type="checkbox" class="rounded border-slate-300"></td>
+                                    <td class="py-3 px-3 font-bold text-slate-800">T015</td>
+                                    <td class="py-3 px-3">TR_MainTank</td>
+                                    <td class="py-3 px-3">หม้อแปลงชำรุด</td>
+                                    <td class="py-3 px-3 text-center">5</td>
+                                    <td class="py-3 px-3 text-center">1</td>
+                                    <td class="py-3 px-3 text-center">1</td>
+                                    <td class="py-3 px-3 text-center font-bold text-rose-600">5</td>
+                                    <td class="py-3 px-3"><span class="bg-rose-100 text-rose-800 text-[10px] font-semibold px-2 py-0.5 rounded">วิกฤต</span></td>
+                                    <td class="py-3 px-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded">ใช้งาน</span></td>
+                                    <td class="py-3 px-3 text-center">
+                                        <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] px-2.5 py-1 rounded transition">ดูรายละเอียด</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-slate-200 text-xs text-slate-500 gap-3">
+                        <div>แสดง 1 - 8 จาก 222 รายการ</div>
+                        <div class="flex items-center space-x-1">
+                            <button class="px-2.5 py-1 border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50"><i class="fa-solid fa-angle-left"></i></button>
+                            <button class="px-3 py-1 bg-blue-600 text-white font-medium rounded shadow-sm">1</button>
+                            <button class="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50">2</button>
+                            <button class="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50">3</button>
+                            <button class="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50">4</button>
+                            <button class="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50">5</button>
+                            <span class="px-1">...</span>
+                            <button class="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50">28</button>
+                            <button class="px-2.5 py-1 border border-slate-200 rounded hover:bg-slate-50"><i class="fa-solid fa-angle-right"></i></button>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span>แสดง</span>
+                            <select class="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs">
+                                <option>8</option>
+                                <option>15</option>
+                                <option>30</option>
+                            </select>
+                            <span>รายการ/หน้า</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Failure Mode Detail Panel (Right Column) -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+                            <h3 class="font-bold text-slate-800 text-base">รายละเอียด Failure Mode</h3>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3.5 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-pen text-[10px]"></i> แก้ไขคะแนน
+                            </button>
+                        </div>
+
+                        <!-- Detail Info -->
+                        <div class="py-4 space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xl font-extrabold text-blue-700" id="detail-code">T001</span>
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2.5 py-0.5 rounded">ใช้งาน</span>
+                            </div>
+
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-800" id="detail-title">Counter Lightning Arrester ชำรุด</h4>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-xs">
+                                <div>
+                                    <span class="text-slate-400 block text-[10px]">Component</span>
+                                    <span class="font-semibold text-slate-700" id="detail-comp">TR_Counter L/A</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[10px]">Failure Cause</span>
+                                    <span class="font-semibold text-slate-700">โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด</span>
+                                </div>
+                            </div>
+
+                            <!-- SOD Counters -->
+                            <div class="grid grid-cols-3 gap-3 pt-2">
+                                <!-- Severity -->
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                                    <span class="text-[10px] font-medium text-slate-500 uppercase block mb-1">S</span>
+                                    <span class="text-[10px] text-slate-400 block mb-2">Severity</span>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button onclick="adjustSOD('S', -1)" class="w-6 h-6 bg-white border border-slate-300 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                                        <span class="font-bold text-sm" id="val-s">2</span>
+                                        <button onclick="adjustSOD('S', 1)" class="w-6 h-6 bg-white border border-slate-300 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition"><i class="fa-solid fa-plus text-[10px]"></i></button>
+                                    </div>
+                                </div>
+                                <!-- Occurrence -->
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                                    <span class="text-[10px] font-medium text-slate-500 uppercase block mb-1">O</span>
+                                    <span class="text-[10px] text-slate-400 block mb-2">Occurrence</span>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button onclick="adjustSOD('O', -1)" class="w-6 h-6 bg-white border border-slate-300 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                                        <span class="font-bold text-sm" id="val-o">2</span>
+                                        <button onclick="adjustSOD('O', 1)" class="w-6 h-6 bg-white border border-slate-300 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition"><i class="fa-solid fa-plus text-[10px]"></i></button>
+                                    </div>
+                                </div>
+                                <!-- Detection -->
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                                    <span class="text-[10px] font-medium text-slate-500 uppercase block mb-1">D</span>
+                                    <span class="text-[10px] text-slate-400 block mb-2">Detection</span>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button onclick="adjustSOD('D', -1)" class="w-6 h-6 bg-white border border-slate-300 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                                        <span class="font-bold text-sm" id="val-d">2</span>
+                                        <button onclick="adjustSOD('D', 1)" class="w-6 h-6 bg-white border border-slate-300 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition"><i class="fa-solid fa-plus text-[10px]"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- RPN Box -->
+                            <div class="bg-blue-50/70 border border-blue-200 p-4 rounded-xl flex items-center justify-between">
+                                <div>
+                                    <div class="text-xl font-extrabold text-blue-700">RPN = <span id="val-rpn">8</span></div>
+                                    <div class="text-[10px] text-slate-500">RPN = S x O x D</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-slate-500 block mb-1">Priority</span>
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full" id="val-priority">ปานกลาง/ต่ำ</span>
+                                </div>
+                            </div>
+
+                            <!-- Remark -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1">หมายเหตุ</label>
+                                <input type="text" value="-" class="w-full bg-slate-50 border border-slate-200 text-xs rounded-lg px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center space-x-3 pt-4 border-t border-slate-200">
+                        <button class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs py-2.5 rounded-lg transition shadow-sm">
+                            ยกเลิก
+                        </button>
+                        <button onclick="showSaveMessage()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs py-2.5 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk text-xs"></i> บันทึกการแก้ไข
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Section: Priority Distribution, Top 5 Components & Reports -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Priority Distribution Donut Chart Card -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base mb-1">การกระจาย Priority</h3>
+                        <p class="text-xs text-slate-500 mb-4">สัดส่วนตามระดับความสำคัญของความเสี่ยง</p>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-6 my-2">
+                        <div class="w-40 h-40 relative flex items-center justify-center">
+                            <canvas id="priorityChart"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span class="text-xs text-slate-400">รวม</span>
+                                <span class="text-xl font-bold text-slate-800">222</span>
+                                <span class="text-[10px] text-slate-400">รายการ</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2.5 text-xs">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+                                <span class="text-slate-600 font-medium">วิกฤต</span>
+                                <span class="font-bold text-slate-800">18 (8.1%)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                                <span class="text-slate-600 font-medium">เฝ้าระวัง</span>
+                                <span class="font-bold text-slate-800">46 (20.7%)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span>
+                                <span class="text-slate-600 font-medium">ปานกลาง/ต่ำ</span>
+                                <span class="font-bold text-slate-800">158 (71.2%)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-400 text-right mt-2">อัปเดตล่าสุด: วันนี้</div>
+                </div>
+
+                <!-- Top 5 Component Bar Chart Card -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base mb-1">Top 5 Component</h3>
+                        <p class="text-xs text-slate-500 mb-3">(ตามจำนวน Failure Mode)</p>
+                    </div>
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <div class="flex justify-between font-medium text-slate-700 mb-1">
+                                <span>TR_MainTank</span>
+                                <span class="font-bold">28</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-blue-600 h-full rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between font-medium text-slate-700 mb-1">
+                                <span>TR_Bushing</span>
+                                <span class="font-bold">24</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-blue-500 h-full rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between font-medium text-slate-700 mb-1">
+                                <span>TR_Coil</span>
+                                <span class="font-bold">18</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-sky-500 h-full rounded-full" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between font-medium text-slate-700 mb-1">
+                                <span>TR_Radiator</span>
+                                <span class="font-bold">15</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-teal-500 h-full rounded-full" style="width: 53%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between font-medium text-slate-700 mb-1">
+                                <span>TR_TapChanger</span>
+                                <span class="font-bold">12</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-indigo-500 h-full rounded-full" style="width: 42%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents and Reports Card -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base mb-1">เอกสารและรายงาน</h3>
+                        <p class="text-xs text-slate-500 mb-4">ดาวน์โหลดเทมเพลตและรายงานวิเคราะห์ RCM</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="#" class="flex flex-col items-center justify-center p-3.5 bg-emerald-50/50 border border-emerald-200 hover:bg-emerald-50 rounded-xl transition text-center group">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-lg mb-2 shadow-sm group-hover:scale-105 transition">
+                                <i class="fa-solid fa-file-excel"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-700">FMEA Template</span>
+                            <span class="text-[10px] text-slate-400">Excel Spreadsheet</span>
+                        </a>
+
+                        <a href="#" class="flex flex-col items-center justify-center p-3.5 bg-emerald-50/50 border border-emerald-200 hover:bg-emerald-50 rounded-xl transition text-center group">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-lg mb-2 shadow-sm group-hover:scale-105 transition">
+                                <i class="fa-solid fa-file-excel"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-700">HI Calculation Sheet</span>
+                            <span class="text-[10px] text-slate-400">Health Index Tool</span>
+                        </a>
+
+                        <a href="#" class="flex flex-col items-center justify-center p-3.5 bg-blue-50/50 border border-blue-200 hover:bg-blue-50 rounded-xl transition text-center group">
+                            <div class="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center text-lg mb-2 shadow-sm group-hover:scale-105 transition">
+                                <i class="fa-solid fa-file-word"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-700">Maintenance Plan</span>
+                            <span class="text-[10px] text-slate-400">Word Document</span>
+                        </a>
+
+                        <a href="#" class="flex flex-col items-center justify-center p-3.5 bg-rose-50/50 border border-rose-200 hover:bg-rose-50 rounded-xl transition text-center group">
+                            <div class="w-10 h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center text-lg mb-2 shadow-sm group-hover:scale-105 transition">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-700">RCM Report</span>
+                            <span class="text-[10px] text-slate-400">PDF Summary</span>
+                        </a>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
+                        <span>ระบบรายงานอัตโนมัติ</span>
+                        <a href="#" class="text-blue-600 font-semibold hover:underline">ดูทั้งหมด <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Custom Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3 z-50">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <div>
+            <div class="text-xs font-bold" id="toast-title">บันทึกข้อมูลเรียบร้อย</div>
+            <div class="text-[10px] text-slate-300" id="toast-desc">คะแนน RPN ถูกอัปเดตในระบบแล้ว</div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Toggle Submenu for RCM Analysis
+        function toggleSubmenu() {
+            const submenu = document.getElementById('rcm-submenu');
+            const arrow = document.getElementById('rcm-arrow');
+            submenu.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+        }
+
+        // Live Clock
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('current-time').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateClock, 1000);
+
+        // Select Row in Table to update Right Panel
+        function selectRow(element, code, title, comp, rpn, priority) {
+            // Highlight selected row
+            const rows = element.parentElement.querySelectorAll('tr');
+            rows.forEach(r => r.classList.remove('bg-blue-50/60', 'font-medium'));
+            element.classList.add('bg-blue-50/60', 'font-medium');
+
+            // Update Right Panel Info
+            document.getElementById('detail-code').innerText = code;
+            document.getElementById('detail-title').innerText = title;
+            document.getElementById('detail-comp').innerText = comp;
+            document.getElementById('val-rpn').innerText = rpn;
+            document.getElementById('val-priority').innerText = priority;
+        }
+
+        // Adjust SOD values dynamically
+        function adjustSOD(type, delta) {
+            let s = parseInt(document.getElementById('val-s').innerText);
+            let o = parseInt(document.getElementById('val-o').innerText);
+            let d = parseInt(document.getElementById('val-d').innerText);
+
+            if (type === 'S') s = Math.max(1, Math.min(10, s + delta));
+            if (type === 'O') o = Math.max(1, Math.min(10, o + delta));
+            if (type === 'D') d = Math.max(1, Math.min(10, d + delta));
+
+            document.getElementById('val-s').innerText = s;
+            document.getElementById('val-o').innerText = o;
+            document.getElementById('val-d').innerText = d;
+
+            let rpn = s * o * d;
+            document.getElementById('val-rpn').innerText = rpn;
+
+            let priorityText = "ปานกลาง/ต่ำ";
+            if (rpn >= 20) priorityText = "วิกฤต";
+            else if (rpn >= 12) priorityText = "เฝ้าระวัง";
+
+            document.getElementById('val-priority').innerText = priorityText;
+        }
+
+        // Toast notification
+        function showSaveMessage() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Initialize Priority Doughnut Chart
+        window.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('priorityChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['วิกฤต', 'เฝ้าระวัง', 'ปานกลาง/ต่ำ'],
+                    datasets: [{
+                        data: [18, 46, 158],
+                        backgroundColor: ['#f43f5e', '#f59e0b', '#3b82f6'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
