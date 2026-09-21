@@ -6,380 +6,1394 @@
 <title>RCM & Health Index Management System</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
 :root{
-  --navy:#123b66;--navy2:#0a2949;--blue:#2583d8;
-  --bg:#f4f8fc;--white:#fff;--border:#dce7f2;
-  --text:#17385e;--muted:#71869e;--green:#2ea776;
+    --navy:#0c315b;
+    --navy2:#071f3c;
+    --blue:#267ed0;
+    --blue2:#3b95e7;
+    --bg:#f4f8fc;
+    --card:#ffffff;
+    --border:#dbe7f3;
+    --text:#102f5b;
+    --muted:#71859d;
+
+    --green:#35af7b;
+    --yellow:#f3ae27;
+    --orange:#f18c34;
+    --red:#e54d60;
+    --purple:#7554c6;
 }
+
 body{
-  font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text)
+    font-family:Tahoma,"Segoe UI",Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
 }
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.app{display:flex;min-height:100vh}
 
-/* SIDEBAR */
+button,input,select,textarea{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.app{
+    display:flex;
+    min-height:100vh;
+}
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
 .sidebar{
-  width:250px;background:linear-gradient(180deg,var(--navy),var(--navy2));
-  color:white;position:fixed;top:0;bottom:0;left:0;overflow:auto
+    width:235px;
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:0;
+    background:
+        linear-gradient(180deg,#123f70 0%,#082746 100%);
+    color:white;
+    overflow-y:auto;
+    z-index:50;
 }
-.brand{padding:25px;border-bottom:1px solid #ffffff20}
-.brand h2{font-size:20px}
-.brand p{font-size:11px;opacity:.65;margin-top:7px;line-height:1.5}
-.menu{padding:14px 10px}
+
+.brand{
+    padding:22px 20px;
+    border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.brand h2{
+    font-size:19px;
+    letter-spacing:.3px;
+}
+
+.brand p{
+    font-size:11px;
+    opacity:.72;
+    margin-top:7px;
+    line-height:1.5;
+}
+
+.menu{
+    padding:13px 8px 90px;
+}
+
 .menu-btn{
-  width:100%;border:0;background:none;color:white;text-align:left;
-  padding:12px 14px;border-radius:9px;margin:2px 0;display:flex;
-  align-items:center;gap:11px
+    width:100%;
+    border:0;
+    color:white;
+    background:transparent;
+    padding:11px 13px;
+    border-radius:9px;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    text-align:left;
+    margin:2px 0;
+    transition:.18s;
 }
-.menu-btn:hover,.menu-btn.active{background:#ffffff18}
-.icon{width:22px;text-align:center}
-.submenu{margin-left:27px;border-left:1px solid #ffffff30;padding-left:8px}
-.submenu .menu-btn{font-size:12px;padding:9px 12px;opacity:.8}
 
-/* MAIN */
-.main{margin-left:250px;width:calc(100% - 250px)}
-.header{
-  height:72px;background:white;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 25px;position:sticky;top:0;z-index:5
+.menu-btn:hover{
+    background:rgba(255,255,255,.08);
 }
-.header h1{font-size:21px}
-.header p{font-size:11px;color:var(--muted);margin-top:4px}
-.header-right{display:flex;gap:10px;align-items:center}
+
+.menu-btn.active{
+    background:linear-gradient(90deg,#2f72b1,#245f98);
+}
+
+.menu-icon{
+    width:25px;
+    text-align:center;
+    font-size:18px;
+}
+
+.menu-label{
+    font-size:13px;
+}
+
+.submenu{
+    margin:5px 0 8px 30px;
+    padding-left:9px;
+    border-left:1px solid rgba(255,255,255,.2);
+}
+
+.submenu .menu-btn{
+    padding:8px 8px;
+}
+
+.submenu .menu-label{
+    font-size:11px;
+    opacity:.82;
+}
+
+.sidebar-footer{
+    position:absolute;
+    bottom:25px;
+    left:20px;
+    right:20px;
+    font-style:italic;
+    font-size:13px;
+    line-height:1.6;
+    opacity:.85;
+}
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.main{
+    margin-left:235px;
+    width:calc(100% - 235px);
+    min-width:0;
+}
+
+/* =====================================================
+   TOPBAR
+===================================================== */
+
+.topbar{
+    height:67px;
+    background:white;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    position:sticky;
+    top:0;
+    z-index:30;
+}
+
+.search-wrap{
+    position:relative;
+}
+
 .search{
-  width:270px;border:1px solid var(--border);padding:10px 13px;
-  border-radius:9px;outline:none
-}
-.content{padding:20px}
-
-/* PAGES */
-.page{display:none}
-.page.active{display:block}
-.page-head{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:18px;gap:15px
-}
-.page-head h2{font-size:23px}
-.page-head p{font-size:12px;color:var(--muted);margin-top:5px}
-.primary{
-  background:var(--blue);border:0;color:white;padding:10px 16px;
-  border-radius:8px
-}
-.secondary{
-  background:white;border:1px solid var(--border);color:var(--text);
-  padding:10px 16px;border-radius:8px
+    width:350px;
+    height:39px;
+    border:1px solid #cfdfee;
+    border-radius:8px;
+    padding:0 15px 0 38px;
+    outline:none;
+    color:var(--text);
 }
 
-/* HERO */
+.search:focus{
+    border-color:#69a9e3;
+    box-shadow:0 0 0 3px rgba(49,132,207,.1);
+}
+
+.search-icon{
+    position:absolute;
+    left:13px;
+    top:9px;
+    color:#4b739c;
+}
+
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:16px;
+}
+
+.circle-btn{
+    width:36px;
+    height:36px;
+    border:0;
+    border-radius:50%;
+    background:#eef5fb;
+    color:#315e8c;
+}
+
+.user{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.avatar{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#3b7dbd;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.user-name{
+    font-size:12px;
+}
+
+.user-name strong{
+    display:block;
+    font-size:12px;
+}
+
+.user-name span{
+    font-size:10px;
+    color:var(--muted);
+}
+
+/* =====================================================
+   CONTENT
+===================================================== */
+
+.content{
+    padding:13px 15px 20px;
+}
+
+.page{
+    display:none;
+}
+
+.page.active{
+    display:block;
+}
+
+/* =====================================================
+   HERO
+===================================================== */
+
 .hero{
-  background:linear-gradient(110deg,#e7f3ff,#fff);
-  border:1px solid var(--border);border-radius:16px;padding:28px;
+    min-height:175px;
+    border:1px solid #cfe1f2;
+    border-radius:13px;
+    overflow:hidden;
+    display:grid;
+    grid-template-columns:1fr 360px;
+    background:
+        radial-gradient(circle at 70% 20%,rgba(255,255,255,.8),transparent 35%),
+        linear-gradient(100deg,#e3f2ff,#cbe9ff);
 }
-.hero small{color:#527394}
-.hero h2{font-size:38px;margin:8px 0}
-.hero p{color:#597691}
 
-/* FLOW */
-.flow-box{
-  background:white;border:1px solid var(--border);
-  border-radius:15px;margin-top:16px;padding:18px;overflow-x:auto
+.hero-content{
+    padding:24px 28px;
 }
-.flow{display:flex;align-items:center;min-width:1100px;gap:7px}
-.step{
-  border:1px solid transparent;width:100px;min-width:100px;height:115px;
-  border-radius:12px;padding:9px;text-align:center;color:var(--text);
-  transition:.2s
-}
-.step:hover{transform:translateY(-3px);border-color:#9bc9ed}
-.step b{
-  display:flex;width:29px;height:29px;margin:0 auto 8px;border-radius:50%;
-  background:#267fca;color:white;align-items:center;justify-content:center
-}
-.step span{font-size:22px;display:block;margin-bottom:5px}
-.step small{font-size:10px;line-height:1.4}
-.s1{background:#edf7ff}.s2{background:#eaf9f6}.s3{background:#fff8df}
-.s4{background:#f3edff}.s5{background:#fff0f3}.s6{background:#eaf6ff}
-.s7{background:#eaf9f1}.s8{background:#ecf9fa}.s9{background:#fff6e7}
-.s10{background:#faf0ff}
-.arrow{color:#7995b3;font-size:20px}
 
-/* EMPTY */
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+.hero-kicker{
+    font-size:13px;
+    margin-bottom:8px;
+}
+
+.hero h1{
+    font-size:34px;
+    letter-spacing:-.5px;
+}
+
+.hero-sub{
+    margin-top:7px;
+    font-size:17px;
+}
+
+.hero-quote{
+    margin-top:13px;
+    font-size:15px;
+    font-style:italic;
+}
+
+.hero-visual{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+}
+
+.transformer{
+    width:220px;
+    height:115px;
+    background:linear-gradient(#7f98a8,#526d80);
+    border-radius:6px;
+    position:relative;
+    box-shadow:0 18px 35px rgba(0,40,80,.2);
+}
+
+.transformer:before,
+.transformer:after{
+    content:"";
+    position:absolute;
+    width:16px;
+    height:70px;
+    top:-50px;
+    background:repeating-linear-gradient(
+        to bottom,
+        #293b4b 0,
+        #293b4b 6px,
+        #778b98 6px,
+        #778b98 11px
+    );
+}
+
+.transformer:before{left:55px}
+.transformer:after{right:55px}
+
+.transformer-lines{
+    position:absolute;
+    inset:14px;
+    border-top:2px solid rgba(255,255,255,.35);
+    border-bottom:2px solid rgba(255,255,255,.25);
+}
+
+.hero-info{
+    background:rgba(255,255,255,.36);
+    padding:23px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.hero-info small{
+    font-size:11px;
+}
+
+.hero-info h2{
+    font-size:35px;
+    margin:4px 0 15px;
+}
+
+.hero-info blockquote{
+    font-size:13px;
+    font-style:italic;
+    text-align:center;
+    line-height:1.5;
+}
+
+/* =====================================================
+   FLOW
+===================================================== */
+
+.section-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:13px;
+    margin-top:11px;
+}
+
+.section-head{
+    padding:12px 14px 6px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.section-head h3{
+    font-size:14px;
+}
+
+.link-btn{
+    border:0;
+    background:none;
+    color:var(--blue);
+    font-size:11px;
+}
+
+.flow-scroll{
+    overflow-x:auto;
+    padding:9px 12px 14px;
+}
+
+.flow{
+    min-width:1060px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.flow-step{
+    width:90px;
+    min-width:90px;
+    min-height:105px;
+    border:1px solid transparent;
+    border-radius:11px;
+    padding:8px 5px;
+    background:#eef6fd;
+    text-align:center;
+    color:var(--text);
+    transition:.2s;
+}
+
+.flow-step:hover{
+    transform:translateY(-3px);
+    border-color:#91bee4;
+}
+
+.flow-step .number{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    background:#2075c3;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:-12px auto 5px;
+    font-weight:bold;
+}
+
+.flow-step .ficon{
+    font-size:25px;
+    margin:6px;
+}
+
+.flow-step p{
+    font-size:10px;
+    line-height:1.35;
+    font-weight:bold;
+}
+
+.flow-step:nth-of-type(2){background:#eaf9f5}
+.flow-step:nth-of-type(3){background:#fff8df}
+.flow-step:nth-of-type(4){background:#f2edff}
+.flow-step:nth-of-type(5){background:#fff0f3}
+.flow-step:nth-of-type(6){background:#eaf6ff}
+.flow-step:nth-of-type(7){background:#eaf9f2}
+.flow-step:nth-of-type(8){background:#edf9fc}
+.flow-step:nth-of-type(9){background:#fff6e9}
+.flow-step:nth-of-type(10){background:#f9efff}
+
+.flow-arrow{
+    color:#4e84b7;
+}
+
+/* =====================================================
+   KPI
+===================================================== */
+
+.overview-title{
+    margin-top:11px;
+    font-size:14px;
+}
+
+.kpis{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:11px;
+    margin-top:8px;
+}
+
+.kpi{
+    min-height:90px;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    padding:13px;
+    gap:13px;
+}
+
+.kpi-icon{
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+}
+
+.ki-blue{background:#e7f3ff;color:#2583d8}
+.ki-green{background:#e5f8ef;color:#24a673}
+.ki-yellow{background:#fff4d8;color:#d99512}
+.ki-red{background:#ffe8eb;color:#d93e50}
+
+.kpi-label{
+    font-size:11px;
+    font-weight:bold;
+}
+
+.kpi-number{
+    margin-top:5px;
+    font-size:25px;
+    font-weight:bold;
+}
+
+.placeholder{
+    color:#8da0b4;
+}
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.dashboard-row{
+    display:grid;
+    grid-template-columns:1fr 1.15fr .95fr;
+    gap:11px;
+    margin-top:11px;
+}
+
 .card{
-  background:white;border:1px solid var(--border);border-radius:13px;
-  padding:18px
+    background:white;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:13px;
+    min-width:0;
 }
-.card h3{font-size:15px;margin-bottom:7px}
-.card p{font-size:12px;color:var(--muted);line-height:1.6}
-.empty{
-  min-height:180px;display:flex;flex-direction:column;
-  justify-content:center;align-items:center;text-align:center
-}
-.empty-icon{
-  width:58px;height:58px;border-radius:50%;background:#edf5fc;
-  display:flex;align-items:center;justify-content:center;
-  font-size:25px;margin-bottom:12px
-}
-.empty strong{font-size:14px}
-.empty p{margin-top:6px;max-width:360px}
 
-/* FORM */
+.card-title{
+    font-size:14px;
+    font-weight:bold;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.empty-chart{
+    min-height:180px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:#8a9caf;
+    text-align:center;
+}
+
+.empty-ring{
+    width:130px;
+    height:130px;
+    border-radius:50%;
+    border:26px solid #edf3f8;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#8498ad;
+    margin-bottom:10px;
+}
+
+.empty-ring span{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.empty-state{
+    min-height:175px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    text-align:center;
+    color:#8598ad;
+}
+
+.empty-state .empty-icon{
+    font-size:37px;
+    margin-bottom:8px;
+}
+
+.empty-state strong{
+    font-size:12px;
+}
+
+.empty-state p{
+    font-size:10px;
+    margin-top:5px;
+}
+
+/* =====================================================
+   LOWER
+===================================================== */
+
+.lower-row{
+    display:grid;
+    grid-template-columns:1.2fr .9fr .95fr;
+    gap:11px;
+    margin-top:11px;
+}
+
+.doc-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:7px;
+}
+
+.doc{
+    min-height:105px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:white;
+    text-align:center;
+    padding:13px 4px;
+    font-size:9px;
+    color:var(--text);
+}
+
+.doc:hover{
+    background:#f6faff;
+}
+
+.doc-icon{
+    font-size:25px;
+    margin-bottom:8px;
+}
+
+.table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:10px;
+}
+
+.table th{
+    background:#edf4fa;
+    text-align:left;
+    padding:8px;
+}
+
+.table td{
+    padding:8px;
+    border-top:1px solid #edf1f5;
+}
+
+.no-data{
+    text-align:center!important;
+    height:115px;
+    color:#8598ad;
+}
+
+/* =====================================================
+   INNER PAGE
+===================================================== */
+
+.page-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+    gap:15px;
+}
+
+.page-header h2{
+    font-size:22px;
+}
+
+.page-header p{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:4px;
+}
+
+.primary{
+    border:0;
+    border-radius:8px;
+    background:var(--blue);
+    color:white;
+    padding:10px 15px;
+}
+
+.primary:hover{
+    background:#166fbd;
+}
+
+.secondary{
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:white;
+    color:var(--text);
+    padding:10px 15px;
+}
+
 .form-card{
-  background:white;border:1px solid var(--border);
-  border-radius:13px;padding:20px
-}
-.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
-.field label{display:block;font-size:12px;font-weight:bold;margin-bottom:6px}
-.field input,.field select,.field textarea{
-  width:100%;border:1px solid var(--border);border-radius:8px;
-  padding:10px;background:white;outline:none
-}
-.field textarea{min-height:90px;resize:vertical}
-.full{grid-column:1/-1}
-.form-actions{margin-top:18px;display:flex;justify-content:flex-end;gap:8px}
-
-/* TABLE EMPTY */
-.table-wrap{background:white;border:1px solid var(--border);border-radius:13px;overflow:hidden}
-table{width:100%;border-collapse:collapse}
-th{background:#edf4fa;text-align:left;padding:11px;font-size:11px}
-td{padding:12px;border-top:1px solid #edf1f5;font-size:11px}
-.no-data{text-align:center!important;padding:45px!important;color:var(--muted)}
-
-.back{
-  border:0;background:none;color:var(--blue);margin-bottom:12px;
-  font-size:12px
+    background:white;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:18px;
 }
 
-@media(max-width:900px){
-  .sidebar{width:70px}
-  .brand p,.brand h2,.menu-btn .label,.submenu{display:none}
-  .main{margin-left:70px;width:calc(100% - 70px)}
-  .grid,.form-grid{grid-template-columns:1fr}
-  .search{display:none}
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+}
+
+.field label{
+    display:block;
+    font-size:11px;
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
+.field input,
+.field select,
+.field textarea{
+    width:100%;
+    border:1px solid #d6e2ee;
+    border-radius:7px;
+    padding:10px;
+    outline:none;
+    background:white;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+    border-color:#5ca2df;
+}
+
+.field textarea{
+    min-height:90px;
+    resize:vertical;
+}
+
+.full{
+    grid-column:1/-1;
+}
+
+.form-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:15px;
+}
+
+.hidden{
+    display:none!important;
+}
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+.modal-bg{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(5,25,45,.5);
+    z-index:100;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.modal-bg.show{
+    display:flex;
+}
+
+.modal{
+    background:white;
+    width:min(650px,100%);
+    max-height:90vh;
+    overflow:auto;
+    border-radius:14px;
+    padding:20px;
+}
+
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:17px;
+}
+
+.close{
+    width:34px;
+    height:34px;
+    border:0;
+    border-radius:50%;
+    background:#eef4fa;
+}
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+.toast{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    background:#173d63;
+    color:white;
+    border-radius:8px;
+    padding:11px 16px;
+    font-size:11px;
+    z-index:200;
+    display:none;
+}
+
+.toast.show{
+    display:block;
+}
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer{
+    margin-top:13px;
+    display:flex;
+    justify-content:space-between;
+    font-size:9px;
+    color:#8296ab;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:1100px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .dashboard-row,.lower-row{grid-template-columns:1fr}
+}
+
+@media(max-width:760px){
+    .sidebar{width:68px}
+    .brand h2{font-size:10px}
+    .brand p,.menu-label,.submenu,.sidebar-footer{display:none}
+    .main{margin-left:68px;width:calc(100% - 68px)}
+    .search{width:190px}
+    .user-name{display:none}
+    .hero{grid-template-columns:1fr}
+    .hero-visual{display:none}
+    .hero-info{display:none}
+    .hero h1{font-size:26px}
+    .kpis{grid-template-columns:1fr}
+    .form-grid{grid-template-columns:1fr}
+    .full{grid-column:auto}
 }
 </style>
 </head>
 
 <body>
+
 <div class="app">
 
+<!-- ===================================================
+SIDEBAR
+=================================================== -->
+
 <aside class="sidebar">
-  <div class="brand">
-    <h2>⚙ RCM SYSTEM</h2>
-    <p>Reliability & Maintenance<br>Management Platform</p>
-  </div>
 
-  <nav class="menu">
-    <button class="menu-btn active" data-page="dashboard">
-      <span class="icon">⌂</span><span class="label">Dashboard</span>
-    </button>
-
-    <button class="menu-btn" data-page="assets">
-      <span class="icon">▦</span><span class="label">Asset Management</span>
-    </button>
-
-    <button class="menu-btn">
-      <span class="icon">⚙</span><span class="label">RCM Analysis</span>
-    </button>
-
-    <div class="submenu">
-      <button class="menu-btn" data-page="functions"><span class="label">Functions</span></button>
-      <button class="menu-btn" data-page="failure"><span class="label">Functional Failure</span></button>
-      <button class="menu-btn" data-page="fmea"><span class="label">FMEA</span></button>
-      <button class="menu-btn" data-page="criticality"><span class="label">Criticality</span></button>
-      <button class="menu-btn" data-page="hi"><span class="label">Health Index</span></button>
-      <button class="menu-btn" data-page="strategy"><span class="label">Maintenance Strategy</span></button>
+    <div class="brand">
+        <h2>RCM SYSTEM</h2>
+        <p>Reliability-Centered Maintenance<br>& Health Index</p>
     </div>
 
-    <button class="menu-btn" data-page="task">
-      <span class="icon">☑</span><span class="label">Maintenance Task</span>
-    </button>
+    <nav class="menu">
 
-    <button class="menu-btn" data-page="plan">
-      <span class="icon">▣</span><span class="label">Maintenance Plan</span>
-    </button>
+        <button class="menu-btn active" data-page="dashboard">
+            <span class="menu-icon">⌂</span>
+            <span class="menu-label">Dashboard</span>
+        </button>
 
-    <button class="menu-btn" data-page="inspection">
-      <span class="icon">⌁</span><span class="label">Inspection & Monitoring</span>
-    </button>
+        <button class="menu-btn" data-page="assets">
+            <span class="menu-icon">▦</span>
+            <span class="menu-label">Asset Management</span>
+        </button>
 
-    <button class="menu-btn" data-page="reports">
-      <span class="icon">▤</span><span class="label">Reports</span>
-    </button>
-  </nav>
+        <button class="menu-btn">
+            <span class="menu-icon">⚙</span>
+            <span class="menu-label">RCM Analysis</span>
+        </button>
+
+        <div class="submenu">
+
+            <button class="menu-btn" data-page="functions">
+                <span class="menu-label">Functions</span>
+            </button>
+
+            <button class="menu-btn" data-page="failure">
+                <span class="menu-label">Functional Failure</span>
+            </button>
+
+            <button class="menu-btn" data-page="fmea">
+                <span class="menu-label">FMEA</span>
+            </button>
+
+            <button class="menu-btn" data-page="criticality">
+                <span class="menu-label">Criticality</span>
+            </button>
+
+            <button class="menu-btn" data-page="hi">
+                <span class="menu-label">Health Index</span>
+            </button>
+
+            <button class="menu-btn" data-page="strategy">
+                <span class="menu-label">Maintenance Strategy</span>
+            </button>
+
+        </div>
+
+        <button class="menu-btn" data-page="task">
+            <span class="menu-icon">▣</span>
+            <span class="menu-label">Maintenance Task</span>
+        </button>
+
+        <button class="menu-btn" data-page="plan">
+            <span class="menu-icon">☑</span>
+            <span class="menu-label">Maintenance Plan</span>
+        </button>
+
+        <button class="menu-btn" data-page="inspection">
+            <span class="menu-icon">▣</span>
+            <span class="menu-label">Inspection & Monitoring</span>
+        </button>
+
+        <button class="menu-btn" data-page="reports">
+            <span class="menu-icon">▤</span>
+            <span class="menu-label">Reports</span>
+        </button>
+
+        <button class="menu-btn" data-page="settings">
+            <span class="menu-icon">⚙</span>
+            <span class="menu-label">Settings</span>
+        </button>
+
+    </nav>
+
+    <div class="sidebar-footer">
+        Reliable Assets<br>
+        Sustainable Tomorrow
+    </div>
+
 </aside>
+
+<!-- ===================================================
+MAIN
+=================================================== -->
 
 <main class="main">
 
-<header class="header">
-  <div>
-    <h1 id="headerTitle">RCM & Health Index Management System</h1>
-    <p>Reliability-Centered Maintenance</p>
-  </div>
+<header class="topbar">
 
-  <div class="header-right">
-    <input class="search" id="search" placeholder="ค้นหาอุปกรณ์...">
-  </div>
+    <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input
+            id="globalSearch"
+            class="search"
+            placeholder="ค้นหาอุปกรณ์, รหัส, สถานที่..."
+        >
+    </div>
+
+    <div class="top-actions">
+
+        <button class="circle-btn" id="notificationBtn">🔔</button>
+
+        <button class="circle-btn" id="helpBtn">?</button>
+
+        <div class="user">
+            <div class="avatar">●</div>
+
+            <div class="user-name">
+                <strong>ผู้ใช้งาน</strong>
+                <span>RCM Management</span>
+            </div>
+        </div>
+
+    </div>
+
 </header>
 
 <div class="content">
 
-<!-- DASHBOARD -->
+<!-- ===================================================
+DASHBOARD
+=================================================== -->
+
 <section class="page active" id="dashboard">
 
-  <div class="hero">
-    <small>ระบบวิเคราะห์และวางแผนการบำรุงรักษา</small>
-    <h2>RCM & Health Index</h2>
-    <p>Reliability-Centered Maintenance & Asset Health Management</p>
-  </div>
+    <section class="hero">
 
-  <div class="flow-box">
-    <div class="flow">
+        <div class="hero-content">
 
-      <button class="step s1" data-page="assets">
-        <b>1</b><span>▦</span><small>กำหนดขอบเขต<br>และเลือกอุปกรณ์</small>
-      </button>
-      <i class="arrow">→</i>
+            <div class="hero-kicker">
+                ยินดีต้อนรับสู่ระบบ
+            </div>
 
-      <button class="step s2" data-page="functions">
-        <b>2</b><span>▤</span><small>กำหนดหน้าที่<br>และมาตรฐาน</small>
-      </button>
-      <i class="arrow">→</i>
+            <h1>
+                RCM & Health Index Management System
+            </h1>
 
-      <button class="step s3" data-page="failure">
-        <b>3</b><span>⚠</span><small>Functional<br>Failure</small>
-      </button>
-      <i class="arrow">→</i>
+            <div class="hero-sub">
+                Reliability-Centered Maintenance for Sustainable Power System
+            </div>
 
-      <button class="step s4" data-page="fmea">
-        <b>4</b><span>⌕</span><small>วิเคราะห์<br>FMEA</small>
-      </button>
-      <i class="arrow">→</i>
+            <div class="hero-quote">
+                “เพิ่มความเชื่อถือได้ของระบบไฟฟ้า เพื่อการบริหารสินทรัพย์อย่างยั่งยืน”
+            </div>
 
-      <button class="step s5" data-page="criticality">
-        <b>5</b><span>▥</span><small>Consequence<br>Criticality</small>
-      </button>
-      <i class="arrow">→</i>
+        </div>
 
-      <button class="step s6" data-page="hi">
-        <b>6</b><span>⌁</span><small>ประเมิน<br>Health Index</small>
-      </button>
-      <i class="arrow">→</i>
+        <div class="hero-visual">
+            <div class="transformer">
+                <div class="transformer-lines"></div>
+            </div>
+        </div>
 
-      <button class="step s7" data-page="strategy">
-        <b>7</b><span>⚒</span><small>เลือกกลยุทธ์<br>บำรุงรักษา</small>
-      </button>
-      <i class="arrow">→</i>
+    </section>
 
-      <button class="step s8" data-page="task">
-        <b>8</b><span>☑</span><small>Maintenance<br>Task</small>
-      </button>
-      <i class="arrow">→</i>
+    <!-- FLOW -->
 
-      <button class="step s9" data-page="plan">
-        <b>9</b><span>▣</span><small>Maintenance<br>Plan</small>
-      </button>
-      <i class="arrow">→</i>
+    <section class="section-card">
 
-      <button class="step s10" data-page="reports">
-        <b>10</b><span>↗</span><small>ติดตามผล<br>และทบทวน</small>
-      </button>
+        <div class="section-head">
+
+            <h3>
+                ขั้นตอนการทำ RCM ร่วมกับการประเมิน Health Index
+            </h3>
+
+            <button class="link-btn" data-page="assets">
+                เริ่มต้นวิเคราะห์ →
+            </button>
+
+        </div>
+
+        <div class="flow-scroll">
+
+            <div class="flow">
+
+                <button class="flow-step" data-page="assets">
+                    <span class="number">1</span>
+                    <span class="ficon">▦</span>
+                    <p>กำหนดขอบเขต<br>และเลือกอุปกรณ์</p>
+                </button>
+
+                <span class="flow-arrow">→</span>
+
+                <button class="flow-step" data-page="functions">
+                    <span class="number">2</span>
+                    <span class="ficon">▤</span>
+                    <p>กำหนดหน้าที่<br>และมาตรฐาน</p>
+                </button>
+
+                <span class="flow-arrow">→</span>
+
+                <button class="flow-step" data-page="failure">
+                    <span class="number">3</span>
+                    <span class="ficon">⚠</span>
+                    <p>Functional<br>Failure</p>
+                </button>
+
+                <span class="flow-arrow">→</span>
+
+                <button class="flow-step" data-page="fmea">
+                    <span class="number">4</span>
+                    <span class="ficon">⌕</span>
+                    <p>วิเคราะห์<br>FMEA</p>
+                </button>
+
+                <span class="flow-arrow">→</span>
+
+                <button class="flow-step" data-page="criticality">
+                    <span class="number">5</span>
+                    <span class="ficon">▥</span>
+                    <p>Consequence /<br>Criticality</p>
+                </button>
+
+                <span class="flow-arrow">→</span>
+
+                <button class="flow-step" data-page="hi">
+                    <span class="number">6</span>
+                    <span class="ficon">⌁</span>
+                    <p>ประเมิน<br>Health Index</p>
+                </button>
+
+                <span class="flow-arrow">→</span>
+
+                <button class="flow-step" data-page="strategy">
+                    <span class="number">7</span>
+                    <span class="ficon">⚙</span>
+                    <p>เลือกกลยุทธ์<br>การบำรุงรักษา</p>
+                </button>
+
+                <span class="flow-arrow">→</span>
+
+                <button class="flow-step" data-page="task">
+                    <span class="number">8</span>
+                    <span class="ficon">☑</span>
+                    <p>กำหนด<br>Maintenance Task</p>
+                </button>
+
+                <span class="flow-arrow">→</span>
+
+                <button class="flow-step" data-page="plan">
+                    <span class="number">9</span>
+                    <span class="ficon">▣</span>
+                    <p>จัดทำ<br>Maintenance Plan</p>
+                </button>
+
+                <span class="flow-arrow">→</span>
+
+                <button class="flow-step" data-page="reports">
+                    <span class="number">10</span>
+                    <span class="ficon">↗</span>
+                    <p>ติดตามผล<br>และทบทวน</p>
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <h3 class="overview-title">
+        ภาพรวมระบบ
+    </h3>
+
+    <!-- KPI -->
+
+    <div class="kpis">
+
+        <div class="kpi">
+            <div class="kpi-icon ki-blue">▦</div>
+            <div>
+                <div class="kpi-label">จำนวนอุปกรณ์ทั้งหมด</div>
+                <div class="kpi-number placeholder">–</div>
+            </div>
+        </div>
+
+        <div class="kpi">
+            <div class="kpi-icon ki-green">⌁</div>
+            <div>
+                <div class="kpi-label">อุปกรณ์ HI ดี</div>
+                <div class="kpi-number placeholder">–</div>
+            </div>
+        </div>
+
+        <div class="kpi">
+            <div class="kpi-icon ki-yellow">◉</div>
+            <div>
+                <div class="kpi-label">อุปกรณ์ที่ต้องเฝ้าระวัง</div>
+                <div class="kpi-number placeholder">–</div>
+            </div>
+        </div>
+
+        <div class="kpi">
+            <div class="kpi-icon ki-red">⚠</div>
+            <div>
+                <div class="kpi-label">อุปกรณ์วิกฤต</div>
+                <div class="kpi-number placeholder">–</div>
+            </div>
+        </div>
 
     </div>
-  </div>
 
-  <div class="grid">
-    <div class="card empty">
-      <div class="empty-icon">▦</div>
-      <strong>ยังไม่มีข้อมูลอุปกรณ์</strong>
-      <p>เพิ่มอุปกรณ์เพื่อเริ่มต้นกระบวนการ RCM</p>
+    <!-- DASHBOARD ROW -->
+
+    <div class="dashboard-row">
+
+        <div class="card">
+
+            <div class="card-title">
+                Health Index Overview
+            </div>
+
+            <div class="empty-chart">
+
+                <div class="empty-ring">
+                    <span>–</span>
+                </div>
+
+                <span>ยังไม่มีข้อมูล Health Index</span>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-title">
+                อุปกรณ์ที่ต้องดำเนินการ
+
+                <button class="link-btn" data-page="assets">
+                    ดูทั้งหมด →
+                </button>
+            </div>
+
+            <div class="empty-state">
+
+                <div class="empty-icon">◇</div>
+
+                <strong>ยังไม่มีข้อมูล</strong>
+
+                <p>
+                    เมื่อมีข้อมูลจะแสดงรายการอุปกรณ์ที่ต้องดำเนินการ
+                </p>
+
+                <br>
+
+                <button class="primary" data-page="assets">
+                    + เพิ่มข้อมูลอุปกรณ์
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-title">
+                Maintenance Strategy Distribution
+            </div>
+
+            <div class="empty-chart">
+
+                <div class="empty-ring">
+                    <span>–</span>
+                </div>
+
+                <span>ยังไม่มีข้อมูลกลยุทธ์</span>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <div class="card empty">
-      <div class="empty-icon">⌁</div>
-      <strong>ยังไม่มีข้อมูล Health Index</strong>
-      <p>ข้อมูลจะแสดงหลังจากมีการประเมิน HI</p>
-    </div>
+    <!-- LOWER -->
 
-    <div class="card empty">
-      <div class="empty-icon">⚒</div>
-      <strong>ยังไม่มีกลยุทธ์การบำรุงรักษา</strong>
-      <p>ผลลัพธ์จะแสดงหลังจากวิเคราะห์ RCM</p>
+    <div class="lower-row">
+
+        <div class="card">
+
+            <div class="card-title">
+                งานที่ต้องดำเนินการ (To Do)
+            </div>
+
+            <table class="table">
+
+                <thead>
+                <tr>
+                    <th>กำหนดเสร็จ</th>
+                    <th>งาน</th>
+                    <th>อุปกรณ์</th>
+                    <th>ผู้รับผิดชอบ</th>
+                    <th>สถานะ</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr>
+                    <td colspan="5" class="no-data">
+                        ยังไม่มีงานที่ต้องดำเนินการ
+                    </td>
+                </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-title">
+                เอกสารและรายงาน
+            </div>
+
+            <div class="doc-grid">
+
+                <button class="doc" data-page="fmea">
+                    <div class="doc-icon">📊</div>
+                    FMEA<br>Template
+                </button>
+
+                <button class="doc" data-page="hi">
+                    <div class="doc-icon">📈</div>
+                    HI Calculation<br>Sheet
+                </button>
+
+                <button class="doc" data-page="plan">
+                    <div class="doc-icon">📋</div>
+                    Maintenance<br>Plan
+                </button>
+
+                <button class="doc" data-page="reports">
+                    <div class="doc-icon">📄</div>
+                    RCM<br>Report
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-title">
+                🔔 การแจ้งเตือน
+            </div>
+
+            <div class="empty-state">
+
+                <div class="empty-icon">♧</div>
+
+                <strong>ยังไม่มีการแจ้งเตือน</strong>
+
+                <p>
+                    เมื่อมีการแจ้งเตือนจะแสดงรายการที่นี่
+                </p>
+
+            </div>
+
+        </div>
+
     </div>
-  </div>
 
 </section>
 
-<!-- ASSETS -->
+<!-- ===================================================
+ASSET MANAGEMENT
+=================================================== -->
+
 <section class="page" id="assets">
-  <div class="page-head">
-    <div>
-      <h2>Asset Management</h2>
-      <p>จัดการรายการอุปกรณ์ที่จะนำมาวิเคราะห์ RCM</p>
-    </div>
-    <button class="primary" id="addAsset">+ เพิ่มอุปกรณ์</button>
-  </div>
 
-  <div class="table-wrap" id="assetTable">
-    <table>
-      <thead>
-        <tr><th>รหัสอุปกรณ์</th><th>ชื่ออุปกรณ์</th><th>ประเภท</th><th>สถานที่</th></tr>
-      </thead>
-      <tbody>
-        <tr><td colspan="4" class="no-data">ยังไม่มีข้อมูลอุปกรณ์</td></tr>
-      </tbody>
-    </table>
-  </div>
+    <div class="page-header">
 
-  <div class="form-card" id="assetForm" style="display:none">
-    <button class="back" id="cancelAsset">← กลับ</button>
+        <div>
+            <h2>Asset Management</h2>
+            <p>กำหนดขอบเขตและจัดการข้อมูลอุปกรณ์</p>
+        </div>
 
-    <div class="page-head">
-      <div>
-        <h2>เพิ่มอุปกรณ์</h2>
-        <p>กรอกข้อมูลพื้นฐานของอุปกรณ์</p>
-      </div>
+        <button class="primary" id="addAssetBtn">
+            + เพิ่มอุปกรณ์
+        </button>
+
     </div>
 
-    <form id="assetEntry">
-      <div class="form-grid">
-        <div class="field">
-          <label>รหัสอุปกรณ์</label>
-          <input id="assetId" required>
-        </div>
+    <div class="card">
 
-        <div class="field">
-          <label>ชื่ออุปกรณ์</label>
-          <input id="assetName" required>
-        </div>
+        <table class="table">
 
-        <div class="field">
-          <label>ประเภทอุปกรณ์</label>
-          <input id="assetType">
-        </div>
+            <thead>
+            <tr>
+                <th>รหัสอุปกรณ์</th>
+                <th>ชื่ออุปกรณ์</th>
+                <th>ประเภท</th>
+                <th>สถานที่</th>
+                <th>สถานะ RCM</th>
+                <th></th>
+            </tr>
+            </thead>
 
-        <div class="field">
-          <label>สถานที่ติดตั้ง</label>
-          <input id="assetLocation">
-        </div>
+            <tbody id="assetTableBody">
 
-        <div class="field full">
-          <label>รายละเอียดเพิ่มเติม</label>
-          <textarea id="assetNote"></textarea>
-        </div>
-      </div>
+            <tr id="assetEmpty">
+                <td colspan="6" class="no-data">
+                    ยังไม่มีข้อมูลอุปกรณ์ — กด “เพิ่มอุปกรณ์” เพื่อเริ่มต้น
+                </td>
+            </tr>
 
-      <div class="form-actions">
-        <button type="button" class="secondary" id="clearAsset">ล้างข้อมูล</button>
-        <button type="submit" class="primary">บันทึก</button>
-      </div>
-    </form>
-  </div>
+            </tbody>
+
+        </table>
+
+    </div>
+
 </section>
 
-<!-- GENERIC RCM PAGES -->
+<!-- ===================================================
+DYNAMIC PAGES
+=================================================== -->
+
 <section class="page" id="functions"></section>
 <section class="page" id="failure"></section>
 <section class="page" id="fmea"></section>
@@ -390,129 +1404,749 @@ td{padding:12px;border-top:1px solid #edf1f5;font-size:11px}
 <section class="page" id="plan"></section>
 <section class="page" id="inspection"></section>
 <section class="page" id="reports"></section>
+<section class="page" id="settings"></section>
+
+<div class="footer">
+    <span>Version 1.0.0 | RCM & Health Index Management System</span>
+    <span>Reliable Assets • Sustainable Power System</span>
+</div>
 
 </div>
 </main>
 </div>
 
+<!-- ===================================================
+ADD ASSET MODAL
+=================================================== -->
+
+<div class="modal-bg" id="assetModal">
+
+<div class="modal">
+
+    <div class="modal-header">
+
+        <div>
+            <h3>เพิ่มข้อมูลอุปกรณ์</h3>
+            <small>กรอกข้อมูลพื้นฐานเพื่อเริ่มต้น RCM</small>
+        </div>
+
+        <button class="close" id="closeAssetModal">
+            ×
+        </button>
+
+    </div>
+
+    <form id="assetForm">
+
+        <div class="form-grid">
+
+            <div class="field">
+                <label>รหัสอุปกรณ์ *</label>
+                <input id="assetCode" required>
+            </div>
+
+            <div class="field">
+                <label>ชื่ออุปกรณ์ *</label>
+                <input id="assetName" required>
+            </div>
+
+            <div class="field">
+                <label>ประเภทอุปกรณ์</label>
+
+                <select id="assetType">
+                    <option value="">-- เลือกประเภท --</option>
+                    <option>Transformer</option>
+                    <option>Load Break Switch</option>
+                    <option>Sectionalizer</option>
+                    <option>Ring Main Unit (RMU)</option>
+                    <option>Unit Substation</option>
+                    <option>Capacitor Bank</option>
+                    <option>Protection Equipment</option>
+                    <option>Other</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>สถานที่ติดตั้ง</label>
+                <input id="assetLocation">
+            </div>
+
+            <div class="field full">
+                <label>รายละเอียดเพิ่มเติม</label>
+                <textarea id="assetNote"></textarea>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+
+            <button
+                type="button"
+                class="secondary"
+                id="cancelAsset"
+            >
+                ยกเลิก
+            </button>
+
+            <button
+                type="submit"
+                class="primary"
+            >
+                บันทึกอุปกรณ์
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-const pageInfo = {
-  functions:["Functions & Performance Standards","กำหนดหน้าที่ของอุปกรณ์และมาตรฐานการทำงาน","▤"],
-  failure:["Functional Failure","ระบุลักษณะที่อุปกรณ์ไม่สามารถทำหน้าที่ตามที่กำหนด","⚠"],
-  fmea:["FMEA","วิเคราะห์ Failure Mode, Causes และ Effects","⌕"],
-  criticality:["Consequence / Criticality","ประเมินผลกระทบและจัดลำดับความสำคัญของ Failure Mode","▥"],
-  hi:["Health Index (HI)","ประเมินสภาพและสุขภาพของอุปกรณ์","⌁"],
-  strategy:["Maintenance Strategy","เลือกกลยุทธ์ PM, PdM/CBM, Redesign หรือ Run-to-Failure","⚒"],
-  task:["Maintenance Task","กำหนดงานและวิธีการบำรุงรักษา","☑"],
-  plan:["Maintenance Plan","จัดทำแผนและกำหนดช่วงเวลาการบำรุงรักษา","▣"],
-  inspection:["Inspection & Monitoring","บันทึกและติดตามผลการตรวจสภาพอุปกรณ์","◉"],
-  reports:["Review & Reports","ติดตามผล ทบทวน และจัดทำรายงาน","↗"]
-};
 
-Object.entries(pageInfo).forEach(([id,data])=>{
-  document.getElementById(id).innerHTML = `
-    <div class="page-head">
-      <div>
-        <h2>${data[0]}</h2>
-        <p>${data[1]}</p>
-      </div>
-      <button class="primary">+ เพิ่มข้อมูล</button>
-    </div>
+/* =====================================================
+PAGE DATA
+===================================================== */
 
-    <div class="card empty">
-      <div class="empty-icon">${data[2]}</div>
-      <strong>ยังไม่มีข้อมูล</strong>
-      <p>เลือกอุปกรณ์และเพิ่มข้อมูลเพื่อเริ่มขั้นตอนนี้</p>
-    </div>
-  `;
-});
+const pageData = {
 
-/* PAGE NAVIGATION */
-function openPage(id){
-  const target=document.getElementById(id);
-  if(!target)return;
+    functions:{
+        title:"Functions & Performance Standards",
+        subtitle:"กำหนดหน้าที่หลัก หน้าที่รอง และมาตรฐานการทำงานของอุปกรณ์",
+        icon:"▤"
+    },
 
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  target.classList.add("active");
+    failure:{
+        title:"Functional Failure",
+        subtitle:"ระบุลักษณะที่อุปกรณ์ไม่สามารถทำหน้าที่ตามที่กำหนด",
+        icon:"⚠"
+    },
 
-  document.querySelectorAll(".menu-btn").forEach(b=>b.classList.remove("active"));
-  const menu=document.querySelector(`.menu-btn[data-page="${id}"]`);
-  if(menu)menu.classList.add("active");
+    fmea:{
+        title:"FMEA",
+        subtitle:"วิเคราะห์ Failure Mode, Cause, Effect และประเมิน S, O, D",
+        icon:"⌕"
+    },
 
-  document.getElementById("headerTitle").textContent =
-    id==="dashboard"
-      ? "RCM & Health Index Management System"
-      : (pageInfo[id]?.[0] || "Asset Management");
+    criticality:{
+        title:"Consequence / Criticality",
+        subtitle:"ประเมินผลกระทบและจัดลำดับความสำคัญของความล้มเหลว",
+        icon:"▥"
+    },
 
-  window.scrollTo({top:0,behavior:"smooth"});
-}
+    hi:{
+        title:"Health Index",
+        subtitle:"ประเมินสภาพและสุขภาพของอุปกรณ์จากข้อมูลการตรวจสอบ",
+        icon:"⌁"
+    },
 
-document.querySelectorAll("[data-page]").forEach(el=>{
-  el.addEventListener("click",()=>openPage(el.dataset.page));
-});
+    strategy:{
+        title:"Maintenance Strategy",
+        subtitle:"เลือกกลยุทธ์การบำรุงรักษาที่เหมาะสม",
+        icon:"⚙"
+    },
 
-/* ASSET FORM */
-const addAsset=document.getElementById("addAsset");
-const assetForm=document.getElementById("assetForm");
-const assetTable=document.getElementById("assetTable");
+    task:{
+        title:"Maintenance Task",
+        subtitle:"กำหนดกิจกรรมและวิธีการบำรุงรักษา",
+        icon:"☑"
+    },
 
-addAsset.addEventListener("click",()=>{
-  assetTable.style.display="none";
-  assetForm.style.display="block";
-});
+    plan:{
+        title:"Maintenance Plan",
+        subtitle:"จัดทำแผนงานและกำหนดช่วงเวลาการบำรุงรักษา",
+        icon:"▣"
+    },
 
-document.getElementById("cancelAsset").addEventListener("click",()=>{
-  assetForm.style.display="none";
-  assetTable.style.display="block";
-});
+    inspection:{
+        title:"Inspection & Monitoring",
+        subtitle:"บันทึกข้อมูลการตรวจสอบและ Condition Monitoring",
+        icon:"◉"
+    },
 
-document.getElementById("clearAsset").addEventListener("click",()=>{
-  document.getElementById("assetEntry").reset();
-});
+    reports:{
+        title:"Reports & Review",
+        subtitle:"ติดตามผล ทบทวน และจัดทำรายงาน RCM",
+        icon:"↗"
+    },
 
-/*
-  ตอนนี้ยังไม่บันทึกข้อมูลจริงตามที่ขอ
-  ปุ่มบันทึกเพียงตรวจสอบว่า Form ใช้งานได้
-*/
-document.getElementById("assetEntry").addEventListener("submit",e=>{
-  e.preventDefault();
-
-  alert(
-    "แบบฟอร์มพร้อมใช้งานแล้ว\n\n" +
-    "ยังไม่ได้เชื่อมต่อฐานข้อมูล จึงยังไม่บันทึกข้อมูลจริง"
-  );
-});
-
-/* GENERIC ADD BUTTON */
-document.querySelectorAll(".page").forEach(page=>{
-  if(page.id==="assets" || page.id==="dashboard")return;
-
-  const btn=page.querySelector(".primary");
-
-  if(btn){
-    btn.addEventListener("click",()=>{
-      alert(
-        "หน้ากรอกข้อมูลของ " +
-        (pageInfo[page.id]?.[0] || "") +
-        " จะเชื่อมกับข้อมูลอุปกรณ์ที่เลือก"
-      );
-    });
-  }
-});
-
-/* SEARCH */
-document.getElementById("search").addEventListener("keydown",e=>{
-  if(e.key==="Enter"){
-    const q=e.target.value.trim();
-
-    if(!q){
-      alert("กรุณากรอกคำค้นหา");
-      return;
+    settings:{
+        title:"Settings",
+        subtitle:"ตั้งค่าระบบ RCM & Health Index",
+        icon:"⚙"
     }
 
-    alert("ยังไม่มีข้อมูลอุปกรณ์สำหรับค้นหา");
-  }
+};
+
+
+/* =====================================================
+GENERATE EMPTY PAGES
+===================================================== */
+
+Object.keys(pageData).forEach(id=>{
+
+    const page = document.getElementById(id);
+    const data = pageData[id];
+
+    page.innerHTML = `
+
+        <div class="page-header">
+
+            <div>
+                <h2>${data.title}</h2>
+                <p>${data.subtitle}</p>
+            </div>
+
+            <button
+                class="primary add-analysis"
+                data-section="${id}"
+            >
+                + เพิ่มข้อมูล
+            </button>
+
+        </div>
+
+        <div class="card">
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    ${data.icon}
+                </div>
+
+                <strong>
+                    ยังไม่มีข้อมูล
+                </strong>
+
+                <p>
+                    เพิ่มหรือเลือกอุปกรณ์ก่อนเริ่มขั้นตอนนี้
+                </p>
+
+            </div>
+
+        </div>
+
+    `;
+
 });
+
+
+/* =====================================================
+PAGE NAVIGATION
+===================================================== */
+
+function openPage(pageId){
+
+    const target =
+        document.getElementById(pageId);
+
+    if(!target) return;
+
+    document
+        .querySelectorAll(".page")
+        .forEach(page=>{
+            page.classList.remove("active");
+        });
+
+    target.classList.add("active");
+
+
+    document
+        .querySelectorAll(".menu-btn[data-page]")
+        .forEach(btn=>{
+            btn.classList.remove("active");
+        });
+
+
+    const sidebarButton =
+        document.querySelector(
+            `.menu-btn[data-page="${pageId}"]`
+        );
+
+    if(sidebarButton){
+        sidebarButton.classList.add("active");
+    }
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+}
+
+
+/* CLICK NAVIGATION */
+
+document.addEventListener("click",event=>{
+
+    const button =
+        event.target.closest("[data-page]");
+
+    if(!button) return;
+
+    const page =
+        button.dataset.page;
+
+    if(page){
+        openPage(page);
+    }
+
+});
+
+
+/* =====================================================
+ASSET MODAL
+===================================================== */
+
+const modal =
+    document.getElementById("assetModal");
+
+const addAssetBtn =
+    document.getElementById("addAssetBtn");
+
+const closeAssetModal =
+    document.getElementById("closeAssetModal");
+
+const cancelAsset =
+    document.getElementById("cancelAsset");
+
+
+function openAssetModal(){
+
+    modal.classList.add("show");
+
+    setTimeout(()=>{
+        document
+            .getElementById("assetCode")
+            .focus();
+    },100);
+
+}
+
+
+function closeModal(){
+
+    modal.classList.remove("show");
+
+}
+
+
+addAssetBtn.addEventListener(
+    "click",
+    openAssetModal
+);
+
+
+closeAssetModal.addEventListener(
+    "click",
+    closeModal
+);
+
+
+cancelAsset.addEventListener(
+    "click",
+    closeModal
+);
+
+
+modal.addEventListener(
+    "click",
+    event=>{
+
+        if(event.target === modal){
+            closeModal();
+        }
+
+    }
+);
+
+
+/* =====================================================
+ASSET DATA
+Only user-entered data is shown.
+===================================================== */
+
+const assets = [];
+
+
+document
+.getElementById("assetForm")
+.addEventListener("submit",event=>{
+
+    event.preventDefault();
+
+
+    const code =
+        document
+        .getElementById("assetCode")
+        .value
+        .trim();
+
+
+    const name =
+        document
+        .getElementById("assetName")
+        .value
+        .trim();
+
+
+    const type =
+        document
+        .getElementById("assetType")
+        .value;
+
+
+    const location =
+        document
+        .getElementById("assetLocation")
+        .value
+        .trim();
+
+
+    if(!code || !name){
+
+        showToast(
+            "กรุณากรอกรหัสและชื่ออุปกรณ์"
+        );
+
+        return;
+    }
+
+
+    assets.push({
+        code,
+        name,
+        type,
+        location
+    });
+
+
+    renderAssets();
+
+
+    event.target.reset();
+
+    closeModal();
+
+
+    showToast(
+        "เพิ่มอุปกรณ์เรียบร้อย"
+    );
+
+});
+
+
+/* =====================================================
+RENDER ASSETS
+===================================================== */
+
+function renderAssets(){
+
+    const tbody =
+        document.getElementById(
+            "assetTableBody"
+        );
+
+
+    if(assets.length === 0){
+
+        tbody.innerHTML = `
+
+            <tr>
+                <td
+                    colspan="6"
+                    class="no-data"
+                >
+                    ยังไม่มีข้อมูลอุปกรณ์
+                </td>
+            </tr>
+
+        `;
+
+        return;
+    }
+
+
+    tbody.innerHTML =
+        assets
+        .map((asset,index)=>`
+
+            <tr>
+
+                <td>
+                    ${escapeHTML(asset.code)}
+                </td>
+
+                <td>
+                    ${escapeHTML(asset.name)}
+                </td>
+
+                <td>
+                    ${escapeHTML(asset.type || "-")}
+                </td>
+
+                <td>
+                    ${escapeHTML(asset.location || "-")}
+                </td>
+
+                <td>
+                    ยังไม่เริ่มวิเคราะห์
+                </td>
+
+                <td>
+
+                    <button
+                        class="link-btn analyse-asset"
+                        data-index="${index}"
+                    >
+                        เริ่ม RCM →
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `)
+        .join("");
+
+
+    document
+        .querySelectorAll(
+            ".analyse-asset"
+        )
+        .forEach(btn=>{
+
+            btn.addEventListener(
+                "click",
+                ()=>{
+
+                    openPage(
+                        "functions"
+                    );
+
+                    showToast(
+                        "เลือกอุปกรณ์สำหรับการวิเคราะห์แล้ว"
+                    );
+
+                }
+            );
+
+        });
+
+}
+
+
+/* =====================================================
+SEARCH
+===================================================== */
+
+document
+.getElementById("globalSearch")
+.addEventListener(
+    "keydown",
+    event=>{
+
+        if(event.key !== "Enter"){
+            return;
+        }
+
+
+        const query =
+            event.target.value
+            .trim()
+            .toLowerCase();
+
+
+        if(!query){
+
+            showToast(
+                "กรุณากรอกคำค้นหา"
+            );
+
+            return;
+        }
+
+
+        if(assets.length === 0){
+
+            showToast(
+                "ยังไม่มีข้อมูลอุปกรณ์สำหรับค้นหา"
+            );
+
+            return;
+        }
+
+
+        const found =
+            assets.some(asset=>
+
+                asset.code
+                    .toLowerCase()
+                    .includes(query)
+
+                ||
+
+                asset.name
+                    .toLowerCase()
+                    .includes(query)
+
+                ||
+
+                asset.location
+                    .toLowerCase()
+                    .includes(query)
+
+            );
+
+
+        showToast(
+            found
+            ? "พบข้อมูลที่ค้นหา"
+            : "ไม่พบข้อมูลที่ค้นหา"
+        );
+
+    }
+);
+
+
+/* =====================================================
+ANALYSIS BUTTONS
+===================================================== */
+
+document
+.addEventListener(
+    "click",
+    event=>{
+
+        const button =
+            event.target.closest(
+                ".add-analysis"
+            );
+
+        if(!button){
+            return;
+        }
+
+
+        if(assets.length === 0){
+
+            showToast(
+                "กรุณาเพิ่มอุปกรณ์ก่อนเริ่มวิเคราะห์"
+            );
+
+            openPage("assets");
+
+            return;
+        }
+
+
+        showToast(
+            "พร้อมสำหรับเพิ่มข้อมูลในขั้นตอนนี้"
+        );
+
+    }
+);
+
+
+/* =====================================================
+NOTIFICATION / HELP
+===================================================== */
+
+document
+.getElementById(
+    "notificationBtn"
+)
+.addEventListener(
+    "click",
+    ()=>{
+
+        showToast(
+            "ยังไม่มีการแจ้งเตือน"
+        );
+
+    }
+);
+
+
+document
+.getElementById(
+    "helpBtn"
+)
+.addEventListener(
+    "click",
+    ()=>{
+
+        showToast(
+            "เริ่มต้นโดยเพิ่มอุปกรณ์ใน Asset Management"
+        );
+
+    }
+);
+
+
+/* =====================================================
+TOAST
+===================================================== */
+
+let toastTimer;
+
+
+function showToast(message){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            ()=>{
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* =====================================================
+SAFE HTML
+===================================================== */
+
+function escapeHTML(value){
+
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
 </script>
+
 </body>
 </html>
