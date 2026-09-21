@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RCM & Health Index Management System</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --navy:#102f59;
+    --navy2:#164674;
+    --blue:#2685d8;
+    --light:#f4f8fc;
+    --border:#dce8f4;
+    --text:#17365f;
+    --muted:#70859e;
+    --green:#39aa79;
+    --yellow:#f2b532;
+    --orange:#ed8b3a;
+    --red:#dc5360;
+    --purple:#7655c7;
+}
+
+body{
+    font-family:"Tahoma","Arial",sans-serif;
+    background:#eef5fb;
+    color:var(--text);
+}
+
+/* =========================
+   LAYOUT
+========================= */
+
+.app{
+    display:flex;
+    min-height:100vh;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+    width:245px;
+    background:linear-gradient(180deg,#153e6c,#0b294c);
+    color:white;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    overflow-y:auto;
+    z-index:20;
+}
+
+.brand{
+    padding:26px 22px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+
+.brand-title{
+    font-size:20px;
+    font-weight:700;
+}
+
+.brand-subtitle{
+    font-size:11px;
+    opacity:.65;
+    margin-top:6px;
+    line-height:1.5;
+}
+
+.menu{
+    padding:15px 10px;
+}
+
+.menu-title{
+    padding:12px 15px 7px;
+    font-size:10px;
+    opacity:.5;
+    text-transform:uppercase;
+}
+
+.menu-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 15px;
+    margin:4px 0;
+    border-radius:9px;
+    cursor:pointer;
+    font-size:14px;
+    transition:.2s;
+}
+
+.menu-item:hover,
+.menu-item.active{
+    background:rgba(255,255,255,.12);
+}
+
+.menu-icon{
+    width:24px;
+    text-align:center;
+    font-size:18px;
+}
+
+.submenu{
+    margin-left:29px;
+    border-left:1px solid rgba(255,255,255,.2);
+    padding-left:12px;
+}
+
+.submenu div{
+    padding:8px 8px;
+    font-size:12px;
+    opacity:.75;
+    cursor:pointer;
+}
+
+.submenu div:hover{
+    opacity:1;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.main{
+    margin-left:245px;
+    width:calc(100% - 245px);
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.topbar{
+    height:72px;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+.page-title h1{
+    font-size:22px;
+}
+
+.page-title p{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:4px;
+}
+
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.search{
+    width:300px;
+    padding:10px 15px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    outline:none;
+}
+
+.avatar{
+    width:38px;
+    height:38px;
+    background:#dceafb;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+}
+
+.user{
+    font-size:12px;
+}
+
+.user strong{
+    display:block;
+    font-size:13px;
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.content{
+    padding:18px;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+    background:
+        linear-gradient(100deg,rgba(228,242,255,.98),rgba(245,250,255,.82));
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:25px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    min-height:170px;
+}
+
+.hero small{
+    font-size:14px;
+}
+
+.hero h2{
+    font-size:37px;
+    margin:8px 0;
+}
+
+.hero p{
+    color:#345b83;
+}
+
+.hero-right{
+    text-align:right;
+}
+
+.hero-date{
+    font-size:12px;
+}
+
+.hero-time{
+    font-size:38px;
+    font-weight:700;
+    margin:5px 0;
+}
+
+.hero-tag{
+    margin-top:12px;
+    font-style:italic;
+    color:#315b88;
+}
+
+/* =========================
+   RCM FLOW
+========================= */
+
+.flow-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:15px;
+    margin-top:15px;
+    padding:15px;
+    overflow-x:auto;
+}
+
+.flow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-width:1100px;
+}
+
+.flow-item{
+    width:96px;
+    min-height:105px;
+    border-radius:12px;
+    text-align:center;
+    padding:10px 6px;
+    position:relative;
+}
+
+.flow-number{
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    color:white;
+    margin:-18px auto 7px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+}
+
+.flow-icon{
+    font-size:26px;
+    margin-bottom:7px;
+}
+
+.flow-item p{
+    font-size:11px;
+    font-weight:600;
+    line-height:1.4;
+}
+
+.flow-arrow{
+    font-size:22px;
+    color:#7795b6;
+}
+
+.c1{background:#edf6ff}.c1 .flow-number{background:#287bc1}
+.c2{background:#eaf9f7}.c2 .flow-number{background:#258b88}
+.c3{background:#fff7df}.c3 .flow-number{background:#df991a}
+.c4{background:#f2edff}.c4 .flow-number{background:#7452bd}
+.c5{background:#fff0f3}.c5 .flow-number{background:#c83259}
+.c6{background:#edf7ff}.c6 .flow-number{background:#2387d5}
+.c7{background:#ebfaf2}.c7 .flow-number{background:#35a976}
+.c8{background:#ebf9fb}.c8 .flow-number{background:#258eaf}
+.c9{background:#fff6e8}.c9 .flow-number{background:#d78721}
+.c10{background:#faf0ff}.c10 .flow-number{background:#8a3c9e}
+
+/* =========================
+   KPI
+========================= */
+
+.kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-top:15px;
+}
+
+.kpi{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:17px;
+    display:flex;
+    gap:15px;
+    align-items:center;
+}
+
+.kpi-icon{
+    width:54px;
+    height:54px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:27px;
+}
+
+.blue-bg{background:#e7f3ff}
+.green-bg{background:#e5f7ee}
+.yellow-bg{background:#fff4d8}
+.red-bg{background:#ffe9ec}
+
+.kpi-label{
+    font-size:12px;
+    color:#526e8d;
+}
+
+.kpi-value{
+    font-size:29px;
+    font-weight:700;
+    margin-top:4px;
+}
+
+.kpi-value small{
+    font-size:11px;
+    font-weight:400;
+}
+
+/* =========================
+   DASHBOARD GRID
+========================= */
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:1.1fr 1.3fr .9fr;
+    gap:12px;
+    margin-top:15px;
+}
+
+.card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:13px;
+    padding:15px;
+}
+
+.card-title{
+    font-size:15px;
+    font-weight:700;
+    margin-bottom:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.link{
+    color:#2884d5;
+    font-size:11px;
+    cursor:pointer;
+}
+
+/* =========================
+   HEALTH INDEX
+========================= */
+
+.health-wrap{
+    display:flex;
+    align-items:center;
+    gap:25px;
+}
+
+.donut{
+    width:145px;
+    height:145px;
+    border-radius:50%;
+    background:
+        conic-gradient(
+            var(--green) 0 61%,
+            var(--yellow) 61% 87%,
+            var(--orange) 87% 95%,
+            var(--red) 95% 100%
+        );
+    position:relative;
+    flex-shrink:0;
+}
+
+.donut::after{
+    content:"";
+    position:absolute;
+    width:86px;
+    height:86px;
+    background:white;
+    border-radius:50%;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+.donut-center{
+    position:absolute;
+    z-index:2;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    font-weight:700;
+    font-size:22px;
+}
+
+.donut-center span{
+    display:block;
+    font-size:10px;
+    font-weight:400;
+}
+
+.legend{
+    width:100%;
+}
+
+.legend-row{
+    display:flex;
+    justify-content:space-between;
+    margin:10px 0;
+    font-size:11px;
+}
+
+.dot{
+    display:inline-block;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    margin-right:6px;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:11px;
+}
+
+th{
+    text-align:left;
+    background:#edf4fb;
+    padding:9px;
+}
+
+td{
+    padding:9px;
+    border-bottom:1px solid #edf1f5;
+}
+
+.badge{
+    padding:5px 9px;
+    border-radius:15px;
+    font-size:10px;
+    display:inline-block;
+}
+
+.badge-red{
+    background:#ffe5e8;
+    color:#ba3342;
+}
+
+.badge-orange{
+    background:#fff0dc;
+    color:#ca721d;
+}
+
+.badge-yellow{
+    background:#fff6d6;
+    color:#a57900;
+}
+
+.badge-green{
+    background:#e5f7ee;
+    color:#168657;
+}
+
+.btn{
+    border:1px solid #b8d9f6;
+    color:#2379bd;
+    background:#f1f8ff;
+    padding:5px 10px;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:10px;
+}
+
+/* =========================
+   STRATEGY
+========================= */
+
+.strategy-donut{
+    margin:auto;
+    width:145px;
+    height:145px;
+    border-radius:50%;
+    background:
+        conic-gradient(
+            #47b882 0 34%,
+            #4e9ce9 34% 65%,
+            #dd688d 65% 80%,
+            #8062ca 80% 100%
+        );
+    position:relative;
+}
+
+.strategy-donut::after{
+    content:"";
+    position:absolute;
+    inset:35px;
+    background:white;
+    border-radius:50%;
+}
+
+.strategy-center{
+    position:absolute;
+    z-index:2;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-size:21px;
+    font-weight:700;
+    text-align:center;
+}
+
+.strategy-center span{
+    font-size:10px;
+    display:block;
+}
+
+/* =========================
+   LOWER GRID
+========================= */
+
+.lower-grid{
+    display:grid;
+    grid-template-columns:1.2fr .85fr .85fr;
+    gap:12px;
+    margin-top:12px;
+}
+
+/* =========================
+   DOCUMENT
+========================= */
+
+.documents{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+}
+
+.doc{
+    border:1px solid var(--border);
+    padding:12px 5px;
+    text-align:center;
+    border-radius:9px;
+    font-size:10px;
+}
+
+.doc-icon{
+    font-size:25px;
+    margin-bottom:7px;
+}
+
+/* =========================
+   ALERT
+========================= */
+
+.alert{
+    padding:9px 3px;
+    border-bottom:1px solid #edf1f5;
+    font-size:11px;
+}
+
+.alert-icon{
+    margin-right:6px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1100px){
+
+    .kpi-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+
+    .lower-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:750px){
+
+    .sidebar{
+        width:70px;
+    }
+
+    .brand-title{
+        font-size:12px;
+    }
+
+    .brand-subtitle,
+    .menu-item span:not(.menu-icon),
+    .submenu,
+    .menu-title{
+        display:none;
+    }
+
+    .main{
+        margin-left:70px;
+        width:calc(100% - 70px);
+    }
+
+    .search{
+        display:none;
+    }
+
+    .kpi-grid{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .hero-right{
+        text-align:left;
+        margin-top:15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- ===================================
+     SIDEBAR
+=================================== -->
+
+<aside class="sidebar">
+
+    <div class="brand">
+        <div class="brand-title">
+            ⚙ RCM SYSTEM
+        </div>
+
+        <div class="brand-subtitle">
+            Reliability & Maintenance<br>
+            Management Platform
+        </div>
+    </div>
+
+    <div class="menu">
+
+        <div class="menu-title">Main Menu</div>
+
+        <div class="menu-item active">
+            <span class="menu-icon">⌂</span>
+            <span>Dashboard</span>
+        </div>
+
+        <div class="menu-item">
+            <span class="menu-icon">▦</span>
+            <span>Asset Management</span>
+        </div>
+
+        <div class="menu-item">
+            <span class="menu-icon">⚙</span>
+            <span>RCM Analysis</span>
+        </div>
+
+        <div class="submenu">
+            <div>Functions</div>
+            <div>Functional Failure</div>
+            <div>FMEA</div>
+            <div>Criticality</div>
+            <div>Health Index</div>
+            <div>Maintenance Strategy</div>
+        </div>
+
+        <div class="menu-item">
+            <span class="menu-icon">▣</span>
+            <span>Maintenance Plan</span>
+        </div>
+
+        <div class="menu-item">
+            <span class="menu-icon">⌁</span>
+            <span>Inspection & Monitoring</span>
+        </div>
+
+        <div class="menu-item">
+            <span class="menu-icon">▤</span>
+            <span>Reports</span>
+        </div>
+
+        <div class="menu-item">
+            <span class="menu-icon">⚙</span>
+            <span>Settings</span>
+        </div>
+
+    </div>
+
+</aside>
+
+<!-- ===================================
+     MAIN
+=================================== -->
+
+<main class="main">
+
+<header class="topbar">
+
+    <div class="page-title">
+
+        <h1>
+            RCM & Health Index Management System
+        </h1>
+
+        <p>
+            Reliability-Centered Maintenance for Sustainable Power System
+        </p>
+
+    </div>
+
+    <div class="top-actions">
+
+        <input
+            class="search"
+            placeholder="🔎  ค้นหาอุปกรณ์, รหัส, สถานที่..."
+        >
+
+        <div>🔔</div>
+
+        <div class="avatar">
+            👤
+        </div>
+
+        <div class="user">
+            <strong>User</strong>
+            Industrial Engineering
+        </div>
+
+    </div>
+
+</header>
+
+<div class="content">
+
+<!-- HERO -->
+
+<section class="hero">
+
+    <div>
+
+        <small>
+            ระบบวิเคราะห์และวางแผนการบำรุงรักษา
+        </small>
+
+        <h2>
+            RCM & Health Index
+        </h2>
+
+        <p>
+            Reliability-Centered Maintenance & Asset Health Management
+        </p>
+
+    </div>
+
+    <div class="hero-right">
+
+        <div class="hero-date">
+            ระบบบริหารจัดการงานบำรุงรักษา
+        </div>
+
+        <div class="hero-time">
+            RCM
+        </div>
+
+        <div class="hero-tag">
+            “Reliable Assets • Sustainable System”
+        </div>
+
+    </div>
+
+</section>
+
+<!-- RCM FLOW -->
+
+<section class="flow-card">
+
+<div class="flow">
+
+<div class="flow-item c1">
+<div class="flow-number">1</div>
+<div class="flow-icon">▦</div>
+<p>กำหนดขอบเขต<br>และเลือกอุปกรณ์</p>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-item c2">
+<div class="flow-number">2</div>
+<div class="flow-icon">▤</div>
+<p>กำหนดหน้าที่<br>และมาตรฐาน</p>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-item c3">
+<div class="flow-number">3</div>
+<div class="flow-icon">⚠</div>
+<p>Functional<br>Failure</p>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-item c4">
+<div class="flow-number">4</div>
+<div class="flow-icon">⌕</div>
+<p>วิเคราะห์<br>FMEA</p>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-item c5">
+<div class="flow-number">5</div>
+<div class="flow-icon">▥</div>
+<p>Consequence<br>/ Criticality</p>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-item c6">
+<div class="flow-number">6</div>
+<div class="flow-icon">⌁</div>
+<p>ประเมิน<br>Health Index</p>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-item c7">
+<div class="flow-number">7</div>
+<div class="flow-icon">⚒</div>
+<p>เลือกกลยุทธ์<br>การบำรุงรักษา</p>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-item c8">
+<div class="flow-number">8</div>
+<div class="flow-icon">☑</div>
+<p>กำหนด<br>Maintenance Task</p>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-item c9">
+<div class="flow-number">9</div>
+<div class="flow-icon">▣</div>
+<p>จัดทำ<br>Maintenance Plan</p>
+</div>
+
+<div class="flow-arrow">→</div>
+
+<div class="flow-item c10">
+<div class="flow-number">10</div>
+<div class="flow-icon">↗</div>
+<p>ติดตามผล<br>และทบทวน</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- KPI -->
+
+<div class="kpi-grid">
+
+<div class="kpi">
+
+<div class="kpi-icon blue-bg">
+▦
+</div>
+
+<div>
+<div class="kpi-label">
+จำนวนอุปกรณ์ทั้งหมด
+</div>
+
+<div class="kpi-value">
+124 <small>รายการ</small>
+</div>
+</div>
+
+</div>
+
+<div class="kpi">
+
+<div class="kpi-icon green-bg">
+⌁
+</div>
+
+<div>
+<div class="kpi-label">
+อุปกรณ์ HI ดี
+</div>
+
+<div class="kpi-value">
+76 <small>รายการ</small>
+</div>
+</div>
+
+</div>
+
+<div class="kpi">
+
+<div class="kpi-icon yellow-bg">
+◉
+</div>
+
+<div>
+<div class="kpi-label">
+อุปกรณ์ที่ต้องเฝ้าระวัง
+</div>
+
+<div class="kpi-value">
+32 <small>รายการ</small>
+</div>
+</div>
+
+</div>
+
+<div class="kpi">
+
+<div class="kpi-icon red-bg">
+⚠
+</div>
+
+<div>
+<div class="kpi-label">
+อุปกรณ์วิกฤต
+</div>
+
+<div class="kpi-value">
+16 <small>รายการ</small>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<!-- MAIN DASHBOARD -->
+
+<div class="dashboard-grid">
+
+<!-- HEALTH INDEX -->
+
+<div class="card">
+
+<div class="card-title">
+Health Index Overview
+<span class="link">ดูรายละเอียด →</span>
+</div>
+
+<div class="health-wrap">
+
+<div class="donut">
+
+<div class="donut-center">
+124
+<span>อุปกรณ์</span>
+</div>
+
+</div>
+
+<div class="legend">
+
+<div class="legend-row">
+<span>
+<span class="dot"
+style="background:#39aa79"></span>
+ดี (80–100)
+</span>
+<b>76</b>
+</div>
+
+<div class="legend-row">
+<span>
+<span class="dot"
+style="background:#f2b532"></span>
+เฝ้าระวัง (60–79)
+</span>
+<b>32</b>
+</div>
+
+<div class="legend-row">
+<span>
+<span class="dot"
+style="background:#ed8b3a"></span>
+เสื่อมสภาพ (40–59)
+</span>
+<b>10</b>
+</div>
+
+<div class="legend-row">
+<span>
+<span class="dot"
+style="background:#dc5360"></span>
+วิกฤต (0–39)
+</span>
+<b>6</b>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- PRIORITY -->
+
+<div class="card">
+
+<div class="card-title">
+Top 5 อุปกรณ์ที่ต้องดำเนินการ
+<span class="link">ดูทั้งหมด →</span>
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>รหัส</th>
+<th>อุปกรณ์</th>
+<th>HI</th>
+<th>สถานะ</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>TR-001</td>
+<td>Transformer</td>
+<td>32</td>
+<td>
+<span class="badge badge-red">
+วิกฤต
+</span>
+</td>
+<td>
+<button class="btn">ดูรายละเอียด</button>
+</td>
+</tr>
+
+<tr>
+<td>RMU-03</td>
+<td>Ring Main Unit</td>
+<td>45</td>
+<td>
+<span class="badge badge-orange">
+เสื่อมสภาพ
+</span>
+</td>
+<td>
+<button class="btn">ดูรายละเอียด</button>
+</td>
+</tr>
+
+<tr>
+<td>LBS-12</td>
+<td>Load Break Switch</td>
+<td>58</td>
+<td>
+<span class="badge badge-orange">
+เสื่อมสภาพ
+</span>
+</td>
+<td>
+<button class="btn">ดูรายละเอียด</button>
+</td>
+</tr>
+
+<tr>
+<td>CB-07</td>
+<td>Capacitor Bank</td>
+<td>62</td>
+<td>
+<span class="badge badge-yellow">
+เฝ้าระวัง
+</span>
+</td>
+<td>
+<button class="btn">ดูรายละเอียด</button>
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- STRATEGY -->
+
+<div class="card">
+
+<div class="card-title">
+Maintenance Strategy
+</div>
+
+<div class="strategy-donut">
+
+<div class="strategy-center">
+124
+<span>อุปกรณ์</span>
+</div>
+
+</div>
+
+<div class="legend">
+
+<div class="legend-row">
+<span>
+<span class="dot" style="background:#47b882"></span>
+Predictive / CBM
+</span>
+<b>42</b>
+</div>
+
+<div class="legend-row">
+<span>
+<span class="dot" style="background:#4e9ce9"></span>
+Preventive (PM)
+</span>
+<b>38</b>
+</div>
+
+<div class="legend-row">
+<span>
+<span class="dot" style="background:#dd688d"></span>
+Redesign / Proactive
+</span>
+<b>18</b>
+</div>
+
+<div class="legend-row">
+<span>
+<span class="dot" style="background:#8062ca"></span>
+Run-to-Failure
+</span>
+<b>26</b>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- LOWER -->
+
+<div class="lower-grid">
+
+<!-- TODO -->
+
+<div class="card">
+
+<div class="card-title">
+งานที่ต้องดำเนินการ (To Do)
+<span class="link">ดูทั้งหมด →</span>
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>กำหนดเสร็จ</th>
+<th>งาน</th>
+<th>อุปกรณ์</th>
+<th>สถานะ</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>25 ก.ย.</td>
+<td>ตรวจวัดค่าก๊าซในน้ำมัน (DGA)</td>
+<td>TR-001</td>
+<td>
+<span class="badge badge-yellow">
+รอดำเนินการ
+</span>
+</td>
+</tr>
+
+<tr>
+<td>26 ก.ย.</td>
+<td>ตรวจสอบสวิตช์</td>
+<td>LBS-12</td>
+<td>
+<span class="badge badge-yellow">
+รอดำเนินการ
+</span>
+</td>
+</tr>
+
+<tr>
+<td>28 ก.ย.</td>
+<td>ตรวจอุณหภูมิและภาระโหลด</td>
+<td>RMU-03</td>
+<td>
+<span class="badge badge-green">
+กำหนดแล้ว
+</span>
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- DOCUMENT -->
+
+<div class="card">
+
+<div class="card-title">
+เอกสารและรายงาน
+</div>
+
+<div class="documents">
+
+<div class="doc">
+<div class="doc-icon">📊</div>
+FMEA
+</div>
+
+<div class="doc">
+<div class="doc-icon">📈</div>
+HI Calculation
+</div>
+
+<div class="doc">
+<div class="doc-icon">📋</div>
+Maintenance Plan
+</div>
+
+<div class="doc">
+<div class="doc-icon">📄</div>
+RCM Report
+</div>
+
+</div>
+
+</div>
+
+<!-- ALERT -->
+
+<div class="card">
+
+<div class="card-title">
+การแจ้งเตือน
+<span class="link">ดูทั้งหมด →</span>
+</div>
+
+<div class="alert">
+<span class="alert-icon">🔴</span>
+HI ต่ำกว่าเกณฑ์ — TR-001
+</div>
+
+<div class="alert">
+<span class="alert-icon">🟡</span>
+ครบกำหนด PM — RMU-03
+</div>
+
+<div class="alert">
+<span class="alert-icon">🟠</span>
+ตรวจพบค่าผิดปกติ — TR-02
+</div>
+
+<div class="alert">
+<span class="alert-icon">🟢</span>
+งานบำรุงรักษาใกล้ครบกำหนด
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+<script>
+
+/* =====================================
+   SIDEBAR ACTIVE MENU
+===================================== */
+
+const menuItems =
+document.querySelectorAll(".menu-item");
+
+menuItems.forEach(item=>{
+
+    item.addEventListener("click",()=>{
+
+        menuItems.forEach(i=>
+            i.classList.remove("active")
+        );
+
+        item.classList.add("active");
+
+    });
+
+});
+
+
+/* =====================================
+   DETAIL BUTTON
+===================================== */
+
+document
+.querySelectorAll(".btn")
+.forEach(btn=>{
+
+    btn.addEventListener("click",()=>{
+
+        alert(
+            "เปิดหน้ารายละเอียดอุปกรณ์\n"+
+            "สามารถเชื่อมต่อกับหน้า FMEA / HI / RCM ได้"
+        );
+
+    });
+
+});
+
+
+/* =====================================
+   SEARCH
+===================================== */
+
+const search =
+document.querySelector(".search");
+
+search.addEventListener("keydown",(e)=>{
+
+    if(e.key==="Enter"){
+
+        const value =
+        search.value.trim();
+
+        if(value){
+
+            alert(
+                "ค้นหาอุปกรณ์: "+value
+            );
+
+        }
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
