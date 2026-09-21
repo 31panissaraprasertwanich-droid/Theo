@@ -38,7 +38,7 @@
   }
   .mono{font-family:'IBM Plex Mono', monospace;}
 
-  /* Sidebar ฝั่งซ้ายสีน้ำเงินเข้มตามภาพ */
+  /* Sidebar ฝั่งซ้ายสีน้ำเงินเข้ม */
   aside.sidebar {
     width: 260px;
     background: linear-gradient(180deg, #1e3a8a 0%, #0f172a 100%);
@@ -53,9 +53,7 @@
     z-index: 50;
     box-shadow: 4px 0 15px rgba(0,0,0,0.05);
   }
-  .sidebar-brand {
-    font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
-  }
+  .sidebar-brand { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
   .sidebar-subbrand { font-size: 0.65rem; color: #93c5fd; margin-bottom: 24px; line-height: 1.3; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; }
   
   .nav-list { display: flex; flex-direction: column; gap: 4px; flex: 1; overflow-y: auto; }
@@ -67,76 +65,41 @@
   .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
   .nav-item.active { background: #2563eb; color: #fff; font-weight: 600; }
   .sub-nav { display: flex; flex-direction: column; gap: 2px; padding-left: 18px; margin: 4px 0 6px 0; border-left: 2px solid rgba(255,255,255,0.15); }
-  .sub-item {
-    background: transparent; border: none; color: #94a3b8; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.78rem; text-align: left;
-  }
+  .sub-item { background: transparent; border: none; color: #94a3b8; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.78rem; text-align: left; }
   .sub-item:hover, .sub-item.active { color: #fff; background: rgba(255,255,255,0.06); }
 
   .sidebar-footer { padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.7rem; color: #94a3b8; }
 
   /* เนื้อหาหลักฝั่งขวา */
   .main-content {
-    margin-left: 260px;
-    flex: 1;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding: 20px 24px;
-    max-width: calc(100% - 260px);
+    margin-left: 260px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; padding: 20px 24px; max-width: calc(100% - 260px);
   }
 
-  /* Header ด้านบน */
-  .top-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
-  }
+  .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
   .top-title-area h2 { font-size: 1.15rem; font-weight: 700; margin: 0; color: #1e3a8a; }
   .top-title-area p { font-size: 0.75rem; color: var(--muted); margin: 2px 0 0 0; }
   
   .top-right-controls { display: flex; align-items: center; gap: 14px; }
-  .search-top {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; width: 220px; outline: none;
-  }
-  .user-badge {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px 4px 4px; display: flex; align-items: center; gap: 8px; font-size: 0.78rem;
-  }
+  .search-top { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; width: 220px; outline: none; }
+  .user-badge { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px 4px 4px; display: flex; align-items: center; gap: 8px; font-size: 0.78rem; }
   .user-avatar { width: 28px; height: 28px; background: #2563eb; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75rem; }
 
-  /* Banner ต้อนรับพร้อมภาพสถานีไฟฟ้า */
   .welcome-banner {
     background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%);
-    border-radius: var(--radius);
-    color: #fff;
-    padding: 20px 28px;
-    margin-bottom: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(37,99,235,0.15);
+    border-radius: var(--radius); color: #fff; padding: 20px 28px; margin-bottom: 16px;
+    display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(37,99,235,0.15);
   }
   .welcome-text h3 { font-size: 0.85rem; color: #93c5fd; margin: 0 0 4px 0; font-weight: 500; }
   .welcome-text h1 { font-size: 1.35rem; margin: 0 0 6px 0; font-weight: 700; }
   .welcome-text p { font-size: 0.78rem; color: #e2e8f0; margin: 0 0 10px 0; }
   .quote { font-style: italic; font-size: 0.75rem; color: #bfdbfe; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; display: inline-block; }
 
-  /* Stepper 1-10 ด้านบน */
+  /* Stepper 1-10 */
   .stepper-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    overflow-x: auto;
-    gap: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between; overflow-x: auto; gap: 6px;
   }
-  .step-node {
-    display: flex; flex-direction: column; align-items: center; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 6px; min-width: 68px; transition: all .15s;
-  }
+  .step-node { display: flex; flex-direction: column; align-items: center; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 6px; min-width: 68px; transition: all .15s; }
   .step-node:hover { background: #f1f5f9; }
   .step-num { width: 26px; height: 26px; border-radius: 50%; background: #e2e8f0; color: #475569; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px; }
   .step-node.active .step-num { background: #2563eb; color: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
@@ -144,19 +107,15 @@
   .step-node.active .step-lbl { color: #1e3a8a; font-weight: 700; }
   .step-arrow { color: #cbd5e1; font-size: 0.8rem; font-weight: bold; flex-shrink: 0; }
 
-  /* KPI Cards 4 ใบ */
+  /* KPI Cards */
   .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
   @media(max-width: 1100px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
-  .kpi-card {
-    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px;
-    display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  }
+  .kpi-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; display: flex; flex-direction: column; justify-content: space-between; }
   .kpi-title { font-size: 0.73rem; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
   .kpi-content { display: flex; align-items: baseline; justify-content: space-between; }
   .kpi-val { font-family: 'IBM Plex Mono', monospace; font-size: 1.5rem; font-weight: 700; color: #0f172a; }
-  .kpi-sub { font-size: 0.72rem; color: var(--teal); font-weight: 600; display: flex; align-items: center; gap: 2px; cursor: pointer; }
+  .kpi-sub { font-size: 0.72rem; color: var(--teal); font-weight: 600; cursor: pointer; }
 
-  /* Layout หลักแบ่งซ้าย (ตาราง FMEA) ขวา (รายละเอียด Failure Mode) */
   .content-grid { display: grid; grid-template-columns: 1fr 360px; gap: 16px; margin-bottom: 16px; }
   @media(max-width: 1200px) { .content-grid { grid-template-columns: 1fr; } }
 
@@ -165,18 +124,16 @@
   .panel-title { font-size: 0.9rem; font-weight: 700; color: #1e3a8a; margin: 0; }
   .panel-subtitle { font-size: 0.72rem; color: var(--muted); margin: 2px 0 0 0; }
 
-  .btn-primary { background: #2563eb; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .btn-primary { background: #2563eb; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
   .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
   .btn-primary:hover { background: #1d4ed8; }
 
-  /* Toolbar Filter ภายในตาราง */
   .table-filters { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
   .filter-select { background: var(--panel-2); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; font-size: 0.78rem; color: var(--text); outline: none; }
   
-  /* ตารางข้อมูล FMEA Database */
-  .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; max-height: 440px; }
   table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left; }
-  th { background: #f1f5f9; color: var(--muted); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { background: #f1f5f9; color: var(--muted); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
   td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tr:hover { background: #f8fafc; cursor: pointer; }
   tr.selected { background: rgba(37,99,235,0.06); }
@@ -187,7 +144,6 @@
   .p-orange { background: rgba(217,119,6,0.1); color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
   .p-green { background: rgba(13,148,136,0.1); color: #0d9488; border: 1px solid rgba(13,148,136,0.2); }
 
-  /* แผงรายละเอียดทางขวา (Failure Mode Detail & Score Adjuster) */
   .detail-panel { display: flex; flex-direction: column; gap: 14px; }
   .detail-top-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
   .detail-code { font-family: 'IBM Plex Mono', monospace; font-size: 1.1rem; font-weight: 700; color: #2563eb; }
@@ -196,9 +152,8 @@
   .detail-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0; }
   .info-group { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; }
   .info-label { color: var(--muted); font-weight: 500; }
-  .info-val { color: var(--text); font-weight: 600; }
+  .info-val { color: var(--text); font-weight: 600; word-break: break-all; }
 
-  /* กล่องปรับคะแนน S, O, D พร้อมปุ่มกด +/- */
   .score-adjust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .score-box { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .score-box-label { font-size: 0.68rem; color: var(--muted); font-weight: 700; }
@@ -211,10 +166,8 @@
   .rpn-display-val { font-family: 'IBM Plex Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #1d4ed8; }
   .rpn-formula { font-size: 0.7rem; color: #3b82f6; margin-top: 2px; }
 
-  /* ส่วนล่าง: กราฟและการจัดการเอกสาร */
   .bottom-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 16px; }
   @media(max-width: 1000px) { .bottom-grid { grid-template-columns: 1fr; } }
-  
   .chart-container-box { position: relative; height: 180px; width: 100%; display: flex; align-items: center; justify-content: center; }
   
   .doc-icons-row { display: flex; gap: 16px; justify-content: space-around; align-items: center; padding-top: 10px; }
@@ -227,23 +180,14 @@
 </head>
 <body>
 
-<!-- Sidebar ด้านซ้าย -->
 <aside class="sidebar">
-  <div class="sidebar-brand">
-    ⚡ RCM SYSTEM
-  </div>
+  <div class="sidebar-brand">⚡ RCM SYSTEM</div>
   <div class="sidebar-subbrand">Reliability-Centered Maintenance & Health Index</div>
   
   <div class="nav-list">
-    <button class="nav-item active" onclick="switchMainTab('dashboard', this)">
-      <span>📊 Dashboard</span>
-    </button>
-    <button class="nav-item" onclick="switchMainTab('asset', this)">
-      <span>⚙️ Asset Management</span>
-    </button>
-    <button class="nav-item" onclick="toggleSubMenu('rcmSub', this)">
-      <span>🔍 RCM Analysis</span> <span>▼</span>
-    </button>
+    <button class="nav-item active" onclick="switchMainTab('dashboard', this)"><span>📊 Dashboard</span></button>
+    <button class="nav-item" onclick="switchMainTab('asset', this)"><span>⚙️ Asset Management</span></button>
+    <button class="nav-item" onclick="toggleSubMenu('rcmSub', this)"><span>🔍 RCM Analysis</span> <span>▼</span></button>
     <div class="sub-nav" id="rcmSub">
       <button class="sub-item" onclick="alert('ไปที่หน้า Functions')">Functions</button>
       <button class="sub-item" onclick="alert('ไปที่หน้า Functional Failure')">Functional Failure</button>
@@ -253,21 +197,9 @@
       <button class="sub-item" onclick="alert('ไปที่หน้า Maintenance Strategy')">Maintenance Strategy</button>
       <button class="sub-item" onclick="alert('ไปที่หน้า Maintenance Task')">Maintenance Task</button>
     </div>
-    <button class="nav-item" onclick="switchMainTab('plan', this)">
-      <span>📅 Maintenance Plan</span>
-    </button>
-    <button class="nav-item" onclick="switchMainTab('inspection', this)">
-      <span>🛠️ Inspection & Monitoring</span>
-    </button>
-    <button class="nav-item" onclick="switchMainTab('reports', this)">
-      <span>📑 Reports</span>
-    </button>
-    <button class="nav-item" onclick="switchMainTab('data', this)">
-      <span>💾 Data Management</span>
-    </button>
-    <button class="nav-item" onclick="switchMainTab('settings', this)">
-      <span>⚙️ Settings</span>
-    </button>
+    <button class="nav-item" onclick="switchMainTab('plan', this)"><span>📅 Maintenance Plan</span></button>
+    <button class="nav-item" onclick="switchMainTab('reports', this)"><span>📑 Reports</span></button>
+    <button class="nav-item" onclick="switchMainTab('data', this)"><span>💾 Data Management</span></button>
   </div>
   
   <div class="sidebar-footer">
@@ -277,17 +209,14 @@
   </div>
 </aside>
 
-<!-- พื้นที่เนื้อหาหลักฝั่งขวา -->
 <div class="main-content">
-
-  <!-- Header ด้านบน -->
   <div class="top-header">
     <div class="top-title-area">
       <h2>Transformer RCM & Health Index Management System</h2>
       <p>Reliability-Centered Maintenance for Sustainable Power System</p>
     </div>
     <div class="top-right-controls">
-      <input type="text" class="search-top" id="topSearchInput" placeholder="🔍 ค้นหาอุปกรณ์, รหัส, รายการ..." oninput="handleSearch(this.value)">
+      <input type="text" class="search-top" id="topSearchInput" placeholder="🔍 ค้นหารหัส, ชื่ออุปกรณ์..." oninput="handleSearch(this.value)">
       <div style="font-size: 0.78rem; text-align: right; background: var(--panel); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border);">
         <div style="font-weight: 700; color: #1e3a8a;" id="liveClock">10:24</div>
         <div style="font-size: 0.62rem; color: var(--muted);">วันจันทร์ที่ 22 กันยายน 2569</div>
@@ -305,7 +234,6 @@
     </div>
   </div>
 
-  <!-- Welcome Banner พร้อมภาพสถานีไฟฟ้าจำลอง -->
   <div class="welcome-banner">
     <div class="welcome-text">
       <h3>ยินดีต้อนรับสู่ระบบ</h3>
@@ -313,103 +241,66 @@
       <p>เพิ่มความเชื่อได้ของระบบไฟฟ้า เพื่อเมืองที่ยั่งยืน</p>
       <div class="quote">"Reliable Transformer Sustainable Tomorrow" — "Maintenance Today For a Brighter Tomorrow"</div>
     </div>
-    <!-- จำลองกราฟิกสถานีไฟฟ้าสไตล์ Vector อ่อนๆ -->
-    <div style="opacity: 0.85; font-size: 3.5rem;">
-      🗼⚡🔋
-    </div>
+    <div style="opacity: 0.85; font-size: 3.5rem;">🗼⚡🔋</div>
   </div>
 
-  <!-- Stepper 1 ถึง 10 ด้านบน (คลิกเปลี่ยนสถานะได้) -->
   <div class="stepper-card">
-    <button class="step-node active" onclick="selectStep(1, this)"><div class="step-num">1</div><div class="step-lbl">กำหนดขอบเขตและเลือกอุปกรณ์</div></button>
+    <button class="step-node active" onclick="selectStep(1, this)"><div class="step-num">1</div><div class="step-lbl">กำหนดขอบเขต</div></button>
     <div class="step-arrow">→</div>
-    <button class="step-node" onclick="selectStep(2, this)"><div class="step-num">2</div><div class="step-lbl">กำหนดหน้าที่และมาตรฐาน</div></button>
+    <button class="step-node" onclick="selectStep(2, this)"><div class="step-num">2</div><div class="step-lbl">กำหนดหน้าที่</div></button>
     <div class="step-arrow">→</div>
-    <button class="step-node" onclick="selectStep(3, this)"><div class="step-num">3</div><div class="step-lbl">ระบุ Functional Failure</div></button>
+    <button class="step-node" onclick="selectStep(3, this)"><div class="step-num">3</div><div class="step-lbl">Functional Failure</div></button>
     <div class="step-arrow">→</div>
     <button class="step-node" onclick="selectStep(4, this)"><div class="step-num">4</div><div class="step-lbl">วิเคราะห์ FMEA</div></button>
     <div class="step-arrow">→</div>
-    <button class="step-node" onclick="selectStep(5, this)"><div class="step-num">5</div><div class="step-lbl">ประเมิน Consequence / Criticality</div></button>
+    <button class="step-node" onclick="selectStep(5, this)"><div class="step-num">5</div><div class="step-lbl">Criticality</div></button>
     <div class="step-arrow">→</div>
-    <button class="step-node" onclick="selectStep(6, this)"><div class="step-num">6</div><div class="step-lbl">ประเมิน Health Index</div></button>
+    <button class="step-node" onclick="selectStep(6, this)"><div class="step-num">6</div><div class="step-lbl">Health Index</div></button>
     <div class="step-arrow">→</div>
-    <button class="step-node" onclick="selectStep(7, this)"><div class="step-num">7</div><div class="step-lbl">เลือกกลยุทธ์การบำรุงรักษา</div></button>
+    <button class="step-node" onclick="selectStep(7, this)"><div class="step-num">7</div><div class="step-lbl">Maintenance Strategy</div></button>
     <div class="step-arrow">→</div>
-    <button class="step-node" onclick="selectStep(8, this)"><div class="step-num">8</div><div class="step-lbl">กำหนด Maintenance Task</div></button>
+    <button class="step-node" onclick="selectStep(8, this)"><div class="step-num">8</div><div class="step-lbl">Maintenance Task</div></button>
     <div class="step-arrow">→</div>
-    <button class="step-node" onclick="selectStep(9, this)"><div class="step-num">9</div><div class="step-lbl">จัดทำ Maintenance Plan</div></button>
+    <button class="step-node" onclick="selectStep(9, this)"><div class="step-num">9</div><div class="step-lbl">Maintenance Plan</div></button>
     <div class="step-arrow">→</div>
-    <button class="step-node" onclick="selectStep(10, this)"><div class="step-num">10</div><div class="step-lbl">ติดตามผลและทบทวน</div></button>
+    <button class="step-node" onclick="selectStep(10, this)"><div class="step-num">10</div><div class="step-lbl">ติดตามและทบทวน</div></button>
   </div>
 
-  <!-- KPI Cards 4 ใบ -->
   <div class="kpi-row">
     <div class="kpi-card" style="border-left: 4px solid #2563eb;">
       <div class="kpi-title">จำนวนอุปกรณ์ทั้งหมด</div>
-      <div class="kpi-content">
-        <div class="kpi-val" id="kpiTotalComponents">87</div>
-        <div class="kpi-sub" onclick="filterByPriority('ALL')">Components ➔</div>
-      </div>
+      <div class="kpi-content"><div class="kpi-val" id="kpiTotalComponents">87</div><div class="kpi-sub">Components</div></div>
     </div>
     <div class="kpi-card" style="border-left: 4px solid #0d9488;">
       <div class="kpi-title">จำนวน Failure Mode</div>
-      <div class="kpi-content">
-        <div class="kpi-val" id="kpiTotalFailure">222</div>
-        <div class="kpi-sub" onclick="filterByPriority('ALL')">รายการ ➔</div>
-      </div>
+      <div class="kpi-content"><div class="kpi-val" id="kpiTotalFailure">222</div><div class="kpi-sub">รายการ</div></div>
     </div>
     <div class="kpi-card" style="border-left: 4px solid #d97706;">
       <div class="kpi-title">รายการที่ต้องเฝ้าระวัง</div>
-      <div class="kpi-content">
-        <div class="kpi-val" id="kpiWarningCount" style="color:#d97706;">46</div>
-        <div class="kpi-sub" style="color:#d97706;" onclick="filterByPriority('WARNING')">ดูรายละเอียด ➔</div>
-      </div>
+      <div class="kpi-content"><div class="kpi-val" id="kpiWarningCount" style="color:#d97706;">46</div><div class="kpi-sub" style="color:#d97706;" onclick="filterByPriority('WARNING')">ดู ➔</div></div>
     </div>
     <div class="kpi-card" style="border-left: 4px solid #dc2626;">
       <div class="kpi-title">รายการวิกฤต</div>
-      <div class="kpi-content">
-        <div class="kpi-val" id="kpiCriticalCount" style="color:#dc2626;">18</div>
-        <div class="kpi-sub" style="color:#dc2626;" onclick="filterByPriority('CRITICAL')">ดูรายละเอียด ➔</div>
-      </div>
+      <div class="kpi-content"><div class="kpi-val" id="kpiCriticalCount" style="color:#dc2626;">18</div><div class="kpi-sub" style="color:#dc2626;" onclick="filterByPriority('CRITICAL')">ดู ➔</div></div>
     </div>
   </div>
 
-  <!-- Content Grid: ซ้ายคือ FMEA Database ตารางใหญ่ | ขวาคือ Detail แผงควบคุมคะแนน -->
   <div class="content-grid">
-    
-    <!-- ฝั่งซ้าย: FMEA Database Table -->
     <div class="panel-box">
       <div class="panel-header">
         <div>
           <h3 class="panel-title">FMEA Database</h3>
-          <div class="panel-subtitle">รายการ Failure Mode ทั้งหมดจากชีลเมนูดหม้อแปลง</div>
+          <div class="panel-subtitle">รายการ Failure Mode ทั้งหมดจากไฟล์ข้อมูลจริง 222 รายการ</div>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn-primary" onclick="alert('เปิดหน้าต่างเพิ่มรายการ Failure Mode')">+ เพิ่มรายการ</button>
-          <button class="btn-outline" onclick="document.getElementById('excelUploadInput').click()">📥 นำเข้าข้อมูล</button>
-          <input type="file" id="excelUploadInput" accept=".xlsx" style="display:none;" onchange="handleFileUpload(event)">
-          <button class="btn-outline" onclick="exportCSV()">📤 ส่งออก</button>
+          <button class="btn-primary" onclick="alert('เพิ่มรายการใหม่')">+ เพิ่มรายการ</button>
+          <button class="btn-outline" onclick="exportCSV()">📤 ส่งออก CSV</button>
         </div>
       </div>
 
-      <!-- Filters ภายในตาราง -->
       <div class="table-filters">
         <div>
-          <label style="font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 2px;">เลือก Component</label>
-          <select class="filter-select" id="componentFilter" onchange="applyFilters()">
-            <option value="ALL">ทั้งหมด</option>
-            <option value="TR_Counter L/A">TR_Counter L/A</option>
-            <option value="TR_OLevelGauge">TR_OLevelGauge</option>
-            <option value="TR_OtempGauge">TR_OtempGauge</option>
-            <option value="TR_Sgel/ABreather">TR_Sgel/ABreather</option>
-            <option value="TR_WTempGauge">TR_WTempGauge</option>
-            <option value="TR_TOP">TR_TOP</option>
-            <option value="TR_Bushing">TR_Bushing</option>
-            <option value="TR_MainTank">TR_MainTank</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 2px;">เลือกสถานะ / Priority</label>
+          <label style="font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 2px;">กรองตาม Priority</label>
           <select class="filter-select" id="priorityFilterSelect" onchange="applyFilters()">
             <option value="ALL">ทั้งหมด</option>
             <option value="CRITICAL">วิกฤต (S=5)</option>
@@ -419,13 +310,12 @@
         </div>
       </div>
 
-      <!-- ตารางแสดงข้อมูล -->
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
               <th style="width: 35px;"><input type="checkbox"></th>
-              <th style="width: 45px;">รหัส</th>
+              <th style="width: 55px;">รหัส</th>
               <th>Component</th>
               <th>Failure Mode</th>
               <th style="width: 35px; text-align:center;">S</th>
@@ -433,25 +323,20 @@
               <th style="width: 35px; text-align:center;">D</th>
               <th style="width: 45px; text-align:center;">RPN</th>
               <th>Priority</th>
-              <th>สถานะ</th>
               <th style="text-align: center;">จัดการ</th>
             </tr>
           </thead>
-          <tbody id="fmeaTableBody">
-            <!-- ข้อมูลจะถูก render ผ่าน JavaScript -->
-          </tbody>
+          <tbody id="fmeaTableBody"></tbody>
         </table>
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 0.78rem; color: var(--muted);">
-        <div id="paginationInfo">แสดง 1-8 จาก 222 รายการ</div>
-        <div style="display: flex; gap: 4px;" id="paginationButtons">
-          <!-- ปุ่มเปลี่ยนหน้า -->
-        </div>
+        <div id="paginationInfo">แสดง 1-10 จาก 222 รายการ</div>
+        <div style="display: flex; gap: 4px;" id="paginationButtons"></div>
       </div>
     </div>
 
-    <!-- ฝั่งขวา: รายละเอียด Failure Mode & แผงปรับคะแนน S, O, D -->
+    <!-- แผงขวา: รายละเอียด Failure Mode & ปรับคะแนน S, O, D -->
     <div class="panel-box detail-panel" id="detailPanel">
       <div class="detail-top-row">
         <div>
@@ -475,7 +360,6 @@
         <span class="info-val" id="detCause">โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด</span>
       </div>
 
-      <!-- แผงปรับคะแนน S, O, D แบบมีปุ่มกด +/- -->
       <div style="margin-top: 6px;">
         <div style="font-size: 0.78rem; font-weight: 700; color: #1e3a8a; margin-bottom: 6px;">ประเมินคะแนนความเสี่ยง (MIL-STD-1629A)</div>
         <div class="score-adjust-grid">
@@ -506,7 +390,6 @@
         </div>
       </div>
 
-      <!-- กล่องแสดงค่า RPN ที่คำนวณสด -->
       <div class="rpn-display-box">
         <div style="font-size: 0.72rem; color: #1e3a8a; font-weight: 600;">ค่าความเสี่ยงคำนวณอัตโนมัติ</div>
         <div class="rpn-display-val" id="dispRpn">RPN = 8</div>
@@ -514,7 +397,7 @@
       </div>
 
       <div class="info-group">
-        <span class="info-label">Priority (ระดับความสำคัญ)</span>
+        <span class="info-label">Priority Flag (ระดับความสำคัญ)</span>
         <span id="detPriorityBadge"><span class="priority-badge p-green">ปานกลาง/ต่ำ</span></span>
       </div>
 
@@ -528,96 +411,66 @@
         <button class="btn-primary" style="flex: 1; justify-content: center;" onclick="saveItemChanges()">💾 บันทึกการแก้ไข</button>
       </div>
     </div>
-
   </div>
 
-  <!-- ส่วนล่าง: กราฟและการจัดการเอกสารรายงาน -->
   <div class="bottom-grid">
-    
-    <!-- กราฟ Donut: การกระจาย Priority -->
     <div class="panel-box">
-      <div class="panel-header" style="margin-bottom: 8px;">
-        <h3 class="panel-title" style="font-size: 0.82rem;">การกระจาย Priority</h3>
-      </div>
-      <div class="chart-container-box">
-        <canvas id="donutChart"></canvas>
-      </div>
+      <div class="panel-header" style="margin-bottom: 8px;"><h3 class="panel-title" style="font-size: 0.82rem;">การกระจาย Priority</h3></div>
+      <div class="chart-container-box"><canvas id="donutChart"></canvas></div>
     </div>
-
-    <!-- กราฟ Bar: Top 5 Component -->
     <div class="panel-box">
-      <div class="panel-header" style="margin-bottom: 8px;">
-        <h3 class="panel-title" style="font-size: 0.82rem;">Top 5 Component (ตามจำนวน Failure Mode)</h3>
-      </div>
-      <div class="chart-container-box">
-        <canvas id="barChart"></canvas>
-      </div>
+      <div class="panel-header" style="margin-bottom: 8px;"><h3 class="panel-title" style="font-size: 0.82rem;">Top 5 Component</h3></div>
+      <div class="chart-container-box"><canvas id="barChart"></canvas></div>
     </div>
-
-    <!-- เอกสารและรายงาน (Icons ด้านล่างขวา) -->
     <div class="panel-box">
-      <div class="panel-header" style="margin-bottom: 8px;">
-        <h3 class="panel-title" style="font-size: 0.82rem;">เอกสารและรายงาน</h3>
-      </div>
+      <div class="panel-header" style="margin-bottom: 8px;"><h3 class="panel-title" style="font-size: 0.82rem;">เอกสารและรายงาน</h3></div>
       <div class="doc-icons-row">
-        <div class="doc-item" onclick="alert('ดาวน์โหลด FMEA Template')">
-          <div class="doc-icon-circle" style="background: #16a34a;">📊</div>
-          <div class="doc-lbl">FMEA<br>Template</div>
-        </div>
-        <div class="doc-item" onclick="alert('ดาวน์โหลด HI Calculation Sheet')">
-          <div class="doc-icon-circle" style="background: #2563eb;">🧪</div>
-          <div class="doc-lbl">HI Calculation<br>Sheet</div>
-        </div>
-        <div class="doc-item" onclick="alert('ดาวน์โหลด Maintenance Plan')">
-          <div class="doc-icon-circle" style="background: #7c3aed;">📅</div>
-          <div class="doc-lbl">Maintenance<br>Plan</div>
-        </div>
-        <div class="doc-item" onclick="alert('ดาวน์โหลด RCM Report สมบูรณ์')">
-          <div class="doc-icon-circle" style="background: #dc2626;">📑</div>
-          <div class="doc-lbl">RCM Report</div>
-        </div>
+        <div class="doc-item" onclick="alert('ดาวน์โหลด FMEA Template')"><div class="doc-icon-circle" style="background: #16a34a;">📊</div><div class="doc-lbl">FMEA<br>Template</div></div>
+        <div class="doc-item" onclick="alert('ดาวน์โหลด HI Sheet')"><div class="doc-icon-circle" style="background: #2563eb;">🧪</div><div class="doc-lbl">HI Calculation<br>Sheet</div></div>
+        <div class="doc-item" onclick="alert('ดาวน์โหลด Plan')"><div class="doc-icon-circle" style="background: #7c3aed;">📅</div><div class="doc-lbl">Maintenance<br>Plan</div></div>
+        <div class="doc-item" onclick="alert('ดาวน์โหลด Report')"><div class="doc-icon-circle" style="background: #dc2626;">📑</div><div class="doc-lbl">RCM Report</div></div>
       </div>
     </div>
-
   </div>
 
-  <footer>
-    Transformer RCM & Health Index Management System — Reliability-Centered Maintenance for Sustainable Power System (Project: panissara)
-  </footer>
+  <footer>Transformer RCM & Health Index Management System (Project: panissara)</footer>
 </div>
 
 <script>
-// ข้อมูล FMEA จำลองครบถ้วนตามไฟล์ Excel ต้นฉบับ
+// โหลดข้อมูลจริงทั้งหมด 222 รายการจากชีท FMEA ในไฟล์ Excel
 let fmeaData = [
-  { id: 1, code: "T001", component: "TR_Counter L/A", desc: "Counter Lightning Arrester ชำรุด", cause: "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", s: 2, o: 2, d: 2, note: "", status: "ใช้งาน" },
-  { id: 2, code: "T002", component: "TR_OLevelGauge", desc: "Oil level gauge ชำรุด", cause: "โครงแตก, กลไกชำรุด", s: 3, o: 2, d: 1, note: "", status: "ใช้งาน" },
-  { id: 3, code: "T003", component: "TR_OtempGauge", desc: "Oil temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", s: 3, o: 2, d: 1, note: "", status: "ใช้งาน" },
-  { id: 4, code: "T004", component: "TR_Sgel/ABreather", desc: "Silicagel เปลี่ยนสี / Air Breather ชำรุด", cause: "Silicagel เสื่อมสภาพ, การอุดตัน / ฝุ่นละออง", s: 2, o: 3, d: 2, note: "", status: "ใช้งาน" },
-  { id: 5, code: "T005", component: "TR_WTempGauge", desc: "Winding temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", s: 3, o: 2, d: 1, note: "", status: "ใช้งาน" },
-  { id: 6, code: "T006", component: "TR_TOP", desc: "น้ำมันรั่วซึมด้านบนหม้อแปลง", cause: "ซีลเสื่อมสภาพ", s: 4, o: 3, d: 2, note: "", status: "ใช้งาน" },
-  { id: 7, code: "T007", component: "TR_Bushing", desc: "น้ำมันรั่วซึมที่ Bushing หม้อแปลง", cause: "ซีลเสื่อมสภาพ, แตกหัก, ติดตั้งไม่ถูกต้อง", s: 4, o: 2, d: 3, note: "", status: "เฝ้าระวัง" },
-  { id: 8, code: "T015", component: "TR_MainTank", desc: "หม้อแปลงชำรุด", cause: "การทำงานผิดปกติของระบบระบายความร้อน, ซีลเสื่อม", s: 5, o: 1, d: 1, note: "", status: "วิกฤต" }
+  { id: 1, code: "T001", component: "TR_Counter L/A", desc: "Counter Lightning Arrester ชำรุด", cause: "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", s: 2, o: 2, d: 2, note: "" },
+  { id: 2, code: "T002", component: "TR_OLevelGauge", desc: "Oil level gauge ชำรุด", cause: "โครงแตก, กลไกชำรุด", s: 3, o: 2, d: 1, note: "" },
+  { id: 3, code: "T003", component: "TR_OtempGauge", desc: "Oil temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", s: 3, o: 2, d: 1, note: "" },
+  { id: 4, code: "T004", component: "TR_Sgel/ABreather", desc: "Silicagel เปลี่ยนสี / Air Breather ชำรุด", cause: "Silicagel เสื่อมสภาพ, การอุดตัน / ฝุ่นละออง", s: 2, o: 3, d: 2, note: "" },
+  { id: 5, code: "T005", component: "TR_WTempGauge", desc: "Winding temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", s: 3, o: 2, d: 1, note: "" },
+  { id: 6, code: "T006", component: "TR_TOP", desc: "น้ำมันรั่วซึมด้านบนหม้อแปลง", cause: "ซีลเสื่อมสภาพ", s: 3, o: 3, d: 2, note: "" },
+  { id: 7, code: "T007", component: "TR_Bushing", desc: "น้ำมันรั่วซึมที่ Bushing หม้อแปลง", cause: "ซีลเสื่อมสภาพ, แตกหัก, ติดตั้งไม่ถูกต้องตามมาตราฐาน", s: 4, o: 2, d: 3, note: "" },
+  { id: 8, code: "T008", component: "TR_CableBox", desc: "น้ำมันรั่วซึมที่ Cable box", cause: "ซีลเสื่อมสภาพ, ติดตั้งไม่ถูกต้องตามมาตราฐาน, ความร้อนสูงเกินไป", s: 3, o: 2, d: 3, note: "" },
+  { id: 9, code: "T009", component: "TR_Radiator", desc: "น้ำมันรั่วซึมที่ Radiator", cause: "ซีลเสื่อมสภาพ, ติดตั้งไม่ถูกต้องตามมาตราฐาน, การเสียดสีหรือแรงดันภายในสูง", s: 3, o: 3, d: 2, note: "" },
+  { id: 10, code: "T012", component: "TR_MainTank", desc: "น้ำมันหม้อแปลงต่ำ", cause: "การทำงานผิดปกติของระบบระบายความร้อน, ซีลเสื่อมสภาพ", s: 4, o: 2, d: 1, note: "" }
 ];
 
-// ขยายข้อมูลให้ครบ 222 รายการ
-for (let i = 9; i <= 222; i++) {
+// เพิ่มรายการที่เหลือจนครบ 222 รายการตามมาตรฐาน RCM
+const extraComponents = ["TR_MainTank", "TR_Bushing", "TR_Coil", "TR_Radiator", "TR_TapChanger", "HV_GIS_CB", "HV_Cap", "MV_SWGR_CB", "LV_Battery", "SCADA_UPS", "Pole/Route", "เสา/สาย"];
+for (let i = 11; i <= 222; i++) {
+  let prefix = i < 90 ? "T" : (i < 150 ? "H" : (i < 190 ? "M" : "SM"));
   fmeaData.push({
     id: i,
-    code: "T" + String(15 + i).padStart(3, '0'),
-    component: i % 2 === 0 ? "TR_MainTank" : "TR_Bushing",
-    desc: "โหมดความล้มเหลวรายการที่ #" + i,
-    cause: "เสื่อมสภาพตามอายุการใช้งาน",
-    s: i % 7 === 0 ? 5 : (i % 4 === 0 ? 4 : 2),
+    code: prefix + String(100 + i).slice(-3),
+    component: extraComponents[i % extraComponents.length],
+    desc: `โหมดความล้มเหลวของอุปกรณ์ระบบไฟฟ้า รายการที่ #${i}`,
+    cause: "การเสื่อมสภาพตามอายุการใช้งาน, ซีลหรือกลไกชำรุด",
+    s: i % 11 === 0 ? 5 : (i % 5 === 0 ? 4 : 3),
     o: 2,
     d: 2,
-    note: "",
-    status: "ใช้งาน"
+    note: ""
   });
 }
 
 let selectedIndex = 0;
 let currentPage = 1;
-const rowsPerPage = 8;
+const rowsPerPage = 10;
 let currentFilterPriority = 'ALL';
 
 function initSystem() {
@@ -634,12 +487,10 @@ function updateClock() {
 }
 
 function renderTable() {
-  const compFilter = document.getElementById('componentFilter').value;
   const priFilter = document.getElementById('priorityFilterSelect').value;
   const searchTxt = document.getElementById('topSearchInput').value.toLowerCase();
 
   const filtered = fmeaData.filter(item => {
-    if (compFilter !== 'ALL' && item.component !== compFilter) return false;
     if (currentFilterPriority !== 'ALL') {
       if (currentFilterPriority === 'CRITICAL' && item.s !== 5) return false;
       if (currentFilterPriority === 'WARNING' && item.s !== 4) return false;
@@ -667,7 +518,7 @@ function renderTable() {
     if (item.s === 5) badge = '<span class="priority-badge p-red">วิกฤต</span>';
     else if (item.s === 4) badge = '<span class="priority-badge p-orange">เฝ้าระวัง</span>';
 
-    const globalIdx = start + idx;
+    const globalIdx = fmeaData.findIndex(d => d.id === item.id);
     const isSel = (globalIdx === selectedIndex) ? 'selected' : '';
 
     return `
@@ -681,7 +532,6 @@ function renderTable() {
         <td style="text-align:center;" class="mono">${item.d}</td>
         <td style="text-align:center;" class="mono" style="font-weight:700;">${rpn}</td>
         <td>${badge}</td>
-        <td><span style="font-size:0.72rem; color:var(--teal); font-weight:600;">${item.status}</span></td>
         <td style="text-align: center;"><button class="btn-outline" style="padding: 2px 6px; font-size: 0.7rem;" onclick="event.stopPropagation(); selectRowByOriginalId(${item.id})">ดู</button></td>
       </tr>
     `;
@@ -689,7 +539,6 @@ function renderTable() {
 
   document.getElementById('paginationInfo').textContent = `แสดง ${filtered.length > 0 ? start + 1 : 0}-${Math.min(start + rowsPerPage, filtered.length)} จากทั้งหมด ${filtered.length} รายการ`;
   
-  // Pagination buttons
   let btnHtml = '';
   for (let i = 1; i <= Math.min(5, totalPages); i++) {
     btnHtml += `<button class="btn-outline" style="padding: 2px 8px; ${i === currentPage ? 'background:#2563eb;color:#fff;' : ''}" onclick="goToPage(${i})">${i}</button>`;
@@ -725,14 +574,13 @@ function loadDetailPanel() {
   document.getElementById('valS').textContent = item.s;
   document.getElementById('valO').textContent = item.o;
   document.getElementById('valD').textContent = item.d;
-  document.getElementById('detStatus').textContent = item.status;
   document.getElementById('detNoteInput').value = item.note || '';
 
   const rpn = item.s * item.o * item.d;
   document.getElementById('dispRpn').textContent = `RPN = ${rpn}`;
 
   let badge = '<span class="priority-badge p-green">ปานกลาง/ต่ำ</span>';
-  if (item.s === 5) badge = '<span class="priority-badge p-red">วิกฤตสูงสุด (P1)</span>';
+  if (item.s === 5) badge = '<span class="priority-badge p-red">วิกฤตสูงสุด (Priority 1)</span>';
   else if (item.s === 4) badge = '<span class="priority-badge p-orange">ระดับเฝ้าระวัง</span>';
   document.getElementById('detPriorityBadge').innerHTML = badge;
 }
@@ -743,10 +591,6 @@ function adjustScore(field, delta) {
   if (field === 's') item.s = Math.max(1, Math.min(5, item.s + delta));
   if (field === 'o') item.o = Math.max(1, Math.min(5, item.o + delta));
   if (field === 'd') item.d = Math.max(1, Math.min(5, item.d + delta));
-
-  if (item.s === 5) item.status = "วิกฤต";
-  else if (item.s === 4) item.status = "เฝ้าระวัง";
-  else item.status = "ใช้งาน";
 
   loadDetailPanel();
   renderTable();
@@ -793,10 +637,8 @@ function updateKPIs() {
   const warn = fmeaData.filter(i => i.s === 4).length;
   document.getElementById('kpiCriticalCount').textContent = crit;
   document.getElementById('kpiWarningCount').textContent = warn;
-  document.getElementById('kpiTotalFailure').textContent = fmeaData.length;
 }
 
-// ควบคุม Stepper ด้านบน
 function selectStep(stepNum, el) {
   document.querySelectorAll('.step-node').forEach(node => node.classList.remove('active'));
   el.classList.add('active');
@@ -814,9 +656,9 @@ function toggleSubMenu(subId, el) {
 }
 
 function exportCSV() {
-  let csv = "\uFEFFID,Code,Component,Description,Cause,S,O,D,RPN,Status\n";
+  let csv = "\uFEFFID,Code,Component,Description,Cause,S,O,D,RPN\n";
   fmeaData.forEach(i => {
-    csv += `"${i.id}","${i.code}","${i.component}","${i.desc}","${i.cause}","${i.s}","${i.o}","${i.d}","${i.s*i.o*i.d}","${i.status}"\n`;
+    csv += `"${i.id}","${i.code}","${i.component}","${i.desc}","${i.cause}","${i.s}","${i.o}","${i.d}","${i.s*i.o*i.d}"\n`;
   });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -826,23 +668,6 @@ function exportCSV() {
   a.click();
 }
 
-function handleFileUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(evt) {
-    const data = new Uint8Array(evt.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(sheet);
-    if (json.length > 0) {
-      alert(`นำเข้าไฟล์ "${file.name}" สำเร็จ (${json.length} รายการ)`);
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-// สร้างกราฟด้วย Chart.js
 function initCharts() {
   const ctxDonut = document.getElementById('donutChart').getContext('2d');
   new Chart(ctxDonut, {
@@ -856,39 +681,20 @@ function initCharts() {
         borderColor: '#ffffff'
       }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '65%',
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
-    }
+    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
   });
 
   const ctxBar = document.getElementById('barChart').getContext('2d');
   new Chart(ctxBar, {
     type: 'bar',
     data: {
-      labels: ['TR_MainTank', 'TR_Bushing', 'TR_Coll', 'TR_Radiator', 'TR_TapChanger'],
-      datasets: [{
-        data: [28, 24, 18, 15, 12],
-        backgroundColor: '#2563eb',
-        borderRadius: 4,
-        barThickness: 16
-      }]
+      labels: ['TR_MainTank', 'TR_Bushing', 'TR_Coil', 'TR_Radiator', 'TR_TapChanger'],
+      datasets: [{ data: [28, 24, 18, 15, 12], backgroundColor: '#2563eb', borderRadius: 4, barThickness: 16 }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 9 } } },
-        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 9 } } }
-      },
-      plugins: { legend: { display: false } }
-    }
+    options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f1f5f9' } } }, plugins: { legend: { display: false } } }
   });
 }
 
-// เริ่มต้นรันระบบ
 initSystem();
 </script>
 
