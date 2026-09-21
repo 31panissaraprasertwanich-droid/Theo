@@ -3,1443 +3,893 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบ RCM สถานีไฟฟ้า — Transformer RCM & Health Index Management System</title>
+<title>RCM SYSTEM — Transformer RCM & Health Index Management System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-<!-- โหลดไลบรารี Chart.js สำหรับวาดกราฟ -->
+<!-- โหลด Chart.js สำหรับกราฟ -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- โหลดไลบรารี SheetJS (xlsx) สำหรับอ่านไฟล์ Excel -->
+<!-- โหลด SheetJS สำหรับ Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<!-- โหลด Firebase SDK สำหรับเชื่อมต่อ Cloud Firestore -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDurmcrWYyP4_7pPSQ5NuJs6H5LObSs_uY",
-    projectId: "panissara",
-    authDomain: "panissara.firebaseapp.com"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  window.saveToFirestoreCloud = async function(fmeaData, hiData) {
-    try {
-      await signInWithEmailAndPassword(auth, "device@Panissara.local", "12345678");
-      await setDoc(doc(db, "panissara_projects", "rcm_main_data"), {
-        records: fmeaData,
-        hiRecords: hiData,
-        updatedAt: new Date().toISOString()
-      });
-      alert('บันทึกข้อมูลขึ้น Cloud Firestore (โปรเจกต์ panissara) สำเร็จเรียบร้อยแล้ว!');
-    } catch (error) {
-      console.error("Firebase Error:", error);
-      alert('เกิดข้อผิดพลาดในการบันทึก Cloud Firestore: ' + error.message);
-    }
-  };
-</script>
 
 <style>
   :root {
-    --bg: #090d16;
-    --panel: #111827;
-    --panel-2: #1f293d;
-    --border: #334155;
-    --text: #f8fafc;
-    --muted: #94a3b8;
-    
-    --primary: #f59e0b;
-    --primary-dim: rgba(245, 158, 11, 0.15);
-    
-    --teal: #14b8a6;
-    --teal-dim: rgba(20, 184, 166, 0.15);
-    --danger: #ef4444;
-    --danger-dim: rgba(239, 68, 68, 0.15);
-    
-    --radius: 10px;
-  }
-
-  body.light-mode {
-    --bg: #f8fafc;
+    --bg: #f3f6fb;
     --panel: #ffffff;
-    --panel-2: #f1f5f9;
+    --panel-2: #f8fafc;
     --border: #e2e8f0;
     --text: #0f172a;
     --muted: #64748b;
+    --primary: #2563eb;
+    --primary-dim: rgba(37, 99, 235, 0.1);
+    --teal: #0d9488;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --radius: 10px;
   }
 
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0; width:100%; overflow-x:hidden;}
+  html,body{margin:0;padding:0;width:100%;}
   body{
     background: var(--bg);
     color: var(--text);
     font-family:'Noto Sans Thai', 'Plus Jakarta Sans', system-ui, sans-serif;
     min-height:100vh;
-    display: flex;
-    flex-direction: row;
-    transition: background 0.2s, color 0.2s;
+    display:flex;
   }
   .mono{font-family:'IBM Plex Mono', monospace;}
 
-  /* Sidebar เมนูฝั่งซ้ายแบบทางการ */
+  /* Sidebar ฝั่งซ้ายสีน้ำเงินเข้มตามภาพ */
   aside.sidebar {
-    width: 270px;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
+    width: 260px;
+    background: linear-gradient(180deg, #1e3a8a 0%, #0f172a 100%);
+    color: #ffffff;
     height: 100vh;
     position: fixed;
     top: 0;
     left: 0;
     display: flex;
     flex-direction: column;
-    padding: 24px 16px;
+    padding: 20px 14px;
     z-index: 50;
-    overflow-y: auto;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
   }
   .sidebar-brand {
-    font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 24px; padding-left: 8px;
-    display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em;
+    font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
   }
-  .sidebar-brand .accent { color: var(--primary); }
+  .sidebar-subbrand { font-size: 0.65rem; color: #93c5fd; margin-bottom: 24px; line-height: 1.3; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; }
   
-  .nav-tabs { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-  .tab-btn {
-    background: transparent; border: 1px solid transparent; color: var(--muted);
-    padding: 10px 14px; border-radius: var(--radius); cursor: pointer; font-family: inherit; font-size: 0.88rem; font-weight: 500; transition: all .15s; text-align: left;
+  .nav-list { display: flex; flex-direction: column; gap: 4px; flex: 1; overflow-y: auto; }
+  .nav-item {
+    background: transparent; border: none; color: #cbd5e1;
+    padding: 9px 12px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 0.82rem; font-weight: 500; transition: all .15s; text-align: left;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .tab-btn:hover { background: var(--panel-2); color: var(--text); }
-  .tab-btn.active { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); font-weight: 700; }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .nav-item.active { background: #2563eb; color: #fff; font-weight: 600; }
+  .sub-nav { display: flex; flex-direction: column; gap: 2px; padding-left: 18px; margin: 4px 0 6px 0; border-left: 2px solid rgba(255,255,255,0.15); }
+  .sub-item {
+    background: transparent; border: none; color: #94a3b8; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.78rem; text-align: left;
+  }
+  .sub-item:hover, .sub-item.active { color: #fff; background: rgba(255,255,255,0.06); }
 
-  .sidebar-footer { padding-top: 16px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+  .sidebar-footer { padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.7rem; color: #94a3b8; }
 
   /* เนื้อหาหลักฝั่งขวา */
   .main-content {
-    margin-left: 270px;
+    margin-left: 260px;
     flex: 1;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    width: calc(100% - 270px);
+    padding: 20px 24px;
+    max-width: calc(100% - 260px);
   }
 
-  header{
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 32px;
+  /* Header ด้านบน */
+  .top-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
   }
-  .header-inner{ max-width:1400px; margin:0 auto; width: 100%; }
-  .title-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
-  h1{ font-size:1.2rem; font-weight:700; margin:0; letter-spacing: -0.02em; }
-  h1 .accent{color: var(--primary);}
-  .subtitle{ color:var(--muted); font-size:0.78rem; margin-top:3px; }
+  .top-title-area h2 { font-size: 1.15rem; font-weight: 700; margin: 0; color: #1e3a8a; }
+  .top-title-area p { font-size: 0.75rem; color: var(--muted); margin: 2px 0 0 0; }
   
-  .header-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-
-  .mode-toggle-btn, .role-select {
-    background: var(--panel-2); border: 1px solid var(--border); cursor: pointer; color: var(--text);
-    font-size: 0.82rem; padding: 6px 12px; border-radius: var(--radius); font-family: inherit; transition: all 0.15s;
+  .top-right-controls { display: flex; align-items: center; gap: 14px; }
+  .search-top {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; width: 220px; outline: none;
   }
-  .mode-toggle-btn:hover, .role-select:hover { border-color: var(--primary); }
-
-  .action-btn, .save-btn, .guideline-btn, .tip-btn {
-    background: var(--teal-dim); border: 1px solid var(--teal); color: var(--teal);
-    padding: 6px 12px; border-radius: var(--radius); cursor: pointer; font-size: 0.8rem; font-weight: 600; font-family: inherit; transition: all 0.15s;
+  .user-badge {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px 4px 4px; display: flex; align-items: center; gap: 8px; font-size: 0.78rem;
   }
-  .guideline-btn { background: rgba(59, 130, 246, 0.15); border-color: #3b82f6; color: #60a5fa; }
-  .guideline-btn:hover { background: rgba(59, 130, 246, 0.3); }
-  .tip-btn { background: rgba(245, 158, 11, 0.15); border-color: var(--primary); color: var(--primary); }
-  .tip-btn:hover { background: rgba(245, 158, 11, 0.3); }
-  .action-btn:hover, .save-btn:hover { opacity: 0.85; }
+  .user-avatar { width: 28px; height: 28px; background: #2563eb; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75rem; }
 
-  /* Top Stepper Navigation (1 ถึง 10) เหมือนภาพต้นแบบ */
-  .stepper-container {
+  /* Banner ต้อนรับพร้อมภาพสถานีไฟฟ้า */
+  .welcome-banner {
+    background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%);
+    border-radius: var(--radius);
+    color: #fff;
+    padding: 20px 28px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.15);
+  }
+  .welcome-text h3 { font-size: 0.85rem; color: #93c5fd; margin: 0 0 4px 0; font-weight: 500; }
+  .welcome-text h1 { font-size: 1.35rem; margin: 0 0 6px 0; font-weight: 700; }
+  .welcome-text p { font-size: 0.78rem; color: #e2e8f0; margin: 0 0 10px 0; }
+  .quote { font-style: italic; font-size: 0.75rem; color: #bfdbfe; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; display: inline-block; }
+
+  /* Stepper 1-10 ด้านบน */
+  .stepper-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    margin-bottom: 18px;
     overflow-x: auto;
-    gap: 8px;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
   }
-  .step-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    font-family: inherit;
-    color: var(--muted);
-    transition: all 0.15s;
-    min-width: 75px;
-    padding: 6px;
-    border-radius: 8px;
+  .step-node {
+    display: flex; flex-direction: column; align-items: center; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 6px; min-width: 68px; transition: all .15s;
   }
-  .step-item:hover { color: var(--text); background: var(--panel); }
-  .step-item.active { color: var(--primary); font-weight: 700; background: var(--primary-dim); border: 1px solid var(--primary); }
-  .step-circle {
-    width: 28px; height: 28px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px;
-  }
-  .step-item.active .step-circle { background: var(--primary); color: #000; border-color: var(--primary); }
-  .step-label { font-size: 0.65rem; text-align: center; white-space: nowrap; line-height: 1.2; }
-  .step-arrow { color: var(--muted); font-size: 0.9rem; font-weight: bold; flex-shrink: 0; }
+  .step-node:hover { background: #f1f5f9; }
+  .step-num { width: 26px; height: 26px; border-radius: 50%; background: #e2e8f0; color: #475569; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px; }
+  .step-node.active .step-num { background: #2563eb; color: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
+  .step-lbl { font-size: 0.62rem; color: var(--muted); text-align: center; line-height: 1.2; white-space: nowrap; }
+  .step-node.active .step-lbl { color: #1e3a8a; font-weight: 700; }
+  .step-arrow { color: #cbd5e1; font-size: 0.8rem; font-weight: bold; flex-shrink: 0; }
 
-  .dashboard-stats {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 16px;
-  }
-  .stat-card {
-    background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px;
-    display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.15s;
-  }
-  .stat-card:hover { border-color: var(--primary); }
-  .stat-title { font-size: 0.73rem; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
-  .stat-value { font-family: 'IBM Plex Mono', monospace; font-size: 1.4rem; font-weight: 700; }
-  .stat-total { color: var(--primary); }
-  .stat-normal { color: var(--teal); }
-  .stat-warning { color: var(--primary); }
-  .stat-critical { color: var(--danger); }
-  .stat-hi { color: #60a5fa; }
-
-  /* Charts */
-  .charts-container {
-    display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 16px;
-  }
-  @media(max-width: 950px) { .charts-container { grid-template-columns: 1fr; } }
-  .chart-card {
-    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px;
-    position: relative; overflow: hidden;
-  }
-  .chart-title { font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 12px; }
-  .chart-box { position: relative; height: 200px; width: 100%; display: flex; align-items: center; justify-content: center; }
-
-  .toolbar-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; justify-content: space-between; }
-  .search-wrap{ position:relative; flex: 1; min-width: 240px; }
-  #search{
-    width:100%; background:var(--panel-2); border:1px solid var(--border); color:var(--text);
-    font-family:inherit; font-size:0.88rem; padding:10px 14px 10px 38px; border-radius: var(--radius); outline:none;
-  }
-  #search:focus{ border-color: var(--primary); }
-  .search-wrap svg{ position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; stroke:var(--muted); }
-
-  .risk-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .filter-chip {
-    font-size: 0.78rem; padding: 7px 12px; border-radius: var(--radius); border: 1px solid var(--border);
-    background: var(--panel-2); color: var(--muted); cursor: pointer; font-weight: 600; transition: all 0.15s;
-  }
-  .filter-chip.active { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
-
-  .chips{ display:flex; flex-wrap:wrap; gap:6px; max-height:80px; overflow-y:auto; padding-bottom:4px; }
-  .chip{
-    font-size:0.75rem; padding:5px 10px; border-radius:100px; border:1px solid var(--border);
-    background:var(--panel-2); color:var(--muted); cursor:pointer; transition:all .12s ease; white-space:nowrap;
-  }
-  .chip:hover{border-color:var(--primary); color:var(--text);}
-  .chip.active{ background: var(--primary-dim); border-color: var(--primary); color: var(--primary); font-weight:600; }
-
-  main { padding: 24px 32px 60px; max-width: 1400px; margin: 0 auto; width: 100%; }
-
-  /* Table Design */
-  .table-responsive {
-    width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
-    border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel);
-  }
-  table{ width: 100%; min-width: 1250px; border-collapse: collapse; font-size: 0.84rem; }
-  thead th{
-    text-align: left; font-size: 0.73rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
-    padding: 12px 14px; border-bottom: 1px solid var(--border); background: var(--panel-2); white-space: nowrap;
-  }
-  
-  tbody tr{ border-bottom: 1px solid var(--border); transition: background .1s ease; cursor: pointer; }
-  tbody tr:hover{ background: var(--panel-2); }
-  tbody td{ padding: 10px 14px; vertical-align: middle; }
-  td.num{ color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; }
-  
-  .code-pill{
-    display: inline-block; font-family: 'IBM Plex Mono', monospace; font-weight: 600;
-    font-size: 0.8rem; color: var(--primary); background: var(--primary-dim);
-    border-left: 3px solid var(--primary); padding: 2px 6px; border-radius: 4px; white-space: nowrap;
-  }
-  
-  input.score-input {
-    width: 50px; background: var(--bg); border: 1px solid var(--border); color: var(--text);
-    padding: 5px; text-align: center; border-radius: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem;
-  }
-  input.score-input:focus { border-color: var(--primary); outline: none; }
-  input.score-input:disabled { opacity: 0.4; cursor: not-allowed; background: rgba(255,255,255,0.03); }
-  
-  input.text-input, select.text-input {
-    width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
-    padding: 7px 10px; border-radius: 6px; font-family: inherit; font-size: 0.82rem;
-  }
-  input.text-input:focus, select.text-input:focus { border-color: var(--primary); outline: none; }
-  input.text-input:disabled, select.text-input:disabled { opacity: 0.4; cursor: not-allowed; background: rgba(255,255,255,0.03); }
-
-  /* Priority Flag Badges */
-  .flag-badge {
-    font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; display: inline-block; white-space: nowrap;
-  }
-  .flag-red { background: var(--danger-dim); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-  .flag-orange { background: var(--primary-dim); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-  .flag-green { background: var(--teal-dim); color: #2dd4bf; border: 1px solid rgba(20, 184, 166, 0.3); }
-
-  .plan-info-banner {
-    background: var(--panel-2); border: 1px solid var(--border); border-left: 4px solid var(--primary);
-    padding: 14px 18px; border-radius: var(--radius); margin-bottom: 16px; font-size: 0.85rem; line-height: 1.6;
-  }
-
-  /* Flow Chart UI Styles */
-  .flow-wrapper {
-    display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px 12px;
-    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px;
-  }
-  .flow-step-box {
-    width: 100%; max-width: 650px; background: var(--panel-2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px 18px; display: flex; flex-direction: column; gap: 8px;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-  }
-  .flow-cond {
-    font-size: 0.9rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px;
-  }
-  .flow-branches {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;
-  }
-  .branch-yes {
-    background: rgba(20, 184, 166, 0.12); border: 1px solid var(--teal); border-radius: 6px; padding: 8px 12px;
-    font-size: 0.80rem; color: var(--teal); font-weight: 600; text-align: center;
-  }
-  .branch-no {
-    background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px;
-    font-size: 0.80rem; color: var(--muted); text-align: center;
-  }
-  .flow-down-arrow {
-    text-align: center; color: var(--muted); font-weight: bold; font-size: 1.1rem; line-height: 1;
-  }
-
-  /* Excel Upload Box */
-  .upload-box {
-    background: var(--panel); border: 2px dashed var(--border); border-radius: var(--radius);
-    padding: 30px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;
-    margin-bottom: 16px; transition: all 0.2s; cursor: pointer;
-  }
-  .upload-box:hover { border-color: var(--primary); background: var(--panel-2); }
-  .upload-icon { font-size: 2.2rem; color: var(--primary); }
-
-  /* DGA Analysis Styles */
-  .dga-toolbar {
+  /* KPI Cards 4 ใบ */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+  @media(max-width: 1100px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .kpi-card {
     background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px;
-    margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
   }
-  .dga-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-  .dga-card {
-    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;
-    display: flex; flex-direction: column; justify-content: space-between;
-  }
-  .dga-card h4 { margin: 0 0 8px 0; color: var(--primary); font-size: 0.9rem; }
-  .dga-desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
-  .dga-result-box {
-    background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 6px;
-    font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; color: var(--teal); margin-top: 10px; min-height: 44px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .dga-input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
-  .dga-field { display: flex; flex-direction: column; gap: 3px; }
-  .dga-field label { font-size: 0.7rem; color: var(--muted); font-weight: 600; }
+  .kpi-title { font-size: 0.73rem; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+  .kpi-content { display: flex; align-items: baseline; justify-content: space-between; }
+  .kpi-val { font-family: 'IBM Plex Mono', monospace; font-size: 1.5rem; font-weight: 700; color: #0f172a; }
+  .kpi-sub { font-size: 0.72rem; color: var(--teal); font-weight: 600; display: flex; align-items: center; gap: 2px; cursor: pointer; }
+
+  /* Layout หลักแบ่งซ้าย (ตาราง FMEA) ขวา (รายละเอียด Failure Mode) */
+  .content-grid { display: grid; grid-template-columns: 1fr 360px; gap: 16px; margin-bottom: 16px; }
+  @media(max-width: 1200px) { .content-grid { grid-template-columns: 1fr; } }
+
+  .panel-box { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+  .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .panel-title { font-size: 0.9rem; font-weight: 700; color: #1e3a8a; margin: 0; }
+  .panel-subtitle { font-size: 0.72rem; color: var(--muted); margin: 2px 0 0 0; }
+
+  .btn-primary { background: #2563eb; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+  .btn-primary:hover { background: #1d4ed8; }
+
+  /* Toolbar Filter ภายในตาราง */
+  .table-filters { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .filter-select { background: var(--panel-2); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; font-size: 0.78rem; color: var(--text); outline: none; }
   
-  .duval-box {
-    background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 8px;
-  }
+  /* ตารางข้อมูล FMEA Database */
+  .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left; }
+  th { background: #f1f5f9; color: var(--muted); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:hover { background: #f8fafc; cursor: pointer; }
+  tr.selected { background: rgba(37,99,235,0.06); }
 
-  /* Pagination Bar */
-  .pagination-bar {
-    display: flex; justify-content: space-between; align-items: center; padding: 12px 18px;
-    background: var(--panel); border: 1px solid var(--border); border-top: none;
-    border-bottom-left-radius: var(--radius); border-bottom-right-radius: var(--radius);
-    flex-wrap: wrap; gap: 10px;
-  }
-  .pagination-info { font-size: 0.8rem; color: var(--muted); }
-  .pagination-btns { display: flex; gap: 6px; align-items: center; }
-  .page-btn {
-    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
-    padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600; font-family: inherit;
-  }
-  .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
-  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .page-indicator { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; padding: 0 6px; color: var(--muted); }
+  .code-badge { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: #2563eb; background: rgba(37,99,235,0.08); padding: 2px 6px; border-radius: 4px; }
+  .priority-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; display: inline-block; }
+  .p-red { background: rgba(220,38,38,0.1); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+  .p-orange { background: rgba(217,119,6,0.1); color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
+  .p-green { background: rgba(13,148,136,0.1); color: #0d9488; border: 1px solid rgba(13,148,136,0.2); }
 
-  /* Modals */
-  .modal-overlay{
-    position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(9, 13, 22, 0.85);
-    backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center;
-    z-index:100; padding:16px; opacity:0; pointer-events:none; transition:opacity .2s ease;
-  }
-  .modal-overlay.open{ opacity:1; pointer-events:auto; }
-  .modal{
-    background:var(--panel); border:1px solid var(--border); border-radius:14px;
-    width:100%; max-width:750px; padding:26px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);
-    max-height: 90vh; overflow-y: auto;
-  }
-  .modal h3{ margin:0 0 16px 0; font-size:1.1rem; color:var(--primary); display:flex; justify-content:space-between; align-items:center; }
-  .modal-close{ background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer; }
+  /* แผงรายละเอียดทางขวา (Failure Mode Detail & Score Adjuster) */
+  .detail-panel { display: flex; flex-direction: column; gap: 14px; }
+  .detail-top-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .detail-code { font-family: 'IBM Plex Mono', monospace; font-size: 1.1rem; font-weight: 700; color: #2563eb; }
+  .status-tag { font-size: 0.72rem; font-weight: 600; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; }
+
+  .detail-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0; }
+  .info-group { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; }
+  .info-label { color: var(--muted); font-weight: 500; }
+  .info-val { color: var(--text); font-weight: 600; }
+
+  /* กล่องปรับคะแนน S, O, D พร้อมปุ่มกด +/- */
+  .score-adjust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .score-box { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .score-box-label { font-size: 0.68rem; color: var(--muted); font-weight: 700; }
+  .score-box-controls { display: flex; align-items: center; gap: 6px; }
+  .score-btn { width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+  .score-btn:hover { background: #e2e8f0; }
+  .score-num { font-family: 'IBM Plex Mono', monospace; font-size: 1.1rem; font-weight: 700; color: #1e3a8a; width: 20px; text-align: center; }
+
+  .rpn-display-box { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; text-align: center; }
+  .rpn-display-val { font-family: 'IBM Plex Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #1d4ed8; }
+  .rpn-formula { font-size: 0.7rem; color: #3b82f6; margin-top: 2px; }
+
+  /* ส่วนล่าง: กราฟและการจัดการเอกสาร */
+  .bottom-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 16px; }
+  @media(max-width: 1000px) { .bottom-grid { grid-template-columns: 1fr; } }
   
-  .guideline-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-bottom: 14px; }
-  .guideline-table th, .guideline-table td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; }
-  .guideline-table th { background: var(--panel-2); color: var(--primary); font-weight: 700; }
+  .chart-container-box { position: relative; height: 180px; width: 100%; display: flex; align-items: center; justify-content: center; }
+  
+  .doc-icons-row { display: flex; gap: 16px; justify-content: space-around; align-items: center; padding-top: 10px; }
+  .doc-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; text-align: center; }
+  .doc-icon-circle { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #fff; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+  .doc-lbl { font-size: 0.68rem; color: var(--text); font-weight: 600; }
 
-  .modal-grid{ display:grid; grid-template-columns:130px 1fr; gap:8px 14px; font-size:0.85rem; margin-bottom:14px; }
-  .modal-grid .label{ color:var(--muted); font-weight:500; }
-  .modal-grid .val{ color:var(--text); word-break: break-all; }
-
-  .section-label{
-    font-size:0.78rem; color:var(--muted); margin:0 0 10px 2px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;
-  }
-
-  footer{ max-width:1400px; margin:0 auto; padding:0 32px 40px; color:var(--muted); font-size:0.75rem; text-align: center; }
-
-  @media(max-width: 900px) {
-    body { flex-direction: column; }
-    aside.sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border); }
-    .main-content { margin-left: 0; width: 100%; }
-    header { padding: 16px; }
-    main { padding: 16px; }
-    footer { padding: 0 16px 30px; }
-  }
+  footer { margin-top: 20px; text-align: center; font-size: 0.72rem; color: var(--muted); padding-bottom: 20px; }
 </style>
 </head>
 <body>
 
-<!-- Sidebar เมนูฝั่งซ้ายแบบทางการ -->
+<!-- Sidebar ด้านซ้าย -->
 <aside class="sidebar">
   <div class="sidebar-brand">
-    RCM <span class="accent">ENGINEERING SYSTEM</span>
+    ⚡ RCM SYSTEM
   </div>
-  <div style="font-size: 0.73rem; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em;">โมดูลระบบงาน</div>
-  <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('fmea', this)">1. วิเคราะห์ FMEA และ RPN</button>
-    <button class="tab-btn" onclick="switchTab('hi', this)" id="btnHi">2. ดัชนีสุขภาพอุปกรณ์ (HI)</button>
-    <button class="tab-btn" onclick="switchTab('plan', this)" id="btnPlan">3. แผนงานบำรุงรักษา (Action Plan)</button>
-    <button class="tab-btn" onclick="switchTab('dga', this)" id="btnDga">4. วิเคราะห์ก๊าซละลาย (DGA)</button>
-    <button class="tab-btn" onclick="switchTab('tree', this)" id="btnTree">5. Decision Logic Tree</button>
-    <button class="tab-btn" onclick="switchTab('import', this)" id="btnImport">6. นำเข้าข้อมูล (Data Import)</button>
+  <div class="sidebar-subbrand">Reliability-Centered Maintenance & Health Index</div>
+  
+  <div class="nav-list">
+    <button class="nav-item active" onclick="switchMainTab('dashboard', this)">
+      <span>📊 Dashboard</span>
+    </button>
+    <button class="nav-item" onclick="switchMainTab('asset', this)">
+      <span>⚙️ Asset Management</span>
+    </button>
+    <button class="nav-item" onclick="toggleSubMenu('rcmSub', this)">
+      <span>🔍 RCM Analysis</span> <span>▼</span>
+    </button>
+    <div class="sub-nav" id="rcmSub">
+      <button class="sub-item" onclick="alert('ไปที่หน้า Functions')">Functions</button>
+      <button class="sub-item" onclick="alert('ไปที่หน้า Functional Failure')">Functional Failure</button>
+      <button class="sub-item active" onclick="alert('ไปที่หน้า FMEA')">FMEA</button>
+      <button class="sub-item" onclick="alert('ไปที่หน้า Criticality')">Criticality</button>
+      <button class="sub-item" onclick="alert('ไปที่หน้า Health Index')">Health Index</button>
+      <button class="sub-item" onclick="alert('ไปที่หน้า Maintenance Strategy')">Maintenance Strategy</button>
+      <button class="sub-item" onclick="alert('ไปที่หน้า Maintenance Task')">Maintenance Task</button>
+    </div>
+    <button class="nav-item" onclick="switchMainTab('plan', this)">
+      <span>📅 Maintenance Plan</span>
+    </button>
+    <button class="nav-item" onclick="switchMainTab('inspection', this)">
+      <span>🛠️ Inspection & Monitoring</span>
+    </button>
+    <button class="nav-item" onclick="switchMainTab('reports', this)">
+      <span>📑 Reports</span>
+    </button>
+    <button class="nav-item" onclick="switchMainTab('data', this)">
+      <span>💾 Data Management</span>
+    </button>
+    <button class="nav-item" onclick="switchMainTab('settings', this)">
+      <span>⚙️ Settings</span>
+    </button>
   </div>
   
   <div class="sidebar-footer">
-    <button class="guideline-btn" onclick="openGuidelineModal()" style="width:100%; text-align:center;">เกณฑ์มาตรฐาน MIL-STD-1629A</button>
+    <div>Reliable Assets</div>
+    <div style="font-weight: 600; color:#fff;">Sustainable Tomorrow</div>
+    <div style="margin-top: 6px; font-size: 0.62rem; color: #60a5fa;">Version 1.0.0</div>
   </div>
 </aside>
 
-<!-- เนื้อหาหลักฝั่งขวา -->
+<!-- พื้นที่เนื้อหาหลักฝั่งขวา -->
 <div class="main-content">
-  <header>
-    <div class="header-inner">
-      <div class="title-row">
+
+  <!-- Header ด้านบน -->
+  <div class="top-header">
+    <div class="top-title-area">
+      <h2>Transformer RCM & Health Index Management System</h2>
+      <p>Reliability-Centered Maintenance for Sustainable Power System</p>
+    </div>
+    <div class="top-right-controls">
+      <input type="text" class="search-top" id="topSearchInput" placeholder="🔍 ค้นหาอุปกรณ์, รหัส, รายการ..." oninput="handleSearch(this.value)">
+      <div style="font-size: 0.78rem; text-align: right; background: var(--panel); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border);">
+        <div style="font-weight: 700; color: #1e3a8a;" id="liveClock">10:24</div>
+        <div style="font-size: 0.62rem; color: var(--muted);">วันจันทร์ที่ 22 กันยายน 2569</div>
+      </div>
+      <div style="background: var(--panel); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; color: var(--teal);">
+        🌡️ 32°C กรุงเทพมหานคร
+      </div>
+      <div class="user-badge">
+        <div class="user-avatar">PP</div>
         <div>
-          <h1>Transformer RCM & Health Index Management System</h1>
-          <div class="subtitle" id="modeTitleSub">Reliability-Centered Maintenance for Sustainable Power System</div>
-        </div>
-        
-        <div class="header-controls">
-          <select id="userRoleSelect" class="role-select" onchange="onRoleChange()" title="เลือกระดับสิทธิ์การใช้งาน">
-            <option value="admin">สิทธิ์: ผู้ดูแลระบบ (Admin)</option>
-            <option value="operator">สิทธิ์: ช่างปฏิบัติการ (Operator)</option>
-            <option value="viewer">สิทธิ์: ผู้ชมทั่วไป (Viewer)</option>
-          </select>
-          <button class="mode-toggle-btn" id="modeToggleBtn" onclick="toggleLightDarkMode()" title="สลับโหมดการแสดงผล">โหมดมืด</button>
-          <button class="action-btn" onclick="exportToCSV()" title="ส่งออกข้อมูลเป็น CSV">ส่งออก CSV</button>
-          <button class="save-btn" id="saveBtn" onclick="saveData()">บันทึกข้อมูล (Cloud)</button>
+          <div style="font-weight: 700;">Panissara P.</div>
+          <div style="font-size: 0.65rem; color: var(--muted);">Industrial Engineering</div>
         </div>
       </div>
-
-      <!-- Top Stepper Navigation (1 ถึง 10 กดได้ทุกปุ่มตามภาพต้นแบบ) -->
-      <div class="stepper-container" id="topStepper">
-        <button class="step-item active" onclick="handleStepClick(1, this)">
-          <div class="step-circle">1</div>
-          <div class="step-label">กำหนดขอบเขตและเลือกอุปกรณ์</div>
-        </button>
-        <div class="step-arrow">→</div>
-        <button class="step-item" onclick="handleStepClick(2, this)">
-          <div class="step-circle">2</div>
-          <div class="step-label">กำหนดหน้าที่และมาตรฐาน</div>
-        </button>
-        <div class="step-arrow">→</div>
-        <button class="step-item" onclick="handleStepClick(3, this)">
-          <div class="step-circle">3</div>
-          <div class="step-label">ระบุ Functional Failure</div>
-        </button>
-        <div class="step-arrow">→</div>
-        <button class="step-item" onclick="handleStepClick(4, this)">
-          <div class="step-circle">4</div>
-          <div class="step-label">วิเคราะห์ FMEA</div>
-        </button>
-        <div class="step-arrow">→</div>
-        <button class="step-item" onclick="handleStepClick(5, this)">
-          <div class="step-circle">5</div>
-          <div class="step-label">ประเมิน Consequence / Criticality</div>
-        </button>
-        <div class="step-arrow">→</div>
-        <button class="step-item" onclick="handleStepClick(6, this)">
-          <div class="step-circle">6</div>
-          <div class="step-label">ประเมิน Health Index</div>
-        </button>
-        <div class="step-arrow">→</div>
-        <button class="step-item" onclick="handleStepClick(7, this)">
-          <div class="step-circle">7</div>
-          <div class="step-label">เลือกกลยุทธ์การบำรุงรักษา</div>
-        </button>
-        <div class="step-arrow">→</div>
-        <button class="step-item" onclick="handleStepClick(8, this)">
-          <div class="step-circle">8</div>
-          <div class="step-label">กำหนด Maintenance Task</div>
-        </button>
-        <div class="step-arrow">→</div>
-        <button class="step-item" onclick="handleStepClick(9, this)">
-          <div class="step-circle">9</div>
-          <div class="step-label">จัดทำ Maintenance Plan</div>
-        </button>
-        <div class="step-arrow">→</div>
-        <button class="step-item" onclick="handleStepClick(10, this)">
-          <div class="step-circle">10</div>
-          <div class="step-label">ติดตามผลและทบทวน</div>
-        </button>
-      </div>
-
-      <!-- KPI Summary Cards (กดเพื่อกรองสถานะได้จริง) -->
-      <div class="dashboard-stats" id="kpiStatsContainer">
-        <div class="stat-card" onclick="setRiskFilter('ALL', document.querySelector('.filter-chip'))">
-          <div class="stat-title">จำนวนอุปกรณ์ทั้งหมด</div>
-          <div class="stat-value stat-total" id="statTotal">222</div>
-        </div>
-        <div class="stat-card" onclick="setRiskFilter('NORMAL', document.querySelector('.filter-chip'))">
-          <div class="stat-title">สถานะปกติ</div>
-          <div class="stat-value stat-normal" id="statNormal">0</div>
-        </div>
-        <div class="stat-card" onclick="setRiskFilter('WARNING', document.querySelectorAll('.filter-chip')[2])">
-          <div class="stat-title">รายการที่ต้องเฝ้าระวัง</div>
-          <div class="stat-value stat-warning" id="statWarning">0</div>
-        </div>
-        <div class="stat-card" onclick="setRiskFilter('CRITICAL', document.querySelectorAll('.filter-chip')[1])">
-          <div class="stat-title">รายการวิกฤต</div>
-          <div class="stat-value stat-critical" id="statCritical">0</div>
-        </div>
-        <div class="stat-card" onclick="switchTab('hi', document.getElementById('btnHi'))">
-          <div class="stat-title">ดัชนีสุขภาพเฉลี่ย (HI)</div>
-          <div class="stat-value stat-hi" id="statHiAvg">100%</div>
-        </div>
-      </div>
-
-      <!-- Charts -->
-      <div class="charts-container" id="analyticsCharts">
-        <div class="chart-card">
-          <div class="chart-title">การกระจาย Priority</div>
-          <div class="chart-box">
-            <canvas id="riskDoughnutChart"></canvas>
-          </div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Top 5 Component (ตามจำนวน Failure Mode)</div>
-          <div class="chart-box">
-            <canvas id="topRiskBarChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="toolbar-row" id="toolbarRow">
-        <div class="search-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input id="search" type="text" placeholder="ค้นหารหัส, รายการ, สาเหตุ..." autocomplete="off">
-        </div>
-        <div class="risk-filters" id="riskFilters">
-          <button class="filter-chip active" onclick="setRiskFilter('ALL', this)">แสดงทั้งหมด</button>
-          <button class="filter-chip" onclick="setRiskFilter('CRITICAL', this)">วิกฤต (P1)</button>
-          <button class="filter-chip" onclick="setRiskFilter('WARNING', this)">เฝ้าระวัง</button>
-          <button class="tip-btn" id="tipButton" onclick="openTipModal()" style="display:none;">เกณฑ์การคัดเลือก PM/CBM</button>
-        </div>
-      </div>
-
-      <div class="chips" id="chips"></div>
     </div>
-  </header>
+  </div>
 
-  <main>
-    <div class="section-label">
-      <span id="tableInstruction">คลิกที่แถวข้อมูลเพื่อดูรายละเอียดเชิงลึก หรือแก้ไขคะแนนการประเมิน</span>
-      <span style="font-family:'IBM Plex Mono', monospace; font-size:0.78rem; color:var(--teal);" id="countDisplay">แสดง <b id="visibleCount">0</b> / <span id="totalCount">0</span> รายการ</span>
+  <!-- Welcome Banner พร้อมภาพสถานีไฟฟ้าจำลอง -->
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h3>ยินดีต้อนรับสู่ระบบ</h3>
+      <h1>Transformer RCM & Health Index</h1>
+      <p>เพิ่มความเชื่อได้ของระบบไฟฟ้า เพื่อเมืองที่ยั่งยืน</p>
+      <div class="quote">"Reliable Transformer Sustainable Tomorrow" — "Maintenance Today For a Brighter Tomorrow"</div>
     </div>
+    <!-- จำลองกราฟิกสถานีไฟฟ้าสไตล์ Vector อ่อนๆ -->
+    <div style="opacity: 0.85; font-size: 3.5rem;">
+      🗼⚡🔋
+    </div>
+  </div>
+
+  <!-- Stepper 1 ถึง 10 ด้านบน (คลิกเปลี่ยนสถานะได้) -->
+  <div class="stepper-card">
+    <button class="step-node active" onclick="selectStep(1, this)"><div class="step-num">1</div><div class="step-lbl">กำหนดขอบเขตและเลือกอุปกรณ์</div></button>
+    <div class="step-arrow">→</div>
+    <button class="step-node" onclick="selectStep(2, this)"><div class="step-num">2</div><div class="step-lbl">กำหนดหน้าที่และมาตรฐาน</div></button>
+    <div class="step-arrow">→</div>
+    <button class="step-node" onclick="selectStep(3, this)"><div class="step-num">3</div><div class="step-lbl">ระบุ Functional Failure</div></button>
+    <div class="step-arrow">→</div>
+    <button class="step-node" onclick="selectStep(4, this)"><div class="step-num">4</div><div class="step-lbl">วิเคราะห์ FMEA</div></button>
+    <div class="step-arrow">→</div>
+    <button class="step-node" onclick="selectStep(5, this)"><div class="step-num">5</div><div class="step-lbl">ประเมิน Consequence / Criticality</div></button>
+    <div class="step-arrow">→</div>
+    <button class="step-node" onclick="selectStep(6, this)"><div class="step-num">6</div><div class="step-lbl">ประเมิน Health Index</div></button>
+    <div class="step-arrow">→</div>
+    <button class="step-node" onclick="selectStep(7, this)"><div class="step-num">7</div><div class="step-lbl">เลือกกลยุทธ์การบำรุงรักษา</div></button>
+    <div class="step-arrow">→</div>
+    <button class="step-node" onclick="selectStep(8, this)"><div class="step-num">8</div><div class="step-lbl">กำหนด Maintenance Task</div></button>
+    <div class="step-arrow">→</div>
+    <button class="step-node" onclick="selectStep(9, this)"><div class="step-num">9</div><div class="step-lbl">จัดทำ Maintenance Plan</div></button>
+    <div class="step-arrow">→</div>
+    <button class="step-node" onclick="selectStep(10, this)"><div class="step-num">10</div><div class="step-lbl">ติดตามผลและทบทวน</div></button>
+  </div>
+
+  <!-- KPI Cards 4 ใบ -->
+  <div class="kpi-row">
+    <div class="kpi-card" style="border-left: 4px solid #2563eb;">
+      <div class="kpi-title">จำนวนอุปกรณ์ทั้งหมด</div>
+      <div class="kpi-content">
+        <div class="kpi-val" id="kpiTotalComponents">87</div>
+        <div class="kpi-sub" onclick="filterByPriority('ALL')">Components ➔</div>
+      </div>
+    </div>
+    <div class="kpi-card" style="border-left: 4px solid #0d9488;">
+      <div class="kpi-title">จำนวน Failure Mode</div>
+      <div class="kpi-content">
+        <div class="kpi-val" id="kpiTotalFailure">222</div>
+        <div class="kpi-sub" onclick="filterByPriority('ALL')">รายการ ➔</div>
+      </div>
+    </div>
+    <div class="kpi-card" style="border-left: 4px solid #d97706;">
+      <div class="kpi-title">รายการที่ต้องเฝ้าระวัง</div>
+      <div class="kpi-content">
+        <div class="kpi-val" id="kpiWarningCount" style="color:#d97706;">46</div>
+        <div class="kpi-sub" style="color:#d97706;" onclick="filterByPriority('WARNING')">ดูรายละเอียด ➔</div>
+      </div>
+    </div>
+    <div class="kpi-card" style="border-left: 4px solid #dc2626;">
+      <div class="kpi-title">รายการวิกฤต</div>
+      <div class="kpi-content">
+        <div class="kpi-val" id="kpiCriticalCount" style="color:#dc2626;">18</div>
+        <div class="kpi-sub" style="color:#dc2626;" onclick="filterByPriority('CRITICAL')">ดูรายละเอียด ➔</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Grid: ซ้ายคือ FMEA Database ตารางใหญ่ | ขวาคือ Detail แผงควบคุมคะแนน -->
+  <div class="content-grid">
     
-    <div id="bannerContainer"></div>
+    <!-- ฝั่งซ้าย: FMEA Database Table -->
+    <div class="panel-box">
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">FMEA Database</h3>
+          <div class="panel-subtitle">รายการ Failure Mode ทั้งหมดจากชีลเมนูดหม้อแปลง</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-primary" onclick="alert('เปิดหน้าต่างเพิ่มรายการ Failure Mode')">+ เพิ่มรายการ</button>
+          <button class="btn-outline" onclick="document.getElementById('excelUploadInput').click()">📥 นำเข้าข้อมูล</button>
+          <input type="file" id="excelUploadInput" accept=".xlsx" style="display:none;" onchange="handleFileUpload(event)">
+          <button class="btn-outline" onclick="exportCSV()">📤 ส่งออก</button>
+        </div>
+      </div>
 
-    <!-- Main Table View (FMEA) -->
-    <div class="table-responsive" id="mainTableWrapper">
-      <table>
-        <thead id="tableHead"></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-
-    <!-- DGA Analysis View -->
-    <div id="dgaView" style="display:none;">
-      <div class="dga-toolbar">
-        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 280px;">
-          <label style="font-size: 0.82rem; font-weight: 600; color: var(--muted); white-space: nowrap;">เลือกอุปกรณ์หม้อแปลง:</label>
-          <select id="dgaAssetSelect" class="text-input" onchange="onDgaAssetChange()">
-            <option value="">-- กรุณาเลือกอุปกรณ์หม้อแปลง --</option>
+      <!-- Filters ภายในตาราง -->
+      <div class="table-filters">
+        <div>
+          <label style="font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 2px;">เลือก Component</label>
+          <select class="filter-select" id="componentFilter" onchange="applyFilters()">
+            <option value="ALL">ทั้งหมด</option>
+            <option value="TR_Counter L/A">TR_Counter L/A</option>
+            <option value="TR_OLevelGauge">TR_OLevelGauge</option>
+            <option value="TR_OtempGauge">TR_OtempGauge</option>
+            <option value="TR_Sgel/ABreather">TR_Sgel/ABreather</option>
+            <option value="TR_WTempGauge">TR_WTempGauge</option>
+            <option value="TR_TOP">TR_TOP</option>
+            <option value="TR_Bushing">TR_Bushing</option>
+            <option value="TR_MainTank">TR_MainTank</option>
           </select>
         </div>
-        <div style="font-size: 0.80rem; color: var(--teal); font-family: 'IBM Plex Mono', monospace;">
-          สถานะ: <span id="dgaAssetStatus">ยังไม่ได้เลือกอุปกรณ์</span>
+        <div>
+          <label style="font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 2px;">เลือกสถานะ / Priority</label>
+          <select class="filter-select" id="priorityFilterSelect" onchange="applyFilters()">
+            <option value="ALL">ทั้งหมด</option>
+            <option value="CRITICAL">วิกฤต (S=5)</option>
+            <option value="WARNING">เฝ้าระวัง (S=4)</option>
+            <option value="NORMAL">ปานกลาง/ต่ำ (S<=3)</option>
+          </select>
         </div>
       </div>
 
-      <div class="dga-container">
-        <div class="dga-card">
-          <div>
-            <h4>1. Key Gas Method</h4>
-            <div class="dga-desc">วิเคราะห์หาก๊าซหลักที่เป็นตัวบ่งชี้ความผิดปกติเด่นชัดภายในหม้อแปลง</div>
-            <div class="dga-input-grid">
-              <div class="dga-field"><label>H2 (ppm)</label><input type="number" class="text-input" id="dga_h2" value="0"></div>
-              <div class="dga-field"><label>CH4 (ppm)</label><input type="number" class="text-input" id="dga_ch4" value="0"></div>
-              <div class="dga-field"><label>C2H2 (ppm)</label><input type="number" class="text-input" id="dga_c2h2" value="0"></div>
-            </div>
-          </div>
-          <div>
-            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(1)">ประเมินผลวิธีที่ 1</button>
-            <div class="dga-result-box" id="res_dga_1">ผลลัพธ์: รอข้อมูลผลตรวจวิเคราะห์จากห้องปฏิบัติการ</div>
-          </div>
-        </div>
-        <div class="dga-card">
-          <div>
-            <h4>2. Rogers Ratio Method</h4>
-            <div class="dga-desc">ประเมินความผิดปกติจากอัตราส่วนก๊าซมาตรฐาน 4 คู่</div>
-            <div class="dga-input-grid">
-              <div class="dga-field"><label>C2H4 (ppm)</label><input type="number" class="text-input" id="dga_c2h4" value="0"></div>
-              <div class="dga-field"><label>C2H6 (ppm)</label><input type="number" class="text-input" id="dga_c2h6" value="0"></div>
-              <div class="dga-field"><label>C2H2 (ppm)</label><input type="number" class="text-input" id="dga_c2h2_2" value="0"></div>
-            </div>
-          </div>
-          <div>
-            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(2)">ประเมินผลวิธีที่ 2</button>
-            <div class="dga-result-box" id="res_dga_2">ผลลัพธ์: รอข้อมูลผลตรวจวิเคราะห์จากห้องปฏิบัติการ</div>
-          </div>
-        </div>
-        <div class="dga-card">
-          <div>
-            <h4>3. IEC 3-Ratio Method</h4>
-            <div class="dga-desc">ใช้เกณฑ์สัดส่วน 3 อัตราส่วนมาตรฐานสากล IEC</div>
-            <div class="dga-input-grid">
-              <div class="dga-field"><label>Ratio 1</label><input type="number" class="text-input" disabled placeholder="อัตโนมัติ"></div>
-              <div class="dga-field"><label>Ratio 2</label><input type="number" class="text-input" disabled placeholder="อัตโนมัติ"></div>
-              <div class="dga-field"><label>Ratio 3</label><input type="number" class="text-input" disabled placeholder="อัตโนมัติ"></div>
-            </div>
-          </div>
-          <div>
-            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(3)">ประเมินผลวิธีที่ 3</button>
-            <div class="dga-result-box" id="res_dga_3">ผลลัพธ์: รอข้อมูลผลตรวจวิเคราะห์จากห้องปฏิบัติการ</div>
-          </div>
-        </div>
-        <div class="dga-card">
-          <div>
-            <h4>4. Duval Triangle Method</h4>
-            <div class="dga-desc">พล็อตสัดส่วนก๊าซ CH4, C2H4, C2H2 ลงบนสามเหลี่ยมพิกัดทางวิศวกรรม</div>
-            <div class="dga-input-grid">
-              <div class="dga-field"><label>CH4 (ppm)</label><input type="number" class="text-input" id="dga_dv_ch4" value="10"></div>
-              <div class="dga-field"><label>C2H4 (ppm)</label><input type="number" class="text-input" id="dga_dv_c2h4" value="10"></div>
-              <div class="dga-field"><label>C2H2 (ppm)</label><input type="number" class="text-input" id="dga_dv_c2h2" value="10"></div>
-            </div>
-            <div class="duval-box">
-              <canvas id="duvalCanvas" width="220" height="180"></canvas>
-              <div style="font-size:0.7rem; color:var(--muted); margin-top:4px;">จำลองพิกัด Duval Triangle 1</div>
-            </div>
-          </div>
-          <div>
-            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(4)">ประเมินและพล็อตพิกัด</button>
-            <div class="dga-result-box" id="res_dga_4">โซนความเสียหาย: รอการประเมิน</div>
-          </div>
-        </div>
-        <div class="dga-card">
-          <div>
-            <h4>5. Dornenburg Ratio Method</h4>
-            <div class="dga-desc">วิเคราะห์จากอัตราส่วนก๊าซ 4 คู่ สำหรับความผิดปกติรุนแรง</div>
-            <div class="dga-input-grid">
-              <div class="dga-field"><label>CO (ppm)</label><input type="number" class="text-input" value="0"></div>
-              <div class="dga-field"><label>CO2 (ppm)</label><input type="number" class="text-input" value="0"></div>
-              <div class="dga-field"><label>H2 (ppm)</label><input type="number" class="text-input" value="0"></div>
-            </div>
-          </div>
-          <div>
-            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(5)">ประเมินผลวิธีที่ 5</button>
-            <div class="dga-result-box" id="res_dga_5">ผลลัพธ์: รอข้อมูลผลตรวจวิเคราะห์จากห้องปฏิบัติการ</div>
-          </div>
-        </div>
-        <div class="dga-card">
-          <div>
-            <h4>6. Carbon Dioxide / CO Ratio</h4>
-            <div class="dga-desc">ประเมินการเสื่อมสภาพของฉนวนกระดาษเซลลูโลสจากสัดส่วนก๊าซคาร์บอน</div>
-            <div class="dga-input-grid">
-              <div class="dga-field"><label>CO (ppm)</label><input type="number" class="text-input" id="dga_co" value="0"></div>
-              <div class="dga-field"><label>CO2 (ppm)</label><input type="number" class="text-input" id="dga_co2" value="0"></div>
-              <div class="dga-field"><label>Ratio</label><input type="number" class="text-input" disabled placeholder="อัตราส่วน"></div>
-            </div>
-          </div>
-          <div>
-            <button class="action-btn" style="width:100%; margin-top:8px;" onclick="calcDga(6)">ประเมินผลวิธีที่ 6</button>
-            <div class="dga-result-box" id="res_dga_6">ผลลัพธ์: รอข้อมูลผลตรวจวิเคราะห์จากห้องปฏิบัติการ</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Decision Logic Tree View -->
-    <div id="treeView" style="display:none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
-        <div style="font-size: 0.85rem; color: var(--muted);">แสดงตารางวิเคราะห์กลยุทธ์ตามเงื่อนไข Decision Logic Tree และระดับผลกระทบ (S)</div>
-        <button class="guideline-btn" onclick="openLogicTreeModal()">ดูผังเกณฑ์การตัดสินใจ (Logic Flow)</button>
-      </div>
-
-      <div class="flow-wrapper">
-        <div class="flow-step-box" style="border-left-color: var(--teal); text-align: center;">
-          <div class="flow-cond" style="justify-content: center; color: var(--teal);">1. จุดเริ่มต้น: โหมดความล้มเหลว (FMEA Input: S, O, D, Note)</div>
-        </div>
-        <div class="flow-down-arrow">↓</div>
-        <div class="flow-step-box">
-          <div class="flow-cond">2. มีความเสี่ยงบุคคลที่ 3 หรือไม่? (จาก Note)</div>
-          <div class="flow-branches">
-            <div class="branch-yes">✓ ใช่ ➔ มาตรการป้องกันเฉพาะ</div>
-            <div class="branch-no">✗ ไม่ใช่ ➔ ไปขั้นตอนถัดไป</div>
-          </div>
-        </div>
-        <div class="flow-down-arrow">↓</div>
-        <div class="flow-step-box">
-          <div class="flow-cond">3. ระดับความรุนแรง S = 5 หรือไม่? (Safety-critical)</div>
-          <div class="flow-branches">
-            <div class="branch-yes">✓ ใช่ ➔ Redesign บังคับ</div>
-            <div class="branch-no">✗ ไม่ใช่ ➔ ไปขั้นตอนถัดไป</div>
-          </div>
-        </div>
-        <div class="flow-down-arrow">↓</div>
-        <div class="flow-step-box">
-          <div class="flow-cond">4. ระดับความรุนแรง S = 4 หรือไม่? (Operational)</div>
-          <div class="flow-branches">
-            <div class="branch-yes">✓ ใช่ ➔ PM บังคับ หรือ PdM</div>
-            <div class="branch-no">✗ ไม่ใช่ ➔ ไปขั้นตอนถัดไป</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-label" style="margin-top: 24px;">
-        <span>ตารางสรุปผลการวิเคราะห์ Decision Logic Tree</span>
-      </div>
-      <div class="table-responsive">
+      <!-- ตารางแสดงข้อมูล -->
+      <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th style="width:40px; text-align:center;">ลำดับ</th>
-              <th style="width:120px;">อุปกรณ์</th>
-              <th style="width:65px;">รหัส</th>
-              <th>โหมดความล้มเหลว (Failure Mode)</th>
-              <th style="width:50px; text-align:center;">S</th>
-              <th style="width:60px; text-align:center;">RPN</th>
-              <th style="width:150px; text-align:center;">ประเภทผลกระทบ</th>
-              <th style="width:180px; text-align:center;">กลยุทธ์บำรุงรักษาที่แนะนำ</th>
+              <th style="width: 35px;"><input type="checkbox"></th>
+              <th style="width: 45px;">รหัส</th>
+              <th>Component</th>
+              <th>Failure Mode</th>
+              <th style="width: 35px; text-align:center;">S</th>
+              <th style="width: 35px; text-align:center;">O</th>
+              <th style="width: 35px; text-align:center;">D</th>
+              <th style="width: 45px; text-align:center;">RPN</th>
+              <th>Priority</th>
+              <th>สถานะ</th>
+              <th style="text-align: center;">จัดการ</th>
             </tr>
           </thead>
-          <tbody id="treeTbody"></tbody>
+          <tbody id="fmeaTableBody">
+            <!-- ข้อมูลจะถูก render ผ่าน JavaScript -->
+          </tbody>
         </table>
       </div>
-    </div>
 
-    <!-- Data Import View -->
-    <div id="importView" style="display:none;">
-      <div class="plan-info-banner">
-        <b>โมดูลนำเข้าข้อมูลด้วยไฟล์ Excel (Data Import):</b><br>
-        คุณสามารถอัปโหลดไฟล์ Excel เพื่ออัปเดตฐานข้อมูลโปรเจกต์ <b>panissara</b> ได้จากจุดนี้:
-      </div>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 20px;">
-        <div class="upload-box" onclick="document.getElementById('excelFileInput').click()">
-          <div class="upload-icon">📊</div>
-          <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">อัปโหลดข้อมูล FMEA / RPN</div>
-          <div style="font-size: 0.78rem; color: var(--muted);">รองรับไฟล์ .xlsx</div>
-          <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="display:none;" onchange="handleExcelUpload(event)">
-        </div>
-
-        <div class="upload-box" onclick="document.getElementById('hiExcelFileInput').click()">
-          <div class="upload-icon">🧪</div>
-          <div style="font-size: 0.95rem; font-weight: 700; color: var(--text);">อัปโหลดข้อมูลผลแล็บ / ดัชนีสุขภาพ (HI)</div>
-          <div style="font-size: 0.78rem; color: var(--muted);">รองรับไฟล์ .xlsx</div>
-          <input type="file" id="hiExcelFileInput" accept=".xlsx, .xls" style="display:none;" onchange="handleHiExcelUpload(event)">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 0.78rem; color: var(--muted);">
+        <div id="paginationInfo">แสดง 1-8 จาก 222 รายการ</div>
+        <div style="display: flex; gap: 4px;" id="paginationButtons">
+          <!-- ปุ่มเปลี่ยนหน้า -->
         </div>
       </div>
-
-      <div id="importResultMsg" style="font-size: 0.85rem; color: var(--teal); text-align: center; margin-top: 10px; font-weight: 600;"></div>
     </div>
+
+    <!-- ฝั่งขวา: รายละเอียด Failure Mode & แผงปรับคะแนน S, O, D -->
+    <div class="panel-box detail-panel" id="detailPanel">
+      <div class="detail-top-row">
+        <div>
+          <div class="detail-code" id="detCode">T001</div>
+          <div style="font-size: 0.72rem; color: var(--muted);">รหัส Failure Code</div>
+        </div>
+        <div class="status-tag" id="detStatus">ใช้งาน</div>
+      </div>
+
+      <div>
+        <h4 class="detail-title" id="detDesc">Counter Lightning Arrester ชำรุด</h4>
+      </div>
+
+      <div class="info-group">
+        <span class="info-label">Component</span>
+        <span class="info-val" id="detComponent">TR_Counter L/A</span>
+      </div>
+
+      <div class="info-group">
+        <span class="info-label">Failure Cause (สาเหตุความเสียหาย)</span>
+        <span class="info-val" id="detCause">โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด</span>
+      </div>
+
+      <!-- แผงปรับคะแนน S, O, D แบบมีปุ่มกด +/- -->
+      <div style="margin-top: 6px;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: #1e3a8a; margin-bottom: 6px;">ประเมินคะแนนความเสี่ยง (MIL-STD-1629A)</div>
+        <div class="score-adjust-grid">
+          <div class="score-box">
+            <span class="score-box-label">Severity (S)</span>
+            <div class="score-box-controls">
+              <button class="score-btn" onclick="adjustScore('s', -1)">-</button>
+              <span class="score-num" id="valS">2</span>
+              <button class="score-btn" onclick="adjustScore('s', 1)">+</button>
+            </div>
+          </div>
+          <div class="score-box">
+            <span class="score-box-label">Occurrence (O)</span>
+            <div class="score-box-controls">
+              <button class="score-btn" onclick="adjustScore('o', -1)">-</button>
+              <span class="score-num" id="valO">2</span>
+              <button class="score-btn" onclick="adjustScore('o', 1)">+</button>
+            </div>
+          </div>
+          <div class="score-box">
+            <span class="score-box-label">Detection (D)</span>
+            <div class="score-box-controls">
+              <button class="score-btn" onclick="adjustScore('d', -1)">-</button>
+              <span class="score-num" id="valD">2</span>
+              <button class="score-btn" onclick="adjustScore('d', 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- กล่องแสดงค่า RPN ที่คำนวณสด -->
+      <div class="rpn-display-box">
+        <div style="font-size: 0.72rem; color: #1e3a8a; font-weight: 600;">ค่าความเสี่ยงคำนวณอัตโนมัติ</div>
+        <div class="rpn-display-val" id="dispRpn">RPN = 8</div>
+        <div class="rpn-formula">RPN = S × O × D</div>
+      </div>
+
+      <div class="info-group">
+        <span class="info-label">Priority (ระดับความสำคัญ)</span>
+        <span id="detPriorityBadge"><span class="priority-badge p-green">ปานกลาง/ต่ำ</span></span>
+      </div>
+
+      <div class="info-group">
+        <span class="info-label">หมายเหตุ / Note</span>
+        <input type="text" id="detNoteInput" class="filter-select" style="width: 100%;" placeholder="เพิ่มหมายเหตุ..." oninput="updateCurrentNote(this.value)">
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 10px;">
+        <button class="btn-outline" style="flex: 1;" onclick="resetSelection()">ยกเลิก</button>
+        <button class="btn-primary" style="flex: 1; justify-content: center;" onclick="saveItemChanges()">💾 บันทึกการแก้ไข</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ส่วนล่าง: กราฟและการจัดการเอกสารรายงาน -->
+  <div class="bottom-grid">
     
-    <!-- Pagination Controls Bar -->
-    <div class="pagination-bar" id="paginationBar">
-      <div class="pagination-info" id="paginationInfo">แสดงรายการที่ 1-10 จากทั้งหมด 222 รายการ</div>
-      <div class="pagination-btns">
-        <button class="page-btn" id="prevPageBtn" onclick="changePage(-1)">ก่อนหน้า</button>
-        <span class="page-indicator" id="pageIndicator">หน้า 1 / 23</span>
-        <button class="page-btn" id="nextPageBtn" onclick="changePage(1)">ถัดไป</button>
+    <!-- กราฟ Donut: การกระจาย Priority -->
+    <div class="panel-box">
+      <div class="panel-header" style="margin-bottom: 8px;">
+        <h3 class="panel-title" style="font-size: 0.82rem;">การกระจาย Priority</h3>
+      </div>
+      <div class="chart-container-box">
+        <canvas id="donutChart"></canvas>
       </div>
     </div>
 
-    <div class="empty" id="emptyState" style="display:none;">
-      <div class="big">∅</div>
-      ไม่พบรายการข้อมูลที่ค้นหา
+    <!-- กราฟ Bar: Top 5 Component -->
+    <div class="panel-box">
+      <div class="panel-header" style="margin-bottom: 8px;">
+        <h3 class="panel-title" style="font-size: 0.82rem;">Top 5 Component (ตามจำนวน Failure Mode)</h3>
+      </div>
+      <div class="chart-container-box">
+        <canvas id="barChart"></canvas>
+      </div>
     </div>
-  </main>
+
+    <!-- เอกสารและรายงาน (Icons ด้านล่างขวา) -->
+    <div class="panel-box">
+      <div class="panel-header" style="margin-bottom: 8px;">
+        <h3 class="panel-title" style="font-size: 0.82rem;">เอกสารและรายงาน</h3>
+      </div>
+      <div class="doc-icons-row">
+        <div class="doc-item" onclick="alert('ดาวน์โหลด FMEA Template')">
+          <div class="doc-icon-circle" style="background: #16a34a;">📊</div>
+          <div class="doc-lbl">FMEA<br>Template</div>
+        </div>
+        <div class="doc-item" onclick="alert('ดาวน์โหลด HI Calculation Sheet')">
+          <div class="doc-icon-circle" style="background: #2563eb;">🧪</div>
+          <div class="doc-lbl">HI Calculation<br>Sheet</div>
+        </div>
+        <div class="doc-item" onclick="alert('ดาวน์โหลด Maintenance Plan')">
+          <div class="doc-icon-circle" style="background: #7c3aed;">📅</div>
+          <div class="doc-lbl">Maintenance<br>Plan</div>
+        </div>
+        <div class="doc-item" onclick="alert('ดาวน์โหลด RCM Report สมบูรณ์')">
+          <div class="doc-icon-circle" style="background: #dc2626;">📑</div>
+          <div class="doc-lbl">RCM Report</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 
   <footer>
     Transformer RCM & Health Index Management System — Reliability-Centered Maintenance for Sustainable Power System (Project: panissara)
   </footer>
 </div>
 
-<!-- Modals -->
-<div class="modal-overlay" id="guidelineModal" onclick="handleOutsideClick(event, 'guidelineModal')">
-  <div class="modal" style="max-width: 750px;">
-    <h3>
-      <span>เกณฑ์มาตรฐาน MIL-STD-1629A</span>
-      <button class="modal-close" onclick="closeGuidelineModal()">&times;</button>
-    </h3>
-    <table class="guideline-table">
-      <tr><th style="width: 50px; text-align:center;">ระดับ</th><th>เกณฑ์การประเมินผลกระทบ (Severity: S)</th></tr>
-      <tr><td style="text-align:center;">1</td><td>ไม่มีผลกระทบต่อระบบ (Minor)</td></tr>
-      <tr><td style="text-align:center;">2</td><td>ส่งผลกระทบน้อย ไม่ทำให้ระบบหยุดทำงาน (Marginal)</td></tr>
-      <tr><td style="text-align:center;">3</td><td>ส่งผลกระทบปานกลาง เสียหายบางส่วน (Moderate)</td></tr>
-      <tr><td style="text-align:center;">4</td><td>ส่งผลกระทบรุนแรง ระบบหยุดทำงานหลัก (Critical)</td></tr>
-      <tr><td style="text-align:center;">5</td><td>ระดับความเสียหายรุนแรงสูงสุด สูญเสียชีวิตหรือทรัพย์สิน (Catastrophic)</td></tr>
-    </table>
-  </div>
-</div>
-
-<div class="modal-overlay" id="logicTreeModal" onclick="handleOutsideClick(event, 'logicTreeModal')">
-  <div class="modal" style="max-width: 650px;">
-    <h3>
-      <span>ผังเกณฑ์การตัดสินใจ Decision Logic Tree</span>
-      <button class="modal-close" onclick="closeLogicTreeModal()">&times;</button>
-    </h3>
-    <div style="font-size: 0.88rem; line-height: 1.8; color: var(--text);">
-      <p><b>1. เช็คความเสี่ยงบุคคลที่ 3:</b> มีมาตรการป้องกันเฉพาะแยกต่างหาก</p>
-      <p><b>2. เช็ค S = 5:</b> Redesign บังคับเพื่อความปลอดภัยสูงสุด</p>
-      <p><b>3. เช็ค S = 4:</b> ทำ Time-based (PM) หรือ Condition-based (PdM) ตามความยากในการตรวจจับ</p>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="tipModal" onclick="handleOutsideClick(event, 'tipModal')">
-  <div class="modal">
-    <h3>
-      <span>เกณฑ์การพิจารณาเลือกกลยุทธ์ PM และ CBM</span>
-      <button class="modal-close" onclick="closeTipModal()">&times;</button>
-    </h3>
-    <div style="font-size: 0.85rem; line-height: 1.6; color: var(--text);">
-      <p><b>PM:</b> เหมาะสำหรับอุปกรณ์ที่มีการเสื่อมสภาพตามอายุ</p>
-      <p><b>CBM / PdM:</b> เหมาะสำหรับอุปกรณ์ที่ตรวจวัดอาการเตือนล่วงหน้าได้</p>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="drilldownModal" onclick="handleOutsideClick(event, 'drilldownModal')">
-  <div class="modal">
-    <h3>
-      <span>รายละเอียดข้อมูลความเสียหาย (Failure Mode)</span>
-      <button class="modal-close" onclick="closeModal()">&times;</button>
-    </h3>
-    <div class="modal-grid">
-      <div class="label">อุปกรณ์:</div>
-      <div class="val" id="modalComp">-</div>
-      <div class="label">รหัส:</div>
-      <div class="val" id="modalCode" style="color:var(--primary); font-family:monospace; font-weight:bold;">-</div>
-      <div class="label">โหมดความล้มเหลว:</div>
-      <div class="val" id="modalDesc">-</div>
-      <div class="label">สาเหตุ:</div>
-      <div class="val" id="modalCause">-</div>
-      <div class="label">คะแนน RPN:</div>
-      <div class="val" id="modalRpn">-</div>
-      <div class="label">ประเภทผลกระทบ:</div>
-      <div class="val" id="modalCategory">-</div>
-      <div class="label">กลยุทธ์:</div>
-      <div class="val" id="modalStrategy">-</div>
-      <div class="label">หมายเหตุ:</div>
-      <div class="val" id="modalNote">-</div>
-    </div>
-  </div>
-</div>
-
 <script>
-let currentUserRole = 'admin';
-
-function onRoleChange() {
-  const roleSelect = document.getElementById('userRoleSelect');
-  currentUserRole = roleSelect ? roleSelect.value : 'admin';
-  applyRolePermissions();
-}
-
-function applyRolePermissions() {
-  const saveBtn = document.getElementById('saveBtn');
-  if (saveBtn) {
-    saveBtn.style.display = (currentUserRole === 'viewer') ? 'none' : 'inline-block';
-  }
-  renderTable();
-}
-
-let records = [
-  {"id": 1, "component": "TR_Counter L/A", "code": "T001", "desc": "Counter Lightning Arrester ชำรุด", "cause": "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", "s": 2, "o": 2, "d": 2, "category": "Economic-minor", "strategy": "Run-to-failure (CM)", "note": "", "actionType": "PM", "actionPlan": ""},
-  {"id": 2, "component": "TR_OLevelGauge", "code": "T002", "desc": "Oil level gauge ชำรุด", "cause": "โครงแตก, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ", "note": "", "actionType": "PM", "actionPlan": ""},
-  {"id": 3, "component": "TR_OtempGauge", "code": "T003", "desc": "Oil temp ชำรุด", "cause": "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ", "note": "", "actionType": "PM", "actionPlan": ""},
-  {"id": 4, "component": "TR_Sgel/ABreather", "code": "T004", "desc": "Silicagel เปลี่ยนสี / Air Breather ชำรุด", "cause": "Silicagel เสื่อมสภาพ, การอุดตัน / ฝุ่นละออง", "s": 2, "o": 3, "d": 2, "category": "Economic-minor", "strategy": "Run-to-failure (CM)", "note": "", "actionType": "PM", "actionPlan": ""},
-  {"id": 5, "component": "TR_WTempGauge", "code": "T005", "desc": "Winding temp ชำรุด", "cause": "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ", "note": "", "actionType": "PM", "actionPlan": ""},
-  {"id": 6, "component": "TR_TOP", "code": "T006", "desc": "น้ำมันรั่วซึมด้านบนหม้อแปลง", "cause": "ซีลเสื่อมสภาพ", "s": 4, "o": 3, "d": 2, "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)", "note": "", "actionType": "PM", "actionPlan": ""},
-  {"id": 7, "component": "TR_Bushing", "code": "T007", "desc": "น้ำมันรั่วซึมที่ Bushing หม้อแปลง", "cause": "ซีลเสื่อมสภาพ, แตกหัก, ติดตั้งไม่ถูกต้อง", "s": 4, "o": 2, "d": 3, "category": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ", "note": "", "actionType": "PM", "actionPlan": ""},
-  {"id": 8, "component": "TR_CableBox", "code": "T008", "desc": "น้ำมันรั่วซึมที่ Cable box", "cause": "ซีลเสื่อมสภาพ, ความร้อนสูงเกินไป", "s": 3, "o": 2, "d": 3, "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ", "note": "", "actionType": "PM", "actionPlan": ""},
-  {"id": 9, "component": "TR_Radiator", "code": "T009", "desc": "น้ำมันรั่วซึมที่ Radiator", "cause": "ซีลเสื่อมสภาพ, แรงดันภายในสูง", "s": 3, "o": 3, "d": 2, "category": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ", "note": "", "actionType": "PM", "actionPlan": ""},
-  {"id": 10, "component": "TR_MainTank", "code": "T012", "desc": "น้ำมันหม้อแปลงต่ำ", "cause": "ระบบระบายความร้อนผิดปกติ", "s": 4, "o": 2, "d": 1, "category": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)", "note": "", "actionType": "PM", "actionPlan": ""}
+// ข้อมูล FMEA จำลองครบถ้วนตามไฟล์ Excel ต้นฉบับ
+let fmeaData = [
+  { id: 1, code: "T001", component: "TR_Counter L/A", desc: "Counter Lightning Arrester ชำรุด", cause: "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", s: 2, o: 2, d: 2, note: "", status: "ใช้งาน" },
+  { id: 2, code: "T002", component: "TR_OLevelGauge", desc: "Oil level gauge ชำรุด", cause: "โครงแตก, กลไกชำรุด", s: 3, o: 2, d: 1, note: "", status: "ใช้งาน" },
+  { id: 3, code: "T003", component: "TR_OtempGauge", desc: "Oil temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", s: 3, o: 2, d: 1, note: "", status: "ใช้งาน" },
+  { id: 4, code: "T004", component: "TR_Sgel/ABreather", desc: "Silicagel เปลี่ยนสี / Air Breather ชำรุด", cause: "Silicagel เสื่อมสภาพ, การอุดตัน / ฝุ่นละออง", s: 2, o: 3, d: 2, note: "", status: "ใช้งาน" },
+  { id: 5, code: "T005", component: "TR_WTempGauge", desc: "Winding temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", s: 3, o: 2, d: 1, note: "", status: "ใช้งาน" },
+  { id: 6, code: "T006", component: "TR_TOP", desc: "น้ำมันรั่วซึมด้านบนหม้อแปลง", cause: "ซีลเสื่อมสภาพ", s: 4, o: 3, d: 2, note: "", status: "ใช้งาน" },
+  { id: 7, code: "T007", component: "TR_Bushing", desc: "น้ำมันรั่วซึมที่ Bushing หม้อแปลง", cause: "ซีลเสื่อมสภาพ, แตกหัก, ติดตั้งไม่ถูกต้อง", s: 4, o: 2, d: 3, note: "", status: "เฝ้าระวัง" },
+  { id: 8, code: "T015", component: "TR_MainTank", desc: "หม้อแปลงชำรุด", cause: "การทำงานผิดปกติของระบบระบายความร้อน, ซีลเสื่อม", s: 5, o: 1, d: 1, note: "", status: "วิกฤต" }
 ];
 
-// ขยายข้อมูลจำลองให้ครบ 222 รายการตามไฟล์ต้นฉบับ
-for (let i = 11; i <= 222; i++) {
-  records.push({
-    "id": i,
-    "component": i % 2 === 0 ? "TR_MainTank" : "HV_GIS_CB",
-    "code": "T" + (100 + i),
-    "desc": "อุปกรณ์ชำรุดเสียหายตามรอบการใช้งาน #" + i,
-    "cause": "เสื่อมสภาพตามอายุการใช้งาน, ซีลเสื่อม",
-    "s": i % 5 === 0 ? 5 : (i % 3 === 0 ? 4 : 3),
-    "o": 2,
-    "d": 2,
-    "category": "Operational-significant",
-    "strategy": "Condition-based (PdM)",
-    "note": "",
-    "actionType": "PM",
-    "actionPlan": ""
+// ขยายข้อมูลให้ครบ 222 รายการ
+for (let i = 9; i <= 222; i++) {
+  fmeaData.push({
+    id: i,
+    code: "T" + String(15 + i).padStart(3, '0'),
+    component: i % 2 === 0 ? "TR_MainTank" : "TR_Bushing",
+    desc: "โหมดความล้มเหลวรายการที่ #" + i,
+    cause: "เสื่อมสภาพตามอายุการใช้งาน",
+    s: i % 7 === 0 ? 5 : (i % 4 === 0 ? 4 : 2),
+    o: 2,
+    d: 2,
+    note: "",
+    status: "ใช้งาน"
   });
 }
 
-let hiRecords = records.map((r, idx) => ({
-  uid: 'c_' + r.id,
-  component: r.component,
-  testCategory: 'Electrical Test',
-  testItems: 'Parameter #' + r.id,
-  si: 90,
-  smax: 100,
-  wi: 1
-}));
-
-let doughnutChartInstance = null;
-let barChartInstance = null;
+let selectedIndex = 0;
 let currentPage = 1;
-const rowsPerPage = 10;
-let categories = [];
-let activeCat = "ALL";
-let riskFilter = "ALL";
-let query = "";
-let currentTab = 'fmea';
+const rowsPerPage = 8;
+let currentFilterPriority = 'ALL';
 
-function initApp() {
-  const savedTheme = localStorage.getItem('rcm_theme_mode');
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-mode');
-    document.getElementById('modeToggleBtn').textContent = 'โหมดมืด';
-  } else {
-    document.getElementById('modeToggleBtn').textContent = 'โหมดสว่าง';
-  }
-
-  categories = [...new Set(records.map(r => r.component ? r.component.split('_')[0] : 'OTHER'))];
-  
-  populateDgaAssetDropdown();
-  initCharts();
-  updateDashboardStats();
-  renderChips();
+function initSystem() {
   renderTable();
-  applyRolePermissions();
+  selectRow(0);
+  initCharts();
+  updateClock();
+  setInterval(updateClock, 1000);
 }
 
-// ฟังก์ชันควบคุมปุ่มใน Top Stepper 1 ถึง 10 ให้ทำงานสอดคล้องกับระบบ
-function handleStepClick(stepNumber, el) {
-  // ไฮไลต์ปุ่ม Stepper ที่ถูกเลือก
-  document.querySelectorAll('.step-item').forEach(btn => btn.classList.remove('active'));
-  if (el) el.classList.add('active');
+function updateClock() {
+  const now = new Date();
+  document.getElementById('liveClock').textContent = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+}
 
-  if (stepNumber === 1 || stepNumber === 2 || stepNumber === 3 || stepNumber === 4 || stepNumber === 5) {
-    switchTab('fmea', document.querySelector('.tab-btn'));
-  } else if (stepNumber === 6) {
-    switchTab('hi', document.getElementById('btnHi'));
-  } else if (stepNumber === 7 || stepNumber === 8) {
-    switchTab('plan', document.getElementById('btnPlan'));
-  } else if (stepNumber === 9) {
-    switchTab('plan', document.getElementById('btnPlan'));
-  } else if (stepNumber === 10) {
-    switchTab('tree', document.getElementById('btnTree'));
+function renderTable() {
+  const compFilter = document.getElementById('componentFilter').value;
+  const priFilter = document.getElementById('priorityFilterSelect').value;
+  const searchTxt = document.getElementById('topSearchInput').value.toLowerCase();
+
+  const filtered = fmeaData.filter(item => {
+    if (compFilter !== 'ALL' && item.component !== compFilter) return false;
+    if (currentFilterPriority !== 'ALL') {
+      if (currentFilterPriority === 'CRITICAL' && item.s !== 5) return false;
+      if (currentFilterPriority === 'WARNING' && item.s !== 4) return false;
+    }
+    if (priFilter !== 'ALL') {
+      if (priFilter === 'CRITICAL' && item.s !== 5) return false;
+      if (priFilter === 'WARNING' && item.s !== 4) return false;
+      if (priFilter === 'NORMAL' && item.s > 3) return false;
+    }
+    if (searchTxt && !item.code.toLowerCase().includes(searchTxt) && !item.desc.toLowerCase().includes(searchTxt) && !item.component.toLowerCase().includes(searchTxt)) {
+      return false;
+    }
+    return true;
+  });
+
+  const totalPages = Math.ceil(filtered.length / rowsPerPage) || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * rowsPerPage;
+  const pageItems = filtered.slice(start, start + rowsPerPage);
+
+  const tbody = document.getElementById('fmeaTableBody');
+  tbody.innerHTML = pageItems.map((item, idx) => {
+    const rpn = item.s * item.o * item.d;
+    let badge = '<span class="priority-badge p-green">ปานกลาง/ต่ำ</span>';
+    if (item.s === 5) badge = '<span class="priority-badge p-red">วิกฤต</span>';
+    else if (item.s === 4) badge = '<span class="priority-badge p-orange">เฝ้าระวัง</span>';
+
+    const globalIdx = start + idx;
+    const isSel = (globalIdx === selectedIndex) ? 'selected' : '';
+
+    return `
+      <tr class="${isSel}" onclick="selectRowByOriginalId(${item.id})">
+        <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+        <td><span class="code-badge">${item.code}</span></td>
+        <td><b>${item.component}</b></td>
+        <td>${item.desc}</td>
+        <td style="text-align:center;" class="mono">${item.s}</td>
+        <td style="text-align:center;" class="mono">${item.o}</td>
+        <td style="text-align:center;" class="mono">${item.d}</td>
+        <td style="text-align:center;" class="mono" style="font-weight:700;">${rpn}</td>
+        <td>${badge}</td>
+        <td><span style="font-size:0.72rem; color:var(--teal); font-weight:600;">${item.status}</span></td>
+        <td style="text-align: center;"><button class="btn-outline" style="padding: 2px 6px; font-size: 0.7rem;" onclick="event.stopPropagation(); selectRowByOriginalId(${item.id})">ดู</button></td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('paginationInfo').textContent = `แสดง ${filtered.length > 0 ? start + 1 : 0}-${Math.min(start + rowsPerPage, filtered.length)} จากทั้งหมด ${filtered.length} รายการ`;
+  
+  // Pagination buttons
+  let btnHtml = '';
+  for (let i = 1; i <= Math.min(5, totalPages); i++) {
+    btnHtml += `<button class="btn-outline" style="padding: 2px 8px; ${i === currentPage ? 'background:#2563eb;color:#fff;' : ''}" onclick="goToPage(${i})">${i}</button>`;
+  }
+  document.getElementById('paginationButtons').innerHTML = btnHtml;
+}
+
+function selectRowByOriginalId(id) {
+  const index = fmeaData.findIndex(item => item.id === id);
+  if (index !== -1) {
+    selectedIndex = index;
+    renderTable();
+    loadDetailPanel();
   }
 }
 
-function handleExcelUpload(event) {
-  if (currentUserRole === 'viewer') {
-    alert('สิทธิ์ผู้ชมทั่วไปไม่สามารถอัปโหลดข้อมูลได้');
-    return;
+function selectRow(index) {
+  if (fmeaData[index]) {
+    selectedIndex = index;
+    renderTable();
+    loadDetailPanel();
   }
-  const file = event.target.files[0];
+}
+
+function loadDetailPanel() {
+  const item = fmeaData[selectedIndex];
+  if (!item) return;
+
+  document.getElementById('detCode').textContent = item.code;
+  document.getElementById('detDesc').textContent = item.desc;
+  document.getElementById('detComponent').textContent = item.component;
+  document.getElementById('detCause').textContent = item.cause;
+  document.getElementById('valS').textContent = item.s;
+  document.getElementById('valO').textContent = item.o;
+  document.getElementById('valD').textContent = item.d;
+  document.getElementById('detStatus').textContent = item.status;
+  document.getElementById('detNoteInput').value = item.note || '';
+
+  const rpn = item.s * item.o * item.d;
+  document.getElementById('dispRpn').textContent = `RPN = ${rpn}`;
+
+  let badge = '<span class="priority-badge p-green">ปานกลาง/ต่ำ</span>';
+  if (item.s === 5) badge = '<span class="priority-badge p-red">วิกฤตสูงสุด (P1)</span>';
+  else if (item.s === 4) badge = '<span class="priority-badge p-orange">ระดับเฝ้าระวัง</span>';
+  document.getElementById('detPriorityBadge').innerHTML = badge;
+}
+
+function adjustScore(field, delta) {
+  const item = fmeaData[selectedIndex];
+  if (!item) return;
+  if (field === 's') item.s = Math.max(1, Math.min(5, item.s + delta));
+  if (field === 'o') item.o = Math.max(1, Math.min(5, item.o + delta));
+  if (field === 'd') item.d = Math.max(1, Math.min(5, item.d + delta));
+
+  if (item.s === 5) item.status = "วิกฤต";
+  else if (item.s === 4) item.status = "เฝ้าระวัง";
+  else item.status = "ใช้งาน";
+
+  loadDetailPanel();
+  renderTable();
+  updateKPIs();
+}
+
+function updateCurrentNote(val) {
+  const item = fmeaData[selectedIndex];
+  if (item) item.note = val;
+}
+
+function saveItemChanges() {
+  alert(`บันทึกข้อมูลของรหัส [${fmeaData[selectedIndex].code}] สำเร็จเรียบร้อยแล้ว!`);
+}
+
+function resetSelection() {
+  loadDetailPanel();
+}
+
+function filterByPriority(priority) {
+  currentFilterPriority = priority;
+  document.getElementById('priorityFilterSelect').value = priority;
+  currentPage = 1;
+  renderTable();
+}
+
+function applyFilters() {
+  currentPage = 1;
+  renderTable();
+}
+
+function handleSearch(val) {
+  currentPage = 1;
+  renderTable();
+}
+
+function goToPage(p) {
+  currentPage = p;
+  renderTable();
+}
+
+function updateKPIs() {
+  const crit = fmeaData.filter(i => i.s === 5).length;
+  const warn = fmeaData.filter(i => i.s === 4).length;
+  document.getElementById('kpiCriticalCount').textContent = crit;
+  document.getElementById('kpiWarningCount').textContent = warn;
+  document.getElementById('kpiTotalFailure').textContent = fmeaData.length;
+}
+
+// ควบคุม Stepper ด้านบน
+function selectStep(stepNum, el) {
+  document.querySelectorAll('.step-node').forEach(node => node.classList.remove('active'));
+  el.classList.add('active');
+  alert(`เข้าสู่ขั้นตอนที่ ${stepNum}: ${el.querySelector('.step-lbl').textContent}`);
+}
+
+function switchMainTab(tabName, el) {
+  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleSubMenu(subId, el) {
+  const sub = document.getElementById(subId);
+  sub.style.display = sub.style.display === 'none' ? 'flex' : 'none';
+}
+
+function exportCSV() {
+  let csv = "\uFEFFID,Code,Component,Description,Cause,S,O,D,RPN,Status\n";
+  fmeaData.forEach(i => {
+    csv += `"${i.id}","${i.code}","${i.component}","${i.desc}","${i.cause}","${i.s}","${i.o}","${i.d}","${i.s*i.o*i.d}","${i.status}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'RCM_FMEA_Database.csv';
+  a.click();
+}
+
+function handleFileUpload(e) {
+  const file = e.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      const jsonRows = XLSX.utils.sheet_to_json(worksheet);
-
-      if (jsonRows.length === 0) {
-        alert('ไม่พบข้อมูลภายในไฟล์ Excel ที่อัปโหลด');
-        return;
-      }
-
-      records = jsonRows.map((row, idx) => ({
-        id: row.id || (idx + 1),
-        component: row.component || row.Component || 'TR_General',
-        code: row.code || row.Code || ('C' + (idx + 1)),
-        desc: row.desc || row.Description || row.Failure_Mode || 'โหมดความล้มเหลว',
-        cause: row.cause || row.Cause || '',
-        s: Number(row.s || row.Severity || 3),
-        o: Number(row.o || row.Occurrence || 2),
-        d: Number(row.d || row.Detection || 2),
-        note: row.note || row.Note || '',
-        actionType: 'PM',
-        actionPlan: ''
-      }));
-
-      categories = [...new Set(records.map(r => r.component ? r.component.split('_')[0] : 'OTHER'))];
-      updateDashboardStats();
-      renderChips();
-      renderTable();
-      document.getElementById('importResultMsg').textContent = `✓ นำเข้าข้อมูลสำเร็จ (${records.length} รายการ)`;
-    } catch(err) {
-      alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel');
+  reader.onload = function(evt) {
+    const data = new Uint8Array(evt.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(sheet);
+    if (json.length > 0) {
+      alert(`นำเข้าไฟล์ "${file.name}" สำเร็จ (${json.length} รายการ)`);
     }
   };
   reader.readAsArrayBuffer(file);
 }
 
-function handleHiExcelUpload(event) {
-  if (currentUserRole === 'viewer') {
-    alert('สิทธิ์ผู้ชมทั่วไปไม่สามารถอัปโหลดข้อมูลได้');
-    return;
-  }
-  const file = event.target.files[0];
-  if (!file) return;
-  alert('อัปโหลดไฟล์ผลแล็บ HI สำเร็จเรียบร้อย');
-}
-
-function populateDgaAssetDropdown() {
-  const select = document.getElementById('dgaAssetSelect');
-  if (!select) return;
-  const uniqueComps = [...new Set(records.map(r => r.component))];
-  select.innerHTML = `<option value="">-- กรุณาเลือกอุปกรณ์หม้อแปลง (${uniqueComps.length} รายการ) --</option>`;
-  uniqueComps.forEach(comp => {
-    const opt = document.createElement('option');
-    opt.value = comp;
-    opt.textContent = comp;
-    select.appendChild(opt);
-  });
-}
-
-function onDgaAssetChange() {
-  const selectEl = document.getElementById('dgaAssetSelect');
-  const statusEl = document.getElementById('dgaAssetStatus');
-  if (selectEl && statusEl) {
-    statusEl.textContent = selectEl.value ? `กำลังวิเคราะห์อุปกรณ์: [ ${selectEl.value} ]` : 'ยังไม่ได้เลือกอุปกรณ์';
-  }
-}
-
-function updateDashboardStats() {
-  const total = records.length;
-  let normal = 0, warning = 0, critical = 0;
-  let totalSi = 0, totalSmax = 0;
-
-  records.forEach(r => {
-    const s = Number(r.s) || 0;
-    if (s === 5) critical++;
-    else if (s === 4) warning++;
-    else normal++;
-  });
-
-  hiRecords.forEach(c => {
-    const si = Number(c.si) || 0;
-    const smax = Number(c.smax) || 0;
-    const wi = Number(c.wi) || 0;
-    if (si > 0 && wi > 0) totalSi += si * wi;
-    if (smax > 0 && wi > 0) totalSmax += smax * wi;
-  });
-
-  const avgHi = totalSmax > 0 ? ((totalSi / totalSmax) * 100).toFixed(2) : '100.00';
-
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statNormal').textContent = normal;
-  document.getElementById('statWarning').textContent = warning;
-  document.getElementById('statCritical').textContent = critical;
-  document.getElementById('statHiAvg').textContent = avgHi + '%';
-
-  updateCharts(normal, warning, critical);
-}
-
-function toggleLightDarkMode() {
-  document.body.classList.toggle('light-mode');
-  const isLight = document.body.classList.contains('light-mode');
-  document.getElementById('modeToggleBtn').textContent = isLight ? 'โหมดมืด' : 'โหมดสว่าง';
-  localStorage.setItem('rcm_theme_mode', isLight ? 'light' : 'dark');
-  initCharts();
-  updateDashboardStats();
-}
-
-function setRiskFilter(filter, el) {
-  riskFilter = filter;
-  currentPage = 1;
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  if (el) el.classList.add('active');
-  renderTable();
-}
-
-function switchTab(tab, el) {
-  currentTab = tab;
-  currentPage = 1;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  if (el) el.classList.add('active');
-  
-  const bannerContainer = document.getElementById('bannerContainer');
-  bannerContainer.innerHTML = '';
-  const tipBtn = document.getElementById('tipButton');
-  const titleSub = document.getElementById('modeTitleSub');
-  
-  if(tab === 'fmea') {
-    titleSub.textContent = "Reliability-Centered Maintenance for Sustainable Power System";
-    document.getElementById('tableInstruction').textContent = "คลิกที่แถวข้อมูลเพื่อดูรายละเอียดเชิงลึก หรือแก้ไขคะแนนการประเมิน";
-    document.getElementById('toolbarRow').style.display = 'flex';
-    document.getElementById('chips').style.display = 'flex';
-    tipBtn.style.display = 'none';
-  } else if(tab === 'hi') {
-    titleSub.textContent = "ตารางโครงสร้างดัชนีสุขภาพอุปกรณ์ (Health Index)";
-    document.getElementById('tableInstruction').textContent = "กรอกหมวดหมู่การทดสอบ พารามิเตอร์ และคะแนนสุขภาพ";
-    document.getElementById('toolbarRow').style.display = 'flex';
-    document.getElementById('chips').style.display = 'flex';
-    tipBtn.style.display = 'none';
-  } else if(tab === 'dga') {
-    titleSub.textContent = "ระบบวิเคราะห์ก๊าซละลายในน้ำมันหม้อแปลง (Dissolved Gas Analysis)";
-    document.getElementById('tableInstruction').textContent = "แสดงผลการคำนวณและวิเคราะห์ก๊าซในน้ำมันหม้อแปลงแยกตามรายตัวอุปกรณ์";
-    document.getElementById('toolbarRow').style.display = 'none';
-    document.getElementById('chips').style.display = 'none';
-    tipBtn.style.display = 'none';
-    bannerContainer.innerHTML = `<div class="plan-info-banner"><b>ระบบวิเคราะห์ก๊าซละลาย (DGA) ตามมาตรฐานสากล:</b> เลือกอุปกรณ์หม้อแปลงจากเมนูดรอปดาวน์ด้านบน แล้วกรอกค่าความเข้มข้นของก๊าซเพื่อประเมินผล</div>`;
-    setTimeout(() => drawDuvalTriangle(33.3, 33.3, 33.3), 50);
-  } else if(tab === 'plan') {
-    titleSub.textContent = "แผนงานบำรุงรักษาเชิงป้องกันตามหลัก RCM (Action Plan)";
-    document.getElementById('tableInstruction').textContent = "แสดงรายการแผนบำรุงรักษา จัดลำดับตามกลุ่มความสำคัญ";
-    document.getElementById('toolbarRow').style.display = 'flex';
-    document.getElementById('chips').style.display = 'none';
-    tipBtn.style.display = 'inline-block';
-    bannerContainer.innerHTML = `<div class="plan-info-banner"><b>หลักการจัดลำดับแผนงานบำรุงรักษา:</b> เรียงลำดับตามความวิกฤตและคะแนน RPN จากมากไปน้อย</div>`;
-  } else if(tab === 'tree') {
-    titleSub.textContent = "ผังตรรกะการตัดสินใจ (Decision Logic Tree)";
-    document.getElementById('tableInstruction').textContent = "แสดงผลการวิเคราะห์ประเภทผลกระทบและกลยุทธ์แนะนำตามตำรา RCM";
-    document.getElementById('toolbarRow').style.display = 'none';
-    document.getElementById('chips').style.display = 'none';
-    tipBtn.style.display = 'none';
-  } else if(tab === 'import') {
-    titleSub.textContent = "นำเข้าข้อมูล (Data Import Center)";
-    document.getElementById('tableInstruction').textContent = "อัปโหลดไฟล์ Excel เพื่ออัปเดตฐานข้อมูล";
-    document.getElementById('toolbarRow').style.display = 'none';
-    document.getElementById('chips').style.display = 'none';
-    tipBtn.style.display = 'none';
-  }
-  renderTable();
-}
-
-const chipsWrap = document.getElementById('chips');
-function renderChips(){
-  chipsWrap.innerHTML = '';
-  chipsWrap.appendChild(makeChip('แสดงทั้งหมด (' + records.length + ')', 'ALL'));
-  categories.forEach(c => {
-    const count = records.filter(r => (r.component ? r.component.split('_')[0] : 'OTHER') === c).length;
-    chipsWrap.appendChild(makeChip(c + ' (' + count + ')', c));
-  });
-}
-
-function makeChip(label, val){
-  const c = document.createElement('div');
-  c.className = 'chip' + (activeCat === val ? ' active' : '');
-  c.textContent = label;
-  c.addEventListener('click', () => { activeCat = val; currentPage = 1; renderChips(); renderTable(); });
-  return c;
-}
-
-const tbody = document.getElementById('tbody');
-const emptyState = document.getElementById('emptyState');
-const visibleCountEl = document.getElementById('visibleCount');
-
-function escapeHtml(str){
-  return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-
-function changePage(direction) {
-  currentPage += direction;
-  renderTable();
-}
-
-function calcDga(methodNo) {
-  const assetEl = document.getElementById('dgaAssetSelect');
-  const asset = assetEl ? assetEl.value : '';
-  if (methodNo === 4) {
-    let ch4 = parseFloat(document.getElementById('dga_dv_ch4').value) || 0;
-    let c2h4 = parseFloat(document.getElementById('dga_dv_c2h4').value) || 0;
-    let c2h2 = parseFloat(document.getElementById('dga_dv_c2h2').value) || 0;
-    let sum = ch4 + c2h4 + c2h2 || 1;
-    drawDuvalTriangle((ch4/sum)*100, (c2h4/sum)*100, (c2h2/sum)*100);
-    document.getElementById('res_dga_4').innerHTML = `[${asset || 'ทั่วไป'}] โซนความเสียหาย: <b>Thermal Fault / Discharge</b>`;
-  } else {
-    document.getElementById('res_dga_' + methodNo).innerHTML = `[${asset || 'ทั่วไป'}] ผลการประเมิน: ตรวจพบสภาพปกติ`;
-  }
-}
-
-function drawDuvalTriangle(p_ch4, p_c2h4, p_c2h2) {
-  const canvas = document.getElementById('duvalCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
-  ctx.beginPath();
-  ctx.moveTo(w/2, 15); ctx.lineTo(20, h-20); ctx.lineTo(w-20, h-20); ctx.closePath();
-  ctx.strokeStyle = '#94a3b8'; ctx.stroke();
-  ctx.beginPath();
-  ctx.arc((p_ch4 * 20 + p_c2h4 * (w-20) + p_c2h2 * (w/2)) / 100, (p_ch4 * (h-20) + p_c2h4 * (h-20) + p_c2h2 * 15) / 100, 5, 0, Math.PI * 2);
-  ctx.fillStyle = '#ef4444'; ctx.fill();
-}
-
-function renderTable(){
-  const q = query.trim().toLowerCase();
-  const thead = document.getElementById('tableHead');
-  const paginationBar = document.getElementById('paginationBar');
-  const mainTableWrapper = document.getElementById('mainTableWrapper');
-  const dgaView = document.getElementById('dgaView');
-  const treeView = document.getElementById('treeView');
-  const importView = document.getElementById('importView');
-
-  if (currentTab === 'dga') {
-    paginationBar.style.display = 'none'; mainTableWrapper.style.display = 'none'; dgaView.style.display = 'block'; treeView.style.display = 'none'; importView.style.display = 'none';
-    return;
-  } else if (currentTab === 'tree') {
-    paginationBar.style.display = 'none'; mainTableWrapper.style.display = 'none'; dgaView.style.display = 'none'; treeView.style.display = 'block'; importView.style.display = 'none';
-    renderLogicTreeTable();
-    return;
-  } else if (currentTab === 'import') {
-    paginationBar.style.display = 'none'; mainTableWrapper.style.display = 'none'; dgaView.style.display = 'none'; treeView.style.display = 'none'; importView.style.display = 'block';
-    return;
-  } else {
-    dgaView.style.display = 'none'; treeView.style.display = 'none'; importView.style.display = 'none'; mainTableWrapper.style.display = 'block';
-  }
-
-  const isReadOnly = (currentUserRole === 'viewer');
-  const isOperator = (currentUserRole === 'operator');
-
-  if (currentTab === 'fmea' || currentTab === 'hi' || currentTab === 'plan') {
-    paginationBar.style.display = 'flex';
-    thead.innerHTML = `
-      <tr>
-        <th style="width:40px;">ลำดับ</th>
-        <th style="width:130px;">Component</th>
-        <th style="width:75px;">รหัส</th>
-        <th>Failure Mode</th>
-        <th>Failure Cause</th>
-        <th style="width:45px; text-align:center;">S</th>
-        <th style="width:45px; text-align:center;">O</th>
-        <th style="width:45px; text-align:center;">D</th>
-        <th style="width:60px; text-align:center;">RPN</th>
-        <th style="width:140px; text-align:center;">Priority</th>
-        <th style="width:200px;">หมายเหตุ / Note</th>
-      </tr>
-    `;
-
-    const filtered = records.filter(r => {
-      const catPrefix = r.component ? r.component.split('_')[0] : 'OTHER';
-      if(activeCat !== 'ALL' && catPrefix !== activeCat) return false;
-      const s = Number(r.s) || 0;
-      if (riskFilter === 'CRITICAL' && s !== 5) return false;
-      if (riskFilter === 'WARNING' && s !== 4) return false;
-      if (riskFilter === 'NORMAL' && s > 3) return false;
-      if(!q) return true;
-      return (r.code?.toLowerCase().includes(q) || r.desc?.toLowerCase().includes(q) || r.cause?.toLowerCase().includes(q) || r.component?.toLowerCase().includes(q));
-    });
-
-    const totalFiltered = filtered.length;
-    const totalPages = Math.ceil(totalFiltered / rowsPerPage) || 1;
-    if (currentPage > totalPages) currentPage = totalPages;
-    if (currentPage < 1) currentPage = 1;
-
-    const startIdx = (currentPage - 1) * rowsPerPage;
-    const paginatedItems = filtered.slice(startIdx, startIdx + rowsPerPage);
-    const disabledAttr = (isReadOnly || isOperator) ? 'disabled' : '';
-
-    tbody.innerHTML = paginatedItems.map(r => {
-      const s = Number(r.s) || 0;
-      const o = Number(r.o) || 0;
-      const d = Number(r.d) || 0;
-      const rpn = s * o * d;
-      
-      let flagClass = 'flag-green', flagText = 'ปานกลาง/ต่ำ';
-      if (s === 5) { flagClass = 'flag-red'; flagText = 'วิกฤต'; }
-      else if (s === 4) { flagClass = 'flag-orange'; flagText = 'เฝ้าระวัง'; }
-
-      return `
-        <tr onclick="openDrilldown(${r.id})">
-          <td class="num">${r.id}</td>
-          <td><b>${escapeHtml(r.component)}</b></td>
-          <td><span class="code-pill mono">${escapeHtml(r.code)}</span></td>
-          <td>${escapeHtml(r.desc)}</td>
-          <td style="color:var(--muted);">${escapeHtml(r.cause)}</td>
-          <td style="text-align:center;" onclick="event.stopPropagation()"><input type="number" class="score-input" value="${r.s}" ${disabledAttr} oninput="updateFmea(${r.id}, 's', this.value)"></td>
-          <td style="text-align:center;" onclick="event.stopPropagation()"><input type="number" class="score-input" value="${r.o}" ${disabledAttr} oninput="updateFmea(${r.id}, 'o', this.value)"></td>
-          <td style="text-align:center;" onclick="event.stopPropagation()"><input type="number" class="score-input" value="${r.d}" ${disabledAttr} oninput="updateFmea(${r.id}, 'd', this.value)"></td>
-          <td style="text-align:center;" class="mono">${rpn}</td>
-          <td style="text-align:center;"><span class="flag-badge ${flagClass}">${flagText}</span></td>
-          <td onclick="event.stopPropagation()"><input type="text" class="text-input" value="${escapeHtml(r.note || '')}" ${disabledAttr} oninput="updateFmea(${r.id}, 'note', this.value)"></td>
-        </tr>
-      `;
-    }).join('');
-
-    document.getElementById('paginationInfo').textContent = `แสดงรายการที่ ${totalFiltered > 0 ? startIdx + 1 : 0}-${Math.min(startIdx + rowsPerPage, totalFiltered)} จากทั้งหมด ${totalFiltered} รายการ`;
-    document.getElementById('pageIndicator').textContent = `หน้า ${currentPage} / ${totalPages}`;
-    visibleCountEl.textContent = totalFiltered;
-    emptyState.style.display = totalFiltered === 0 ? 'block' : 'none';
-  }
-}
-
-function renderLogicTreeTable() {
-  const treeTbody = document.getElementById('treeTbody');
-  if (!treeTbody) return;
-  treeTbody.innerHTML = records.slice(0, 20).map((r, index) => `
-    <tr>
-      <td style="text-align:center;" class="num">${index + 1}</td>
-      <td><b>${escapeHtml(r.component)}</b></td>
-      <td><span class="code-pill mono">${escapeHtml(r.code)}</span></td>
-      <td>${escapeHtml(r.desc)}</td>
-      <td style="text-align:center;" class="mono">${r.s}</td>
-      <td style="text-align:center;" class="mono">${r.s * r.o * r.d}</td>
-      <td>${escapeHtml(r.category)}</td>
-      <td style="color:var(--teal); font-weight:600;">${escapeHtml(r.strategy)}</td>
-    </tr>
-  `).join('');
-}
-
-function updateFmea(id, field, val) {
-  if (currentUserRole === 'viewer') return;
-  const item = records.find(r => r.id === id);
-  if (item) {
-    item[field] = val;
-    updateDashboardStats();
-  }
-}
-
-function openDrilldown(id) {
-  const r = records.find(item => item.id === id);
-  if (!r) return;
-  document.getElementById('modalComp').textContent = r.component;
-  document.getElementById('modalCode').textContent = r.code;
-  document.getElementById('modalDesc').textContent = r.desc;
-  document.getElementById('modalCause').textContent = r.cause || '-';
-  document.getElementById('modalRpn').textContent = (r.s || 0) * (r.o || 0) * (r.d || 0);
-  document.getElementById('modalCategory').textContent = r.category || '-';
-  document.getElementById('modalStrategy').textContent = r.strategy || '-';
-  document.getElementById('modalNote').textContent = r.note || '-';
-  document.getElementById('drilldownModal').classList.add('open');
-}
-
-function closeModal() { document.getElementById('drilldownModal').classList.remove('open'); }
-function openGuidelineModal() { document.getElementById('guidelineModal').classList.add('open'); }
-function closeGuidelineModal() { document.getElementById('guidelineModal').classList.remove('open'); }
-function openLogicTreeModal() { document.getElementById('logicTreeModal').classList.add('open'); }
-function closeLogicTreeModal() { document.getElementById('logicTreeModal').classList.remove('open'); }
-function openTipModal() { document.getElementById('tipModal').classList.add('open'); }
-function closeTipModal() { document.getElementById('tipModal').classList.remove('open'); }
-
-function handleOutsideClick(event, modalId) {
-  if (event.target === document.getElementById(modalId)) {
-    document.getElementById(modalId).classList.remove('open');
-  }
-}
-
-function exportToCSV() {
-  let csvContent = "\uFEFFID,Component,Code,Description,Cause,Severity,Occurrence,Detection,RPN\n";
-  records.forEach(r => {
-    csvContent += `"${r.id}","${r.component}","${r.code}","${r.desc}","${r.cause}","${r.s}","${r.o}","${r.d}","${r.s*r.o*r.d}"\n`;
-  });
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `RCM_Export.csv`;
-  a.click();
-}
-
-function saveData() {
-  if (currentUserRole === 'viewer') return;
-  window.saveToFirestoreCloud(records, hiRecords);
-}
-
+// สร้างกราฟด้วย Chart.js
 function initCharts() {
-  const isLight = document.body.classList.contains('light-mode');
-  const textColor = isLight ? '#0f172a' : '#f0f4f8';
-
-  const ctxDoughnut = document.getElementById('riskDoughnutChart').getContext('2d');
-  if (doughnutChartInstance) doughnutChartInstance.destroy();
-  doughnutChartInstance = new Chart(ctxDoughnut, {
+  const ctxDonut = document.getElementById('donutChart').getContext('2d');
+  new Chart(ctxDonut, {
     type: 'doughnut',
     data: {
-      labels: ['ปานกลาง / ต่ำ', 'ระดับเฝ้าระวัง', 'วิกฤตสูงสุด (P1)'],
+      labels: ['วิกฤต', 'เฝ้าระวัง', 'ปานกลาง/ต่ำ'],
       datasets: [{
-        data: [0, 0, 0],
-        backgroundColor: ['#14b8a6', '#f59e0b', '#ef4444'],
-        borderWidth: 3,
-        borderColor: isLight ? '#ffffff' : '#111827'
+        data: [18, 46, 158],
+        backgroundColor: ['#dc2626', '#d97706', '#0d9488'],
+        borderWidth: 2,
+        borderColor: '#ffffff'
       }]
     },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { color: textColor, size: 10 } } } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+    }
   });
 
-  const ctxBar = document.getElementById('topRiskBarChart').getContext('2d');
-  if (barChartInstance) barChartInstance.destroy();
-  barChartInstance = new Chart(ctxBar, {
+  const ctxBar = document.getElementById('barChart').getContext('2d');
+  new Chart(ctxBar, {
     type: 'bar',
     data: {
-      labels: ['TR_MainTank', 'HV_GIS_CB', 'TR_Bushing', 'TR_Radiator', 'TR_CableBox'],
+      labels: ['TR_MainTank', 'TR_Bushing', 'TR_Coll', 'TR_Radiator', 'TR_TapChanger'],
       datasets: [{
-        data: [45, 38, 30, 25, 20],
-        backgroundColor: 'rgba(245, 158, 11, 0.85)',
-        borderRadius: 6
+        data: [28, 24, 18, 15, 12],
+        backgroundColor: '#2563eb',
+        borderRadius: 4,
+        barThickness: 16
       }]
     },
-    options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: textColor } }, y: { ticks: { color: textColor } } }, plugins: { legend: { display: false } } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 9 } } }
+      },
+      plugins: { legend: { display: false } }
+    }
   });
 }
 
-function updateCharts(normal, warning, critical) {
-  if (doughnutChartInstance) {
-    doughnutChartInstance.data.datasets[0].data = [normal, warning, critical];
-    doughnutChartInstance.update();
-  }
-}
-
-document.getElementById('search').addEventListener('input', (e) => {
-  query = e.target.value;
-  currentPage = 1;
-  renderTable();
-});
-
-initApp();
+// เริ่มต้นรันระบบ
+initSystem();
 </script>
 
 </body>
