@@ -313,7 +313,7 @@ const UI = {
  asset_location:['Asset Location','ตำแหน่งสินทรัพย์'], view_map:['View Map','ดูแผนที่'], recent_activities:['Recent Activities','กิจกรรมล่าสุด'],
  hi_trend_fleet:['Health Index Trend (Fleet Average)','แนวโน้มดัชนีสุขภาพ (ค่าเฉลี่ยรวม)'], maint_strategy:['Maintenance Strategy (Current)','กลยุทธ์บำรุงรักษา (ปัจจุบัน)'],
  all_status:['All Status','สถานะทั้งหมด'], all_voltage:['All Voltage','แรงดันทั้งหมด'], search_assets:['Search assets...','ค้นหาสินทรัพย์...'],
- back_to_assets:['← Back to Assets','← กลับไปยังสินทรัพย์'], export_report:['Export Report','ส่งออกรายงาน'], more_actions:['More Actions ▾','การกระทำอื่นๆ ▾'],
+ back_to_assets:['← Back to Assets','← กลับไปยังสินทรัพย์'], viewing_asset:['Viewing:','กำลังดู:'], export_report:['Export Report','ส่งออกรายงาน'], more_actions:['More Actions ▾','การกระทำอื่นๆ ▾'],
  health_index:['Health Index','ดัชนีสุขภาพ'], rpn_max:['RPN (Max)','RPN (สูงสุด)'], dga_diagnosis:['DGA Diagnosis','ผลวินิจฉัย DGA'], next_action:['Next Action','การกระทำถัดไป'],
  tab_overview:['Overview','ภาพรวม'], tab_healthindex:['Health Index','ดัชนีสุขภาพ'], tab_dga:['DGA Analysis','วิเคราะห์ DGA'],
  tab_fmea:['FMEA & RPN','FMEA & RPN'], tab_rcm:['RCM Decision','การตัดสินใจ RCM'], tab_plan:['Maintenance Plan','แผนบำรุงรักษา'],
@@ -611,6 +611,26 @@ function mkChart(id,cfg){
   }catch(err){ console.error('chart error', id, err); }
 }
 function cssv(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#94a3b8'; }
+const valueLabelPlugin = {
+  id: 'valueLabels',
+  afterDatasetsDraw(chart){
+    const {ctx} = chart;
+    chart.data.datasets.forEach((ds, dsIndex)=>{
+      const meta = chart.getDatasetMeta(dsIndex);
+      if(meta.hidden || !meta.data) return;
+      meta.data.forEach((point, index)=>{
+        const value = ds.data[index];
+        if(value===undefined || value===null) return;
+        ctx.save();
+        ctx.fillStyle = ds.borderColor || '#334155';
+        ctx.font = '700 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(String(value), point.x, point.y - 10);
+        ctx.restore();
+      });
+    });
+  }
+};
 function chartBox(id, heightPx){ return `<div class="chart-box" style="height:${heightPx}px;"><canvas id="${id}"></canvas></div>`; }
 const commonOpts = ()=>({ responsive:true, maintainAspectRatio:false });
 
@@ -683,11 +703,6 @@ function renderOverview(){
       </tbody></table></div>
     </div>
     <div style="display:flex; flex-direction:column; gap:16px;">
-      <div class="card">
-        <div class="card-head"><h3>${t('asset_location')}</h3><button class="linklike" id="btnViewMap">${t('view_map')}</button></div>
-        <div class="mapbox"><svg viewBox="0 0 300 150"><g stroke="#ffffff77" stroke-width="1"><line x1="0" y1="40" x2="300" y2="40"/><line x1="0" y1="90" x2="300" y2="90"/><line x1="90" y1="0" x2="90" y2="150"/><line x1="200" y1="0" x2="200" y2="150"/></g></svg>
-        <div class="map-pin">${icon('pin')}<div class="pinhead">TR-014 · ${t('critical')}</div></div></div>
-      </div>
       <div class="card" style="flex:1;">
         <div class="card-head"><h3>${t('recent_activities')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
         <ul class="recact">${REC_ACTIVITIES.map(r=>`<li><span class="dot" style="background:var(--${r.c==='blue'?'accent-2':r.c})"></span><div><div>${r.a[state.lang]}</div><div class="rt">${r.d} · ${r.t}</div></div></li>`).join('')}</ul>
@@ -726,13 +741,12 @@ function initOverviewCharts(){
   const gridColor = cssv('--border');
   mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#1a9e6b','#e8a13a','#e0524a'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
   mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','PdM','CM','BM'],datasets:[{data:[8,6,3,2,1],backgroundColor:['#2f6fed','#1a9e6b','#8b5cf6','#e0524a','#94a3b8'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('ovTrend2',{type:'line',data:{labels:MONTHS9,datasets:[{data:HI_TREND_FLEET,borderColor:'#2f6fed',backgroundColor:'#2f6fed22',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:MONTHS9,datasets:[{data:HI_TREND_FLEET,borderColor:'#2f6fed',backgroundColor:'#2f6fed22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#2f6fed'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
   document.querySelectorAll('[data-ov-filter]').forEach(el=> el.addEventListener('click',()=>{ state.assetFilterStatus = el.dataset.ovFilter; render(); }));
   const addBtn = document.getElementById('btnAddAssetOv'); if(addBtn) addBtn.addEventListener('click', openAddAssetModal);
   const gotoBtns = document.querySelectorAll('[data-goto-assets]'); gotoBtns.forEach(b=>b.addEventListener('click',()=>{ state.page='assets'; render(); window.scrollTo(0,0); }));
-  const mapBtn = document.getElementById('btnViewMap'); if(mapBtn) mapBtn.addEventListener('click', ()=>toast(state.lang==='th'?'เปิดแผนที่แบบเต็มหน้าจอ (ตัวอย่าง)':'Opening full map view (demo)'));
 }
 
 /* ============ ASSETS LIST PAGE ============ */
@@ -824,7 +838,10 @@ function renderDetail(){
   else if(state.detailTab==='history') body = detailHistoryTab(a);
   else if(state.detailTab==='docs') body = detailDocsTab(a);
   return `
-  <div style="margin-bottom:6px;"><button class="linklike" id="backToAssets">${t('back_to_assets')}</button></div>
+  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:6px;">
+    <button class="linklike" id="backToAssets">${t('back_to_assets')}</button>
+    <div class="filter-row"><label class="small-muted" style="font-weight:700;">${t('viewing_asset')}</label><select class="chip-input" id="detailAssetSelect">${ASSETS.map(x=>`<option value="${x.id}" ${x.id===state.assetId?'selected':''}>${x.id} — ${x.loc}</option>`).join('')}</select></div>
+  </div>
   <div class="card" style="margin-bottom:16px;">${detailHeader(a)}</div>
   <div class="tabs">${DETAIL_TABS.map(tb=>`<button class="tab ${state.detailTab===tb.id?'active':''}" data-dtab="${tb.id}">${t(tb.key)}</button>`).join('')}</div>
   <div id="detailBody">${body}</div>`;
@@ -1239,8 +1256,8 @@ function detailDocsTab(a){
 }
 function initDetailCharts(a){
   const gridColor = cssv('--border');
-  if(document.getElementById('detTrend')) mkChart('detTrend',{type:'line',data:{labels:TR014_MONTHS,datasets:[{data:TR014_TREND,borderColor:'#e0524a',backgroundColor:'#e0524a22',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
-  if(document.getElementById('hiTrend')) mkChart('hiTrend',{type:'line',data:{labels:TR014_MONTHS,datasets:[{data:TR014_TREND,borderColor:'#e0524a',backgroundColor:'#e0524a22',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  if(document.getElementById('detTrend')) mkChart('detTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:TR014_TREND,borderColor:'#e0524a',backgroundColor:'#e0524a22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#e0524a'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
+  if(document.getElementById('hiTrend')) mkChart('hiTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:TR014_TREND,borderColor:'#e0524a',backgroundColor:'#e0524a22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#e0524a'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
   if(document.getElementById('hiGauge')) mkChart('hiGauge',{type:'doughnut',data:{datasets:[{data:[a.hi,100-a.hi],backgroundColor:['#e0524a', gridColor],borderWidth:0,circumference:180,rotation:270}]},options:{...commonOpts(),cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
   if(document.getElementById('hiRadar')) mkChart('hiRadar',{type:'radar',data:{labels:HEALTH_BREAKDOWN.map(h=>h.k),datasets:[{label:'Current',data:HEALTH_BREAKDOWN.map(h=>h.v),borderColor:'#e0524a',backgroundColor:'#e0524a33',pointRadius:2},{label:'Target',data:[85,85,85,85,85],borderColor:'#94a3b8',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{r:{min:0,max:100,grid:{color:gridColor},angleLines:{color:gridColor},pointLabels:{font:{size:10}}}}}});
   if(document.getElementById('dgaHist')) mkChart('dgaHist',{type:'line',data:{labels:DGA_HIST.months,datasets:[
@@ -1256,6 +1273,7 @@ function initDetailCharts(a){
 function attachDetailEvents(){
   document.querySelectorAll('[data-dtab]').forEach(el=> el.addEventListener('click',()=>{ state.detailTab = el.dataset.dtab; render(); }));
   const back = document.getElementById('backToAssets'); if(back) back.addEventListener('click',()=>{ state.page='assets'; render(); window.scrollTo(0,0); });
+  const assetSel = document.getElementById('detailAssetSelect'); if(assetSel) assetSel.addEventListener('change',(e)=>{ state.assetId = e.target.value; render(); window.scrollTo(0,0); });
   const rcmSelect = document.getElementById('rcmSelect'); if(rcmSelect) rcmSelect.addEventListener('change',(e)=>{ state.rcmMode = e.target.value; render(); });
   const rcmReset = document.getElementById('btnRcmReset'); if(rcmReset) rcmReset.addEventListener('click',()=>{ state.rcmAnswers[state.rcmMode] = {}; render(); toast(t('reset')+' ✓'); });
   const rcmPrint = document.getElementById('btnRcmPrint'); if(rcmPrint) rcmPrint.addEventListener('click', ()=>window.print());
