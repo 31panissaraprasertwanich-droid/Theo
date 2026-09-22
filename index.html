@@ -1,160 +1,1396 @@
-<!doctype html>
-<html lang="th">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Transformer RCM Workspace</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RCM Transformer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{--bg:#f4f7fb;--panel:#fff;--ink:#15243a;--muted:#6f7f94;--line:#dfe7f1;--nav:#10233f;--blue:#1769e0;--soft:#edf4ff;--good:#198754;--warn:#d98b00;--bad:#c53b45;--r:16px}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px Inter,"Segoe UI",Tahoma,sans-serif}
-header{height:72px;background:var(--nav);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 28px;box-shadow:0 3px 14px #10233f20}
-.brand b{font-size:19px}.brand span{display:block;color:#aebbd0;font-size:12px;margin-top:3px}
-.asset{display:flex;gap:10px;align-items:center}.asset select,.asset button{border:1px solid #ffffff28;background:#ffffff10;color:#fff;border-radius:10px;padding:9px 12px}.asset option{color:#111}
-nav{height:52px;background:#fff;border-bottom:1px solid var(--line);display:flex;gap:4px;padding:7px 24px;overflow:auto;position:sticky;top:0;z-index:5}
-nav button{white-space:nowrap;border:0;background:transparent;color:#53657c;border-radius:9px;padding:9px 14px;cursor:pointer;font-weight:600}nav button.active{background:var(--soft);color:var(--blue)}
-main{max-width:1500px;margin:auto;padding:24px}.page{display:none}.page.active{display:block}
-.title{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}.title h1{font-size:25px;margin:0}.title p{margin:5px 0 0;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.hero{background:linear-gradient(120deg,#10233f,#174f92);color:#fff;border-radius:22px;padding:25px 27px;margin-bottom:18px;display:flex;justify-content:space-between;gap:20px;align-items:center;box-shadow:0 14px 34px #153f7025}.hero h1{font-size:27px;margin:0 0 8px}.hero p{margin:0;color:#cfdbeb}.hero .badge{background:#ffffff16;border:1px solid #ffffff25;padding:10px 14px;border-radius:12px;white-space:nowrap}.fleet-card{position:relative;overflow:hidden}.fleet-card:after{content:'';position:absolute;width:90px;height:90px;border-radius:50%;right:-30px;top:-30px;background:#1769e00b}.fleet-card .v{font-size:34px}.status-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px}.normal{background:#198754}.watch{background:#d98b00}.critical{background:#c53b45}.asset-table td:first-child{font-weight:700}.health-pill{display:inline-block;min-width:86px;text-align:center;border-radius:99px;padding:5px 9px;font-size:11px;font-weight:750}.hp-normal{background:#e9f7ef;color:#137044}.hp-watch{background:#fff5df;color:#9a6500}.hp-critical{background:#fdebed;color:#a72c38}.overview-layout{display:grid;grid-template-columns:1.45fr .55fr;gap:14px}.distribution{display:flex;align-items:center;justify-content:center;min-height:230px}.donut{width:170px;height:170px;border-radius:50%;position:relative;background:conic-gradient(#198754 0 60%,#d98b00 60% 85%,#c53b45 85% 100%)}.donut:after{content:'20\A Transformers';white-space:pre;position:absolute;inset:29px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:750;line-height:1.5}.card,.box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 4px 18px #1b355008}
-.card{padding:18px}.k{color:var(--muted);font-size:12px}.v{font-size:28px;font-weight:750;margin:6px 0}.tag{display:inline-block;border-radius:99px;padding:5px 9px;font-size:11px;font-weight:700;background:var(--soft);color:var(--blue)}
-.box{padding:20px;margin-top:14px}.box h3{margin:0 0 15px;font-size:16px}
-table{width:100%;border-collapse:collapse;min-width:900px}th{background:#f7f9fc;color:#66768a;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em}th,td{padding:11px;border-bottom:1px solid var(--line);vertical-align:top}.scroll{overflow:auto}
-input,select,textarea{width:100%;border:1px solid #ccd7e5;background:#fff;border-radius:8px;padding:8px;color:var(--ink);font:inherit}input[type=number]{min-width:65px}.mini{width:68px}
-.btn{border:0;border-radius:9px;padding:9px 13px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer}.btn.secondary{background:#edf2f7;color:#31445d}.btn.danger{background:#fff0f1;color:var(--bad)}
-.formgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}.meter{height:10px;background:#e9eef5;border-radius:99px;overflow:hidden}.meter i{display:block;height:100%;background:var(--blue);width:0}
-.strategy{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.strat{padding:16px;border:1px solid var(--line);border-radius:13px;background:#fff}.strat b{font-size:18px}.strat p{color:var(--muted);font-size:12px;line-height:1.5}
-.logic{text-align:center}.question{max-width:620px;margin:20px auto;padding:24px;border:1px solid var(--line);border-radius:15px;background:#f9fbfd}.question h2{margin-top:0}.logic-actions{display:flex;justify-content:center;gap:10px}
-.result{padding:16px;border-left:4px solid var(--blue);background:var(--soft);border-radius:8px;margin-top:14px}
-.duval-wrap{display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap}.duval-info{min-width:260px;max-width:420px}
-svg{max-width:520px;width:100%;height:auto}.zone{stroke:#fff;stroke-width:2;opacity:.78}.point{fill:#111;stroke:#fff;stroke-width:3}
-.timeline{display:grid;grid-template-columns:1fr 80px 1fr;gap:12px;align-items:stretch}.arrow{display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--blue)}
-.note{color:var(--muted);font-size:12px;line-height:1.6}.right{text-align:right}
-@media(max-width:900px){.grid,.formgrid,.strategy{grid-template-columns:1fr 1fr}.overview-layout{grid-template-columns:1fr}.split,.timeline{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}}
-@media(max-width:560px){main{padding:14px}.grid,.formgrid,.strategy{grid-template-columns:1fr}header{padding:0 14px}.asset select{max-width:130px}}
+:root{
+  --navy:#0d1b34; --navy-2:#132548; --navy-3:#1b3160;
+  --accent:#f0793c; --accent-2:#2f6fed;
+  --green:#1a9e6b; --green-bg:#e6f7ef;
+  --amber:#e8a13a; --amber-bg:#fdf3e2;
+  --red:#e0524a; --red-bg:#fbe9e8;
+  --blue-bg:#eaf1fe;
+  --bg:#eef2f8; --card:#ffffff; --border:#e3e8f1; --text:#1b2436; --muted:#6b7690;
+  --radius:12px;
+  font-family:'Inter','Noto Sans Thai',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#0b1120; --card:#131b2c; --border:#232e45; --text:#e7ebf3; --muted:#93a0bd; --green-bg:#0f2a20; --amber-bg:#2e2412; --red-bg:#2e1616; --blue-bg:#0f1f3d; }
+}
+:root[data-theme="dark"]{ --bg:#0b1120; --card:#131b2c; --border:#232e45; --text:#e7ebf3; --muted:#93a0bd; --green-bg:#0f2a20; --amber-bg:#2e2412; --red-bg:#2e1616; --blue-bg:#0f1f3d; }
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0; background:var(--bg); color:var(--text); padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); -webkit-font-smoothing:antialiased;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+a{color:inherit;}
+button{font-family:inherit;}
+.app{display:flex; min-height:100vh;}
+.sidebar{width:236px; flex:0 0 236px; background:var(--navy); color:#dfe6f5; display:flex; flex-direction:column; position:sticky; top:0; height:100vh; padding-top:env(safe-area-inset-top,0px); z-index:40;}
+.brand{display:flex; align-items:center; gap:10px; padding:22px 20px 18px; border-bottom:1px solid rgba(255,255,255,.08);}
+.brand-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#c9501f);display:flex;align-items:center;justify-content:center;flex:0 0 38px;}
+.brand-mark svg{width:22px;height:22px;}
+.brand-text .name{font-weight:800; font-size:15px; letter-spacing:.2px; color:#fff;}
+.brand-text .sub{font-size:11px; color:#8fa0c4; margin-top:1px;}
+nav.navlist{padding:14px 10px; flex:1; overflow-y:auto;}
+.navitem{display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:9px; font-size:13.5px; font-weight:500; color:#b7c3de; cursor:pointer; margin-bottom:2px; border-left:3px solid transparent; user-select:none;}
+.navitem svg{width:17px;height:17px; flex:0 0 17px; opacity:.9;}
+.navitem:hover{background:rgba(255,255,255,.05); color:#fff;}
+.navitem.active{background:var(--navy-3); color:#fff; border-left:3px solid var(--accent);}
+.sidebar-footer{padding:16px 20px 22px; border-top:1px solid rgba(255,255,255,.08); font-size:11px; color:#7688ac; line-height:1.5;}
+.main{flex:1; min-width:0; display:flex; flex-direction:column;}
+.topbar{position:sticky; top:0; z-index:30; background:var(--card); border-bottom:1px solid var(--border); padding:14px 26px; padding-top:calc(14px + env(safe-area-inset-top,0px)); display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap:wrap;}
+.page-title h1{margin:0; font-size:19px; font-weight:800;}
+.page-title p{margin:1px 0 0; font-size:12px; color:var(--muted); font-weight:500;}
+.topbar-right{display:flex; align-items:center; gap:12px;}
+.search-box{display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--border); border-radius:9px; padding:8px 12px; min-width:220px; color:var(--muted); font-size:13px;}
+.search-box input{border:none;background:transparent;outline:none;color:var(--text);font-size:13px;width:100%;font-family:inherit;}
+.search-box svg{width:15px;height:15px; flex:0 0 15px;}
+.langtoggle{display:flex; border:1px solid var(--border); border-radius:9px; overflow:hidden;}
+.langtoggle button{border:none; background:var(--bg); color:var(--muted); font-size:12px; font-weight:700; padding:8px 12px; cursor:pointer;}
+.langtoggle button.active{background:var(--accent-2); color:#fff;}
+.bell{position:relative; width:34px;height:34px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;border:1px solid var(--border); cursor:pointer;}
+.bell svg{width:16px;height:16px;color:var(--muted);}
+.bell .dot{position:absolute; top:-4px; right:-4px; background:var(--red); color:#fff; font-size:9px; font-weight:700; width:16px;height:16px;border-radius:50%; display:flex;align-items:center;justify-content:center;}
+.dropdown{position:absolute; top:44px; right:0; width:300px; background:var(--card); border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.15); z-index:60; overflow:hidden;}
+.dropdown-head{padding:12px 14px; border-bottom:1px solid var(--border); font-weight:800; font-size:13px; display:flex; justify-content:space-between; align-items:center;}
+.dropdown-body{max-height:320px; overflow-y:auto;}
+.dropdown-item{padding:11px 14px; border-bottom:1px solid var(--border); font-size:12.3px; cursor:pointer;}
+.dropdown-item:hover{background:var(--bg);}
+.dropdown-item:last-child{border-bottom:none;}
+.dropdown-item .dt{color:var(--muted); font-size:10.5px; margin-top:2px;}
+.user{display:flex; align-items:center; gap:9px;}
+.avatar{width:34px;height:34px;border-radius:50%; background:var(--navy-3); color:#fff; display:flex;align-items:center;justify-content:center; font-weight:700; font-size:13px; flex:0 0 34px;}
+.user .u-name{font-size:13px; font-weight:700;}
+.user .u-role{font-size:11px; color:var(--muted);}
+.content{padding:22px 26px 60px; max-width:1500px; width:100%; margin:0 auto;}
+.hidden{display:none !important;}
+.card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 18px;}
+.card h3{margin:0 0 4px; font-size:14.5px; font-weight:700;}
+.card .card-sub{font-size:11.5px; color:var(--muted); margin:0 0 12px;}
+.card-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:10px; flex-wrap:wrap;}
+.card-head h3{margin:0;}
+.linklike{font-size:12px; color:var(--accent-2); font-weight:600; cursor:pointer; white-space:nowrap; background:none; border:none;}
+.grid{display:grid; gap:16px;}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g2{grid-template-columns:repeat(2,1fr);}
+@media (max-width:1100px){ .g4{grid-template-columns:repeat(2,1fr);} .g3{grid-template-columns:repeat(1,1fr);} .g2{grid-template-columns:repeat(1,1fr);}
+  .sidebar{position:fixed; z-index:50; transform:translateX(-100%); transition:transform .2s;}
+  .sidebar.open{transform:translateX(0);}
+  .menu-btn{display:flex !important;}
+  [style*="grid-template-columns:1.3fr 1fr 1fr"], [style*="grid-template-columns:1fr 1.4fr 1fr"], [style*="grid-template-columns:1.2fr 1fr 1fr"], [style*="grid-template-columns:1.6fr 1fr"], [style*="grid-template-columns:1fr 1.2fr"], [style*="grid-template-columns:2fr 1fr"], [style*="grid-template-columns:1.7fr 1fr"], [style*="grid-template-columns:1.4fr 1fr"], [style*="grid-template-columns:2.1fr 1fr"]{ grid-template-columns:1fr !important; }
+}
+.menu-btn{display:none; width:34px;height:34px;border-radius:9px;background:var(--bg);align-items:center;justify-content:center;border:1px solid var(--border); cursor:pointer;}
+.stat{display:flex; align-items:center; gap:12px;}
+.stat .icon{width:44px;height:44px;border-radius:10px; display:flex; align-items:center; justify-content:center; flex:0 0 44px;}
+.stat .icon svg{width:22px;height:22px;}
+.stat .label{font-size:12px; color:var(--muted); font-weight:600;}
+.stat .value{font-size:24px; font-weight:800; margin-top:1px;}
+.stat .delta{font-size:11px; font-weight:700; margin-top:2px;}
+.up{color:var(--green);} .down{color:var(--red);}
+.ic-blue{background:var(--blue-bg); color:var(--accent-2);}
+.ic-green{background:var(--green-bg); color:var(--green);}
+.ic-amber{background:var(--amber-bg); color:var(--amber);}
+.ic-red{background:var(--red-bg); color:var(--red);}
+table{width:100%; border-collapse:collapse; font-size:12.6px;}
+th{text-align:left; padding:9px 10px; color:var(--muted); font-weight:700; border-bottom:1px solid var(--border); white-space:nowrap; font-size:11.5px; text-transform:uppercase; letter-spacing:.3px;}
+td{padding:10px 10px; border-bottom:1px solid var(--border); white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+.tbl-wrap{overflow-x:auto;}
+.pill{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;}
+.pill-healthy{background:var(--green-bg); color:var(--green);}
+.pill-warning{background:var(--amber-bg); color:var(--amber);}
+.pill-critical{background:var(--red-bg); color:var(--red);}
+.pill-info{background:var(--blue-bg); color:var(--accent-2);}
+.pill-open{background:var(--red-bg); color:var(--red);}
+.pill-progress{background:var(--blue-bg); color:var(--accent-2);}
+.pill-closed{background:var(--green-bg); color:var(--green);}
+.pill.selectable{cursor:pointer; border:1px solid transparent;}
+.pill.selectable.on{border-color:currentColor;}
+.viewlink{color:var(--accent-2); font-weight:700; cursor:pointer; font-size:12.5px; background:none; border:none; font-family:inherit;}
+.btn{border:none; border-radius:8px; padding:9px 15px; font-size:12.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:7px; font-family:inherit;}
+.btn svg{width:14px;height:14px;}
+.btn-primary{background:var(--accent-2); color:#fff;}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-ghost{background:var(--card); color:var(--text); border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--bg);}
+.btn-outline{background:transparent; border:1px solid var(--border); color:var(--text);}
+.btn-outline:hover{background:var(--bg);}
+.btn-outline.active, .btn-ghost.active{background:var(--accent-2); color:#fff; border-color:var(--accent-2);}
+.tabs{display:flex; gap:4px; border-bottom:1px solid var(--border); overflow-x:auto; margin-bottom:18px;}
+.tab{padding:11px 15px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; background:none; border-top:none; border-left:none; border-right:none; font-family:inherit;}
+.tab.active{color:var(--accent-2); border-bottom-color:var(--accent-2);}
+.chip-input{border:1px solid var(--border); background:var(--bg); border-radius:8px; padding:8px 12px; font-size:12.5px; color:var(--text); font-family:inherit;}
+select.chip-input{cursor:pointer;}
+.filter-row{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+.detail-head{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px;}
+.detail-head img{width:74px;height:74px;object-fit:cover;border-radius:10px; border:1px solid var(--border); background:#dfe6f0;}
+.detail-title{display:flex; align-items:center; gap:10px;}
+.detail-title h2{margin:0; font-size:21px; font-weight:800;}
+.detail-loc{font-size:12.5px; color:var(--muted); display:flex; align-items:center; gap:5px; margin-top:3px;}
+.kpi-row{display:flex; gap:12px; margin-left:auto; flex-wrap:wrap;}
+.kpi{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px 14px; display:flex; align-items:center; gap:9px; min-width:118px;}
+.kpi .kicon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 30px;}
+.kpi .kicon svg{width:15px;height:15px;}
+.kpi .klabel{font-size:10.5px; color:var(--muted); font-weight:700;}
+.kpi .kvalue{font-size:15px; font-weight:800;}
+.chart-box{position:relative; width:100%;}
+.gauge-wrap{display:flex; flex-direction:column; align-items:center; padding:6px 0 0; position:relative;}
+.gauge-num{font-size:34px; font-weight:800; margin-top:-46px;}
+.gauge-sub{font-size:11px; color:var(--muted); font-weight:600;}
+.badge-lg{margin-top:8px; padding:5px 18px; border-radius:20px; font-weight:800; font-size:13px;}
+.hlist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px;}
+.hlist li{display:flex; justify-content:space-between; gap:10px; font-size:12.8px; padding-bottom:9px; border-bottom:1px solid var(--border);}
+.hlist li:last-child{border-bottom:none; padding-bottom:0;}
+.hlist .k{color:var(--muted); font-weight:600;}
+.hlist .v{font-weight:700; text-align:right;}
+.bar-row{display:flex; align-items:center; gap:10px; margin-bottom:11px;}
+.bar-row:last-child{margin-bottom:0;}
+.bar-label{font-size:12px; font-weight:700; width:110px; flex:0 0 110px; display:flex; align-items:center; gap:6px;}
+.bar-track{flex:1; height:8px; background:var(--bg); border-radius:6px; overflow:hidden;}
+.bar-fill{height:100%; border-radius:6px;}
+.bar-val{width:30px; text-align:right; font-size:12px; font-weight:800;}
+.notebox{background:var(--blue-bg); border-radius:10px; padding:12px 14px; font-size:12px; color:var(--text); display:flex; gap:10px; align-items:flex-start;}
+.notebox svg{width:16px;height:16px;flex:0 0 16px; color:var(--accent-2); margin-top:1px;}
+.thumb-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+.thumb{border-radius:10px; overflow:hidden; border:1px solid var(--border);}
+.thumb img{width:100%; height:64px; object-fit:cover; display:block;}
+.thumb .cap{font-size:10.5px; padding:5px 7px; color:var(--muted);}
+.recact{list-style:none; margin:0; padding:0;}
+.recact li{display:flex; gap:10px; align-items:flex-start; font-size:12.3px; padding:9px 0; border-bottom:1px solid var(--border);}
+.recact li:last-child{border-bottom:none;}
+.recact .dot{width:8px;height:8px;border-radius:50%; margin-top:4px; flex:0 0 8px;}
+.recact .rt{color:var(--muted); font-size:11px;}
+.donut-wrap{position:relative; display:flex; align-items:center; justify-content:center;}
+.donut-center{position:absolute; text-align:center; pointer-events:none;}
+.donut-center .n{font-size:22px; font-weight:800;}
+.donut-center .l{font-size:10.5px; color:var(--muted); font-weight:600;}
+.legend{display:flex; flex-direction:column; gap:8px; font-size:12px;}
+.legend .li{display:flex; align-items:center; gap:8px;}
+.legend .sw{width:9px;height:9px;border-radius:3px;flex:0 0 9px;}
+.legend .lval{margin-left:auto; font-weight:700;}
+.mapbox{position:relative; border-radius:10px; overflow:hidden; height:150px; background:linear-gradient(135deg,#dbe8fb,#c8dcf6);}
+.mapbox svg{width:100%;height:100%;}
+.map-pin{position:absolute; top:38%; left:52%; transform:translate(-50%,-100%); text-align:center;}
+.map-pin .pinhead{background:var(--red); color:#fff; border-radius:8px; padding:4px 8px; font-size:10.5px; font-weight:700; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.2);}
+.map-pin svg{width:20px;height:20px; color:var(--red); margin-top:-1px;}
+.strategy-steps{display:flex; gap:8px; overflow-x:auto; margin-bottom:18px;}
+.strategy-step{flex:1; min-width:130px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center; position:relative;}
+.strategy-step .stitle{font-weight:800; font-size:13px;}
+.strategy-step .ssub{font-size:11px; color:var(--muted); margin-top:3px;}
+.strategy-arrow{display:flex; align-items:center; color:var(--muted);}
+.dtree{display:flex; flex-direction:column; align-items:center; gap:10px;}
+.dnode{padding:10px 16px; border-radius:9px; font-size:12.5px; font-weight:700; text-align:center; max-width:280px;}
+.dnode.q{background:var(--navy); color:#fff;}
+.dnode.yes{background:var(--red-bg); color:var(--red); font-size:12px;}
+.dnode.no{background:var(--green-bg); color:var(--green); font-size:12px;}
+.dnode.result{padding:14px 20px; font-size:14px;}
+.dbranch{display:flex; gap:60px; justify-content:center; width:100%; flex-wrap:wrap;}
+.dcol{display:flex; flex-direction:column; align-items:center; gap:8px;}
+.dline{width:1px; height:14px; background:var(--border);}
+.timeline-row{display:grid; grid-template-columns:130px 1fr; align-items:center; gap:10px; margin-bottom:8px; font-size:11.5px;}
+.timeline-track{position:relative; height:18px; background:var(--bg); border-radius:5px;}
+.timeline-bar{position:absolute; top:2px; height:14px; border-radius:4px;}
+.today-line{position:absolute; top:0; bottom:0; width:2px; background:var(--red);}
+.small-muted{font-size:11px; color:var(--muted);}
+.toggle{position:relative; width:38px; height:21px; border-radius:20px; background:var(--border); cursor:pointer; flex:0 0 38px;}
+.toggle.on{background:var(--green);}
+.toggle .knob{position:absolute; top:2px; left:2px; width:17px;height:17px;border-radius:50%; background:#fff; transition:left .15s;}
+.toggle.on .knob{left:19px;}
+.settingsrow{display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); font-size:12.5px; gap:10px;}
+.settingsrow:last-child{border-bottom:none;}
+.settingsrow .srlabel{display:flex; align-items:center; gap:9px; font-weight:600;}
+.settingsrow .srlabel svg{width:15px;height:15px; color:var(--muted);}
+::-webkit-scrollbar{height:7px; width:7px;}
+::-webkit-scrollbar-thumb{background:#c3ccdc; border-radius:10px;}
+.duval-svg{width:100%; max-width:280px; margin:0 auto; display:block;}
+.modal-overlay{position:fixed; inset:0; background:rgba(10,15,30,.5); z-index:100; display:flex; align-items:center; justify-content:center; padding:20px;}
+.modal{background:var(--card); border-radius:14px; width:100%; max-width:440px; max-height:88vh; overflow-y:auto; padding:20px; box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal h3{margin:0 0 14px; font-size:16px;}
+.formrow{margin-bottom:12px;}
+.formrow label{display:block; font-size:11.5px; font-weight:700; color:var(--muted); margin-bottom:5px;}
+.formrow input, .formrow select{width:100%; border:1px solid var(--border); background:var(--bg); border-radius:8px; padding:9px 11px; font-size:13px; color:var(--text); font-family:inherit;}
+.modal-actions{display:flex; gap:8px; justify-content:flex-end; margin-top:16px;}
+.toast-wrap{position:fixed; top:16px; right:16px; z-index:200; display:flex; flex-direction:column; gap:8px; padding-top:env(safe-area-inset-top,0px);}
+.toast{background:var(--navy); color:#fff; padding:11px 16px; border-radius:9px; font-size:12.5px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.25); display:flex; align-items:center; gap:8px; animation:toastin .18s ease;}
+.toast.success{background:#146c43;}
+.toast.error{background:#a3312a;}
+@keyframes toastin{from{opacity:0; transform:translateY(-8px);} to{opacity:1; transform:translateY(0);}}
+@media (max-width:640px){ .kpi-row{margin-left:0; width:100%;} .content{padding:14px;} .topbar{padding:12px 14px;} .search-box{min-width:0;} .thumb-grid{grid-template-columns:repeat(2,1fr);} }
 </style>
 </head>
 <body>
-<header>
- <div class="brand"><b>Transformer RCM Workspace</b><span>Reliability Centered Maintenance • Power Transformer</span></div>
- <div class="asset"><select><option>TR-01 • 115/24 kV</option><option>TR-02 • 115/24 kV</option></select><button onclick="exportData()">Export JSON</button></div>
-</header>
-<nav id="nav"></nav>
-<main>
-<section id="overview" class="page active">
- <div class="hero"><div><div class="k" style="color:#9fb7d5">TRANSFORMER RELIABILITY CENTER</div><h1>RCM Fleet Intelligence</h1><p>ภาพรวมสุขภาพ ความเสี่ยง และ Maintenance Strategy ของหม้อแปลงทั้งระบบ</p></div><div class="badge">Updated • Prototype Dataset</div></div>
- <div class="grid">
-  <div class="card fleet-card"><div class="k">TOTAL ASSETS</div><div class="v" id="fleetTotal">20</div><span class="tag">Transformers</span></div>
-  <div class="card fleet-card"><div class="k"><i class="status-dot normal"></i>NORMAL</div><div class="v" id="fleetNormal">12</div><span class="health-pill hp-normal">ปกติ</span></div>
-  <div class="card fleet-card"><div class="k"><i class="status-dot watch"></i>WATCHLIST</div><div class="v" id="fleetWatch">5</div><span class="health-pill hp-watch">เฝ้าระวัง</span></div>
-  <div class="card fleet-card"><div class="k"><i class="status-dot critical"></i>CRITICAL</div><div class="v" id="fleetCritical">3</div><span class="health-pill hp-critical">วิกฤต</span></div>
- </div>
- <div class="overview-layout">
-  <div class="box"><h3>Transformer Fleet • 20 Assets</h3><div class="scroll"><table class="asset-table"><thead><tr><th>Asset</th><th>Rating</th><th>HI</th><th>RPN</th><th>DGA</th><th>Strategy</th><th>Status</th></tr></thead><tbody id="assetBody"></tbody></table></div></div>
-  <div class="box"><h3>Fleet Health Distribution</h3><div class="distribution"><div class="donut" id="fleetDonut"></div></div><div id="fleetLegend"></div></div>
- </div>
- <div class="box"><h3>Maintenance Strategy Framework</h3><div class="strategy">
-  <div class="strat"><b>BM</b><p>Breakdown Maintenance<br>พังแล้วจึงดำเนินการซ่อม</p></div>
-  <div class="strat"><b>CM</b><p>Corrective Maintenance<br>พบเสียง/อาการผิดปกติ แล้ววางแผนแก้ไข</p></div>
-  <div class="strat"><b>PM</b><p>Preventive Maintenance<br>บำรุงรักษาตามรอบเวลา</p></div>
-  <div class="strat"><b>CBM</b><p>Condition-Based Maintenance<br>ดำเนินการเมื่อ Condition เข้าเกณฑ์</p></div>
-  <div class="strat"><b>PdM</b><p>Predictive Maintenance<br>ติดตาม Trend เพื่อวางแผนก่อนถึงจุดที่ต้องซ่อม</p></div>
- </div></div>
-</section>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 16v6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2"/></svg></div>
+      <div class="brand-text"><div class="name">RCM Transformer</div><div class="sub" id="brandSub">Reliability Centered Maintenance</div></div>
+    </div>
+    <nav class="navlist" id="navlist"></nav>
+    <div class="sidebar-footer" id="sidebarFooter">Reliable Grid<br>Sustainable Tomorrow</div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="menu-btn" id="menuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></div>
+        <div class="page-title"><h1 id="pageTitle">Overview</h1><p id="pageSub">Monitor · Analyze · Plan · Maintain</p></div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="globalSearch" placeholder="Search asset ID or location..."></div>
+        <div class="langtoggle"><button id="langEn" class="active" data-lang="en">EN</button><button id="langTh" data-lang="th">TH</button></div>
+        <div style="position:relative;">
+          <div class="bell" id="bellBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot" id="bellCount">3</span></div>
+          <div id="bellDropdown"></div>
+        </div>
+        <div class="user"><div class="avatar">PP</div><div><div class="u-name">Panissara P.</div><div class="u-role" id="userRole">Industrial Engineering</div></div></div>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+<div id="modalRoot"></div>
+<div class="toast-wrap" id="toastWrap"></div>
 
-<section id="fmea" class="page">
- <div class="title"><div><h1>FMEA & RPN</h1><p>แก้ไข S / O / D ได้ และระบบคำนวณ RPN = S × O × D อัตโนมัติ</p></div><button class="btn" onclick="addFmea()">+ Failure Mode</button></div>
- <div class="box scroll"><table><thead><tr><th>Component</th><th>Function</th><th>Failure Mode</th><th>Failure Effect</th><th>Cause</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th></th></tr></thead><tbody id="fmeaBody"></tbody></table></div>
-</section>
-
-<section id="hi" class="page">
- <div class="title"><div><h1>Health Index • Lab Assessment</h1><p>ประเมิน HI จากผลตรวจน้ำมันและสภาพหม้อแปลง</p></div><button class="btn" onclick="calcHI()">คำนวณ HI</button></div>
- <div class="split"><div class="box"><h3>Laboratory Results</h3><div class="formgrid" id="labFields"></div></div>
- <div class="box"><h3>Health Index Result</h3><div class="v"><span id="hiScore">—</span>/100</div><div class="meter"><i id="hiBar"></i></div><div id="hiText" class="result">กรอกผล Lab แล้วกดคำนวณ</div><p class="note">ตัวอย่างนี้เป็น scoring engine สำหรับ prototype ควรแทนเกณฑ์ด้วยมาตรฐาน/เกณฑ์องค์กรที่อนุมัติก่อนใช้ตัดสินใจจริง</p></div></div>
-</section>
-
-<section id="dga" class="page">
- <div class="title"><div><h1>Dissolved Gas Analysis</h1><p>กรอกค่าก๊าซ (ppm) แล้วส่งผลไปวิเคราะห์ Duval Triangle</p></div><button class="btn" onclick="analyzeDGA()">วิเคราะห์ DGA</button></div>
- <div class="box"><div class="formgrid" id="gasFields"></div><div id="dgaResult" class="result">รอข้อมูล DGA</div></div>
-</section>
-
-<section id="duval" class="page">
- <div class="title"><div><h1>Duval Triangle</h1><p>Visualization จาก CH₄ / C₂H₄ / C₂H₂ ที่กรอกในหน้า DGA</p></div></div>
- <div class="box duval-wrap">
-  <svg viewBox="0 0 600 530" aria-label="Duval Triangle prototype">
-   <polygon points="300,35 35,490 565,490" fill="#f7f9fc" stroke="#aab8ca" stroke-width="3"/>
-   <polygon class="zone" points="300,35 235,146 365,146" fill="#b9d8ff"/><text x="300" y="118" text-anchor="middle">PD</text>
-   <polygon class="zone" points="235,146 95,386 245,386 300,292" fill="#cfe9db"/><text x="190" y="310">T1</text>
-   <polygon class="zone" points="365,146 300,292 355,386 505,386" fill="#ffe1a8"/><text x="400" y="310">T2</text>
-   <polygon class="zone" points="95,386 35,490 245,490 245,386" fill="#ffd0d3"/><text x="145" y="450">D1</text>
-   <polygon class="zone" points="355,386 355,490 565,490 505,386" fill="#e0d4ff"/><text x="450" y="450">D2</text>
-   <polygon class="zone" points="245,386 300,292 355,386 355,490 245,490" fill="#ffc994"/><text x="300" y="420" text-anchor="middle">T3</text>
-   <circle id="duvalPoint" class="point" cx="300" cy="300" r="9" visibility="hidden"/>
-   <text x="300" y="20" text-anchor="middle" font-weight="700">CH₄</text><text x="18" y="510" font-weight="700">C₂H₄</text><text x="530" y="510" font-weight="700">C₂H₂</text>
-  </svg>
-  <div class="duval-info"><div class="k">NORMALIZED GAS</div><div id="duvalPct" class="v" style="font-size:20px">—</div><div id="duvalDiagnosis" class="result">กรอก DGA ก่อน</div><p class="note">กราฟนี้เป็น prototype visualization สำหรับ UX/UI ไม่ควรใช้ zone geometry นี้เป็นเกณฑ์วินิจฉัยทางวิศวกรรมจริงจนกว่าจะใส่ boundary ตามมาตรฐานที่องค์กรเลือกใช้</p></div>
- </div>
-</section>
-
-<section id="logic" class="page">
- <div class="title"><div><h1>RCM Decision Logic Tree</h1><p>วิเคราะห์เส้นทางตัดสินใจและจัดเข้ากลยุทธ์ BM → CM → PM → CBM → PdM</p></div><button class="btn secondary" onclick="resetLogic()">เริ่มใหม่</button></div>
- <div class="box logic"><div id="logicBox"></div></div>
-</section>
-
-<section id="plan" class="page">
- <div class="title"><div><h1>Maintenance Planning • Before / After RCM</h1><p>เปรียบเทียบแผนเดิมกับแผนหลังวิเคราะห์ RCM</p></div><button class="btn" onclick="addPlan()">+ รายการ</button></div>
- <div class="box scroll"><table><thead><tr><th>Equipment / Failure Mode</th><th>Before RCM</th><th>RCM Evidence</th><th>After RCM</th><th>Strategy</th><th>Interval / Trigger</th><th></th></tr></thead><tbody id="planBody"></tbody></table></div>
-</section>
-</main>
 <script>
-const pages=[['overview','Overview'],['fmea','FMEA & RPN'],['hi','HI & Lab'],['dga','DGA'],['duval','Duval Triangle'],['logic','Decision Logic Tree'],['plan','Maintenance Plan']];
-const nav=document.getElementById('nav');
-pages.forEach((p,i)=>{let b=document.createElement('button');b.textContent=p[1];b.className=i?'':'active';b.onclick=()=>show(p[0],b);nav.appendChild(b)});
-function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
-const assets=[
-['TR-01','115/24 kV',92,72,'Normal','PM','Normal'],['TR-02','115/24 kV',88,90,'Normal','PM','Normal'],
-['TR-03','69/24 kV',84,108,'Normal','CBM','Normal'],['TR-04','115/24 kV',81,96,'Normal','PM','Normal'],
-['TR-05','69/24 kV',86,105,'Normal','PM','Normal'],['TR-06','115/24 kV',79,120,'T1','CBM','Normal'],
-['TR-07','69/24 kV',83,112,'Normal','PM','Normal'],['TR-08','115/24 kV',77,126,'T1','CBM','Normal'],
-['TR-09','69/24 kV',90,80,'Normal','PM','Normal'],['TR-10','115/24 kV',82,110,'Normal','PM','Normal'],
-['TR-11','69/24 kV',76,128,'T1','CBM','Normal'],['TR-12','115/24 kV',85,98,'Normal','PM','Normal'],
-['TR-13','69/24 kV',68,168,'T2','CBM','Watch'],['TR-14','115/24 kV',64,180,'T2','CBM','Watch'],
-['TR-15','69/24 kV',61,192,'D1','PdM','Watch'],['TR-16','115/24 kV',58,210,'T2','PdM','Watch'],
-['TR-17','69/24 kV',55,224,'D1','PdM','Watch'],['TR-18','115/24 kV',38,315,'D2','CM','Critical'],
-['TR-19','69/24 kV',32,360,'T3','CM','Critical'],['TR-20','115/24 kV',27,420,'D2','BM','Critical']
+/* ============ TRANSLATIONS ============ */
+const UI = {
+ nav_overview:['Overview','ภาพรวม'], nav_assets:['Transformer Assets','สินทรัพย์หม้อแปลง'], nav_healthindex:['Health Index','ดัชนีสุขภาพ'],
+ nav_dga:['DGA Analysis','วิเคราะห์ DGA'], nav_fmea:['FMEA & RPN','FMEA & RPN'], nav_rcm:['RCM Decision','การตัดสินใจ RCM'],
+ nav_plan:['Maintenance Plan','แผนบำรุงรักษา'], nav_reports:['Reports','รายงาน'], nav_settings:['Settings','ตั้งค่า'],
+ brand_sub:['Reliability Centered Maintenance','การบำรุงรักษาเชิงความน่าเชื่อถือ'],
+ footer_tag:['Reliable Grid<br>Sustainable Tomorrow','โครงข่ายเชื่อถือได้<br>เพื่ออนาคตยั่งยืน'],
+ search_ph:['Search asset ID or location...','ค้นหารหัสสินทรัพย์หรือสถานที่...'],
+ role:['Industrial Engineering','วิศวกรรมอุตสาหการ'],
+ notifications:['Notifications','การแจ้งเตือน'], mark_all_read:['Mark all read','อ่านทั้งหมด'], view_all:['View All →','ดูทั้งหมด →'],
+ sub_overview:['Monitor · Analyze · Plan · Maintain','ติดตาม · วิเคราะห์ · วางแผน · บำรุงรักษา'],
+ sub_assets:['Manage and monitor all transformer assets','จัดการและติดตามสินทรัพย์หม้อแปลงทั้งหมด'],
+ sub_detail:['Asset detail & analysis','รายละเอียดและการวิเคราะห์สินทรัพย์'],
+ sub_reports:['Turn data into actionable maintenance decisions','เปลี่ยนข้อมูลเป็นการตัดสินใจบำรุงรักษา'],
+ sub_settings:['Configure system parameters, criteria, and user management','ตั้งค่าพารามิเตอร์ระบบ เกณฑ์ และผู้ใช้งาน'],
+ hero_title:['Reliable Transformers<br>for a Sustainable Tomorrow','หม้อแปลงที่เชื่อถือได้<br>เพื่ออนาคตที่ยั่งยืน'],
+ total_assets:['Total Assets','สินทรัพย์ทั้งหมด'], healthy:['Healthy','ปกติ'], warning:['Warning','เฝ้าระวัง'], critical:['Critical','วิกฤต'],
+ health_dist:['Health Status Distribution','การกระจายสถานะสุขภาพ'], hi_trend:['Health Index Trend','แนวโน้มดัชนีสุขภาพ'], all_assets:['All Assets ▾','สินทรัพย์ทั้งหมด ▾'],
+ attention:['Assets Requiring Attention','สินทรัพย์ที่ต้องเฝ้าระวัง'], asset:['Asset','สินทรัพย์'], status:['Status','สถานะ'], main_issue:['Main Issue','ปัญหาหลัก'],
+ assets_title:['Transformer Assets','สินทรัพย์หม้อแปลง'], add_asset:['Add Asset','เพิ่มสินทรัพย์'],
+ asset_id:['Asset ID','รหัสสินทรัพย์'], location:['Location','สถานที่'], capacity:['Cap.(MVA)','ขนาด(MVA)'], voltage:['Voltage(kV)','แรงดัน(kV)'],
+ manufacturer:['Manufacturer','ผู้ผลิต'], year:['Year','ปีที่ผลิต'], last_inspection:['Last Inspection','ตรวจล่าสุด'], next_plan:['Next Plan','แผนถัดไป'], view:['View','ดู'],
+ asset_location:['Asset Location','ตำแหน่งสินทรัพย์'], view_map:['View Map','ดูแผนที่'], recent_activities:['Recent Activities','กิจกรรมล่าสุด'],
+ hi_trend_fleet:['Health Index Trend (Fleet Average)','แนวโน้มดัชนีสุขภาพ (ค่าเฉลี่ยรวม)'], maint_strategy:['Maintenance Strategy (Current)','กลยุทธ์บำรุงรักษา (ปัจจุบัน)'],
+ all_status:['All Status','สถานะทั้งหมด'], all_voltage:['All Voltage','แรงดันทั้งหมด'], search_assets:['Search assets...','ค้นหาสินทรัพย์...'],
+ back_to_assets:['← Back to Assets','← กลับไปยังสินทรัพย์'], export_report:['Export Report','ส่งออกรายงาน'], more_actions:['More Actions ▾','การกระทำอื่นๆ ▾'],
+ health_index:['Health Index','ดัชนีสุขภาพ'], rpn_max:['RPN (Max)','RPN (สูงสุด)'], dga_diagnosis:['DGA Diagnosis','ผลวินิจฉัย DGA'], next_action:['Next Action','การกระทำถัดไป'],
+ tab_overview:['Overview','ภาพรวม'], tab_healthindex:['Health Index','ดัชนีสุขภาพ'], tab_dga:['DGA Analysis','วิเคราะห์ DGA'],
+ tab_fmea:['FMEA & RPN','FMEA & RPN'], tab_rcm:['RCM Decision','การตัดสินใจ RCM'], tab_plan:['Maintenance Plan','แผนบำรุงรักษา'],
+ tab_history:['History','ประวัติ'], tab_docs:['Documents','เอกสาร'],
+ operating_status:['Operating Status','สถานะการทำงาน'], in_service:['In Service','ใช้งานอยู่'], load:['Load','โหลด'], top_oil:['Top Oil Temp.','อุณหภูมิน้ำมันบน'],
+ amb_temp:['Ambient Temp.','อุณหภูมิแวดล้อม'], oil_level:['Oil Level','ระดับน้ำมัน'], normal:['Normal','ปกติ'], cooling_system:['Cooling System','ระบบระบายความร้อน'], alarms:['Alarms','สัญญาณเตือน'],
+ view_details:['View Details →','ดูรายละเอียด →'], type:['Type','ประเภท'], severity:['Severity','ความรุนแรง'], confidence:['Confidence','ความเชื่อมั่น'],
+ date:['Date','วันที่'], activity:['Activity','กิจกรรม'], result:['Result','ผลลัพธ์'], by:['By','โดย'],
+ recommended_strategy:['Recommended Strategy','กลยุทธ์ที่แนะนำ'], cbm_full:['Condition Based Maintenance','บำรุงรักษาตามสภาพ'],
+ cbm_rationale:['Deterioration can be detected from DGA and oil condition before functional failure.','สามารถตรวจพบความเสื่อมสภาพจาก DGA และสภาพน้ำมันได้ก่อนเกิดความเสียหายจริง'],
+ recommended_actions:['Recommended Actions','การกระทำที่แนะนำ'], create_maint_plan:['Create Maintenance Plan','สร้างแผนบำรุงรักษา'],
+ act_oil_sampling:['Oil Sampling every 30 days','เก็บตัวอย่างน้ำมันทุก 30 วัน'], act_monitor_dga:['Monitor DGA Trend','ติดตามแนวโน้ม DGA'],
+ act_inspect_cooling:['Inspect Cooling System','ตรวจสอบระบบระบายความร้อน'], act_check_leak:['Check for Oil Leak','ตรวจสอบการรั่วไหลของน้ำมัน'], act_review_load:['Review Load Condition','ทบทวนสภาพโหลด'],
+ overall_hi:['Overall Health Index','ดัชนีสุขภาพโดยรวม'], hi_classification:['Health Index Classification','การจัดระดับดัชนีสุขภาพ'],
+ good:['Good','ดี'], moderate:['Moderate','ปานกลาง'], poor:['Poor','แย่'], very_critical:['Very Critical','วิกฤตมาก'],
+ hi_assessment:['Health Index Assessment','การประเมินดัชนีสุขภาพ'], edit_criteria:['Edit Criteria','แก้ไขเกณฑ์'],
+ parameter:['Parameter','พารามิเตอร์'], score:['Score','คะแนน'], weight:['Weight','น้ำหนัก'], wscore:['W.Score','คะแนนถ่วงน้ำหนัก'], remark:['Remark','หมายเหตุ'], total:['Total','รวม'],
+ hi_contributors:['Health Index Contributors','ปัจจัยดัชนีสุขภาพ'], assessment_summary:['Assessment Summary','สรุปการประเมิน'],
+ main_issue2:['Main Issue','ปัญหาหลัก'], secondary_issue:['Secondary Issue','ปัญหารอง'], risk_level:['Risk Level','ระดับความเสี่ยง'],
+ gas_results:['Gas Results','ผลก๊าซ'], duval_triangle:['Duval Triangle','สามเหลี่ยมดูวาล'], rogers_ratio:['Rogers Ratio','อัตราส่วนโรเจอร์'],
+ iec_ratio:['IEC Ratio','อัตราส่วน IEC'], trend_analysis:['Trend Analysis','วิเคราะห์แนวโน้ม'], interpretation:['Interpretation','การตีความ'],
+ sampling:['Sampling','วันที่เก็บตัวอย่าง'], compare:['Compare','เปรียบเทียบ'], dga_gas_results:['DGA Gas Results','ผลก๊าซ DGA'], gas:['Gas','ก๊าซ'],
+ result_ppm:['Result (ppm)','ผล (ppm)'], normal_range:['Normal Range','ช่วงปกติ'], diagnosis_result:['Diagnosis Result','ผลการวินิจฉัย'],
+ ratio:['Ratio','อัตราส่วน'], value:['Value','ค่า'], diagnosis:['Diagnosis','การวินิจฉัย'], condition:['Condition','สภาพ'],
+ hist_dga_trend:['Historical DGA Trend','แนวโน้ม DGA ย้อนหลัง'], recommended_action:['Recommended Action','การกระทำที่แนะนำ'],
+ rec_continue_dga:['Continue DGA monitoring (monthly)','ติดตาม DGA ต่อเนื่อง (รายเดือน)'], rec_check_cooling:['Check cooling system condition','ตรวจสอบสภาพระบบระบายความร้อน'],
+ rec_inspect_oil:['Inspect oil quality and temperature','ตรวจสอบคุณภาพและอุณหภูมิน้ำมัน'], rec_review_load:['Review load condition','ทบทวนสภาพโหลด'],
+ fmea_table:['FMEA Table','ตาราง FMEA'], add_failure_mode:['Add Failure Mode','เพิ่มโหมดความล้มเหลว'],
+ fmea_sub:['Identify and assess potential failure modes of transformer components','ระบุและประเมินโหมดความล้มเหลวที่อาจเกิดขึ้นของส่วนประกอบหม้อแปลง'],
+ component:['Component','ส่วนประกอบ'], failure_mode:['Failure Mode','โหมดความล้มเหลว'], effect:['Effect','ผลกระทบ'], risk:['Risk','ความเสี่ยง'],
+ risk_matrix:['Risk Matrix','เมทริกซ์ความเสี่ยง'], rpn_dist:['RPN Distribution','การกระจาย RPN'], modes:['Modes','โหมด'],
+ top5_risk:['Top 5 Risk Items','5 อันดับความเสี่ยงสูงสุด'], rec_actions_summary:['Recommended Actions Summary','สรุปการกระทำที่แนะนำ'],
+ immediate:['Immediate','ทันที'], plan_word:['Plan','วางแผน'], monitor:['Monitor','ติดตาม'],
+ key_takeaway_fmea:['Main risks come from winding overheating and tap changer contact wear. Focus on DGA monitoring and cooling system improvement.','ความเสี่ยงหลักมาจากขดลวดร้อนเกินและหน้าสัมผัส Tap Changer สึกหรอ ควรเน้นการติดตาม DGA และปรับปรุงระบบระบายความร้อน'],
+ rcm_tree_title:['RCM Decision Logic Tree','แผนผังการตัดสินใจ RCM'], rcm_tree_sub:['Select failure mode to analyze and get recommended maintenance strategy','เลือกโหมดความล้มเหลวเพื่อวิเคราะห์และรับกลยุทธ์บำรุงรักษาที่แนะนำ'],
+ reset:['Reset','รีเซ็ต'], print:['Print','พิมพ์'],
+ q1:['1. Does the failure have safety or environmental impact?','1. ความล้มเหลวนี้ส่งผลต่อความปลอดภัยหรือสิ่งแวดล้อมหรือไม่?'],
+ q2:['2. Is the failure hidden / not easily detectable?','2. ความล้มเหลวนี้ซ่อนอยู่/ตรวจพบได้ยากหรือไม่?'],
+ q3:['3. Can condition be monitored effectively?','3. สามารถติดตามสภาพได้อย่างมีประสิทธิภาพหรือไม่?'],
+ q4:['4. Is there a clear age or time pattern?','4. มีรูปแบบอายุหรือเวลาที่ชัดเจนหรือไม่?'],
+ yes:['Yes','ใช่'], no:['No','ไม่'],
+ safety_critical:['Safety / Environmental Critical → BM','วิกฤตด้านความปลอดภัย/สิ่งแวดล้อม → BM'],
+ strategy_recommend_prefix:['Recommended Strategy:','กลยุทธ์ที่แนะนำ:'],
+ failure_info:['Failure Mode Information','ข้อมูลโหมดความล้มเหลว'], current_control:['Current Control','การควบคุมปัจจุบัน'],
+ applicable_tasks:['Applicable Maintenance Tasks','งานบำรุงรักษาที่เกี่ยวข้อง'], task:['Task','งาน'], interval:['Interval','ความถี่'], add_task:['Add Task','เพิ่มงาน'],
+ strategy:['Maintenance Strategy','กลยุทธ์บำรุงรักษา'], total_tasks:['Total Tasks','งานทั้งหมด'], completed:['Completed','เสร็จสิ้น'], in_progress:['In Progress','กำลังดำเนินการ'], upcoming:['Upcoming','กำลังจะถึง'],
+ maint_schedule:['Maintenance Plan Schedule','ตารางแผนบำรุงรักษา'], list_view:['List View','มุมมองรายการ'], gantt_view:['Gantt View','มุมมองแกนต์'], create_task:['Create Task','สร้างงาน'],
+ start:['Start','เริ่ม'], end:['End','สิ้นสุด'], duration:['Duration','ระยะเวลา'],
+ before_after:['Before vs After RCM','ก่อนและหลัง RCM'], cost_comparison:['Cost Comparison (THB)','เปรียบเทียบต้นทุน (บาท)'], expected_benefits:['Expected Benefits','ประโยชน์ที่คาดหวัง'],
+ maint_cost:['Maintenance Cost','ต้นทุนบำรุงรักษา'], asset_reliability:['Asset Reliability','ความน่าเชื่อถือของสินทรัพย์'], unplanned_failure:['Unplanned Failure','ความล้มเหลวที่ไม่ได้วางแผน'], equip_lifetime:['Equipment Lifetime','อายุการใช้งานอุปกรณ์'], longer:['Longer','ยาวนานขึ้น'],
+ key_takeaway_plan:['Proactive maintenance for a more reliable grid.','การบำรุงรักษาเชิงรุกเพื่อโครงข่ายที่เชื่อถือได้มากขึ้น'],
+ inspection_history:['Inspection & Activity History','ประวัติการตรวจสอบและกิจกรรม'],
+ photos_docs:['Photos / Documents','รูปภาพ / เอกสาร'], related_docs:['Related Documents','เอกสารที่เกี่ยวข้อง'], file:['File','ไฟล์'], size:['Size','ขนาด'],
+ total_transformers:['Total Transformers','หม้อแปลงทั้งหมด'], total_maint_tasks:['Total Maintenance Tasks','งานบำรุงรักษาทั้งหมด'], estimated_cost:['Estimated Cost','ต้นทุนโดยประมาณ'],
+ period:['Period','ช่วงเวลา'], cost_reduction:['Cost Reduction','ลดต้นทุน'], asset_health_dist:['Asset Health Distribution','การกระจายสุขภาพสินทรัพย์'],
+ hi_trend_avg:['Health Index Trend (Average)','แนวโน้มดัชนีสุขภาพ (ค่าเฉลี่ย)'], failure_mode_dist:['Failure Mode Distribution (from FMEA)','การกระจายโหมดความล้มเหลว (จาก FMEA)'],
+ dga_fault_dist:['DGA Fault Type Distribution','การกระจายประเภทข้อบกพร่อง DGA'], maint_task_summary:['Maintenance Task Summary','สรุปงานบำรุงรักษา'],
+ health_ranking:['Transformer Health Ranking','อันดับสุขภาพหม้อแปลง'], rank:['Rank','อันดับ'], id:['ID','รหัส'], key_takeaways:['Key Takeaways','สรุปประเด็นสำคัญ'],
+ kt1:['Overall fleet health improved 12% vs last year','สุขภาพโดยรวมของฟลีทดีขึ้น 12% เทียบกับปีก่อน'], kt2:['Maintenance cost reduced 33% after RCM','ต้นทุนบำรุงรักษาลดลง 33% หลังใช้ RCM'],
+ kt3:['Thermal faults remain top failure mode (28%)','ข้อบกพร่องทางความร้อนยังคงเป็นสาเหตุหลัก (28%)'], kt4:['Continue CBM for high-risk transformers','ดำเนินการ CBM ต่อสำหรับหม้อแปลงความเสี่ยงสูง'],
+ kt5:['Increase monitoring for warning assets','เพิ่มการติดตามสำหรับสินทรัพย์ที่อยู่ในเกณฑ์เฝ้าระวัง'],
+ generate_report:['Generate Report','สร้างรายงาน'], schedule_report:['Schedule Report','ตั้งเวลารายงาน'], export:['Export','ส่งออก'],
+ settings_general:['General','ทั่วไป'], settings_hi:['Health Index Criteria','เกณฑ์ดัชนีสุขภาพ'], settings_fm:['Failure Mode Library','คลังโหมดความล้มเหลว'],
+ settings_maint:['Maintenance Settings','ตั้งค่าบำรุงรักษา'], settings_users:['User Management','จัดการผู้ใช้'], settings_sys:['System & Data','ระบบและข้อมูล'],
+ system_info:['System Info','ข้อมูลระบบ'], edit:['Edit','แก้ไข'], system_name:['System Name','ชื่อระบบ'], version:['Version','เวอร์ชัน'],
+ department:['Department','แผนก'], timezone:['Time Zone','เขตเวลา'], date_format:['Date Format','รูปแบบวันที่'], sys_language:['System Language','ภาษาระบบ'],
+ hi_criteria_settings:['Health Index Criteria Settings','ตั้งค่าเกณฑ์ดัชนีสุขภาพ'], risk_thresholds:['Risk Level Thresholds','เกณฑ์ระดับความเสี่ยง'], level:['Level','ระดับ'],
+ hi_range:['HI Range','ช่วง HI'], action:['Action','การกระทำ'], code:['Code','รหัส'], category:['Category','หมวดหมู่'], manage:['Manage','จัดการ'],
+ maint_strategy_settings:['Maintenance Strategy Settings','ตั้งค่ากลยุทธ์บำรุงรักษา'], trigger:['Trigger','เงื่อนไข'],
+ add_user:['Add User','เพิ่มผู้ใช้'], name:['Name','ชื่อ'], role_col:['Role','บทบาท'],
+ notif_settings:['Notification Settings','ตั้งค่าการแจ้งเตือน'], email_notif:['Email Notification','แจ้งเตือนทางอีเมล'], task_reminder:['Task Reminder','แจ้งเตือนงาน'],
+ high_risk_alert:['High Risk Alert','แจ้งเตือนความเสี่ยงสูง'], monthly_report:['Monthly Report','รายงานรายเดือน'], sys_update_notif:['System Update Notification','แจ้งเตือนอัปเดตระบบ'],
+ data_mgmt:['Data Management','จัดการข้อมูล'], import_data:['Import Data','นำเข้าข้อมูล'], export_data:['Export Data','ส่งออกข้อมูล'], backup_db:['Backup DB','สำรองฐานข้อมูล'], restore_db:['Restore DB','กู้คืนฐานข้อมูล'],
+ appearance:['Appearance','การแสดงผล'], theme:['Theme','ธีม'], system_opt:['System','ตามระบบ'], light:['Light','สว่าง'], dark:['Dark','มืด'], items_per_page:['Items per page','จำนวนต่อหน้า'],
+ save:['Save','บันทึก'], cancel:['Cancel','ยกเลิก'], close:['Close','ปิด'],
+ toast_added:['Added successfully','เพิ่มข้อมูลสำเร็จ'], toast_saved:['Changes saved','บันทึกการเปลี่ยนแปลงแล้ว'], toast_exported:['File downloaded','ดาวน์โหลดไฟล์แล้ว'],
+ toast_generated:['Report generated','สร้างรายงานแล้ว'], toast_scheduled:['Report scheduled','ตั้งเวลารายงานแล้ว'], toast_no_result:['No matching assets found','ไม่พบสินทรัพย์ที่ตรงกัน'],
+ modal_add_asset:['Add New Asset','เพิ่มสินทรัพย์ใหม่'], modal_add_fmea:['Add Failure Mode','เพิ่มโหมดความล้มเหลว'], modal_add_user:['Add User','เพิ่มผู้ใช้'], modal_add_task:['Add Task','เพิ่มงาน'],
+ field_location:['Location','สถานที่'], field_capacity:['Capacity (MVA)','ขนาด (MVA)'], field_voltage:['Voltage (kV)','แรงดัน (kV)'], field_manufacturer:['Manufacturer','ผู้ผลิต'],
+ field_component:['Component','ส่วนประกอบ'], field_mode:['Failure Mode','โหมดความล้มเหลว'], field_effect:['Potential Effect','ผลกระทบ'],
+ field_s:['Severity (1-10)','ความรุนแรง (1-10)'], field_o:['Occurrence (1-10)','โอกาสเกิด (1-10)'], field_d:['Detection (1-10)','การตรวจจับ (1-10)'],
+ field_name:['Name','ชื่อ'], field_role:['Role','บทบาท'], field_email:['Email','อีเมล'],
+ field_task_name:['Task Name','ชื่องาน'], field_task_type:['Type','ประเภท'], field_task_interval:['Interval','ความถี่'],
+ note1:['Health Index is assessed from electrical test results, physical condition, and age of use.','ดัชนีสุขภาพประเมินจากผลการทดสอบทางไฟฟ้า สภาพทางกายภาพ และอายุการใช้งาน'],
+ note2:['Should be considered together with FMEA and RCM analysis results to determine the maintenance plan.','ควรพิจารณาร่วมกับผลการวิเคราะห์ FMEA และ RCM เพื่อกำหนดแผนบำรุงรักษาที่เหมาะสม'],
+};
+function t(key){ const row = UI[key]; if(!row) return key; return row[state.lang==='th'?1:0]; }
+
+const STATUS_TR = {Healthy:['Healthy','ปกติ'], Warning:['Warning','เฝ้าระวัง'], Critical:['Critical','วิกฤต'], Open:['Open','ดำเนินการ'], 'In Progress':['In Progress','กำลังดำเนินการ'], Closed:['Closed','ปิดงาน'], Active:['Active','ใช้งาน'], Planned:['Planned','วางแผน']};
+function trStatus(s){ const r = STATUS_TR[s]; return r ? r[state.lang==='th'?1:0] : s; }
+const RISK_TR = {High:['High','สูง'], Medium:['Medium','ปานกลาง'], Low:['Low','ต่ำ']};
+function trRisk(s){ const r = RISK_TR[s]; return r ? r[state.lang==='th'?1:0] : s; }
+
+/* ============ DATA ============ */
+const ASSETS = [
+ {id:'TR-001',loc:'Ploenchit SS',cap:50,volt:'115/24',hi:92,status:'Healthy',last:'12 Sep 2026',next:'12 Mar 2027',mfr:'Toshiba',year:2016,type:'ONAN/ONAF',load:54,topOil:52,amb:31},
+ {id:'TR-002',loc:'Chidlom SS',cap:50,volt:'115/24',hi:88,status:'Healthy',last:'10 Sep 2026',next:'10 Mar 2027',mfr:'Hitachi',year:2015,type:'ONAN/ONAF',load:58,topOil:54,amb:31},
+ {id:'TR-003',loc:'Lumpini SS',cap:60,volt:'115/24',hi:62,status:'Warning',last:'8 Sep 2026',next:'8 Mar 2027',mfr:'ABB',year:2009,type:'ONAN/ONAF',load:71,topOil:63,amb:32},
+ {id:'TR-004',loc:'Rama 9 SS',cap:50,volt:'115/24',hi:89,status:'Healthy',last:'6 Sep 2026',next:'6 Mar 2027',mfr:'Siemens',year:2017,type:'ONAN/ONAF',load:49,topOil:50,amb:31},
+ {id:'TR-005',loc:'Asoke SS',cap:60,volt:'115/24',hi:90,status:'Healthy',last:'5 Sep 2026',next:'5 Mar 2027',mfr:'Toshiba',year:2018,type:'ONAN/ONAF',load:52,topOil:51,amb:31},
+ {id:'TR-006',loc:'Sukhumvit SS',cap:50,volt:'115/24',hi:58,status:'Warning',last:'3 Sep 2026',next:'3 Mar 2027',mfr:'Hyundai',year:2008,type:'ONAN/ONAF',load:68,topOil:61,amb:32},
+ {id:'TR-007',loc:'On Nut SS',cap:50,volt:'115/24',hi:78,status:'Healthy',last:'1 Sep 2026',next:'1 Jan 2027',mfr:'ABB',year:2013,type:'ONAN/ONAF',load:60,topOil:55,amb:32},
+ {id:'TR-008',loc:'Phra Khanong SS',cap:50,volt:'115/24',hi:47,status:'Warning',last:'28 Aug 2026',next:'28 Feb 2027',mfr:'Mitsubishi',year:2007,type:'ONAN/ONAF',load:74,topOil:65,amb:32},
+ {id:'TR-009',loc:'Samrong SS',cap:60,volt:'115/24',hi:81,status:'Healthy',last:'25 Aug 2026',next:'25 Feb 2027',mfr:'Siemens',year:2014,type:'ONAN/ONAF',load:56,topOil:53,amb:31},
+ {id:'TR-010',loc:'Bang Kapi SS',cap:60,volt:'115/24',hi:74,status:'Healthy',last:'22 Aug 2026',next:'22 Feb 2027',mfr:'Hitachi',year:2012,type:'ONAN/ONAF',load:63,topOil:57,amb:32},
+ {id:'TR-011',loc:'Ratchada SS',cap:50,volt:'115/24',hi:86,status:'Healthy',last:'20 Aug 2026',next:'20 Feb 2027',mfr:'Toshiba',year:2016,type:'ONAN/ONAF',load:55,topOil:52,amb:31},
+ {id:'TR-012',loc:'Ladprao SS',cap:60,volt:'115/24',hi:92,status:'Healthy',last:'18 Aug 2026',next:'18 Feb 2027',mfr:'ABB',year:2019,type:'ONAN/ONAF',load:48,topOil:49,amb:31},
+ {id:'TR-013',loc:'Bang Sue SS',cap:50,volt:'115/24',hi:83,status:'Healthy',last:'15 Aug 2026',next:'15 Feb 2027',mfr:'Siemens',year:2015,type:'ONAN/ONAF',load:57,topOil:53,amb:31},
+ {id:'TR-014',loc:'Bang Na SS',cap:50,volt:'115/24',hi:34,status:'Critical',last:'18 Sep 2026',next:'18 Oct 2026',mfr:'Mitsubishi',year:2010,type:'ONAN/ONAF',load:62,topOil:68,amb:32},
+ {id:'TR-015',loc:'Din Daeng SS',cap:60,volt:'115/24',hi:85,status:'Healthy',last:'10 Aug 2026',next:'10 Feb 2027',mfr:'Hitachi',year:2017,type:'ONAN/ONAF',load:51,topOil:50,amb:31},
+ {id:'TR-016',loc:'Suan Luang SS',cap:50,volt:'115/24',hi:87,status:'Healthy',last:'8 Aug 2026',next:'8 Feb 2027',mfr:'Toshiba',year:2018,type:'ONAN/ONAF',load:50,topOil:50,amb:31},
+ {id:'TR-017',loc:'Bang Khae SS',cap:60,volt:'115/24',hi:90,status:'Healthy',last:'5 Aug 2026',next:'5 Feb 2027',mfr:'ABB',year:2019,type:'ONAN/ONAF',load:47,topOil:48,amb:31},
+ {id:'TR-018',loc:'Thonburi SS',cap:50,volt:'115/24',hi:55,status:'Warning',last:'2 Aug 2026',next:'2 Feb 2027',mfr:'Hyundai',year:2009,type:'ONAN/ONAF',load:76,topOil:66,amb:32},
+ {id:'TR-019',loc:'Bangkok Noi SS',cap:60,volt:'115/24',hi:51,status:'Warning',last:'30 Jul 2026',next:'30 Jan 2027',mfr:'Mitsubishi',year:2008,type:'ONAN/ONAF',load:70,topOil:64,amb:32},
+ {id:'TR-020',loc:'Yannawa SS',cap:50,volt:'115/24',hi:28,status:'Critical',last:'28 Jul 2026',next:'28 Aug 2026',mfr:'Hyundai',year:2007,type:'ONAN/ONAF',load:66,topOil:69,amb:32},
 ];
-function renderFleet(){
- let body=document.getElementById('assetBody'); if(!body)return;
- let counts={Normal:0,Watch:0,Critical:0}; body.innerHTML='';
- assets.forEach(a=>{counts[a[6]]++;let cls=a[6]=='Normal'?'hp-normal':a[6]=='Watch'?'hp-watch':'hp-critical';let th=a[6]=='Normal'?'ปกติ':a[6]=='Watch'?'เฝ้าระวัง':'วิกฤต';body.innerHTML+=`<tr><td>${a[0]}</td><td>${a[1]}</td><td><b>${a[2]}</b>/100</td><td>${a[3]}</td><td>${a[4]}</td><td><b>${a[5]}</b></td><td><span class="health-pill ${cls}">${th}</span></td></tr>`});
- document.getElementById('fleetTotal').textContent=assets.length;document.getElementById('fleetNormal').textContent=counts.Normal;document.getElementById('fleetWatch').textContent=counts.Watch;document.getElementById('fleetCritical').textContent=counts.Critical;
- let n=counts.Normal/assets.length*100,w=counts.Watch/assets.length*100;
- document.getElementById('fleetDonut').style.background=`conic-gradient(#198754 0 ${n}%,#d98b00 ${n}% ${n+w}%,#c53b45 ${n+w}% 100%)`;
- document.getElementById('fleetLegend').innerHTML=`<p><i class="status-dot normal"></i> ปกติ <b style="float:right">${counts.Normal} เครื่อง</b></p><p><i class="status-dot watch"></i> เฝ้าระวัง <b style="float:right">${counts.Watch} เครื่อง</b></p><p><i class="status-dot critical"></i> วิกฤต <b style="float:right">${counts.Critical} เครื่อง</b></p>`;
+const HI_TREND_FLEET = [72,74,73,75,76,74,73,71,70];
+const MONTHS9 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+const TR014_TREND = [78,76,75,73,70,65,60,55,50,45,40,34];
+const TR014_MONTHS = ['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+const HEALTH_BREAKDOWN = [{k:'DGA',v:28},{k:'Oil Condition',v:42},{k:'Electrical Test',v:55},{k:'Visual Inspection',v:72},{k:'Age / Loading',v:64}];
+const HI_CRITERIA = [
+ {p:'DGA', res:'D2', score:28, weight:25, ws:7.0, status:'Warning', remark:{en:'Thermal fault (300–700°C)',th:'ข้อบกพร่องทางความร้อน (300–700°C)'}},
+ {p:'Breakdown Voltage (BDV)', res:'28 kV', score:42, weight:15, ws:6.3, status:'Warning', remark:{en:'Below standard',th:'ต่ำกว่าเกณฑ์'}},
+ {p:'Moisture', res:'42 ppm', score:50, weight:15, ws:7.5, status:'Warning', remark:{en:'Deterioration starting',th:'เริ่มเสื่อมสภาพ'}},
+ {p:'Acidity', res:'0.28 mgKOH/g', score:60, weight:10, ws:6.0, status:'Healthy', remark:{en:'Close to threshold',th:'ใกล้เกณฑ์สูง'}},
+ {p:'Interfacial Tension (IFT)', res:'18 mN/m', score:45, weight:10, ws:4.5, status:'Warning', remark:{en:'Below standard',th:'ต่ำกว่าเกณฑ์'}},
+ {p:'Furan', res:'0.85 ppm', score:68, weight:15, ws:10.2, status:'Healthy', remark:{en:'Cellulose degradation',th:'มีการเสื่อมของกระดาษฉนวน'}},
+ {p:'Visual Inspection', res:'Major leak', score:40, weight:10, ws:4.0, status:'Warning', remark:{en:'Oil leakage found',th:'พบการรั่วซึมที่บุชชิ่ง'}},
+];
+const DGA_GASES = [
+ {g:'H2', v:125, range:'< 100', status:'up'},{g:'CH4', v:84, range:'< 60', status:'up'},{g:'C2H6', v:45, range:'< 50', status:'ok'},
+ {g:'C2H4', v:176, range:'< 100', status:'up'},{g:'C2H2', v:3, range:'< 5', status:'ok'},{g:'CO', v:320, range:'< 350', status:'ok'},
+ {g:'CO2', v:680, range:'< 1000', status:'ok'},{g:'TDCG', v:433, range:'-', status:'warn'},
+];
+const DGA_HIST = {months:['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'],
+ H2:[60,65,68,72,78,85,92,98,105,112,118,125], CH4:[35,38,40,45,50,55,60,64,68,73,78,84], C2H6:[20,21,22,24,26,28,30,33,36,39,42,45],
+ CO:[210,220,230,240,250,262,275,285,295,305,312,320], CO2:[420,440,455,470,490,510,540,565,590,615,650,680]};
+let FMEA = [
+ {no:1,comp:'Winding',mode:'Overheating',effect:'Insulation failure',s:10,o:4,d:7,rpn:280,risk:'High',control:'Temp. monitoring',action:'Improve cooling / DGA',status:'Open'},
+ {no:2,comp:'Bushing',mode:'Leakage',effect:'Flashover',s:8,o:5,d:4,rpn:160,risk:'High',control:'Visual inspection',action:'Replace gasket',status:'Open'},
+ {no:3,comp:'Tap Changer',mode:'Contact wear',effect:'Operation failure',s:7,o:6,d:5,rpn:210,risk:'High',control:'OLTC monitoring',action:'Condition monitoring',status:'Open'},
+ {no:4,comp:'Cooling System',mode:'Fan failure',effect:'Overheating',s:6,o:4,d:5,rpn:120,risk:'Medium',control:'Routine check',action:'Preventive replacement',status:'Open'},
+ {no:5,comp:'Oil',mode:'Degradation',effect:'Insulation loss',s:7,o:6,d:4,rpn:168,risk:'High',control:'Oil sampling',action:'Shorten sampling interval',status:'Open'},
+ {no:6,comp:'Conservator',mode:'Breather clog',effect:'Moisture ingress',s:6,o:5,d:5,rpn:150,risk:'High',control:'Visual inspection',action:'Replace desiccant',status:'In Progress'},
+ {no:7,comp:'OLTC',mode:'Oil deterioration',effect:'Contact failure',s:8,o:4,d:6,rpn:192,risk:'High',control:'Oil test',action:'Oil filtration / replacement',status:'Open'},
+ {no:8,comp:'Tank',mode:'External leakage',effect:'Environmental risk',s:5,o:3,d:4,rpn:60,risk:'Medium',control:'Visual inspection',action:'Seal / Repair',status:'Closed'},
+];
+const RCM_MODES = {
+ 'Winding - Overheating':{path:'CBM',control:'Temperature monitoring',action:{en:'Implement CBM (DGA & temperature)',th:'ดำเนินการ CBM (DGA และอุณหภูมิ)'},
+   tasks:[['DGA sampling','CBM','3 months','Active'],['Winding temp. monitoring','PdM','Continuous','Active'],['Insulation resistance test','PM','1 year','Active'],['Tightness inspection','CM','As needed','Planned'],['Cooling system check','PM','6 months','Active']]},
+ 'Tap Changer - Contact wear':{path:'PdM',control:'OLTC monitoring',action:{en:'Implement PdM (contact resistance trending)',th:'ดำเนินการ PdM (ติดตามค่าความต้านทานหน้าสัมผัส)'},
+   tasks:[['Contact resistance test','PdM','6 months','Active'],['OLTC oil sampling','CBM','6 months','Active'],['Mechanism inspection','PM','1 year','Active']]},
+ 'Bushing - Leakage':{path:'PM',control:'Visual inspection',action:{en:'Time-based gasket replacement',th:'เปลี่ยนปะเก็นตามรอบเวลา'},
+   tasks:[['Visual inspection','PM','3 months','Active'],['Gasket replacement','PM','2 years','Planned']]},
+ 'OLTC - Oil deterioration':{path:'PdM',control:'Oil test',action:{en:'Trend-based oil filtration schedule',th:'กำหนดกรองน้ำมันตามแนวโน้ม'},
+   tasks:[['OLTC oil test','CBM','6 months','Active'],['Oil filtration','CM','As needed','Planned']]},
+};
+let MAINT_PLAN = [
+ {no:1,task:'Oil Sampling',type:'CBM',start:'18 Sep 2026',end:'18 Sep 2026',dur:'1 day',m:'Sep',len:1},
+ {no:2,task:'DGA Analysis',type:'CBM',start:'18 Sep 2026',end:'25 Sep 2026',dur:'7 days',m:'Sep',len:2},
+ {no:3,task:'Visual Inspection',type:'PM',start:'10 Oct 2026',end:'10 Oct 2026',dur:'1 day',m:'Oct',len:1},
+ {no:4,task:'Thermal Imaging',type:'PdM',start:'15 Oct 2026',end:'15 Oct 2026',dur:'1 day',m:'Oct',len:1},
+ {no:5,task:'Oil Filtration (if needed)',type:'CM',start:'20 Oct 2026',end:'22 Oct 2026',dur:'3 days',m:'Oct',len:2},
+ {no:6,task:'Bushing Test',type:'PM',start:'15 Nov 2026',end:'15 Nov 2026',dur:'2 days',m:'Nov',len:2},
+ {no:7,task:'OLTC Inspection',type:'PM',start:'1 Dec 2026',end:'5 Dec 2026',dur:'5 days',m:'Dec',len:3},
+ {no:8,task:'Routine Cleaning',type:'PM',start:'5 Dec 2026',end:'5 Dec 2026',dur:'1 day',m:'Dec',len:1},
+];
+const GANTT_MONTHS = ['Jul','Aug','Sep','Oct','Nov','Dec'];
+const TYPE_COLOR = {BM:'#94a3b8',CM:'#e0524a',PM:'#2f6fed',CBM:'#1a9e6b',PdM:'#8b5cf6'};
+const REC_ACTIVITIES = [
+ {d:'12 Sep 2026',a:{en:'TR-014 DGA result updated',th:'อัปเดตผล DGA ของ TR-014'},t:'12:34',c:'red'},
+ {d:'11 Sep 2026',a:{en:'TR-006 Inspection completed',th:'ตรวจสอบ TR-006 เสร็จสิ้น'},t:'10:15',c:'green'},
+ {d:'10 Sep 2026',a:{en:'TR-008 Health index recalculated',th:'คำนวณดัชนีสุขภาพ TR-008 ใหม่'},t:'09:20',c:'amber'},
+ {d:'9 Sep 2026',a:{en:'TR-003 Oil sampling completed',th:'เก็บตัวอย่างน้ำมัน TR-003 เสร็จสิ้น'},t:'16:45',c:'green'},
+ {d:'8 Sep 2026',a:{en:'TR-019 FMEA updated',th:'อัปเดต FMEA ของ TR-019'},t:'11:10',c:'blue'},
+];
+const ATTENTION = [
+ {id:'TR-014',hi:34,status:'Critical',issue:{en:'DGA - Thermal Fault',th:'DGA - ข้อบกพร่องทางความร้อน'}},
+ {id:'TR-020',hi:28,status:'Critical',issue:{en:'DGA - Thermal Fault',th:'DGA - ข้อบกพร่องทางความร้อน'}},
+ {id:'TR-008',hi:47,status:'Warning',issue:{en:'Moisture High',th:'ความชื้นสูง'}},
+ {id:'TR-019',hi:51,status:'Warning',issue:{en:'Partial Discharge',th:'ดิสชาร์จบางส่วน'}},
+ {id:'TR-018',hi:55,status:'Warning',issue:{en:'High Loading',th:'โหลดสูง'}},
+];
+let USERS = [
+ {name:'Panissara P.', role:'Admin', email:'panissara.p@rcmtransformer.app', status:'Active'},
+ {name:'Maintenance Team', role:'Operator', email:'maint.team@rcmtransformer.app', status:'Active'},
+ {name:'Supervisor', role:'Viewer', email:'supervisor@rcmtransformer.app', status:'Active'},
+];
+const NOTIFICATIONS = [
+ {en:'TR-014 Health Index dropped to Critical (34)', th:'ดัชนีสุขภาพ TR-014 ลดลงสู่ระดับวิกฤต (34)', t:'2 min ago'},
+ {en:'TR-020 requires immediate oil sampling', th:'TR-020 ต้องเก็บตัวอย่างน้ำมันด่วน', t:'1 hr ago'},
+ {en:'Monthly report is ready to generate', th:'พร้อมสร้างรายงานประจำเดือนแล้ว', t:'3 hr ago'},
+];
+
+/* ============ STATE ============ */
+let state = {page:'overview', assetId:'TR-014', detailTab:'overview', rcmMode:'Winding - Overheating', lang:'en',
+  dgaSubTab:'gas', settingsTab:'general', planView:'list', assetFilterStatus:'All', assetSearch:'', globalSearch:''};
+let chartRegistry = {};
+
+const NAV = [
+ {id:'overview', key:'nav_overview', icon:'home'}, {id:'assets', key:'nav_assets', icon:'box'}, {id:'healthindex', key:'nav_healthindex', icon:'clock'},
+ {id:'dga', key:'nav_dga', icon:'chart'}, {id:'fmea', key:'nav_fmea', icon:'users'}, {id:'rcm', key:'nav_rcm', icon:'doc'},
+ {id:'plan', key:'nav_plan', icon:'calendar'}, {id:'reports', key:'nav_reports', icon:'report'}, {id:'settings', key:'nav_settings', icon:'gear'},
+];
+const ICONS = {
+ home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>', box:'<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>', chart:'<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/>',
+ users:'<circle cx="9" cy="8" r="3"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6"/><circle cx="17" cy="8" r="2.4"/><path d="M16 14c3 0 6 2 6 6"/>',
+ doc:'<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6"/>', calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+ report:'<path d="M4 4h16v16H4z"/><path d="M8 16v-4M12 16V8M16 16v-7"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.36.4.66.75.86s.75.3 1.15.24H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/>',
+ pin:'<path d="M12 22s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+ up:'<path d="M17 7l-9 9M8 7h9v9"/>', down:'<path d="M7 7l9 9M16 7v9H7"/>', info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/>',
+ down2:'<path d="M12 4v13M6 12l6 5 6-5"/><path d="M4 20h16"/>', wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L2 19l3 3 7.3-7.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>',
+ x:'<path d="M18 6L6 18M6 6l12 12"/>', check:'<path d="M20 6L9 17l-5-5"/>',
+};
+function icon(name,extra){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra||''}>${ICONS[name]||''}</svg>`;}
+function statusPillClass(s){ s=(s||'').toLowerCase(); if(s.includes('critical'))return 'pill-critical'; if(s.includes('warn'))return 'pill-warning'; if(s.includes('healthy'))return 'pill-healthy'; if(s.includes('open'))return 'pill-open'; if(s.includes('progress'))return 'pill-progress'; if(s.includes('closed'))return 'pill-closed'; return 'pill-info';}
+function statusColor(s){ s=(s||'').toLowerCase(); if(s.includes('critical'))return 'var(--red)'; if(s.includes('warn'))return 'var(--amber)'; return 'var(--green)';}
+function hiColor(v){ if(v<40) return 'var(--red)'; if(v<60) return 'var(--amber)'; return 'var(--green)'; }
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ============ TOAST / MODAL ============ */
+function toast(msg, kind){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind ? ' '+kind : '');
+  el.innerHTML = (kind==='success'?icon('check',' style="width:14px;height:14px;flex:0 0 14px;"'):'') + `<span>${esc(msg)}</span>`;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .25s'; setTimeout(()=>el.remove(),250); }, 2600);
 }
-renderFleet();
-let fmea=[
- ['Main Tank','Contain insulation oil','Oil leakage','Reduced insulation / cooling','Seal deterioration',7,4,4],
- ['Bushing','Insulate conductor','Insulation deterioration','Flashover / outage','Ageing / contamination',9,3,5],
- ['OLTC','Voltage regulation','Contact wear','Poor switching / overheating','Mechanical wear',8,5,4]
+function openModal(title, bodyHtml, onSubmit){
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `<div class="modal-overlay" id="modalOverlay"><div class="modal">
+    <h3>${esc(title)}</h3>
+    <form id="modalForm">${bodyHtml}
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="modalCancel">${t('cancel')}</button>
+        <button type="submit" class="btn btn-primary">${t('save')}</button>
+      </div>
+    </form>
+  </div></div>`;
+  document.getElementById('modalCancel').addEventListener('click', closeModal);
+  document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='modalOverlay') closeModal(); });
+  document.getElementById('modalForm').addEventListener('submit', (e)=>{ e.preventDefault(); const fd=new FormData(e.target); const data={}; fd.forEach((v,k)=>data[k]=v); onSubmit(data); closeModal(); });
+}
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content], {type: mime || 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+function toCSV(rows){ return rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\\n'); }
+
+/* ============ CHARTS ============ */
+function destroyCharts(){ Object.values(chartRegistry).forEach(c=>{ try{ c && c.destroy(); }catch(e){} }); chartRegistry={}; }
+function mkChart(id,cfg){
+  const el=document.getElementById(id); if(!el) return;
+  try{
+    if(typeof Chart === 'undefined'){ el.parentElement.innerHTML = '<div class="small-muted" style="padding:20px;text-align:center;">Chart library failed to load.</div>'; return; }
+    chartRegistry[id]=new Chart(el.getContext('2d'), cfg);
+  }catch(err){ console.error('chart error', id, err); }
+}
+function cssv(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#94a3b8'; }
+function chartBox(id, heightPx){ return `<div class="chart-box" style="height:${heightPx}px;"><canvas id="${id}"></canvas></div>`; }
+const commonOpts = ()=>({ responsive:true, maintainAspectRatio:false });
+
+/* ============ NAV RENDER ============ */
+function renderNav(){
+  const el = document.getElementById('navlist');
+  el.innerHTML = NAV.map(n=>`<div class="navitem ${state.page===n.id?'active':''}" data-nav="${n.id}">${icon(n.icon)}<span>${t(n.key)}</span></div>`).join('');
+  el.querySelectorAll('.navitem').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      const id = item.dataset.nav;
+      if(['healthindex','dga','fmea','rcm','plan'].includes(id)){ state.page='detail'; state.detailTab=id; }
+      else { state.page = id; }
+      render(); document.getElementById('sidebar').classList.remove('open'); window.scrollTo(0,0);
+    });
+  });
+  document.getElementById('brandSub').textContent = t('brand_sub');
+  document.getElementById('sidebarFooter').innerHTML = t('footer_tag');
+  document.getElementById('userRole').textContent = t('role');
+  const gs = document.getElementById('globalSearch'); if(gs) gs.placeholder = t('search_ph');
+}
+
+/* ============ OVERVIEW PAGE ============ */
+function renderOverview(){
+  const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
+  return `
+  <div class="card" style="background:linear-gradient(120deg,#12274d,#1c3c78); color:#fff; margin-bottom:18px; padding:26px; border:none;">
+    <div style="display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+      <div style="max-width:520px;"><div style="font-size:22px; font-weight:800; line-height:1.35;">${t('hero_title')}</div>
+      <div style="margin-top:10px; font-size:12.5px; color:#c7d5f2; font-weight:600;">${t('sub_overview')}</div></div>
+      <div style="text-align:right; font-size:12px; color:#c7d5f2;"><div style="font-weight:700; color:#fff; font-size:13px;">Mon, 22 Sep 2026 · 10:24</div><div style="margin-top:4px;">Bangkok · 32°C ☀️</div></div>
+    </div>
+  </div>
+  <div class="grid g4" style="margin-bottom:16px;">
+    <div class="card stat"><div class="icon ic-blue">${icon('box')}</div><div><div class="label">${t('total_assets')}</div><div class="value">20</div><div class="delta up">▲ 100%</div></div></div>
+    <div class="card stat"><div class="icon ic-green">${icon('info')}</div><div><div class="label">${t('healthy')}</div><div class="value">${healthy}</div><div class="delta up">▲ 65%</div></div></div>
+    <div class="card stat"><div class="icon ic-amber">${icon('info')}</div><div><div class="label">${t('warning')}</div><div class="value">${warning}</div><div class="delta up">▲ 25%</div></div></div>
+    <div class="card stat"><div class="icon ic-red">${icon('info')}</div><div><div class="label">${t('critical')}</div><div class="value">${critical}</div><div class="delta down">▼ 10%</div></div></div>
+  </div>
+  <div class="grid g3" style="margin-bottom:16px; align-items:stretch;">
+    <div class="card">
+      <div class="card-head"><h3>${t('health_dist')}</h3></div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('ovDonut',130)}<div class="donut-center"><div class="n">20</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
+        <div class="legend">
+          <div class="li"><span class="sw" style="background:var(--green)"></span>${t('healthy')}<span class="lval">${healthy} (${Math.round(healthy/20*100)}%)</span></div>
+          <div class="li"><span class="sw" style="background:var(--amber)"></span>${t('warning')}<span class="lval">${warning} (${Math.round(warning/20*100)}%)</span></div>
+          <div class="li"><span class="sw" style="background:var(--red)"></span>${t('critical')}<span class="lval">${critical} (${Math.round(critical/20*100)}%)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3></div>${chartBox('ovTrend',150)}</div>
+    <div class="card">
+      <div class="card-head"><h3>${t('attention')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('asset')}</th><th>HI</th><th>${t('status')}</th><th>${t('main_issue')}</th></tr></thead><tbody>
+      ${ATTENTION.map(a=>`<tr><td><button class="viewlink" data-view="${a.id}"><b>${a.id}</b></button></td><td style="color:${statusColor(a.status)};font-weight:800;">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${a.issue[state.lang]}</td></tr>`).join('')}
+      </tbody></table></div>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns:2.1fr 1fr; margin-bottom:16px; align-items:stretch;">
+    <div class="card">
+      <div class="card-head"><h3>${t('assets_title')}</h3></div>
+      <div class="filter-row" style="margin-bottom:12px;">
+        <span class="pill pill-info selectable ${state.assetFilterStatus==='All'?'on':''}" data-ov-filter="All">All (20)</span>
+        <span class="pill pill-healthy selectable ${state.assetFilterStatus==='Healthy'?'on':''}" data-ov-filter="Healthy">${t('healthy')} (${healthy})</span>
+        <span class="pill pill-warning selectable ${state.assetFilterStatus==='Warning'?'on':''}" data-ov-filter="Warning">${t('warning')} (${warning})</span>
+        <span class="pill pill-critical selectable ${state.assetFilterStatus==='Critical'?'on':''}" data-ov-filter="Critical">${t('critical')} (${critical})</span>
+        <button class="btn btn-primary" style="margin-left:auto;" id="btnAddAssetOv">${icon('box',' style="width:13px;height:13px"')} ${t('add_asset')}</button>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset_id')}</th><th>${t('location')}</th><th>${t('capacity')}</th><th>${t('voltage')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${t('next_plan')}</th><th></th></tr></thead><tbody>
+      ${filteredAssets(state.assetFilterStatus).slice(0,10).map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td>${a.loc}</td><td>${a.cap}</td><td>${a.volt}</td><td style="font-weight:800;color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${a.next}</td><td><button class="viewlink" data-view="${a.id}">${t('view')}</button></td></tr>`).join('')}
+      </tbody></table></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div class="card">
+        <div class="card-head"><h3>${t('asset_location')}</h3><button class="linklike" id="btnViewMap">${t('view_map')}</button></div>
+        <div class="mapbox"><svg viewBox="0 0 300 150"><g stroke="#ffffff77" stroke-width="1"><line x1="0" y1="40" x2="300" y2="40"/><line x1="0" y1="90" x2="300" y2="90"/><line x1="90" y1="0" x2="90" y2="150"/><line x1="200" y1="0" x2="200" y2="150"/></g></svg>
+        <div class="map-pin">${icon('pin')}<div class="pinhead">TR-014 · ${t('critical')}</div></div></div>
+      </div>
+      <div class="card" style="flex:1;">
+        <div class="card-head"><h3>${t('recent_activities')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
+        <ul class="recact">${REC_ACTIVITIES.map(r=>`<li><span class="dot" style="background:var(--${r.c==='blue'?'accent-2':r.c})"></span><div><div>${r.a[state.lang]}</div><div class="rt">${r.d} · ${r.t}</div></div></li>`).join('')}</ul>
+      </div>
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><div class="card-head"><h3>${t('hi_trend_fleet')}</h3></div>${chartBox('ovTrend2',130)}</div>
+    <div class="card">
+      <div class="card-head"><h3>${t('maint_strategy')}</h3></div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('ovStrategy',130)}<div class="donut-center"><div class="n">20</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
+        <div class="legend">
+          <div class="li"><span class="sw" style="background:#2f6fed"></span>PM<span class="lval">8 (40%)</span></div>
+          <div class="li"><span class="sw" style="background:#1a9e6b"></span>CBM<span class="lval">6 (30%)</span></div>
+          <div class="li"><span class="sw" style="background:#8b5cf6"></span>PdM<span class="lval">3 (15%)</span></div>
+          <div class="li"><span class="sw" style="background:#e0524a"></span>CM<span class="lval">2 (10%)</span></div>
+          <div class="li"><span class="sw" style="background:#94a3b8"></span>BM<span class="lval">1 (5%)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function filteredAssets(status){ let list = ASSETS.slice(); if(status && status!=='All') list = list.filter(a=>a.status===status); return list; }
+function initOverviewCharts(){
+  const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
+  const gridColor = cssv('--border');
+  mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#1a9e6b','#e8a13a','#e0524a'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','PdM','CM','BM'],datasets:[{data:[8,6,3,2,1],backgroundColor:['#2f6fed','#1a9e6b','#8b5cf6','#e0524a','#94a3b8'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('ovTrend',{type:'line',data:{labels:MONTHS9,datasets:[{data:HI_TREND_FLEET,borderColor:'#2f6fed',backgroundColor:'#2f6fed22',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('ovTrend2',{type:'line',data:{labels:MONTHS9,datasets:[{data:HI_TREND_FLEET,borderColor:'#2f6fed',backgroundColor:'#2f6fed22',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+}
+function attachOverviewEvents(){
+  document.querySelectorAll('[data-ov-filter]').forEach(el=> el.addEventListener('click',()=>{ state.assetFilterStatus = el.dataset.ovFilter; render(); }));
+  const addBtn = document.getElementById('btnAddAssetOv'); if(addBtn) addBtn.addEventListener('click', openAddAssetModal);
+  const gotoBtns = document.querySelectorAll('[data-goto-assets]'); gotoBtns.forEach(b=>b.addEventListener('click',()=>{ state.page='assets'; render(); window.scrollTo(0,0); }));
+  const mapBtn = document.getElementById('btnViewMap'); if(mapBtn) mapBtn.addEventListener('click', ()=>toast(state.lang==='th'?'เปิดแผนที่แบบเต็มหน้าจอ (ตัวอย่าง)':'Opening full map view (demo)'));
+}
+
+/* ============ ASSETS LIST PAGE ============ */
+function renderAssetsPage(){
+  const list = ASSETS.filter(a=>{
+    const matchStatus = state.assetFilterStatus==='All' || a.status===state.assetFilterStatus;
+    const q = state.assetSearch.trim().toLowerCase();
+    const matchSearch = !q || a.id.toLowerCase().includes(q) || a.loc.toLowerCase().includes(q) || a.mfr.toLowerCase().includes(q);
+    return matchStatus && matchSearch;
+  });
+  return `
+  <div class="card">
+    <div class="card-head"><h3>${t('assets_title')}</h3><button class="btn btn-primary" id="btnAddAsset">${icon('box',' style="width:13px;height:13px"')} ${t('add_asset')}</button></div>
+    <div class="filter-row" style="margin-bottom:14px;">
+      <input class="chip-input" id="assetSearchInput" placeholder="${t('search_assets')}" style="min-width:220px;" value="${esc(state.assetSearch)}">
+      <select class="chip-input" id="assetStatusFilter">
+        <option value="All" ${state.assetFilterStatus==='All'?'selected':''}>${t('all_status')}</option>
+        <option value="Healthy" ${state.assetFilterStatus==='Healthy'?'selected':''}>${t('healthy')}</option>
+        <option value="Warning" ${state.assetFilterStatus==='Warning'?'selected':''}>${t('warning')}</option>
+        <option value="Critical" ${state.assetFilterStatus==='Critical'?'selected':''}>${t('critical')}</option>
+      </select>
+      <span class="small-muted">${list.length} / ${ASSETS.length}</span>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset_id')}</th><th>${t('location')}</th><th>${t('capacity')}</th><th>${t('voltage')}</th><th>${t('manufacturer')}</th><th>${t('year')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${t('last_inspection')}</th><th>${t('next_plan')}</th><th></th></tr></thead><tbody>
+    ${list.length ? list.map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td>${a.loc}</td><td>${a.cap}</td><td>${a.volt}</td><td>${a.mfr}</td><td>${a.year}</td><td style="font-weight:800;color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${a.last}</td><td>${a.next}</td><td><button class="viewlink" data-view="${a.id}">${t('view')} →</button></td></tr>`).join('') : `<tr><td colspan="12" class="small-muted" style="text-align:center;padding:20px;">${t('toast_no_result')}</td></tr>`}
+    </tbody></table></div>
+  </div>`;
+}
+function attachAssetsPageEvents(){
+  const addBtn = document.getElementById('btnAddAsset'); if(addBtn) addBtn.addEventListener('click', openAddAssetModal);
+  const search = document.getElementById('assetSearchInput');
+  if(search) search.addEventListener('input', (e)=>{ state.assetSearch = e.target.value; renderAssetsTableOnly(); });
+  const statusFilter = document.getElementById('assetStatusFilter');
+  if(statusFilter) statusFilter.addEventListener('change', (e)=>{ state.assetFilterStatus = e.target.value; render(); });
+}
+function renderAssetsTableOnly(){
+  const c = document.getElementById('content');
+  if(state.page==='assets'){ c.innerHTML = renderAssetsPage(); attachAssetsPageEvents(); document.getElementById('assetSearchInput').focus(); document.getElementById('assetSearchInput').setSelectionRange(state.assetSearch.length,state.assetSearch.length); attachGlobalViewLinks(); }
+}
+function openAddAssetModal(){
+  openModal(t('modal_add_asset'), `
+    <div class="formrow"><label>${t('asset_id')}</label><input name="id" value="TR-0${ASSETS.length+1}" required></div>
+    <div class="formrow"><label>${t('field_location')}</label><input name="loc" placeholder="e.g. Rangsit SS" required></div>
+    <div class="formrow"><label>${t('field_capacity')}</label><input name="cap" type="number" value="50" required></div>
+    <div class="formrow"><label>${t('field_voltage')}</label><input name="volt" value="115/24" required></div>
+    <div class="formrow"><label>${t('field_manufacturer')}</label><input name="mfr" placeholder="e.g. ABB" required></div>
+  `, (data)=>{
+    ASSETS.push({id:data.id, loc:data.loc, cap:Number(data.cap), volt:data.volt, hi:85, status:'Healthy', last:'—', next:'—', mfr:data.mfr||'—', year:2026, type:'ONAN/ONAF', load:50, topOil:50, amb:31});
+    render(); toast(t('toast_added'),'success');
+  });
+}
+
+/* ============ ASSET DETAIL ============ */
+const DETAIL_TABS = [
+ {id:'overview', key:'tab_overview'}, {id:'healthindex', key:'tab_healthindex'}, {id:'dga', key:'tab_dga'}, {id:'fmea', key:'tab_fmea'},
+ {id:'rcm', key:'tab_rcm'}, {id:'plan', key:'tab_plan'}, {id:'history', key:'tab_history'}, {id:'docs', key:'tab_docs'},
 ];
-function renderFmea(){let t=document.getElementById('fmeaBody');t.innerHTML='';fmea.forEach((r,i)=>{let tr=document.createElement('tr');tr.innerHTML=r.slice(0,5).map((x,j)=>`<td><input value="${x}" onchange="fmea[${i}][${j}]=this.value"></td>`).join('')+[5,6,7].map(j=>`<td><input class="mini" type="number" min="1" max="10" value="${r[j]}" onchange="fmea[${i}][${j}]=+this.value;renderFmea()"></td>`).join('')+`<td><b>${r[5]*r[6]*r[7]}</b></td><td><button class="btn danger" onclick="fmea.splice(${i},1);renderFmea()">×</button></td>`;t.appendChild(tr)});let mx=Math.max(...fmea.map(r=>r[5]*r[6]*r[7]),0);document.getElementById('ovRPN').textContent=mx||'—'}
-function addFmea(){fmea.push(['','','','','',5,5,5]);renderFmea()} renderFmea();
-const labs=[['bdv','BDV','kV'],['moisture','Moisture','ppm'],['acidity','Acidity','mg KOH/g'],['ift','IFT','mN/m'],['tand','Tan δ','%'],['furan','Furan','ppb'],['age','Transformer Age','year'],['load','Loading','%']];
-document.getElementById('labFields').innerHTML=labs.map(x=>`<div class="field"><label>${x[1]} (${x[2]})</label><input id="${x[0]}" type="number" step="any" placeholder="0"></div>`).join('');
-function val(id){return +document.getElementById(id).value||0}
-function calcHI(){let score=100;if(val('bdv')&&val('bdv')<40)score-=15;if(val('moisture')>30)score-=15;if(val('acidity')>.2)score-=15;if(val('ift')&&val('ift')<25)score-=10;if(val('tand')>.5)score-=10;if(val('furan')>1000)score-=20;if(val('age')>30)score-=10;if(val('load')>100)score-=10;score=Math.max(0,score);document.getElementById('hiScore').textContent=score;document.getElementById('ovHI').textContent=score;document.getElementById('hiBar').style.width=score+'%';let s=score>=80?'Good':score>=60?'Moderate':score>=40?'Poor':'Critical';document.getElementById('hiText').innerHTML=`<b>${s}</b> • Health Index ${score}/100`;document.getElementById('hiTag').textContent=s}
-const gases=[['h2','H₂'],['ch4','CH₄'],['c2h6','C₂H₆'],['c2h4','C₂H₄'],['c2h2','C₂H₂'],['co','CO'],['co2','CO₂']];
-document.getElementById('gasFields').innerHTML=gases.map(x=>`<div class="field"><label>${x[1]} (ppm)</label><input id="${x[0]}" type="number" min="0" step="any" placeholder="0"></div>`).join('');
-function analyzeDGA(){let a=val('ch4'),b=val('c2h4'),c=val('c2h2'),sum=a+b+c;if(!sum){alert('กรอก CH₄, C₂H₄ หรือ C₂H₂ อย่างน้อย 1 ค่า');return}let A=a/sum*100,B=b/sum*100,C=c/sum*100;let diag=C>25?'D2':C>10?'D1':B>50?'T3':B>25?'T2':B>10?'T1':'PD';document.getElementById('dgaResult').innerHTML=`Normalized: CH₄ ${A.toFixed(1)}% • C₂H₄ ${B.toFixed(1)}% • C₂H₂ ${C.toFixed(1)}% &nbsp; → &nbsp; <b>${diag}</b>`;document.getElementById('ovDGA').textContent=diag;document.getElementById('duvalPct').textContent=`${A.toFixed(1)} / ${B.toFixed(1)} / ${C.toFixed(1)} %`;document.getElementById('duvalDiagnosis').innerHTML=`Duval prototype diagnosis: <b>${diag}</b>`;let L={x:35,y:490},R={x:565,y:490},T={x:300,y:35};let x=(A*T.x+B*L.x+C*R.x)/100,y=(A*T.y+B*L.y+C*R.y)/100,p=document.getElementById('duvalPoint');p.setAttribute('cx',x);p.setAttribute('cy',y);p.setAttribute('visibility','visible')}
-let logicStep=0,answers=[];
-const qs=[['เกิด Functional Failure แล้วหรือยัง?','BM'],['ตรวจพบความผิดปกติ/เสียง/อาการที่ต้องวางแผนแก้ไขหรือไม่?','CM'],['Failure มีความสัมพันธ์กับอายุหรือรอบเวลาชัดเจนหรือไม่?','PM'],['มี Condition Indicator และเกณฑ์ Trigger ที่ตรวจติดตามได้หรือไม่?','CBM'],['มีข้อมูล Trend เพียงพอสำหรับคาดการณ์และวางแผนล่วงหน้าหรือไม่?','PdM']];
-function renderLogic(){let b=document.getElementById('logicBox');if(logicStep>=qs.length){return setStrategy('BM','ยังไม่เข้าเงื่อนไขงานเชิงรุกที่กำหนด — ทบทวน consequence และเกณฑ์เพิ่มเติม')}let q=qs[logicStep];b.innerHTML=`<div class="question"><div class="k">QUESTION ${logicStep+1} / ${qs.length}</div><h2>${q[0]}</h2><div class="logic-actions"><button class="btn" onclick="logicYes()">ใช่</button><button class="btn secondary" onclick="logicNo()">ไม่ใช่</button></div></div>`}
-function logicYes(){setStrategy(qs[logicStep][1],'เลือกจาก Decision Logic ขั้นที่ '+(logicStep+1))}
-function logicNo(){logicStep++;renderLogic()}
-function setStrategy(s,why){document.getElementById('logicBox').innerHTML=`<div class="question"><div class="k">RECOMMENDED STRATEGY</div><div class="v">${s}</div><p>${why}</p><button class="btn secondary" onclick="resetLogic()">วิเคราะห์ใหม่</button></div>`;document.getElementById('ovStrategy').textContent=s}
-function resetLogic(){logicStep=0;answers=[];renderLogic()}renderLogic();
-let plans=[['Bushing insulation','PM inspection every 6 months','FMEA + Lab/DGA trend','Condition inspection + trend review','CBM','Condition threshold'],['OLTC contact wear','Fixed interval inspection','FMEA / operating count','Planned inspection based on duty','PM','Operating interval']];
-function renderPlan(){let t=document.getElementById('planBody');t.innerHTML='';plans.forEach((r,i)=>{let tr=document.createElement('tr');tr.innerHTML=r.map((x,j)=>j==4?`<td><select onchange="plans[${i}][${j}]=this.value">${['BM','CM','PM','CBM','PdM'].map(s=>`<option ${s==x?'selected':''}>${s}</option>`).join('')}</select></td>`:`<td><input value="${x}" onchange="plans[${i}][${j}]=this.value"></td>`).join('')+`<td><button class="btn danger" onclick="plans.splice(${i},1);renderPlan()">×</button></td>`;t.appendChild(tr)})}
-function addPlan(){plans.push(['','','','','CBM','']);renderPlan()}renderPlan();
-function exportData(){let data={fmea,plans,healthIndex:document.getElementById('ovHI').textContent,dga:document.getElementById('ovDGA').textContent,strategy:document.getElementById('ovStrategy').textContent};let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='transformer-rcm.json';a.click()}
+function detailHeader(a){
+  return `
+  <div class="detail-head">
+    <img src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=200&h=200&fit=crop" alt="transformer">
+    <div>
+      <div class="detail-title"><h2>${a.id}</h2><span class="pill ${statusPillClass(a.status)}" style="font-size:12px;padding:4px 12px;">${trStatus(a.status)}</span></div>
+      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-top:2px;">${a.volt} kV Power Transformer</div>
+      <div class="detail-loc">${icon('pin',' style="width:13px;height:13px"')} ${a.loc.replace(' SS',' Substation')}</div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kicon" style="background:var(--red-bg);color:var(--red);">${icon('clock')}</div><div><div class="klabel">${t('health_index').toUpperCase()}</div><div class="kvalue">${a.hi} / 100</div></div></div>
+      <div class="kpi"><div class="kicon" style="background:var(--amber-bg);color:var(--amber);">${icon('info')}</div><div><div class="klabel">${t('rpn_max').toUpperCase()}</div><div class="kvalue">280</div></div></div>
+      <div class="kpi"><div class="kicon" style="background:var(--blue-bg);color:var(--accent-2);">${icon('doc')}</div><div><div class="klabel">${t('dga_diagnosis').toUpperCase()}</div><div class="kvalue">D2</div></div></div>
+      <div class="kpi"><div class="kicon" style="background:var(--green-bg);color:var(--green);">${icon('calendar')}</div><div><div class="klabel">${t('next_action').toUpperCase()}</div><div class="kvalue" style="font-size:12.5px;">${state.lang==='th'?'เก็บน้ำมัน (30 วัน)':'Oil Sampling (30d)'}</div></div></div>
+    </div>
+  </div>
+  <div style="display:flex; gap:10px; margin-bottom:14px;">
+    <button class="btn btn-primary" id="btnExportReport">${icon('down2',' style="width:13px;height:13px"')} ${t('export_report')}</button>
+    <button class="btn btn-ghost" id="btnMoreActions">${t('more_actions')}</button>
+  </div>`;
+}
+function renderDetail(){
+  const a = ASSETS.find(x=>x.id===state.assetId) || ASSETS[13];
+  let body = '';
+  if(state.detailTab==='overview') body = detailOverviewTab(a);
+  else if(state.detailTab==='healthindex') body = detailHealthIndexTab(a);
+  else if(state.detailTab==='dga') body = detailDgaTab(a);
+  else if(state.detailTab==='fmea') body = detailFmeaTab(a);
+  else if(state.detailTab==='rcm') body = detailRcmTab(a);
+  else if(state.detailTab==='plan') body = detailPlanTab(a);
+  else if(state.detailTab==='history') body = detailHistoryTab(a);
+  else if(state.detailTab==='docs') body = detailDocsTab(a);
+  return `
+  <div style="margin-bottom:6px;"><button class="linklike" id="backToAssets">${t('back_to_assets')}</button></div>
+  <div class="card" style="margin-bottom:16px;">${detailHeader(a)}</div>
+  <div class="tabs">${DETAIL_TABS.map(tb=>`<button class="tab ${state.detailTab===tb.id?'active':''}" data-dtab="${tb.id}">${t(tb.key)}</button>`).join('')}</div>
+  <div id="detailBody">${body}</div>`;
+}
+function detailOverviewTab(a){
+  return `
+  <div class="grid" style="grid-template-columns:1.3fr 1fr 1fr; margin-bottom:16px; align-items:stretch;">
+    <div class="card">
+      <h3>${t('operating_status')}</h3>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;"></span><span style="font-size:12.5px;font-weight:700;color:var(--green);">${t('in_service')}</span></div>
+      <ul class="hlist">
+        <li><span class="k">${t('load')}</span><span class="v">${a.load} %</span></li>
+        <li><span class="k">${t('top_oil')}</span><span class="v">${a.topOil} °C</span></li>
+        <li><span class="k">${t('amb_temp')}</span><span class="v">${a.amb} °C</span></li>
+        <li><span class="k">${t('oil_level')}</span><span class="v">${t('normal')}</span></li>
+        <li><span class="k">${t('cooling_system')}</span><span class="v">${t('normal')}</span></li>
+        <li><span class="k">${t('alarms')}</span><span class="v">–</span></li>
+      </ul>
+    </div>
+    <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3></div>${chartBox('detTrend',150)}</div>
+    <div class="card" style="text-align:center;">
+      <div class="card-head" style="text-align:left;"><h3>${t('dga_diagnosis')}</h3><button class="linklike" data-dtab="dga">${t('view_details')}</button></div>
+      <svg class="duval-svg" viewBox="0 0 220 190">${duvalTriangleSvg(0.62,0.30)}</svg>
+      <div style="margin-top:10px; text-align:left;">
+        <ul class="hlist"><li><span class="k">${t('type')}</span><span class="v" style="color:var(--red)">${state.lang==='th'?'ข้อบกพร่องทางความร้อน':'Thermal Fault'}</span></li>
+        <li><span class="k">${t('severity')}</span><span class="v" style="color:var(--red)">${state.lang==='th'?'สูง':'High'}</span></li>
+        <li><span class="k">${t('confidence')}</span><span class="v">82%</span></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns:1fr 1.2fr; align-items:stretch;">
+    <div class="card">
+      <div class="card-head"><h3>${t('recent_activities')}</h3><button class="linklike" data-dtab="history">${t('view_all')}</button></div>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('date')}</th><th>${t('activity')}</th><th>${t('result')}</th><th>${t('by')}</th></tr></thead><tbody>
+      <tr><td>12 Sep 2026</td><td>${state.lang==='th'?'อัปเดตผล DGA':'DGA result updated'}</td><td style="color:var(--red);font-weight:700;">D2 (High)</td><td>Lab</td></tr>
+      <tr><td>11 Sep 2026</td><td>${state.lang==='th'?'ตรวจสอบเสร็จสิ้น':'Inspection completed'}</td><td>${state.lang==='th'?'น้ำมันรั่วเล็กน้อย':'Minor oil leak'}</td><td>Field Team</td></tr>
+      <tr><td>10 Sep 2026</td><td>${state.lang==='th'?'คำนวณดัชนีสุขภาพใหม่':'Health index recalculated'}</td><td>HI = 34</td><td>System</td></tr>
+      <tr><td>28 Aug 2026</td><td>${state.lang==='th'?'เก็บตัวอย่างน้ำมันเสร็จสิ้น':'Oil sampling completed'}</td><td>${t('normal')}</td><td>Field Team</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>${t('recommended_strategy')}</h3></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="icon ic-green" style="width:44px;height:44px;">${icon('wrench')}</div><div><div style="font-weight:800;font-size:16px;">CBM</div><div class="small-muted">${t('cbm_full')}</div></div></div>
+      <div class="small-muted" style="margin-bottom:10px;">${t('cbm_rationale')}</div>
+      <div style="font-weight:700;font-size:12.5px;margin-bottom:6px;">${t('recommended_actions')}</div>
+      <ul class="hlist">
+      <li><span class="k">✓ ${t('act_oil_sampling')}</span></li><li><span class="k">✓ ${t('act_monitor_dga')}</span></li>
+      <li><span class="k">✓ ${t('act_inspect_cooling')}</span></li><li><span class="k">✓ ${t('act_check_leak')}</span></li><li><span class="k">✓ ${t('act_review_load')}</span></li>
+      </ul>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;" data-create-plan="1">${icon('calendar',' style="width:13px;height:13px"')} ${t('create_maint_plan')}</button>
+    </div>
+  </div>`;
+}
+function duvalTriangleSvg(px,py){
+  const Ax=110,Ay=15, Bx=15,By=175, Cx=205,Cy=175;
+  const mx = Ax + (Bx-Ax)*px + (Cx-Ax)*py, my = Ay + (By-Ay)*px + (Cy-Ay)*py;
+  return `<polygon points="110,15 15,175 205,175" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+  <line x1="61" y1="95" x2="157" y2="95" stroke="var(--border)"/><line x1="85" y1="175" x2="140" y2="55" stroke="var(--border)"/><line x1="135" y1="175" x2="80" y2="55" stroke="var(--border)"/>
+  <text x="110" y="10" text-anchor="middle" font-size="9" fill="var(--muted)">PD</text><text x="10" y="185" font-size="9" fill="var(--muted)">D1</text><text x="195" y="185" font-size="9" fill="var(--muted)" text-anchor="end">D2</text>
+  <circle cx="${mx}" cy="${my}" r="6" fill="var(--red)"/>`;
+}
+function detailHealthIndexTab(a){
+  return `
+  <div class="grid" style="grid-template-columns:1fr 1.4fr 1fr; margin-bottom:16px; align-items:stretch;">
+    <div class="card" style="text-align:center;">
+      <h3>${t('overall_hi')}</h3>
+      <div class="gauge-wrap">${chartBox('hiGauge',110)}<div class="gauge-num">${a.hi}</div><div class="gauge-sub">/ 100</div>
+      <div class="badge-lg" style="background:var(--red-bg); color:var(--red);">${trStatus(a.status)}</div></div>
+    </div>
+    <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3></div>${chartBox('hiTrend',150)}</div>
+    <div class="card">
+      <h3>${t('hi_classification')}</h3>
+      <ul class="hlist">
+      <li><span class="k"><span class="pill pill-healthy">●</span> 80–100</span><span class="v">${t('good')}</span></li>
+      <li><span class="k"><span class="pill" style="background:#e6f7ef;color:#159c68;">●</span> 60–79</span><span class="v">${t('moderate')}</span></li>
+      <li><span class="k"><span class="pill pill-warning">●</span> 40–59</span><span class="v">${t('poor')}</span></li>
+      <li><span class="k"><span class="pill pill-critical">●</span> 20–39</span><span class="v">${t('critical')}</span></li>
+      <li><span class="k"><span class="pill" style="background:#fbe9e8;color:#b91c1c;">●</span> 0–19</span><span class="v">${t('very_critical')}</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns:1.6fr 1fr; margin-bottom:16px; align-items:stretch;">
+    <div class="card">
+      <div class="card-head"><h3>${t('hi_assessment')}</h3><button class="btn btn-primary" id="btnEditCriteria" style="padding:7px 12px;font-size:12px;">${t('edit_criteria')}</button></div>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('parameter')}</th><th>${t('result')}</th><th>${t('score')}</th><th>${t('weight')}</th><th>${t('wscore')}</th><th>${t('status')}</th><th>${t('remark')}</th></tr></thead><tbody>
+      ${HI_CRITERIA.map(h=>`<tr><td><b>${h.p}</b></td><td>${h.res}</td><td>${h.score}</td><td>${h.weight}%</td><td>${h.ws}</td><td><span class="pill ${statusPillClass(h.status)}">${trStatus(h.status)}</span></td><td class="small-muted">${h.remark[state.lang]}</td></tr>`).join('')}
+      <tr><td colspan="4" style="font-weight:800;">${t('total')}</td><td style="font-weight:800;">${a.hi}.0</td><td></td><td></td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><h3>${t('hi_contributors')}</h3></div>${chartBox('hiRadar',260)}</div>
+  </div>
+  <div class="card">
+    <h3>${t('assessment_summary')}</h3>
+    <div class="grid g3">
+      <ul class="hlist"><li><span class="k">${t('main_issue2')}</span><span class="v" style="color:var(--red);">${state.lang==='th'?'DGA – ข้อบกพร่องทางความร้อน':'DGA – Thermal Fault'}</span></li></ul>
+      <ul class="hlist"><li><span class="k">${t('secondary_issue')}</span><span class="v">${state.lang==='th'?'BDV ต่ำ, ความชื้นสูง':'Low BDV, High Moisture'}</span></li></ul>
+      <ul class="hlist"><li><span class="k">${t('risk_level')}</span><span class="v" style="color:var(--red);">${state.lang==='th'?'สูง':'High'}</span></li></ul>
+      <ul class="hlist"><li><span class="k">${t('recommended_strategy')}</span><span class="v">CBM + PdM</span></li></ul>
+      <ul class="hlist"><li><span class="k">${t('next_action')}</span><span class="v">${state.lang==='th'?'เก็บน้ำมัน (30 วัน)':'Oil Sampling (30 days)'}</span></li></ul>
+    </div>
+  </div>`;
+}
+function detailDgaTab(a){
+  const subtabs = [['gas','gas_results'],['duval','duval_triangle'],['rogers','rogers_ratio'],['iec','iec_ratio'],['trend','trend_analysis'],['interp','interpretation']];
+  return `
+  <div class="filter-row" style="justify-content:space-between; margin-bottom:14px;">
+    <div class="filter-row">${subtabs.map(s=>`<button class="pill selectable ${state.dgaSubTab===s[0]?'pill-info on':''}" data-dga-tab="${s[0]}">${t(s[1])}</button>`).join('')}</div>
+    <div class="filter-row"><select class="chip-input" disabled>${t('sampling')}: 18 Sep 2026</select><button class="btn btn-outline" id="btnCompareDga">${t('compare')}</button></div>
+  </div>
+  ${dgaSubTabContent(a)}`;
+}
+function dgaSubTabContent(a){
+  const gasResultsBlock = `
+    <div class="card"><h3>${t('dga_gas_results')}</h3>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('gas')}</th><th>${t('result_ppm')}</th><th>${t('normal_range')}</th><th>${t('status')}</th></tr></thead><tbody>
+      ${DGA_GASES.map(g=>`<tr><td><b>${g.g}</b></td><td>${g.v}</td><td>${g.range}</td><td>${g.status==='up'?icon('up',' style="width:14px;height:14px;color:var(--red)"'):g.status==='warn'?'<span style="color:var(--amber);font-weight:800;">●</span>':icon('down',' style="width:14px;height:14px;color:var(--green)"')}</td></tr>`).join('')}
+      </tbody></table></div></div>`;
+  const duvalBlock = `
+    <div class="card" style="text-align:center;"><h3>${t('duval_triangle')}</h3>
+      <svg class="duval-svg" viewBox="0 0 220 190">${duvalTriangleSvg(0.62,0.30)}</svg>
+      <div style="text-align:left; margin-top:10px;"><div style="font-weight:800;">${t('diagnosis_result')}</div>
+      <ul class="hlist"><li><span class="k">${t('type')}</span><span class="v" style="color:var(--red)">${state.lang==='th'?'ข้อบกพร่องทางความร้อน (300–700°C)':'Thermal Fault (300–700°C)'}</span></li>
+      <li><span class="k">${t('severity')}</span><span class="v" style="color:var(--red)">${state.lang==='th'?'สูง':'High'}</span></li><li><span class="k">${t('confidence')}</span><span class="v">82%</span></li></ul></div></div>`;
+  const rogersBlock = `
+    <div class="card"><h3>${t('rogers_ratio')}</h3>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('ratio')}</th><th>${t('value')}</th><th>${t('diagnosis')}</th></tr></thead><tbody>
+      <tr><td>CH4 / H2</td><td>0.67</td><td style="color:var(--red);font-weight:700;">${state.lang==='th'?'ข้อบกพร่องทางความร้อน':'Thermal Fault'}</td></tr>
+      <tr><td>C2H4 / C2H6</td><td>3.91</td><td style="color:var(--red);font-weight:700;">${state.lang==='th'?'ข้อบกพร่องทางความร้อน':'Thermal Fault'}</td></tr>
+      <tr><td>C2H2 / C2H4</td><td>0.02</td><td style="color:var(--red);font-weight:700;">${state.lang==='th'?'ข้อบกพร่องทางความร้อน':'Thermal Fault'}</td></tr>
+      </tbody></table></div></div>`;
+  const iecBlock = `
+    <div class="card"><h3>${t('iec_ratio')}</h3>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('ratio')}</th><th>${t('value')}</th><th>${t('condition')}</th></tr></thead><tbody>
+      <tr><td>C2H2 / C2H4</td><td>0.02</td><td style="color:var(--green);font-weight:700;">${t('normal')}</td></tr>
+      <tr><td>CH4 / H2</td><td>0.67</td><td style="color:var(--red);font-weight:700;">${state.lang==='th'?'ผิดปกติ':'Abnormal'}</td></tr>
+      <tr><td>C2H4 / C2H6</td><td>3.91</td><td style="color:var(--red);font-weight:700;">${state.lang==='th'?'ผิดปกติ':'Abnormal'}</td></tr>
+      </tbody></table></div></div>`;
+  const trendBlock = `<div class="card"><h3>${t('hist_dga_trend')}</h3>${chartBox('dgaHist',280)}</div>`;
+  const interpBlock = `<div class="card"><h3>${t('interpretation')}</h3>
+    <div class="notebox">${icon('info')}<div>${state.lang==='th'?'พบความเข้มข้นสูงของ C2H4 และ CH4 บ่งชี้ข้อบกพร่องทางความร้อนในช่วง 300–700°C แนะนำให้ติดตามอย่างต่อเนื่อง':'High concentration of C2H4 and CH4 indicates thermal fault in the range 300–700°C. Continuous monitoring is recommended.'}</div></div>
+    <div style="margin-top:14px;"><h3>${t('recommended_action')}</h3>
+    <ul class="hlist"><li><span class="k">✓ ${t('rec_continue_dga')}</span></li><li><span class="k">✓ ${t('rec_check_cooling')}</span></li><li><span class="k">✓ ${t('rec_inspect_oil')}</span></li><li><span class="k">✓ ${t('rec_review_load')}</span></li></ul>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" data-create-plan="1">${icon('calendar',' style="width:13px;height:13px"')} ${t('create_maint_plan')}</button></div></div>`;
+
+  if(state.dgaSubTab==='duval') return `<div class="grid g2" style="align-items:stretch;">${duvalBlock}${interpBlock}</div>`;
+  if(state.dgaSubTab==='rogers') return `<div class="grid g2" style="align-items:stretch;">${rogersBlock}${iecBlock}</div>`;
+  if(state.dgaSubTab==='iec') return `<div class="grid g2" style="align-items:stretch;">${iecBlock}${rogersBlock}</div>`;
+  if(state.dgaSubTab==='trend') return `<div class="grid" style="grid-template-columns:1.7fr 1fr; align-items:stretch;">${trendBlock}${interpBlock}</div>`;
+  if(state.dgaSubTab==='interp') return `<div class="grid" style="grid-template-columns:1fr; align-items:stretch;">${interpBlock}</div>`;
+  return `<div class="grid" style="grid-template-columns:1.2fr 1fr 1fr; margin-bottom:16px; align-items:stretch;">${gasResultsBlock}${duvalBlock}${rogersBlock}</div>
+  <div class="grid" style="grid-template-columns:1.7fr 1fr; align-items:stretch;">${trendBlock}${interpBlock}</div>`;
+}
+function detailFmeaTab(a){
+  const high = FMEA.filter(f=>f.risk==='High').length, med = FMEA.filter(f=>f.risk==='Medium').length, low = FMEA.length-high-med;
+  return `
+  <div class="card-head" style="margin-bottom:6px;"><h3 style="font-size:16px;">${t('fmea_table')}</h3><button class="btn btn-primary" id="btnAddFmea">${icon('box',' style="width:13px;height:13px"')} ${t('add_failure_mode')}</button></div>
+  <p class="small-muted" style="margin:0 0 14px;">${t('fmea_sub')}</p>
+  <div class="grid" style="grid-template-columns:2fr 1fr; align-items:stretch; margin-bottom:16px;">
+    <div class="card"><div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('component')}</th><th>${t('failure_mode')}</th><th>${t('effect')}</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>${t('risk')}</th><th>${t('status')}</th></tr></thead><tbody>
+      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><b>${f.comp}</b></td><td>${f.mode}</td><td class="small-muted">${f.effect}</td><td>${f.s}</td><td>${f.o}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':'pill-warning'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td></tr>`).join('')}
+      </tbody></table></div></div>
+    <div class="card"><h3>${t('risk_matrix')}</h3>${chartBox('fmeaScatter',260)}</div>
+  </div>
+  <div class="grid" style="grid-template-columns:1fr 1.4fr 1fr; align-items:stretch;">
+    <div class="card"><h3>${t('rpn_dist')}</h3>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="donut-wrap" style="width:110px;height:110px;">${chartBox('fmeaDonut',110)}<div class="donut-center"><div class="n">${FMEA.length}</div><div class="l">${t('modes')}</div></div></div>
+        <div class="legend"><div class="li"><span class="sw" style="background:var(--red)"></span>${trRisk('High')}<span class="lval">${high}</span></div><div class="li"><span class="sw" style="background:var(--amber)"></span>${trRisk('Medium')}<span class="lval">${med}</span></div><div class="li"><span class="sw" style="background:var(--green)"></span>${trRisk('Low')}<span class="lval">${low}</span></div></div>
+      </div>
+    </div>
+    <div class="card"><h3>${t('top5_risk')}</h3>
+      ${FMEA.slice().sort((x,y)=>y.rpn-x.rpn).slice(0,5).map(f=>`<div class="bar-row"><div class="bar-label">${f.comp}</div><div class="bar-track"><div class="bar-fill" style="width:${f.rpn/2.8}%; background:${f.rpn>=150?'var(--red)':'var(--amber)'}"></div></div><div class="bar-val">${f.rpn}</div></div>`).join('')}
+    </div>
+    <div class="card"><h3>${t('rec_actions_summary')}</h3>
+      <div class="grid g3" style="gap:8px; margin-bottom:12px;">
+        <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--red)">4</div><div class="small-muted" style="font-size:10.5px;">${t('immediate')}</div></div>
+        <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--amber)">2</div><div class="small-muted" style="font-size:10.5px;">${t('plan_word')}</div></div>
+        <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--green)">2</div><div class="small-muted" style="font-size:10.5px;">${t('monitor')}</div></div>
+      </div>
+      <div class="notebox">${icon('info')}<div>${t('key_takeaway_fmea')}</div></div>
+    </div>
+  </div>`;
+}
+function openAddFmeaModal(){
+  openModal(t('modal_add_fmea'), `
+    <div class="formrow"><label>${t('field_component')}</label><input name="comp" required></div>
+    <div class="formrow"><label>${t('field_mode')}</label><input name="mode" required></div>
+    <div class="formrow"><label>${t('field_effect')}</label><input name="effect" required></div>
+    <div class="formrow"><label>${t('field_s')}</label><input name="s" type="number" min="1" max="10" value="5" required></div>
+    <div class="formrow"><label>${t('field_o')}</label><input name="o" type="number" min="1" max="10" value="5" required></div>
+    <div class="formrow"><label>${t('field_d')}</label><input name="d" type="number" min="1" max="10" value="5" required></div>
+  `, (data)=>{
+    const s=Number(data.s), o=Number(data.o), d=Number(data.d), rpn=s*o*d;
+    FMEA.push({no:FMEA.length+1, comp:data.comp, mode:data.mode, effect:data.effect, s,o,d, rpn, risk: rpn>=150?'High':rpn>=50?'Medium':'Low', control:'-', action:'-', status:'Open'});
+    render(); toast(t('toast_added'),'success');
+  });
+}
+function detailRcmTab(a){
+  const modeKey = state.rcmMode; const m = RCM_MODES[modeKey]; const fm = FMEA.find(f=>`${f.comp} - ${f.mode}`===modeKey) || FMEA[0];
+  return `
+  <div class="grid" style="grid-template-columns:1.6fr 1fr; align-items:stretch;">
+    <div class="card">
+      <div class="card-head"><h3>${t('rcm_tree_title')}</h3>
+        <div class="filter-row"><select class="chip-input" id="rcmSelect">${Object.keys(RCM_MODES).map(k=>`<option value="${k}" ${k===modeKey?'selected':''}>${k}</option>`).join('')}</select>
+        <button class="btn btn-outline" id="btnRcmReset">${t('reset')}</button><button class="btn btn-outline" id="btnRcmPrint">${t('print')}</button></div>
+      </div>
+      <p class="small-muted" style="margin-top:-4px;">${t('rcm_tree_sub')}</p>
+      <div class="dtree">
+        <div class="dnode q">${t('q1')}</div>
+        <div class="dbranch"><div class="dcol"><div class="dline"></div><div class="dnode yes">${t('yes')}</div><div class="dnode result" style="background:var(--red-bg);color:var(--red);">${t('safety_critical')}</div></div>
+        <div class="dcol"><div class="dline"></div><div class="dnode no">${t('no')}</div><div class="dnode q">${t('q2')}</div></div></div>
+        <div class="dbranch"><div class="dcol"><div class="dline"></div><div class="dnode yes">${t('yes')}</div><div class="dnode q">${t('q3')}</div></div>
+        <div class="dcol"><div class="dline"></div><div class="dnode no">${t('no')}</div><div class="dnode q">${t('q4')}</div></div></div>
+        <div class="dbranch">
+          <div class="dcol"><div class="dnode result" style="background:#f2ecff;color:#7c3aed;">PdM</div></div>
+          <div class="dcol"><div class="dnode result" style="background:var(--blue-bg);color:var(--accent-2);">PM</div></div>
+          <div class="dcol"><div class="dnode result" style="background:var(--blue-bg);color:var(--accent-2);">PM</div></div>
+          <div class="dcol"><div class="dnode result" style="background:var(--amber-bg);color:var(--amber);">CM</div></div>
+        </div>
+      </div>
+      <div class="notebox" style="margin-top:16px; background:var(--green-bg);"><div style="width:100%;">
+        <div style="font-weight:800; color:var(--green); font-size:14px;">${t('strategy_recommend_prefix')} ${m.path}</div>
+        <div class="small-muted" style="margin-top:4px;">${m.action[state.lang]}.</div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card"><h3>${t('failure_info')}</h3>
+        <ul class="hlist"><li><span class="k">${t('component')}</span><span class="v">${fm.comp}</span></li><li><span class="k">${t('failure_mode')}</span><span class="v">${fm.mode}</span></li>
+        <li><span class="k">${t('effect')}</span><span class="v">${fm.effect}</span></li><li><span class="k">S</span><span class="v">${fm.s}</span></li><li><span class="k">O</span><span class="v">${fm.o}</span></li><li><span class="k">D</span><span class="v">${fm.d}</span></li>
+        <li><span class="k">RPN</span><span class="v" style="color:var(--red)">${fm.rpn}</span></li><li><span class="k">${t('current_control')}</span><span class="v">${m.control}</span></li></ul>
+      </div>
+      <div class="card"><div class="card-head"><h3>${t('applicable_tasks')}</h3><button class="btn btn-primary" id="btnAddRcmTask" style="padding:6px 12px;font-size:12px;">${t('add_task')}</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>${t('task')}</th><th>${t('type')}</th><th>${t('interval')}</th><th>${t('status')}</th></tr></thead><tbody>
+        ${m.tasks.map(tk=>`<tr><td>${tk[0]}</td><td>${tk[1]}</td><td>${tk[2]}</td><td><span class="pill ${tk[3]==='Active'?'pill-healthy':'pill-warning'}">${trStatus(tk[3])}</span></td></tr>`).join('')}
+        </tbody></table></div>
+      </div>
+    </div>
+  </div>`;
+}
+function detailPlanTab(a){
+  const completed=5, inprog=4, upcoming=3, total=12;
+  const monthStart = {Jul:0,Aug:1,Sep:2,Oct:3,Nov:4,Dec:5};
+  return `
+  <div class="strategy-steps">
+    <div class="strategy-step" style="border-top:3px solid #94a3b8;"><div class="stitle">BM</div><div class="ssub">${state.lang==='th'?'ซ่อมเมื่อเสีย':'Breakdown'}</div></div><div class="strategy-arrow">→</div>
+    <div class="strategy-step" style="border-top:3px solid var(--red);"><div class="stitle">CM</div><div class="ssub">${state.lang==='th'?'แก้ไข':'Corrective'}</div></div><div class="strategy-arrow">→</div>
+    <div class="strategy-step" style="border-top:3px solid var(--accent-2);"><div class="stitle">PM</div><div class="ssub">${state.lang==='th'?'ป้องกัน':'Preventive'}</div></div><div class="strategy-arrow">→</div>
+    <div class="strategy-step" style="border-top:3px solid var(--green); background:var(--green-bg);"><div class="stitle">CBM</div><div class="ssub">${state.lang==='th'?'ตามสภาพ':'Condition Based'}</div></div><div class="strategy-arrow">→</div>
+    <div class="strategy-step" style="border-top:3px solid #8b5cf6;"><div class="stitle">PdM</div><div class="ssub">${state.lang==='th'?'คาดการณ์':'Predictive'}</div></div>
+  </div>
+  <div class="grid g4" style="margin-bottom:16px;">
+    <div class="card stat"><div class="icon ic-blue">${icon('doc')}</div><div><div class="label">${t('total_tasks')}</div><div class="value">${total}</div></div></div>
+    <div class="card stat"><div class="icon ic-green">${icon('info')}</div><div><div class="label">${t('completed')}</div><div class="value">${completed} <span style="font-size:12px;">(42%)</span></div></div></div>
+    <div class="card stat"><div class="icon ic-amber">${icon('clock')}</div><div><div class="label">${t('in_progress')}</div><div class="value">${inprog} <span style="font-size:12px;">(33%)</span></div></div></div>
+    <div class="card stat"><div class="icon ic-blue">${icon('calendar')}</div><div><div class="label">${t('upcoming')}</div><div class="value">${upcoming} <span style="font-size:12px;">(25%)</span></div></div></div>
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-head"><h3>${t('maint_schedule')}</h3>
+      <div class="filter-row">
+        <button class="btn ${state.planView==='list'?'btn-outline active':'btn-outline'}" data-plan-view="list">${t('list_view')}</button>
+        <button class="btn ${state.planView==='gantt'?'btn-outline active':'btn-outline'}" data-plan-view="gantt">${t('gantt_view')}</button>
+        <button class="btn btn-primary" id="btnCreateTask">${t('create_task')}</button>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('task')}</th><th>${t('type')}</th><th>${t('start')}</th><th>${t('end')}</th><th>${t('duration')}</th></tr></thead><tbody>
+    ${MAINT_PLAN.map(tk=>`<tr><td>${tk.no}</td><td><b>${tk.task}</b></td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${tk.dur}</td></tr>`).join('')}
+    </tbody></table></div>
+    ${state.planView==='gantt' ? `
+    <div style="margin-top:16px;">
+      <div class="timeline-row"><div></div><div style="display:flex; font-size:10.5px; color:var(--muted); font-weight:700;">${GANTT_MONTHS.map(m=>`<div style="flex:1;">${m}</div>`).join('')}</div></div>
+      ${MAINT_PLAN.map(tk=>{ const startIdx = monthStart[tk.m]; const leftPct = (startIdx/GANTT_MONTHS.length)*100; const widthPct = (tk.len/GANTT_MONTHS.length)*100;
+        return `<div class="timeline-row"><div class="small-muted">${tk.task}</div><div class="timeline-track"><div class="timeline-bar" style="left:${leftPct}%; width:${widthPct}%; background:${TYPE_COLOR[tk.type]};"></div><div class="today-line" style="left:${(2.1/6)*100}%;"></div></div></div>`; }).join('')}
+    </div>` : ''}
+  </div>
+  <div class="grid g3">
+    <div class="card"><h3>${t('before_after')}</h3>${chartBox('planBar1',180)}</div>
+    <div class="card"><h3>${t('cost_comparison')}</h3>${chartBox('planBar2',180)}</div>
+    <div class="card"><h3>${t('expected_benefits')}</h3>
+      <ul class="hlist"><li><span class="k">↓ ${t('maint_cost')}</span><span class="v" style="color:var(--green)">33%</span></li>
+      <li><span class="k">↑ ${t('asset_reliability')}</span><span class="v" style="color:var(--green)">25%</span></li>
+      <li><span class="k">↓ ${t('unplanned_failure')}</span><span class="v" style="color:var(--green)">40%</span></li>
+      <li><span class="k">↑ ${t('equip_lifetime')}</span><span class="v" style="color:var(--green)">${t('longer')}</span></li></ul>
+      <div class="notebox" style="margin-top:10px;">${icon('info')}<div>${t('key_takeaway_plan')}</div></div>
+    </div>
+  </div>`;
+}
+function openAddTaskModal(){
+  openModal(t('modal_add_task'), `
+    <div class="formrow"><label>${t('field_task_name')}</label><input name="task" required></div>
+    <div class="formrow"><label>${t('field_task_type')}</label><select name="type"><option>BM</option><option>CM</option><option selected>PM</option><option>CBM</option><option>PdM</option></select></div>
+    <div class="formrow"><label>${t('field_task_interval')}</label><input name="interval" placeholder="e.g. 3 months" required></div>
+  `, (data)=>{
+    MAINT_PLAN.push({no:MAINT_PLAN.length+1, task:data.task, type:data.type, start:'—', end:'—', dur:data.interval, m:'Dec', len:1});
+    render(); toast(t('toast_added'),'success');
+  });
+}
+function detailHistoryTab(a){
+  return `<div class="card"><h3>${t('inspection_history')}</h3>
+  <div class="tbl-wrap"><table><thead><tr><th>${t('date')}</th><th>${t('activity')}</th><th>${t('result')}</th><th>${t('by')}</th></tr></thead><tbody>
+  <tr><td>18 Sep 2026</td><td>${state.lang==='th'?'เก็บตัวอย่าง DGA':'DGA Sampling'}</td><td style="color:var(--red);font-weight:700;">D2 (High)</td><td>Lab</td></tr>
+  <tr><td>12 Sep 2026</td><td>${state.lang==='th'?'อัปเดตผล DGA':'DGA result updated'}</td><td style="color:var(--red);font-weight:700;">D2 (High)</td><td>Lab</td></tr>
+  <tr><td>11 Sep 2026</td><td>${state.lang==='th'?'ตรวจสอบเสร็จสิ้น':'Inspection completed'}</td><td>${state.lang==='th'?'น้ำมันรั่วเล็กน้อย':'Minor oil leak'}</td><td>Field Team</td></tr>
+  <tr><td>10 Sep 2026</td><td>${state.lang==='th'?'คำนวณดัชนีสุขภาพใหม่':'Health index recalculated'}</td><td>HI = 34</td><td>System</td></tr>
+  <tr><td>28 Aug 2026</td><td>${state.lang==='th'?'เก็บตัวอย่างน้ำมันเสร็จสิ้น':'Oil sampling completed'}</td><td>${t('normal')}</td><td>Field Team</td></tr>
+  <tr><td>15 May 2026</td><td>${state.lang==='th'?'เก็บตัวอย่าง DGA':'DGA Sampling'}</td><td>D1 (Medium)</td><td>Lab</td></tr>
+  <tr><td>10 Jan 2026</td><td>${state.lang==='th'?'ตรวจสอบประจำปี':'Annual inspection'}</td><td>${state.lang==='th'?'น่าพอใจ':'Satisfactory'}</td><td>Field Team</td></tr>
+  </tbody></table></div></div>`;
+}
+function detailDocsTab(a){
+  return `<div class="card"><h3>${t('photos_docs')}</h3>
+  <div class="thumb-grid" style="margin-bottom:16px;">
+    <div class="thumb"><img src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=200&h=140&fit=crop"><div class="cap">${state.lang==='th'?'มุมมองรวม':'Overall View'} · 12 Sep 2026</div></div>
+    <div class="thumb"><img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&h=140&fit=crop"><div class="cap">Bushing (A-Phase) · 12 Sep 2026</div></div>
+    <div class="thumb"><img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=200&h=140&fit=crop"><div class="cap">${state.lang==='th'?'น้ำมันรั่วเล็กน้อย':'Oil Leakage (Minor)'} · 11 Sep 2026</div></div>
+    <div class="thumb"><img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=200&h=140&fit=crop"><div class="cap">Nameplate</div></div>
+  </div>
+  <h3>${t('related_docs')}</h3>
+  <div class="tbl-wrap"><table><thead><tr><th>${t('file')}</th><th>${t('size')}</th><th>${t('date')}</th><th></th></tr></thead><tbody>
+  <tr><td>${a.id}_RCM_Analysis.pdf</td><td>1.2 MB</td><td>12 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_RCM_Analysis.txt">${icon('down2',' style="width:14px;height:14px;color:var(--accent-2)"')}</button></td></tr>
+  <tr><td>${a.id}_FMEA.xlsx</td><td>0.8 MB</td><td>10 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_FMEA.csv" data-csv="fmea">${icon('down2',' style="width:14px;height:14px;color:var(--accent-2)"')}</button></td></tr>
+  <tr><td>${a.id}_Maintenance_Plan.pdf</td><td>1.5 MB</td><td>8 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_Maintenance_Plan.csv" data-csv="plan">${icon('down2',' style="width:14px;height:14px;color:var(--accent-2)"')}</button></td></tr>
+  <tr><td>DGA_${a.id}_20260918.pdf</td><td>1.2 MB</td><td>18 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="DGA_${a.id}_20260918.csv" data-csv="dga">${icon('down2',' style="width:14px;height:14px;color:var(--accent-2)"')}</button></td></tr>
+  </tbody></table></div></div>`;
+}
+function initDetailCharts(a){
+  const gridColor = cssv('--border');
+  if(document.getElementById('detTrend')) mkChart('detTrend',{type:'line',data:{labels:TR014_MONTHS,datasets:[{data:TR014_TREND,borderColor:'#e0524a',backgroundColor:'#e0524a22',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  if(document.getElementById('hiTrend')) mkChart('hiTrend',{type:'line',data:{labels:TR014_MONTHS,datasets:[{data:TR014_TREND,borderColor:'#e0524a',backgroundColor:'#e0524a22',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  if(document.getElementById('hiGauge')) mkChart('hiGauge',{type:'doughnut',data:{datasets:[{data:[a.hi,100-a.hi],backgroundColor:['#e0524a', gridColor],borderWidth:0,circumference:180,rotation:270}]},options:{...commonOpts(),cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+  if(document.getElementById('hiRadar')) mkChart('hiRadar',{type:'radar',data:{labels:HEALTH_BREAKDOWN.map(h=>h.k),datasets:[{label:'Current',data:HEALTH_BREAKDOWN.map(h=>h.v),borderColor:'#e0524a',backgroundColor:'#e0524a33',pointRadius:2},{label:'Target',data:[85,85,85,85,85],borderColor:'#94a3b8',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{r:{min:0,max:100,grid:{color:gridColor},angleLines:{color:gridColor},pointLabels:{font:{size:10}}}}}});
+  if(document.getElementById('dgaHist')) mkChart('dgaHist',{type:'line',data:{labels:DGA_HIST.months,datasets:[
+      {label:'H2',data:DGA_HIST.H2,borderColor:'#2f6fed',pointRadius:1,tension:.3},{label:'CH4',data:DGA_HIST.CH4,borderColor:'#1a9e6b',pointRadius:1,tension:.3},
+      {label:'C2H6',data:DGA_HIST.C2H6,borderColor:'#8b5cf6',pointRadius:1,tension:.3},{label:'CO',data:DGA_HIST.CO,borderColor:'#e0524a',pointRadius:1,tension:.3},{label:'CO2',data:DGA_HIST.CO2,borderColor:'#94a3b8',pointRadius:1,tension:.3},
+    ]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  if(document.getElementById('fmeaDonut')){ const high = FMEA.filter(f=>f.risk==='High').length, med=FMEA.filter(f=>f.risk==='Medium').length, low=FMEA.length-high-med;
+    mkChart('fmeaDonut',{type:'doughnut',data:{labels:['High','Medium','Low'],datasets:[{data:[high,med,low],backgroundColor:['#e0524a','#e8a13a','#1a9e6b'],borderWidth:0}]},options:{...commonOpts(),cutout:'70%',plugins:{legend:{display:false}}}}); }
+  if(document.getElementById('fmeaScatter')) mkChart('fmeaScatter',{type:'scatter',data:{datasets:[{label:'Failure Modes',data:FMEA.map(f=>({x:f.o,y:f.s})),backgroundColor: FMEA.map(f=>f.risk==='High'?'#e0524a':f.risk==='Medium'?'#e8a13a':'#1a9e6b'),pointRadius:7}]},
+    options:{...commonOpts(),plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>FMEA[c.dataIndex].comp+' - '+FMEA[c.dataIndex].mode}}},scales:{x:{title:{display:true,text:'Occurrence'},min:0,max:10,grid:{color:gridColor}},y:{title:{display:true,text:'Severity'},min:0,max:10,grid:{color:gridColor}}}}});
+  if(document.getElementById('planBar1')) mkChart('planBar1',{type:'bar',data:{labels:['BM','CM','PM','CBM','PdM'],datasets:[{label:'Before',data:[2,15,10,3,0],backgroundColor:'#e0524a'},{label:'After',data:[8,8,12,8,0],backgroundColor:'#2f6fed'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  if(document.getElementById('planBar2')) mkChart('planBar2',{type:'bar',data:{labels:[''],datasets:[{label:'Before RCM',data:[1.8],backgroundColor:'#e0524a'},{label:'After RCM',data:[1.2],backgroundColor:'#2f6fed'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{title:{display:true,text:'THB (M)'},grid:{color:gridColor}},x:{grid:{display:false}}}}});
+}
+function attachDetailEvents(){
+  document.querySelectorAll('[data-dtab]').forEach(el=> el.addEventListener('click',()=>{ state.detailTab = el.dataset.dtab; render(); }));
+  const back = document.getElementById('backToAssets'); if(back) back.addEventListener('click',()=>{ state.page='assets'; render(); window.scrollTo(0,0); });
+  const rcmSelect = document.getElementById('rcmSelect'); if(rcmSelect) rcmSelect.addEventListener('change',(e)=>{ state.rcmMode = e.target.value; render(); });
+  const rcmReset = document.getElementById('btnRcmReset'); if(rcmReset) rcmReset.addEventListener('click',()=>{ state.rcmMode = 'Winding - Overheating'; render(); toast(t('reset')+' ✓'); });
+  const rcmPrint = document.getElementById('btnRcmPrint'); if(rcmPrint) rcmPrint.addEventListener('click', ()=>window.print());
+  document.querySelectorAll('[data-dga-tab]').forEach(el=> el.addEventListener('click',()=>{ state.dgaSubTab = el.dataset.dgaTab; render(); }));
+  const cmpBtn = document.getElementById('btnCompareDga'); if(cmpBtn) cmpBtn.addEventListener('click', ()=>toast(state.lang==='th'?'เปรียบเทียบผลตรวจ (ตัวอย่าง)':'Comparing sampling results (demo)'));
+  const addFmea = document.getElementById('btnAddFmea'); if(addFmea) addFmea.addEventListener('click', openAddFmeaModal);
+  const addTask = document.getElementById('btnCreateTask'); if(addTask) addTask.addEventListener('click', openAddTaskModal);
+  const addRcmTask = document.getElementById('btnAddRcmTask'); if(addRcmTask) addRcmTask.addEventListener('click', ()=>{ RCM_MODES[state.rcmMode].tasks.push(['New Task','PM','—','Planned']); render(); toast(t('toast_added'),'success'); });
+  document.querySelectorAll('[data-plan-view]').forEach(el=> el.addEventListener('click',()=>{ state.planView = el.dataset.planView; render(); }));
+  const exportBtn = document.getElementById('btnExportReport');
+  if(exportBtn) exportBtn.addEventListener('click', ()=>{
+    const a = ASSETS.find(x=>x.id===state.assetId);
+    const rows = [['Asset ID','Location','Health Index','Status','RPN','DGA Diagnosis'],[a.id,a.loc,a.hi,a.status,'280','D2']];
+    downloadFile(`${a.id}_report.csv`, toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success');
+  });
+  const moreBtn = document.getElementById('btnMoreActions');
+  if(moreBtn) moreBtn.addEventListener('click', ()=>toast(state.lang==='th'?'เมนูการดำเนินการเพิ่มเติม (ตัวอย่าง)':'More actions menu (demo)'));
+  const editCriteria = document.getElementById('btnEditCriteria');
+  if(editCriteria) editCriteria.addEventListener('click', ()=>toast(t('toast_saved'),'success'));
+  document.querySelectorAll('[data-create-plan]').forEach(el=> el.addEventListener('click',()=>{ state.detailTab='plan'; render(); }));
+  document.querySelectorAll('.dl-doc').forEach(el=> el.addEventListener('click',()=>{
+    const csvType = el.dataset.csv;
+    let content = 'Demo document generated by RCM Transformer prototype.';
+    if(csvType==='fmea') content = toCSV([['No','Component','Mode','Effect','S','O','D','RPN','Risk'], ...FMEA.map(f=>[f.no,f.comp,f.mode,f.effect,f.s,f.o,f.d,f.rpn,f.risk])]);
+    if(csvType==='plan') content = toCSV([['No','Task','Type','Start','End','Duration'], ...MAINT_PLAN.map(p=>[p.no,p.task,p.type,p.start,p.end,p.dur])]);
+    if(csvType==='dga') content = toCSV([['Gas','Result(ppm)','Normal Range'], ...DGA_GASES.map(g=>[g.g,g.v,g.range])]);
+    downloadFile(el.dataset.fname, content, 'text/csv'); toast(t('toast_exported'),'success');
+  }));
+}
+
+/* ============ REPORTS PAGE ============ */
+function renderReports(){
+  return `
+  <div class="grid g4" style="margin-bottom:16px;">
+    <div class="card stat"><div class="icon ic-blue">${icon('box')}</div><div><div class="label">${t('total_transformers')}</div><div class="value">20</div></div></div>
+    <div class="card stat"><div class="icon ic-green">${icon('info')}</div><div><div class="label">${t('healthy')}</div><div class="value">13</div></div></div>
+    <div class="card stat"><div class="icon ic-amber">${icon('info')}</div><div><div class="label">${t('warning')}</div><div class="value">5</div></div></div>
+    <div class="card stat"><div class="icon ic-red">${icon('info')}</div><div><div class="label">${t('critical')}</div><div class="value">2</div></div></div>
+  </div>
+  <div class="grid g4" style="margin-bottom:16px;">
+    <div class="card stat"><div class="icon ic-blue">${icon('wrench')}</div><div><div class="label">${t('total_maint_tasks')}</div><div class="value">48</div></div></div>
+    <div class="card stat"><div class="icon ic-green">${icon('info')}</div><div><div class="label">${t('estimated_cost')}</div><div class="value">1.2M THB</div></div></div>
+    <div class="card stat"><div class="icon ic-blue">${icon('calendar')}</div><div><div class="label">${t('period')}</div><div class="value" style="font-size:14px;">Jan – Dec 2026</div></div></div>
+    <div class="card stat"><div class="icon ic-green">${icon('down2')}</div><div><div class="label">${t('cost_reduction')}</div><div class="value" style="color:var(--green)">33%</div></div></div>
+  </div>
+  <div style="display:flex; gap:10px; margin-bottom:16px;">
+    <button class="btn btn-primary" id="btnGenerateReport">${icon('doc',' style="width:13px;height:13px"')} ${t('generate_report')}</button>
+    <button class="btn btn-ghost" id="btnScheduleReport">${icon('calendar',' style="width:13px;height:13px"')} ${t('schedule_report')}</button>
+    <button class="btn btn-ghost" id="btnExportAll">${icon('down2',' style="width:13px;height:13px"')} ${t('export')}</button>
+  </div>
+  <div class="grid g2" style="margin-bottom:16px; align-items:stretch;">
+    <div class="card"><h3>${t('asset_health_dist')}</h3>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('repDonut',130)}<div class="donut-center"><div class="n">20</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
+        <div class="legend"><div class="li"><span class="sw" style="background:var(--green)"></span>${t('healthy')}<span class="lval">13 (65%)</span></div><div class="li"><span class="sw" style="background:var(--amber)"></span>${t('warning')}<span class="lval">5 (25%)</span></div><div class="li"><span class="sw" style="background:var(--red)"></span>${t('critical')}<span class="lval">2 (10%)</span></div></div>
+      </div>
+    </div>
+    <div class="card"><h3>${t('hi_trend_avg')}</h3>${chartBox('repTrend',150)}</div>
+  </div>
+  <div class="grid g2" style="margin-bottom:16px; align-items:stretch;">
+    <div class="card"><h3>${t('failure_mode_dist')}</h3>${chartBox('repFmeaBar',180)}</div>
+    <div class="card"><h3>${t('dga_fault_dist')}</h3>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('repDgaDonut',130)}<div class="donut-center"><div class="n">20</div><div class="l">${state.lang==='th'?'ตัวอย่าง':'Samples'}</div></div></div>
+        <div class="legend">
+          <div class="li"><span class="sw" style="background:#e0524a"></span>${state.lang==='th'?'ความร้อน':'Thermal Fault'}<span class="lval">7 (35%)</span></div>
+          <div class="li"><span class="sw" style="background:#e8a13a"></span>${state.lang==='th'?'ไฟฟ้า':'Electrical Fault'}<span class="lval">6 (30%)</span></div>
+          <div class="li"><span class="sw" style="background:#8b5cf6"></span>PD<span class="lval">4 (20%)</span></div>
+          <div class="li"><span class="sw" style="background:#1a9e6b"></span>${t('normal')}<span class="lval">2 (10%)</span></div>
+          <div class="li"><span class="sw" style="background:#94a3b8"></span>${state.lang==='th'?'ไม่แน่ชัด':'Uncertain'}<span class="lval">1 (5%)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns:1.4fr 1fr; margin-bottom:16px; align-items:stretch;">
+    <div class="card"><h3>${t('maint_task_summary')}</h3>${chartBox('repTaskBar',180)}</div>
+    <div class="card"><h3>${t('cost_comparison')}</h3>${chartBox('repCostBar',180)}</div>
+  </div>
+  <div class="grid" style="grid-template-columns:1.6fr 1fr;">
+    <div class="card"><h3>${t('health_ranking')}</h3>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('rank')}</th><th>${t('id')}</th><th>${t('health_index')}</th><th>${t('status')}</th></tr></thead><tbody>
+      ${ASSETS.slice().sort((x,y)=>y.hi-x.hi).slice(0,4).map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td>${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td></tr>`).join('')}
+      ${ASSETS.slice().sort((x,y)=>x.hi-y.hi).slice(0,4).reverse().map((a,i)=>`<tr><td>${ASSETS.length-3+i}</td><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td></tr>`).join('')}
+      </tbody></table></div>
+    </div>
+    <div class="card"><h3>${t('key_takeaways')}</h3>
+      <ul class="hlist"><li><span class="k">✓ ${t('kt1')}</span></li><li><span class="k">✓ ${t('kt2')}</span></li><li><span class="k">✓ ${t('kt3')}</span></li><li><span class="k">✓ ${t('kt4')}</span></li><li><span class="k">✓ ${t('kt5')}</span></li></ul>
+    </div>
+  </div>`;
+}
+function initReportsCharts(){
+  const gridColor = cssv('--border');
+  mkChart('repDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[13,5,2],backgroundColor:['#1a9e6b','#e8a13a','#e0524a'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('repDgaDonut',{type:'doughnut',data:{labels:['Thermal','Electrical','PD','Normal','Uncertain'],datasets:[{data:[7,6,4,2,1],backgroundColor:['#e0524a','#e8a13a','#8b5cf6','#1a9e6b','#94a3b8'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('repTrend',{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{label:'Avg HI',data:[70,71,70,72,73,72,71,70,72,73,74,75],borderColor:'#2f6fed',backgroundColor:'#2f6fed22',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('repFmeaBar',{type:'bar',data:{labels:['Overheating','Insulation Failure','Oil Leakage','Contact Wear','Cooling Failure','Other'],datasets:[{data:[28,20,15,12,10,15],backgroundColor:'#2f6fed'}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor}},y:{grid:{display:false}}}}});
+  mkChart('repTaskBar',{type:'bar',data:{labels:['BM','CM','PM','CBM','PdM'],datasets:[{label:'Planned',data:[0,9,8,5,4],backgroundColor:'#2f6fed'},{label:'Completed',data:[0,7,7,5,3],backgroundColor:'#1a9e6b'},{label:'Pending',data:[1,5,4,1,1],backgroundColor:'#e8a13a'},{label:'Overdue',data:[0,1,1,0,0],backgroundColor:'#e0524a'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('repCostBar',{type:'bar',data:{labels:[''],datasets:[{label:'Before RCM',data:[1.8],backgroundColor:'#e0524a'},{label:'After RCM',data:[1.2],backgroundColor:'#2f6fed'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{title:{display:true,text:'THB (M)'},grid:{color:gridColor}},x:{grid:{display:false}}}}});
+}
+function attachReportsEvents(){
+  const gen = document.getElementById('btnGenerateReport'); if(gen) gen.addEventListener('click', ()=>{
+    const rows=[['ID','Location','Health Index','Status'], ...ASSETS.map(a=>[a.id,a.loc,a.hi,a.status])];
+    downloadFile('Asset_Summary_Report.csv', toCSV(rows), 'text/csv'); toast(t('toast_generated'),'success');
+  });
+  const sch = document.getElementById('btnScheduleReport'); if(sch) sch.addEventListener('click', ()=>toast(t('toast_scheduled'),'success'));
+  const exp = document.getElementById('btnExportAll'); if(exp) exp.addEventListener('click', ()=>{
+    const rows=[['ID','Location','Health Index','Status'], ...ASSETS.map(a=>[a.id,a.loc,a.hi,a.status])];
+    downloadFile('RCM_Transformer_Export.csv', toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success');
+  });
+}
+
+/* ============ SETTINGS PAGE ============ */
+const SETTINGS_TABS = [['general','settings_general'],['hi','settings_hi'],['fm','settings_fm'],['maint','settings_maint'],['users','settings_users'],['sys','settings_sys']];
+function renderSettings(){
+  return `<div class="tabs">${SETTINGS_TABS.map(s=>`<button class="tab ${state.settingsTab===s[0]?'active':''}" data-stab="${s[0]}">${t(s[1])}</button>`).join('')}</div>
+  <div id="settingsBody">${settingsTabContent()}</div>`;
+}
+function settingsTabContent(){
+  if(state.settingsTab==='hi') return `
+  <div class="card">
+    <div class="card-head"><h3>${t('hi_criteria_settings')}</h3><button class="btn btn-outline" id="btnEditHi" style="padding:6px 11px;font-size:12px;">${t('edit')}</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>${t('parameter')}</th><th>${t('weight')}</th></tr></thead><tbody>
+    <tr><td>DGA</td><td>25%</td></tr><tr><td>${state.lang==='th'?'สภาพน้ำมัน':'Oil Condition'}</td><td>20%</td></tr><tr><td>${state.lang==='th'?'การทดสอบทางไฟฟ้า':'Electrical Test'}</td><td>15%</td></tr>
+    <tr><td>${state.lang==='th'?'ตรวจสอบด้วยสายตา':'Visual Inspection'}</td><td>15%</td></tr><tr><td>${state.lang==='th'?'อายุ/โหลด':'Age / Loading'}</td><td>15%</td></tr><tr><td>${state.lang==='th'?'สภาพแวดล้อม':'Ambient Condition'}</td><td>10%</td></tr>
+    <tr><td style="font-weight:800;">${t('total')}</td><td style="font-weight:800;">100%</td></tr></tbody></table></div>
+  </div>
+  <div class="grid g2" style="margin-top:16px;">
+    <div class="card"><div class="card-head"><h3>${t('risk_thresholds')}</h3><button class="btn btn-outline" id="btnEditRisk" style="padding:6px 11px;font-size:12px;">${t('edit')}</button></div>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('level')}</th><th>${t('hi_range')}</th><th>${t('action')}</th></tr></thead><tbody>
+      <tr><td><span class="pill pill-healthy">${t('good')}</span></td><td>80–100</td><td class="small-muted">${state.lang==='th'?'ทำงานปกติ':'Normal operation'}</td></tr>
+      <tr><td><span class="pill" style="background:#e6f7ef;color:#159c68;">${t('moderate')}</span></td><td>60–79</td><td class="small-muted">${state.lang==='th'?'ติดตามใกล้ชิด':'Close monitoring'}</td></tr>
+      <tr><td><span class="pill pill-warning">${state.lang==='th'?'สูง':'High'}</span></td><td>40–59</td><td class="small-muted">${state.lang==='th'?'วางแผนบำรุงรักษา':'Plan maintenance'}</td></tr>
+      <tr><td><span class="pill pill-critical">${t('critical')}</span></td><td>20–39</td><td class="small-muted">${state.lang==='th'?'ดำเนินการทันที':'Immediate action'}</td></tr>
+      <tr><td><span class="pill" style="background:#fbe9e8;color:#b91c1c;">${t('very_critical')}</span></td><td>0–19</td><td class="small-muted">${state.lang==='th'?'หยุดใช้งานด่วน':'Urgent shutdown'}</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="card"><h3>${t('note1')}</h3><p class="small-muted">${t('note2')}</p></div>
+  </div>`;
+  if(state.settingsTab==='fm') return `
+  <div class="card"><div class="card-head"><h3>${t('settings_fm')}</h3><button class="linklike" id="btnManageFm">${t('manage')}</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>${t('code')}</th><th>${t('failure_mode')}</th><th>${t('category')}</th></tr></thead><tbody>
+    <tr><td>FM-01</td><td>Overheating</td><td>${state.lang==='th'?'ความร้อน':'Thermal'}</td></tr>
+    <tr><td>FM-02</td><td>Insulation Failure</td><td>${state.lang==='th'?'ไฟฟ้า':'Electrical'}</td></tr>
+    <tr><td>FM-03</td><td>Oil Leakage</td><td>${state.lang==='th'?'กลไก':'Mechanical'}</td></tr>
+    <tr><td>FM-04</td><td>Winding Deformation</td><td>${state.lang==='th'?'กลไก':'Mechanical'}</td></tr>
+    <tr><td>FM-05</td><td>Tap Changer Fault</td><td>${state.lang==='th'?'กลไก':'Mechanical'}</td></tr>
+    <tr><td>FM-06</td><td>Bushing Failure</td><td>${state.lang==='th'?'ไฟฟ้า':'Electrical'}</td></tr>
+    </tbody></table></div>
+  </div>`;
+  if(state.settingsTab==='maint') return `
+  <div class="card"><div class="card-head"><h3>${t('maint_strategy_settings')}</h3><button class="btn btn-outline" id="btnEditMaint" style="padding:6px 11px;font-size:12px;">${t('edit')}</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>${t('strategy')}</th><th>${t('trigger')}</th></tr></thead><tbody>
+    <tr><td><b>BM</b> ${state.lang==='th'?'ซ่อมเมื่อเสีย':'Breakdown'}</td><td class="small-muted">${state.lang==='th'?'ใช้งานจนเสีย':'Run to failure — when failed'}</td></tr>
+    <tr><td><b>CM</b> ${state.lang==='th'?'แก้ไข':'Corrective'}</td><td class="small-muted">${state.lang==='th'?'แก้ไขเมื่อพบความผิดปกติ':'Fix after abnormality found'}</td></tr>
+    <tr><td><b>PM</b> ${state.lang==='th'?'ป้องกัน':'Preventive'}</td><td class="small-muted">${state.lang==='th'?'ตามรอบเวลา':'Time-based, by schedule'}</td></tr>
+    <tr><td><b>CBM</b> ${state.lang==='th'?'ตามสภาพ':'Condition Based'}</td><td class="small-muted">${state.lang==='th'?'เมื่อถึงเกณฑ์สภาพ':'When condition threshold met'}</td></tr>
+    <tr><td><b>PdM</b> ${state.lang==='th'?'คาดการณ์':'Predictive'}</td><td class="small-muted">${state.lang==='th'?'วิเคราะห์แนวโน้มและพยากรณ์':'Trend analysis & forecasting'}</td></tr>
+    </tbody></table></div>
+  </div>`;
+  if(state.settingsTab==='users') return `
+  <div class="card"><div class="card-head"><h3>${t('settings_users')}</h3><button class="btn btn-primary" id="btnAddUser" style="padding:6px 12px;font-size:12px;">${t('add_user')}</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>${t('name')}</th><th>${t('role_col')}</th><th>${t('field_email')}</th><th>${t('status')}</th></tr></thead><tbody>
+    ${USERS.map(u=>`<tr><td>${u.name}</td><td>${u.role}</td><td class="small-muted">${u.email}</td><td><span class="pill pill-healthy">${trStatus(u.status)}</span></td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+  if(state.settingsTab==='sys') return `
+  <div class="grid g2">
+    <div class="card"><h3>${t('data_mgmt')}</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="import">${t('import_data')}</button>
+        <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="export">${t('export_data')}</button>
+        <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="backup">${t('backup_db')}</button>
+        <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="restore">${t('restore_db')}</button>
+      </div>
+    </div>
+    <div class="card"><h3>${t('appearance')}</h3>
+      <div class="settingsrow"><div class="srlabel">${t('theme')}</div><select class="chip-input" id="themeSelect"><option value="system">${t('system_opt')}</option><option value="light">${t('light')}</option><option value="dark">${t('dark')}</option></select></div>
+      <div class="settingsrow"><div class="srlabel">${t('items_per_page')}</div><select class="chip-input"><option>10</option><option>20</option><option>50</option></select></div>
+    </div>
+  </div>`;
+  // general
+  return `
+  <div class="grid g3" style="margin-bottom:16px; align-items:stretch;">
+    <div class="card"><div class="card-head"><h3>${t('system_info')}</h3><button class="btn btn-outline" id="btnEditSystem" style="padding:6px 11px;font-size:12px;">${t('edit')}</button></div>
+      <ul class="hlist"><li><span class="k">${t('system_name')}</span><span class="v">RCM Transformer</span></li><li><span class="k">${t('version')}</span><span class="v">1.0.0</span></li>
+      <li><span class="k">${t('department')}</span><span class="v">${state.lang==='th'?'ฝ่ายบริหารสินทรัพย์':'Asset Management Division'}</span></li>
+      <li><span class="k">${t('timezone')}</span><span class="v">(UTC+7) Bangkok</span></li><li><span class="k">${t('date_format')}</span><span class="v">DD/MM/YYYY</span></li>
+      <li><span class="k">${t('sys_language')}</span><span class="v">${state.lang==='th'?'ไทย (รองรับ EN)':'English (TH Support)'}</span></li></ul>
+    </div>
+    <div class="card"><h3>${t('notif_settings')}</h3>
+      <div class="settingsrow"><div class="srlabel">${icon('info')} ${t('email_notif')}</div><div class="toggle on" data-toggle="1"><div class="knob"></div></div></div>
+      <div class="settingsrow"><div class="srlabel">${icon('clock')} ${t('task_reminder')}</div><div class="toggle on" data-toggle="1"><div class="knob"></div></div></div>
+      <div class="settingsrow"><div class="srlabel">${icon('info')} ${t('high_risk_alert')}</div><div class="toggle on" data-toggle="1"><div class="knob"></div></div></div>
+      <div class="settingsrow"><div class="srlabel">${icon('report')} ${t('monthly_report')}</div><div class="toggle" data-toggle="1"><div class="knob"></div></div></div>
+      <div class="settingsrow"><div class="srlabel">${icon('gear')} ${t('sys_update_notif')}</div><div class="toggle on" data-toggle="1"><div class="knob"></div></div></div>
+    </div>
+    <div class="card"><h3>${t('appearance')}</h3>
+      <div class="settingsrow"><div class="srlabel">${t('theme')}</div><select class="chip-input" id="themeSelect2"><option value="system">${t('system_opt')}</option><option value="light">${t('light')}</option><option value="dark">${t('dark')}</option></select></div>
+      <div class="settingsrow"><div class="srlabel">${t('items_per_page')}</div><select class="chip-input"><option>10</option><option>20</option><option>50</option></select></div>
+    </div>
+  </div>`;
+}
+function attachSettingsEvents(){
+  document.querySelectorAll('[data-stab]').forEach(el=> el.addEventListener('click',()=>{ state.settingsTab = el.dataset.stab; render(); }));
+  document.querySelectorAll('.toggle[data-toggle]').forEach(tgl=> tgl.addEventListener('click',()=>{ tgl.classList.toggle('on'); toast(t('toast_saved')); }));
+  ['themeSelect','themeSelect2'].forEach(id=>{
+    const sel = document.getElementById(id);
+    if(sel){ sel.value = document.documentElement.getAttribute('data-theme') || 'system';
+      sel.addEventListener('change',(e)=>{ if(e.target.value==='system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', e.target.value); render(); }); }
+  });
+  ['btnEditHi','btnEditRisk','btnEditMaint','btnEditSystem'].forEach(id=>{ const b=document.getElementById(id); if(b) b.addEventListener('click', ()=>toast(t('toast_saved'),'success')); });
+  const manageFm = document.getElementById('btnManageFm'); if(manageFm) manageFm.addEventListener('click', ()=>{ state.page='detail'; state.detailTab='fmea'; render(); });
+  const addUser = document.getElementById('btnAddUser'); if(addUser) addUser.addEventListener('click', ()=>{
+    openModal(t('modal_add_user'), `
+      <div class="formrow"><label>${t('field_name')}</label><input name="name" required></div>
+      <div class="formrow"><label>${t('field_role')}</label><select name="role"><option>Admin</option><option selected>Operator</option><option>Viewer</option></select></div>
+      <div class="formrow"><label>${t('field_email')}</label><input name="email" type="email" required></div>
+    `, (data)=>{ USERS.push({name:data.name, role:data.role, email:data.email, status:'Active'}); render(); toast(t('toast_added'),'success'); });
+  });
+  document.querySelectorAll('.sys-btn').forEach(b=> b.addEventListener('click', ()=>{
+    const kind = b.dataset.sys;
+    if(kind==='export'){ const rows=[['ID','Location','Health Index','Status'], ...ASSETS.map(a=>[a.id,a.loc,a.hi,a.status])]; downloadFile('rcm_export.csv', toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); }
+    else if(kind==='backup'){ downloadFile('rcm_backup.json', JSON.stringify({ASSETS,FMEA,MAINT_PLAN,USERS}, null, 2), 'application/json'); toast(t('toast_exported'),'success'); }
+    else toast(t('toast_saved'),'success');
+  }));
+}
+
+/* ============ GLOBAL SEARCH / BELL / LANG ============ */
+function attachGlobalViewLinks(){
+  document.querySelectorAll('[data-view]').forEach(el=>{
+    el.addEventListener('click',()=>{ state.assetId = el.dataset.view; state.page='detail'; state.detailTab='overview'; render(); window.scrollTo(0,0); });
+  });
+}
+function attachTopbarEvents(){
+  document.getElementById('langEn').addEventListener('click', ()=>setLang('en'));
+  document.getElementById('langTh').addEventListener('click', ()=>setLang('th'));
+  const bell = document.getElementById('bellBtn');
+  bell.addEventListener('click', (e)=>{ e.stopPropagation(); toggleBellDropdown(); });
+  document.addEventListener('click', (e)=>{ const dd=document.getElementById('bellDropdown'); if(dd && !dd.contains(e.target) && e.target!==bell) dd.innerHTML=''; });
+  const gs = document.getElementById('globalSearch');
+  gs.value = state.globalSearch;
+  gs.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter'){
+      const q = gs.value.trim().toLowerCase(); state.globalSearch = gs.value;
+      const found = ASSETS.find(a=>a.id.toLowerCase()===q) || ASSETS.find(a=>a.id.toLowerCase().includes(q) || a.loc.toLowerCase().includes(q));
+      if(found){ state.assetId = found.id; state.page='detail'; state.detailTab='overview'; render(); window.scrollTo(0,0); }
+      else toast(t('toast_no_result'));
+    }
+  });
+}
+function toggleBellDropdown(){
+  const dd = document.getElementById('bellDropdown');
+  if(dd.innerHTML){ dd.innerHTML=''; return; }
+  dd.innerHTML = `<div class="dropdown"><div class="dropdown-head"><span>${t('notifications')}</span><button class="linklike" id="markAllRead">${t('mark_all_read')}</button></div>
+  <div class="dropdown-body">${NOTIFICATIONS.map(n=>`<div class="dropdown-item">${n[state.lang]}<div class="dt">${n.t}</div></div>`).join('')}</div></div>`;
+  document.getElementById('markAllRead').addEventListener('click', ()=>{ document.getElementById('bellCount').style.display='none'; dd.innerHTML=''; toast(t('toast_saved')); });
+}
+function setLang(lang){ state.lang = lang; render(); }
+
+/* ============ ROUTER ============ */
+function pageMeta(){
+  const titles = {
+    overview:[t('nav_overview'), t('sub_overview')],
+    assets:[t('nav_assets'), t('sub_assets')],
+    detail:[state.assetId, t('sub_detail')],
+    reports:[t('nav_reports'), t('sub_reports')],
+    settings:[t('nav_settings'), t('sub_settings')],
+  };
+  return titles[state.page] || ['RCM Transformer',''];
+}
+function render(){
+  renderNav();
+  document.getElementById('langEn').classList.toggle('active', state.lang==='en');
+  document.getElementById('langTh').classList.toggle('active', state.lang==='th');
+  const [ttl,sub] = pageMeta();
+  document.getElementById('pageTitle').textContent = ttl;
+  document.getElementById('pageSub').textContent = sub;
+  const content = document.getElementById('content');
+  destroyCharts();
+  if(state.page==='overview'){ content.innerHTML = renderOverview(); attachGlobalViewLinks(); attachOverviewEvents(); initOverviewCharts(); }
+  else if(state.page==='assets'){ content.innerHTML = renderAssetsPage(); attachGlobalViewLinks(); attachAssetsPageEvents(); }
+  else if(state.page==='detail'){ content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(ASSETS.find(x=>x.id===state.assetId)); }
+  else if(state.page==='reports'){ content.innerHTML = renderReports(); initReportsCharts(); attachReportsEvents(); }
+  else if(state.page==='settings'){ content.innerHTML = renderSettings(); attachSettingsEvents(); }
+}
+document.getElementById('menuBtn').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+attachTopbarEvents();
+render();
 </script>
-</body></html>
+</body>
+</html>
