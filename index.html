@@ -1,214 +1,789 @@
-<!doctype html>
-<html lang="th">
+<!DOCTYPE html>
+<html lang="th" class="dark">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RCM Transformer Intelligence</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
-*{box-sizing:border-box}:root{--ink:#17151d;--muted:#77717f;--line:#e9e5ee;--bg:#f7f5f9;--card:#fff;--purple:#5d2586;--purple2:#8a4db4;--violet:#efe5f7;--red:#d8465a;--amber:#d78a1d;--green:#218a67;--blue:#3d70c8;--shadow:0 14px 40px rgba(39,22,50,.08)}
-body{margin:0;font-family:Inter,"Noto Sans Thai",sans-serif;background:var(--bg);color:var(--ink)}button,input,select{font:inherit}
-.shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh}aside{position:sticky;top:0;height:100vh;padding:22px 16px;background:#1d1722;color:#fff}
-.brand{display:flex;align-items:center;gap:11px;padding:3px 8px 24px}.brandmark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#a96fd1,#65308c);display:grid;place-items:center;font-weight:800}.brand b{font-size:13px}.brand small{display:block;color:#9d94a5;font-size:9px;margin-top:3px}
-.navlabel{font-size:9px;color:#756c7c;letter-spacing:1.4px;padding:8px 10px}nav button{width:100%;border:0;background:transparent;color:#aaa1b0;padding:11px 12px;border-radius:10px;text-align:left;margin:2px 0;cursor:pointer;font-size:11px}nav button:hover,nav button.active{background:#302638;color:#fff}nav button.active{box-shadow:inset 3px 0 #a967d0}
-.sidecard{position:absolute;bottom:18px;left:16px;right:16px;background:#292130;border:1px solid #3b3044;border-radius:14px;padding:14px}.sidecard small{color:#9e94a6;font-size:9px}.sidecard b{display:block;margin-top:5px;font-size:11px}
-main{min-width:0}header{height:70px;background:rgba(255,255,255,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:10}header h1{font-size:16px;margin:0}header p{margin:3px 0 0;color:var(--muted);font-size:9px}.clock{text-align:right;font-size:10px}.clock b{display:block;font-size:11px}
-.content{padding:25px 28px 40px;max-width:1600px;margin:auto}.page{display:none}.page.active{display:block}
-.hero{position:relative;overflow:hidden;background:linear-gradient(125deg,#3b184f 0%,#632b85 55%,#9459b9 100%);border-radius:22px;padding:28px;color:#fff;display:grid;grid-template-columns:1fr 290px;min-height:210px;box-shadow:0 18px 55px rgba(74,32,98,.18)}.hero:before{content:"";position:absolute;width:360px;height:360px;border-radius:50%;right:-90px;top:-180px;border:1px solid rgba(255,255,255,.12)}.eyebrow{font-size:9px;letter-spacing:1.5px;color:#d8bfe8}.hero h2{font-size:29px;margin:9px 0 8px;letter-spacing:-.8px}.hero p{font-size:11px;color:#e7dced;line-height:1.7;max-width:650px}.herochips{display:flex;gap:7px;flex-wrap:wrap;margin-top:18px}.herochips span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.13);padding:7px 10px;border-radius:999px;font-size:9px}
-.tx{display:grid;place-items:center;position:relative}.tx svg{width:230px;filter:drop-shadow(0 18px 18px rgba(0,0,0,.25))}
-.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin:15px 0}.metric{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:var(--shadow)}.metric small{font-size:8px;color:var(--muted);letter-spacing:.7px}.metric strong{display:block;font-size:24px;margin-top:8px}.metric em{font-style:normal;font-size:9px;color:var(--muted)}
-.grid2{display:grid;grid-template-columns:1.35fr .65fr;gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}.cardhead{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}.cardhead h3{font-size:12px;margin:0}.cardhead p{font-size:9px;color:var(--muted);margin:4px 0 0}.cardbody{padding:18px}
-.btn{border:0;border-radius:9px;padding:8px 11px;font-size:9px;font-weight:700;cursor:pointer}.primary{background:var(--purple);color:#fff}.ghost{background:#fff;border:1px solid var(--line);color:#554f59}
-.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:10px}th{text-align:left;background:#fbfafc;color:#817a85;font-size:8px;letter-spacing:.5px;padding:10px;white-space:nowrap}td{padding:10px;border-top:1px solid #f0edf2;vertical-align:top}tr:hover td{background:#fdfbfe}.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:8px;font-weight:700;white-space:nowrap}.critical{background:#fde8ec;color:#b92d43}.watch{background:#fff1dd;color:#aa6810}.low{background:#e9f6f1;color:#1c785a}.info{background:#edf2fb;color:#3762ad}
-.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:13px}.search{flex:1;min-width:220px;border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:#fff;font-size:10px;outline:none}select{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff;font-size:9px}
-.strategybar{height:8px;background:#eee9f1;border-radius:999px;overflow:hidden;margin-top:8px}.strategybar i{display:block;height:100%;background:linear-gradient(90deg,#6b328f,#a668ca)}
-.failurecards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.failure{border:1px solid var(--line);border-radius:13px;padding:13px}.failure b{font-size:10px}.failure p{font-size:9px;color:var(--muted);line-height:1.55;min-height:40px}.scoreline{display:flex;gap:5px;margin-top:10px}.scoreline span{background:#f4f0f6;border-radius:7px;padding:5px 7px;font-size:8px}
-.notice{padding:14px;border-radius:12px;background:#f5eff8;border:1px solid #e7daef;font-size:10px;line-height:1.65;color:#57485f}
-.empty{padding:34px;text-align:center;color:var(--muted)}.empty b{display:block;color:var(--ink);font-size:13px;margin-bottom:6px}
-@media(max-width:1100px){.metrics{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}.failurecards{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:760px){.shell{grid-template-columns:72px 1fr}aside{padding:18px 9px}.brand div:last-child,.navlabel,nav button span,.sidecard{display:none}nav button{text-align:center;font-size:16px}.content{padding:16px}.hero{grid-template-columns:1fr}.tx{display:none}.metrics{grid-template-columns:1fr 1fr}.failurecards{grid-template-columns:1fr}}
-
-/* ===== RCM Engineering Upgrade v2 ===== */
-.stdgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stdcard{border:1px solid var(--line);border-radius:13px;padding:13px;background:#fff}.stdcard b{font-size:10px}.stdcard p{font-size:9px;color:var(--muted);line-height:1.55;margin:6px 0 0}
-.hi-layout{display:grid;grid-template-columns:290px 1fr;gap:14px}.hi-gauge{background:linear-gradient(145deg,#3b184f,#713994);border-radius:18px;color:white;padding:24px;text-align:center}.hi-gauge strong{font-size:48px;display:block}.hi-gauge small{color:#d9c7e5}.hi-table input,.dga-input{width:76px;border:1px solid var(--line);border-radius:8px;padding:7px;font-size:9px}.hi-table input[type=number]{text-align:center}
-.dga-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:9px}.gas{border:1px solid var(--line);border-radius:13px;padding:12px;background:#fff}.gas small{font-size:8px;color:var(--muted)}.gas b{display:block;font-size:15px;margin:6px 0}.dga-result{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-.rcm-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.flowstep{border:1px solid var(--line);border-radius:13px;padding:13px;background:#fff}.flowstep small{color:var(--purple);font-size:8px;font-weight:800}.flowstep b{display:block;font-size:10px;margin:6px 0}.flowstep p{font-size:8px;color:var(--muted);line-height:1.5;margin:0}
-.edit-select{max-width:230px;border:1px solid var(--line);border-radius:8px;padding:6px;font-size:8px;background:#fff}
-.savebar{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-@media(max-width:1100px){.dga-grid{grid-template-columns:repeat(4,1fr)}.rcm-flow{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:760px){.hi-layout,.dga-result,.stdgrid{grid-template-columns:1fr}.dga-grid{grid-template-columns:repeat(2,1fr)}.rcm-flow{grid-template-columns:1fr}}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Transformer RCM Enterprise Platform v3.0</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        industrial: {
+                            50: '#f0f4f8',
+                            100: '#d9e2ec',
+                            600: '#243b53',
+                            700: '#102a43',
+                            850: '#0b192c',
+                            900: '#070f1a',
+                            accent: '#0066cc',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontPrompt & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        ::-webkit-scrollbar-thumb { background: #627d98; border-radius: 3px; }
+    </style>
 </head>
-<body>
-<div class="shell">
-<aside>
- <div class="brand"><div class="brandmark">⚡</div><div><b>TR • RCM Intelligence</b><small>Transformer Reliability Workspace</small></div></div>
- <div class="navlabel">WORKSPACE</div>
- <nav>
-  <button class="active" data-page="dashboard" onclick="go('dashboard',this)">⌂ <span>Overview</span></button>
-  <button data-page="fmea" onclick="go('fmea',this)">▦ <span>FMEA / RPN</span></button>
-  <button data-page="strategy" onclick="go('strategy',this)">◇ <span>RCM Strategy</span></button>
-  <button data-page="hi" onclick="go('hi',this)">◉ <span>Health Index</span></button>
-  <button data-page="dga" onclick="go('dga',this)">⌁ <span>DGA Workspace</span></button>
-  <button data-page="plan" onclick="go('plan',this)">▣ <span>Maintenance Plan</span></button>
- </nav>
- <div class="sidecard"><small>DATA SOURCE</small><b>RCM 9-9(2).xlsx</b><small>Filtered: TR_ only</small></div>
-</aside>
-<main>
-<header><div><h1 id="title">Transformer RCM Overview</h1><p>ข้อมูลหม้อแปลงจากไฟล์ RCM • ไม่รวมอุปกรณ์หมวดอื่น</p></div><div class="clock"><b id="date"></b><span id="time"></span></div></header>
-<div class="content">
-<section class="page active" id="dashboard">
- <div class="hero">
-  <div><div class="eyebrow">RELIABILITY CENTERED MAINTENANCE</div><h2>Transformer Intelligence</h2><p>มุมมองเดียวสำหรับ Failure Mode, RPN, Consequence และ Maintenance Strategy ของหม้อแปลง โดยดึงเฉพาะรายการ Component ที่ขึ้นต้นด้วย TR_ จากไฟล์ที่ให้มา</p><div class="herochips"><span>FMEA</span><span>RPN Priority</span><span>Decision Logic</span><span>Maintenance Strategy</span><span>TR Assets Only</span></div></div>
-  <div class="tx"><svg viewBox="0 0 260 170" aria-label="transformer illustration"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#dad7df"/><stop offset="1" stop-color="#8c8791"/></linearGradient></defs><rect x="65" y="55" width="130" height="88" rx="10" fill="url(#g)"/><g fill="#bbb6c0"><rect x="85" y="28" width="12" height="34" rx="3"/><rect x="124" y="22" width="12" height="40" rx="3"/><rect x="163" y="28" width="12" height="34" rx="3"/></g><g stroke="#716b76" stroke-width="5"><path d="M52 67v63M44 70v57M36 75v47M208 67v63M216 70v57M224 75v47"/></g><rect x="97" y="85" width="66" height="28" rx="5" fill="#5d2586"/><text x="130" y="103" text-anchor="middle" fill="white" font-size="10" font-family="Inter">POWER TR</text></svg></div>
- </div>
- <div class="metrics">
-  <div class="metric"><small>FAILURE MODES</small><strong id="mTotal">0</strong><em>รายการ TR_ จาก FMEA</em></div>
-  <div class="metric"><small>SEVERITY 5</small><strong id="mCritical">0</strong><em>Critical priority</em></div>
-  <div class="metric"><small>SEVERITY 4</small><strong id="mWatch">0</strong><em>เฝ้าระวัง</em></div>
-  <div class="metric"><small>MAX RPN</small><strong id="mMax">0</strong><em>คะแนนสูงสุดในชุด TR</em></div>
-  <div class="metric"><small>RCM STRATEGIES</small><strong id="mStrategies">0</strong><em>รูปแบบกลยุทธ์ที่พบ</em></div>
- </div>
- <div class="grid2">
-  <div class="card"><div class="cardhead"><div><h3>Priority Failure Modes</h3><p>เรียงตาม Severity ก่อน แล้วจึง RPN</p></div><button class="btn ghost" onclick="go('fmea',document.querySelector('[data-page=fmea]'))">View all</button></div><div class="tablewrap"><table><thead><tr><th>Code / Failure Mode</th><th>Component</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>Priority</th></tr></thead><tbody id="priorityRows"></tbody></table></div></div>
-  <div class="card"><div class="cardhead"><div><h3>Strategy Mix</h3><p>สัดส่วนจาก Decision Logic Tree</p></div></div><div class="cardbody" id="strategyMix"></div></div>
- </div>
-</section>
+<body class="bg-slate-100 text-slate-800 dark:bg-industrial-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
 
-<section class="page" id="fmea">
- <div class="card"><div class="cardhead"><div><h3>Transformer FMEA Register</h3><p>ข้อมูลจริงจากชีต “วิเคราะห์ FMEA และประเมิน RPN” • เฉพาะ TR_</p></div><span class="badge info" id="rowCount"></span></div>
- <div class="cardbody"><div class="toolbar"><input id="q" class="search" placeholder="ค้นหา Component, Failure Mode, Cause..." oninput="renderFMEA()"><select id="sev" onchange="renderFMEA()"><option value="">ทุก Severity</option><option>5</option><option>4</option><option>3</option><option>2</option></select><select id="strat" onchange="renderFMEA()"><option value="">ทุก Strategy</option></select></div></div>
- <div class="tablewrap"><table><thead><tr><th>Component</th><th>Failure Code & Mode</th><th>Failure Cause</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>Priority</th><th>Consequence</th><th>RCM Strategy</th></tr></thead><tbody id="fmeaRows"></tbody></table></div></div>
-</section>
+    <!-- Top Industrial Header Bar -->
+    <header class="bg-white dark:bg-industrial-850 border-b border-slate-200 dark:border-slate-800 h-16 flex items-center justify-between px-6 sticky top-0 z-30 shadow-md">
+        <div class="flex items-center space-x-4">
+            <button id="sidebarToggle" class="text-slate-500 dark:text-slate-400 hover:text-blue-500 focus:outline-none text-xl p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-industrial-700 transition">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 text-white p-2 rounded-xl shadow-md flex items-center justify-center">
+                    <i class="fa-solid fa-bolt-lightning text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-sm sm:text-base tracking-wide text-slate-900 dark:text-white uppercase">Transformer RCM Enterprise</h1>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Reliability-Centered Maintenance Management System</p>
+                </div>
+            </div>
+        </div>
 
+        <div class="flex items-center space-x-4">
+            <div id="realtimeClock" class="hidden md:flex items-center space-x-2 text-xs font-semibold bg-slate-100 dark:bg-industrial-700 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                <i class="fa-regular fa-clock text-blue-500"></i>
+                <span id="clockText">--/--/---- --:--:--</span>
+            </div>
+            <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-industrial-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-industrial-600 transition shadow-sm" title="สลับธีม">
+                <i id="themeIcon" class="fa-solid fa-moon"></i>
+            </button>
+            <div class="flex items-center space-x-3 pl-3 border-l border-slate-200 dark:border-slate-800">
+                <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow">PP</div>
+                <div class="hidden sm:block text-left">
+                    <div class="text-xs font-semibold text-slate-900 dark:text-white">Panissara P.</div>
+                    <div class="text-[10px] text-emerald-500 font-medium">● RCM Lead Engineer</div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-<section class="page" id="strategy">
- <div class="card"><div class="cardhead"><div><h3>RCM Decision Logic — Corrected Model</h3><p>ปรับใหม่: Strategy ไม่ตัดสินจาก RPN เพียงอย่างเดียว แต่ใช้ Failure Consequence + Failure Characteristic + Technical Feasibility</p></div><span class="badge info">SAE JA1011 aligned logic</span></div>
- <div class="cardbody"><div class="rcm-flow">
-  <div class="flowstep"><small>01 • CONSEQUENCE</small><b>Hidden / Safety / Operational / Non-operational</b><p>แยกผลกระทบของ Failure ก่อนเลือกงานบำรุง</p></div>
-  <div class="flowstep"><small>02 • DETECTABILITY</small><b>มี P–F interval ที่ใช้ได้หรือไม่?</b><p>ถ้าตรวจจับ degradation ได้ทันเวลา → On-condition / CBM</p></div>
-  <div class="flowstep"><small>03 • AGE RELATION</small><b>Failure มี age-related pattern หรือไม่?</b><p>ถ้ามีและ task คุ้มค่า → Scheduled restoration / discard</p></div>
-  <div class="flowstep"><small>04 • DEFAULT ACTION</small><b>Failure-finding / No scheduled maintenance / Redesign</b><p>เลือกตาม consequence และความเสี่ยงที่ยอมรับได้</p></div>
- </div></div></div>
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Left Sidebar Navigation -->
+        <aside id="sidebar" class="w-64 bg-white dark:bg-industrial-850 border-r border-slate-200 dark:border-slate-800 flex flex-col z-20 transition-all duration-300 shrink-0">
+            <div class="p-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Navigation Menu</div>
+            <nav class="flex-1 px-3 space-y-1.5 overflow-y-auto">
+                <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-industrial-700 active-nav" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-blue-500"></i>
+                    <span>ภาพรวม & แผนบำรุงรักษา</span>
+                </button>
+                <button onclick="switchTab('assets')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-industrial-700" data-tab="assets">
+                    <i class="fa-solid fa-industry w-5 text-center text-blue-500"></i>
+                    <span>หม้อแปลงไฟฟ้า (Transformers)</span>
+                </button>
+                <button onclick="switchTab('fmea')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-industrial-700" data-tab="fmea">
+                    <i class="fa-solid fa-table-cells w-5 text-center text-blue-500"></i>
+                    <span>วิเคราะห์ FMEA & คำนวณ RPN</span>
+                </button>
+                <button onclick="switchTab('hi')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-industrial-700" data-tab="hi">
+                    <i class="fa-solid fa-heart-pulse w-5 text-center text-blue-500"></i>
+                    <span>ประเมิน Health Index (HI)</span>
+                </button>
+                <button onclick="switchTab('dga')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-industrial-700" data-tab="dga">
+                    <i class="fa-solid fa-flask w-5 text-center text-blue-500"></i>
+                    <span>วิเคราะห์ DGA & สามเหลี่ยม Duval</span>
+                </button>
+                <button onclick="switchTab('strategy')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-industrial-700" data-tab="strategy">
+                    <i class="fa-solid fa-chess-board w-5 text-center text-blue-500"></i>
+                    <span>กลยุทธ์ RCM & Decision Tree</span>
+                </button>
+            </nav>
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+                <div class="bg-blue-50 dark:bg-blue-950/40 p-3 rounded-xl border border-blue-200 dark:border-blue-900/50">
+                    <div class="flex items-center space-x-2 text-blue-600 dark:text-blue-400 font-semibold text-xs mb-1">
+                        <i class="fa-solid fa-database"></i>
+                        <span>Excel Database</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300">โหลดข้อมูลหม้อแปลง 46 รายการสำเร็จ</p>
+                </div>
+            </div>
+        </aside>
 
- <div class="card"><div class="cardhead"><div><h3>Transformer Strategy Register</h3><p>ข้อเสนอแนะใหม่อัตโนมัติจาก Failure Mode ในไฟล์ • สามารถแก้ Strategy ต่อรายการได้</p></div><button class="btn ghost" onclick="resetStrategies()">Reset Recommendation</button></div>
- <div class="tablewrap"><table><thead><tr><th>Component</th><th>Failure Mode</th><th>Consequence</th><th>S</th><th>RPN</th><th>Recommended RCM Strategy</th><th>Reason</th></tr></thead><tbody id="correctedStrategyRows"></tbody></table></div></div>
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-slate-100 dark:bg-industrial-900 overflow-y-auto p-6 md:p-8 space-y-6">
+            
+            <!-- TAB 1: DASHBOARD -->
+            <section id="tab-dashboard" class="tab-content space-y-6">
+                <!-- KPI Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="bg-white dark:bg-industrial-850 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">หม้อแปลงทั้งหมด (Units)</p>
+                            <h3 class="text-3xl font-bold text-slate-900 dark:text-white mt-1">6 <span class="text-xs font-normal text-slate-400">เครื่อง</span></h3>
+                            <span class="inline-flex items-center text-xs font-semibold text-emerald-500 mt-2">
+                                <i class="fa-solid fa-circle-check mr-1"></i> สถานะปกติ 100%
+                            </span>
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fa-solid fa-industry"></i>
+                        </div>
+                    </div>
 
- <div class="card"><div class="cardhead"><div><h3>RCM Reference Library</h3><p>มาตรฐาน/คู่มือที่ควรอ้างในรายงานและใช้กำหนด logic ของระบบ</p></div></div><div class="cardbody"><div class="stdgrid">
-  <div class="stdcard"><b>SAE JA1011:2024</b><p>Evaluation Criteria for Reliability-Centered Maintenance Processes — ใช้เป็นกรอบตรวจว่า process ที่เรียกว่า RCM มีองค์ประกอบครบถ้วน</p></div>
-  <div class="stdcard"><b>CIGRE TB 962 (2025)</b><p>Guide for Transformer Maintenance — best practice, condition evaluation, checking/testing, maintenance intervals และ advanced maintenance</p></div>
-  <div class="stdcard"><b>CIGRE TB 761 (2019)</b><p>Condition Assessment of Power Transformers — scoring matrix, assessment indices และการเชื่อม condition score กับ action / timing</p></div>
-  <div class="stdcard"><b>CIGRE TB 858 (2021)</b><p>Asset Health Indices for Substation Equipment — AHI, diagnostic indicators, FMEA, DGA และ reliability-centred maintenance</p></div>
- </div></div></div>
-</section>
+                    <div class="bg-white dark:bg-industrial-850 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">โหมดความเสี่ยงสูง (Critical RPN)</p>
+                            <h3 class="text-3xl font-bold text-rose-600 dark:text-rose-400 mt-1" id="dashCriticalCount">4 <span class="text-xs font-normal text-slate-400">รายการ</span></h3>
+                            <span class="inline-flex items-center text-xs font-semibold text-rose-500 mt-2">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> ต้องเฝ้าระวังเร่งด่วน
+                            </span>
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fa-solid fa-bolt-lightning"></i>
+                        </div>
+                    </div>
 
+                    <div class="bg-white dark:bg-industrial-850 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">คะแนนสุขภาพเฉลี่ย (Avg HI)</p>
+                            <h3 class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">86.4 <span class="text-xs font-normal text-slate-400">/100</span></h3>
+                            <span class="inline-flex items-center text-xs font-semibold text-emerald-500 mt-2">
+                                <i class="fa-solid fa-shield-heart mr-1"></i>เกณฑ์ปกติ (Normal)
+                            </span>
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                        </div>
+                    </div>
 
+                    <div class="bg-white dark:bg-industrial-850 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">งานบำรุงรักษารอดำเนินการ</p>
+                            <h3 class="text-3xl font-bold text-amber-500 mt-1">3 <span class="text-xs font-normal text-slate-400">งาน</span></h3>
+                            <span class="inline-flex items-center text-xs font-semibold text-amber-500 mt-2">
+                                <i class="fa-solid fa-calendar-days mr-1"></i> รอบสัปดาห์นี้
+                            </span>
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                        </div>
+                    </div>
+                </div>
 
-<section class="page" id="hi">
- <div class="hi-layout">
-  <div class="hi-gauge"><small>SIMULATED TRANSFORMER HEALTH INDEX</small><strong id="hiTotal">76</strong><span id="hiClass" class="badge low">Good</span><p style="font-size:9px;line-height:1.6;color:#e4d8ea;margin-top:14px">คะแนนจำลองสำหรับ Prototype — ผู้ใช้แก้คะแนนและ Weight ได้ ระบบจะคำนวณใหม่ทันที</p></div>
-  <div class="card"><div class="cardhead"><div><h3>Editable HI Scoring Model</h3><p>Weighted condition score 0–100 • 100 = condition ดีกว่า</p></div><button class="btn ghost" onclick="resetHI()">Reset Demo</button></div>
-   <div class="tablewrap"><table class="hi-table"><thead><tr><th>Condition Indicator</th><th>Weight %</th><th>Score 0–100</th><th>Weighted Score</th><th>Reference / Rationale</th></tr></thead><tbody id="hiRows"></tbody></table></div>
-   <div class="cardbody"><div class="notice"><b>Prototype rule:</b> HI ≥ 80 = Very Good, 65–79 = Good, 50–64 = Fair, 35–49 = Poor, &lt;35 = Critical. ช่วงคะแนนนี้เป็นเกณฑ์ภายในของต้นแบบ ไม่ใช่ค่าบังคับของ IEC/CIGRE; CIGRE TB 761 สนับสนุนแนวคิด scoring matrix และการใช้ assessment indices เพื่อจัดอันดับสภาพและช่วยกำหนด action.</div></div>
-  </div>
- </div>
-</section>
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-industrial-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-4 flex items-center">
+                            <i class="fa-solid fa-chart-column text-blue-500 mr-2"></i> สัดส่วนระดับความเสี่ยง FMEA (RPN Distribution)
+                        </h3>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="rpnChart"></canvas>
+                        </div>
+                    </div>
 
+                    <div class="bg-white dark:bg-industrial-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-4 flex items-center">
+                            <i class="fa-solid fa-chart-pie text-blue-500 mr-2"></i> สภาพสุขภาพหม้อแปลง (Health Index Status)
+                        </h3>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="hiChart"></canvas>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Maintenance Schedule Table (Prominent at Dashboard) -->
+                <div class="bg-white dark:bg-industrial-850 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center">
+                                <i class="fa-solid fa-calendar-check text-blue-500 mr-2"></i> แผนงานซ่อมบำรุงหม้อแปลง (Upcoming & Overdue Maintenance Schedule)
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">ตารางการเข้าปฏิบัติงานตามกลยุทธ์ RCM</p>
+                        </div>
+                        <button onclick="showAddScheduleModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-4 py-2.5 rounded-xl shadow transition flex items-center space-x-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>เพิ่มแผนบำรุงรักษา</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-industrial-700 text-slate-700 dark:text-slate-200 font-bold text-xs border-b border-slate-200 dark:border-slate-800">
+                                    <th class="p-4">รหัสอุปกรณ์</th>
+                                    <th class="p-4">ชื่อหม้อแปลง / สถานี</th>
+                                    <th class="p-4">กิจกรรมบำรุงรักษา</th>
+                                    <th class="p-4">วันที่กำหนด</th>
+                                    <th class="p-4">กลยุทธ์</th>
+                                    <th class="p-4">สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="maintenanceTableBody" class="divide-y divide-slate-200 dark:divide-slate-800 text-xs sm:text-sm">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
-<section class="page" id="dga">
- <div class="card"><div class="cardhead"><div><h3>DGA Diagnostic Workspace</h3><p>ค่าจำลองแก้ไขได้ • ใช้เพื่อสาธิต workflow ไม่ใช่ผลตรวจจริง</p></div><button class="btn primary" onclick="analyzeDGA()">Analyze</button></div>
- <div class="cardbody">
-  <div class="dga-grid" id="dgaGrid"></div>
-  <div class="dga-result">
-   <div class="notice"><b id="dgaScreen">Preliminary screening</b><br><span id="dgaText">กด Analyze เพื่อประเมิน pattern เบื้องต้น</span></div>
-   <div class="notice"><b>Engineering rule</b><br>ไม่สรุปความผิดปกติจากก๊าซตัวเดียว ระบบต้นแบบใช้ Key-gas pattern เพื่อคัดกรอง และต้องดู trend, sampling quality, operating history และวิธีวินิจฉัยที่องค์กรกำหนดร่วมกัน</div>
-  </div>
- </div></div>
- <div class="card"><div class="cardhead"><div><h3>DGA Standards & Guides</h3><p>เอกสารอ้างอิงสำหรับออกแบบโมดูลจริง</p></div></div><div class="cardbody"><div class="stdgrid">
-  <div class="stdcard"><b>IEC 60599:2022</b><p>แนวทางตีความ dissolved/free gases ของอุปกรณ์ฉนวนน้ำมัน และย้ำว่าผลเป็น guidance ที่ต้องใช้ engineering judgment</p></div>
-  <div class="stdcard"><b>IEEE C57.104-2019</b><p>Guide สำหรับ DGA ของ mineral-oil immersed transformers ครอบคลุม gas generation, interpretation, diagnostic techniques, limitations และ case studies</p></div>
-  <div class="stdcard"><b>CIGRE TB 783</b><p>แนวทาง DGA monitoring systems และการตรวจสอบความถูกต้องของผลจาก laboratory / online monitors</p></div>
-  <div class="stdcard"><b>Trend before verdict</b><p>ในเว็บจึงแยก “Preliminary Screening” ออกจาก “Engineering Diagnosis” เพื่อไม่ให้ระบบฟันธงจากค่าจำลอง</p></div>
- </div></div></div>
-</section>
+            <!-- TAB 2: ASSETS (TRANSFORMERS) -->
+            <section id="tab-assets" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-industrial-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                            <i class="fa-solid fa-industry text-blue-500 mr-2"></i> ทะเบียนหม้อแปลงไฟฟ้า (Power Transformers Inventory)
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">คัดเฉพาะหม้อแปลงไฟฟ้าหลักและอุปกรณ์ประกอบ (รวม 6 เครื่อง)</p>
+                    </div>
+                    <div class="relative w-full sm:w-72">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-search"></i></span>
+                        <input type="text" id="assetSearchInput" onkeyup="filterAssets()" placeholder="ค้นหารหัส หรือชื่อหม้อแปลง..." class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-industrial-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 dark:text-slate-100">
+                    </div>
+                </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="transformerCardGrid">
+                    <!-- Cards populated by JS -->
+                </div>
+            </section>
 
-<section class="page" id="plan">
- <div class="card"><div class="cardhead"><div><h3>Maintenance Planning Queue</h3><p>จัดกลุ่มจาก RCM Strategy ในไฟล์ • ยังไม่สมมติวันเข้าบำรุง</p></div></div><div class="tablewrap"><table><thead><tr><th>Component</th><th>Failure Mode</th><th>Consequence</th><th>Strategy</th><th>RPN</th><th>Planning Status</th></tr></thead><tbody id="planRows"></tbody></table></div></div>
-</section>
-</div>
-</main></div>
-<script>
-const DATA=[{"component": "TR_Counter L/A", "mode": "T001 Counter Lightning Arrester ชำรุด", "cause": "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", "s": 2, "o": 2, "d": 2, "rpn": 8, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"component": "TR_OLevelGauge", "mode": "T002 Oil level gauge ชำรุด", "cause": "โครงแตก, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_OtempGauge", "mode": "T003 Oil temp ชำรุด", "cause": "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_Sgel/ABreather", "mode": "T004 Silicagel เปลี่ยนสี / Air Breather ชำรุด", "cause": "Silicagel เสื่อมสภาพ, การอุดตัน / ฝุ่นละออง", "s": 2, "o": 3, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"component": "TR_WTempGauge", "mode": "T005 Winding temp ชำรุด", "cause": "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", "s": 3, "o": 2, "d": 1, "rpn": 6, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_TOP", "mode": "T006 น้ำมันรั่วซึมด้านบนหม้อแปลง", "cause": "ซีลเสื่อมสภาพ", "s": 3, "o": 3, "d": 2, "rpn": 18, "priority": "ปานกลาง/ต่ำ", "consequence": "Operational-moderate (เกิดบ่อย)", "strategy": "Time-based (PM)"}, {"component": "TR_Bushing", "mode": "T007 น้ำมันรั่วซึมที่ Bushing หม้อแปลง", "cause": "ซีลเสื่อมสภาพ, แตกหัก, ติดตั้งไม่ถูกต้องตามมาตราฐาน, การเสียดสีหรือความเสียหายจากการเคลื่อนที่", "s": 4, "o": 2, "d": 3, "rpn": 24, "priority": "เฝ้าระวัง", "consequence": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"component": "TR_CableBox", "mode": "T008 น้ำมันรั่วซึมที่ Cable box", "cause": "ซีลเสื่อมสภาพ, ติดตั้งไม่ถูกต้องตามมาตราฐาน, ความร้อนสูงเกินไป", "s": 3, "o": 2, "d": 3, "rpn": 18, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_Radiator", "mode": "T009 น้ำมันรั่วซึมที่ Radiator", "cause": "ซีลเสื่อมสภาพ, ติดตั้งไม่ถูกต้องตามมาตราฐาน, การเสียดสีหรือแรงดันภายในสูง, การเสื่อมสภาพจากการสะสมของสิ่งสกปรก", "s": 3, "o": 3, "d": 2, "rpn": 18, "priority": "ปานกลาง/ต่ำ", "consequence": "Operational-moderate (เกิดบ่อย)", "strategy": "Time-based (PM)"}, {"component": "TR_MainTank", "mode": "T012 น้ำมันหม้อแปลงต่ำ", "cause": "การทำงานผิดปกติของระบบระบายความร้อน, ซีลเสื่อมสภาพ", "s": 4, "o": 2, "d": 1, "rpn": 8, "priority": "เฝ้าระวัง", "consequence": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"component": "TR_MainTank", "mode": "T015 หม้อแปลงชำรุด", "cause": "การรั่วซึมของน้ำมัน, การเกิดไฟฟ้าลัดวงจร, การเสื่อมสภาพจากอายุการใช้งาน, ความร้อนสะสมเกินไป", "s": 5, "o": 1, "d": 1, "rpn": 5, "priority": "วิกฤต", "consequence": "Safety-critical", "strategy": "Redesign บังคับ / Scheduled Discard"}, {"component": "TR_Trip", "mode": "T016 หม้อแปลง Trip", "cause": "การทำงานผิดพลาดของรีเลย์", "s": 4, "o": 2, "d": 1, "rpn": 8, "priority": "เฝ้าระวัง", "consequence": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"component": "TR_FAN", "mode": "T018 เปลี่ยนพัดลมหม้อแปลง", "cause": "สึกหรอจากการใช้งานนาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_FAN", "mode": "T019 พัดลมหม้อแปลงถอดไปซ่อม", "cause": "สึกหรอจากการใช้งานนาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_FAN", "mode": "T020 พัดลมหม้อแปลงไม่ทำงาน", "cause": "การเสียหายของมอเตอร์", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_Coil", "mode": "T023 ขดลวดหม้อแปลงชำรุด", "cause": "การโอเวอร์โหลด, ความผิดปกติของแรงดัน, การผลิตที่ไม่ดี, การเกิดความชื้น", "s": 5, "o": 1, "d": 4, "rpn": 20, "priority": "วิกฤต", "consequence": "Safety-critical", "strategy": "Redesign บังคับ / Scheduled Discard"}, {"component": "TR_Core", "mode": "T024 แกนเหล็กหม้อแปลงชำรุด", "cause": "การออกแบบที่ผิดพลาด, ความเครียดจากการเปลี่ยนแปลงกระแสไฟฟ้า", "s": 4, "o": 1, "d": 4, "rpn": 16, "priority": "เฝ้าระวัง", "consequence": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"component": "TR_HVBushing", "mode": "T025 TR_HVBushing หม้อแปลงชำรุด", "cause": "เสื่อมสภาพ", "s": 4, "o": 2, "d": 3, "rpn": 24, "priority": "เฝ้าระวัง", "consequence": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"component": "TR_MVBushing", "mode": "T026 TR_MVBushing หม้อแปลงชำรุด", "cause": "เสื่อมสภาพ", "s": 4, "o": 2, "d": 3, "rpn": 24, "priority": "เฝ้าระวัง", "consequence": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"component": "TR_OFFLTAP", "mode": "T027 OFF LODE TAP หม้อแปลงชำรุด", "cause": "เสื่อมสภาพ", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_BuchRelay", "mode": "T028 Buchholz relay ชำรุด", "cause": "ลัดวงจรหรือความผิดพลาดภายใน, การติดตั้งไม่ถูกต้อง, เสื่อมสภาพจากอายุใช้งาน, อุณหภูมิสูงเกิน, กลไกติดขัด", "s": 4, "o": 1, "d": 2, "rpn": 8, "priority": "เฝ้าระวัง", "consequence": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"component": "TR_PresRelief", "mode": "T029 Pressure relief ชำรุด", "cause": "การติดตั้งไม่ถูกต้อง, เสื่อมสภาพจากอายุใช้งาน, กลไกติดขัด, แรงดันเกินขีดจำกัดบ่อยเกิน", "s": 4, "o": 1, "d": 2, "rpn": 8, "priority": "เฝ้าระวัง", "consequence": "Operational (ตรวจจับได้)", "strategy": "Condition-based (PdM)"}, {"component": "TR_Control_desk", "mode": "T101 Control desk tap อ่านไม่ตรง", "cause": "เสื่อมสภาพจากอายุใช้งาน, ความชื้นหรือสิ่งสกปรก", "s": 2, "o": 2, "d": 1, "rpn": 4, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"component": "TR_Control_Lampdesk", "mode": "T102 Control desk หลอดขาด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 2, "o": 2, "d": 1, "rpn": 4, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"component": "TR_FanControl", "mode": "T103 Control พัดลมชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 2, "o": 2, "d": 1, "rpn": 4, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"component": "TR_Relay", "mode": "T104 Differential relay ชำรุด", "cause": "การทำงานผิดพลาดในระบบควบคุม, Current Transformer Malfunction, การตั้งค่าผิด", "s": 4, "o": 1, "d": 3, "rpn": 12, "priority": "เฝ้าระวัง", "consequence": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"component": "TR_DifRelay", "mode": "T105 Differential relay เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "priority": "เฝ้าระวัง", "consequence": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"component": "TR_Relay", "mode": "T106 Tripping relay ชำรุด", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "priority": "เฝ้าระวัง", "consequence": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"component": "TR_TrippingRelay", "mode": "T107 Tripping relay เปลี่ยน", "cause": "เสื่อมสภาพจากอายุใช้งาน", "s": 4, "o": 1, "d": 3, "rpn": 12, "priority": "เฝ้าระวัง", "consequence": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"component": "TR_CountTap", "mode": "T206 Counter Tap ไม่ทำงาน", "cause": "กลไกติดขัด, ชุดเฟืองภายในชำรุด, Lubrication, เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_Microlimit", "mode": "T208 Micro sw. Lower & upper limit ค้าง", "cause": "กลไกติดขัด", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_OLTC Tap", "mode": "T209 OLTC เปลี่ยน Tap ทางไฟฟ้าไม่ได้", "cause": "OLTC เปลี่ยน Tap ทางไฟฟ้า ไม่ทำงานจริง", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_OLTC Tap", "mode": "T210 น้ำมันรั่วซึมที่ฝาบ่อ OLTC", "cause": "ซีลเสื่อมสภาพ", "s": 3, "o": 3, "d": 2, "rpn": 18, "priority": "ปานกลาง/ต่ำ", "consequence": "Operational-moderate (เกิดบ่อย)", "strategy": "Time-based (PM)"}, {"component": "TR_OLTC Tap", "mode": "T211 เปลี่ยน Tap แล้วมีเสียงดัง", "cause": "เปลี่ยน Tap แล้วมีเสียงดังจากกลไก", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_OLTC Tap", "mode": "T212 ระดับน้ำมันต่ำที่ OLTC", "cause": "ระดับน้ำมันต่ำที่ OLTC ชีลเสื่อมสภาพ", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_OLTC_ProRelay", "mode": "T215 Tap protective relay ชำรุด", "cause": "กลไกเสื่อมสภาพ, ความชื้น ฝุ่น การกัดกร่อน, มีการต่อสายผิด หรือมี short ที่ terminal", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_OLTC_MainContact", "mode": "T216 Main contact ชำรุด", "cause": "การอาร์ก ระหว่างเปลี่ยน TAP ที่บ่อยครั้ง, อุณหภูมิสูงเกินจากกระแสเกิน, น้ำมัน OLTC เสื่อมสภาพ, กลไกบังคับ contact ทำงานผิดพลาด", "s": 4, "o": 2, "d": 3, "rpn": 24, "priority": "เฝ้าระวัง", "consequence": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"component": "TR_OLTC_TransitContact", "mode": "T217 Transition contact ชำรุด", "cause": "การอาร์ก (Arc) ซ้ำซ้อนขณะสลับ Tap, น้ำมัน OLTC เสื่อมสภาพ, สปริง/กลไกกด contact เสียหาย, ความต้านทาน contact เพิ่มขึ้น", "s": 4, "o": 2, "d": 3, "rpn": 24, "priority": "เฝ้าระวัง", "consequence": "Operational-significant (ตรวจจับยาก)", "strategy": "Time-based (PM) บังคับ"}, {"component": "TR_OLTC_Gear", "mode": "T218 Gear unit ชำรุด", "cause": "สึกหรอ", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_OLTC_Access", "mode": "T219 OLTC Accessories ชำรุด", "cause": "ชำรุดจาก Accessories", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_OLTC_MotorControlBoard", "mode": "T220 Motor drive control board ชำรุด", "cause": "แรงดันไฟฟ้าผิดปกติ, ความชื้นและฝุ่นละอองในกล่องควบคุม, เสื่อมสภาพจากอายุใช้งาน", "s": 3, "o": 2, "d": 2, "rpn": 12, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-low", "strategy": "Condition-based (PdM) หรือ PM ตามรอบ"}, {"component": "TR_OilFilter", "mode": "T301 Counter oil filter ทำงานผิดปกติ", "cause": "Sensor/Trigger  เสียหาย, การรบกวนจากสัญญาณไฟฟ้า (Electrical Noise)", "s": 2, "o": 2, "d": 2, "rpn": 8, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"component": "TR_OilFilter", "mode": "T302 Motor oil filter หมุนกลับทาง", "cause": "Motor oil filter หมุนกลับทาง จาก ต่อท่อผิดด้าน (Inlet/Outlet สลับ)", "s": 2, "o": 2, "d": 2, "rpn": 8, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"component": "TR_OilFilter", "mode": "T303 Oil filter unit มีน้ำมันรั่วซึม", "cause": "ซีลเสื่อมสภาพ", "s": 3, "o": 3, "d": 2, "rpn": 18, "priority": "ปานกลาง/ต่ำ", "consequence": "Operational-moderate (เกิดบ่อย)", "strategy": "Time-based (PM)"}, {"component": "TR_OilFilter", "mode": "T304 Oil filter ไม่ทำงานหลังจากเปลี่ยน Tap", "cause": "ระบบปั๊มน้ำมันของ OLTC หยุดทำงานหรือเดินผิดทาง", "s": 2, "o": 2, "d": 2, "rpn": 8, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-minor", "strategy": "Run-to-failure (CM)"}, {"component": "TR_OilFilter", "mode": "T305 Pressure gauge oil filter เสีย", "cause": "แรงดันน้ำมันเกินพิกัด (Overpressure), น้ำมันหรือสิ่งสกปรกเข้าไปในเกจ, เสื่อมสภาพจากอายุใช้งาน", "s": 2, "o": 2, "d": 2, "rpn": 8, "priority": "ปานกลาง/ต่ำ", "consequence": "Economic-minor", "strategy": "Run-to-failure (CM)"}];
-const titles={dashboard:"Transformer RCM Overview",fmea:"FMEA / RPN Register",strategy:"RCM Strategy",hi:"Health Index",dga:"DGA Workspace",plan:"Maintenance Planning"};
-function go(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('title').textContent=titles[id];window.scrollTo(0,0)}
-function clock(){const n=new Date();date.textContent=n.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short',year:'numeric'});time.textContent=n.toLocaleTimeString('th-TH')}setInterval(clock,1000);clock();
-function cls(x){if(x.s===5)return'critical';if(x.s===4)return'watch';return'low'}
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-const strategies=[...new Set(DATA.map(x=>x.strategy).filter(Boolean))];
-mTotal.textContent=DATA.length;mCritical.textContent=DATA.filter(x=>x.s===5).length;mWatch.textContent=DATA.filter(x=>x.s===4).length;mMax.textContent=Math.max(...DATA.map(x=>x.rpn));mStrategies.textContent=strategies.length;
-priorityRows.innerHTML=[...DATA].sort((a,b)=>b.s-a.s||b.rpn-a.rpn).slice(0,8).map(x=>`<tr><td><b>${esc(x.mode)}</b></td><td>${esc(x.component)}</td><td>${x.s}</td><td>${x.o}</td><td>${x.d}</td><td><b>${x.rpn}</b></td><td><span class="badge ${cls(x)}">${esc(x.priority)}</span></td></tr>`).join('');
-const counts={};DATA.forEach(x=>counts[x.strategy]=(counts[x.strategy]||0)+1);strategyMix.innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div style="margin-bottom:15px"><div style="display:flex;justify-content:space-between;gap:10px;font-size:9px"><b>${esc(k)}</b><span>${v}</span></div><div class="strategybar"><i style="width:${v/DATA.length*100}%"></i></div></div>`).join('');
-strat.innerHTML+=[...strategies].map(s=>`<option>${esc(s)}</option>`).join('');
-function renderFMEA(){let z=DATA.filter(x=>(!q.value||JSON.stringify(x).toLowerCase().includes(q.value.toLowerCase()))&&(!sev.value||String(x.s)===sev.value)&&(!strat.value||x.strategy===strat.value));rowCount.textContent=z.length+' records';fmeaRows.innerHTML=z.map(x=>`<tr><td><b>${esc(x.component)}</b></td><td>${esc(x.mode)}</td><td>${esc(x.cause)}</td><td>${x.s}</td><td>${x.o}</td><td>${x.d}</td><td><b>${x.rpn}</b></td><td><span class="badge ${cls(x)}">${esc(x.priority)}</span></td><td>${esc(x.consequence)}</td><td>${esc(x.strategy)}</td></tr>`).join('')}renderFMEA();
-strategyCards.innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="failure"><span class="badge info">${v} modes</span><p></p><b>${esc(k)}</b><p>${esc(DATA.find(x=>x.strategy===k)?.consequence||'')}</p></div>`).join('');
-planRows.innerHTML=[...DATA].sort((a,b)=>b.s-a.s||b.rpn-a.rpn).map(x=>`<tr><td><b>${esc(x.component)}</b></td><td>${esc(x.mode)}</td><td>${esc(x.consequence)}</td><td>${esc(x.strategy)}</td><td><b>${x.rpn}</b></td><td><span class="badge info">รอวางแผนวันงาน</span></td></tr>`).join('');
+            <!-- TAB 3: FMEA & RPN -->
+            <section id="tab-fmea" class="tab-content hidden space-y-6">
+                <div class="bg-white dark:bg-industrial-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                            <i class="fa-solid fa-table-cells text-blue-500 mr-2"></i> วิเคราะห์ FMEA และคำนวณ RPN (หม้อแปลงไฟฟ้า 46 รายการ)
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">คลิกแก้ไขคะแนน S, O, ด ได้สดๆ และระบบคำนวณ RPN (Severity x Occurrence x Detection) ทันที</p>
+                    </div>
+                    <span class="text-xs bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-xl font-bold border border-blue-200 dark:border-blue-900">
+                        รายการทั้งหมด: <span id="fmeaCount">0</span> รายการ
+                    </span>
+                </div>
 
-/* ===== Engineering Upgrade v2 ===== */
-const HI_DEFAULT=[
- {name:"DGA / Dissolved Gas",w:25,s:72,ref:"IEC 60599 / IEEE C57.104"},
- {name:"Oil Quality / Dielectric",w:18,s:78,ref:"CIGRE condition assessment"},
- {name:"Electrical Tests",w:20,s:82,ref:"Transformer diagnostic tests"},
- {name:"Visual / Mechanical",w:12,s:86,ref:"Inspection findings"},
- {name:"Loading / Thermal Stress",w:15,s:68,ref:"Operating history"},
- {name:"Age / Maintenance History",w:10,s:64,ref:"Fleet / service history"}
-];
-let HI=JSON.parse(localStorage.getItem("tr_hi_demo")||"null")||structuredClone(HI_DEFAULT);
-function renderHI(){
- hiRows.innerHTML=HI.map((x,i)=>`<tr><td><b>${esc(x.name)}</b></td><td><input type="number" min="0" max="100" value="${x.w}" onchange="hiEdit(${i},'w',this.value)"></td><td><input type="number" min="0" max="100" value="${x.s}" onchange="hiEdit(${i},'s',this.value)"></td><td><b>${(x.w*x.s/100).toFixed(1)}</b></td><td>${esc(x.ref)}</td></tr>`).join('');
- const sw=HI.reduce((a,x)=>a+x.w,0)||1, val=Math.round(HI.reduce((a,x)=>a+x.w*x.s,0)/sw);
- hiTotal.textContent=val;let label=val>=80?"Very Good":val>=65?"Good":val>=50?"Fair":val>=35?"Poor":"Critical";hiClass.textContent=label;hiClass.className="badge "+(val>=65?"low":val>=50?"watch":"critical");
-}
-function hiEdit(i,k,v){HI[i][k]=Math.max(0,Math.min(100,Number(v)||0));localStorage.setItem("tr_hi_demo",JSON.stringify(HI));renderHI()}
-function resetHI(){HI=structuredClone(HI_DEFAULT);localStorage.removeItem("tr_hi_demo");renderHI()} renderHI();
+                <div class="bg-white dark:bg-industrial-850 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-industrial-700 text-slate-700 dark:text-slate-200 font-bold border-b border-slate-200 dark:border-slate-800">
+                                    <th class="p-4">Component</th>
+                                    <th class="p-4">Failure Mode</th>
+                                    <th class="p-4">Failure Cause</th>
+                                    <th class="p-4 text-center">S (1-5)</th>
+                                    <th class="p-4 text-center">O (1-5)</th>
+                                    <th class="p-4 text-center">D (1-5)</th>
+                                    <th class="p-4 text-center">RPN</th>
+                                    <th class="p-4">Priority Flag</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fmeaTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
-const DGA_DEFAULT={H2:120,CH4:85,C2H2:8,C2H4:95,C2H6:55,CO:420,CO2:3200};
-let DGA=JSON.parse(localStorage.getItem("tr_dga_demo")||"null")||{...DGA_DEFAULT};
-function renderDGA(){dgaGrid.innerHTML=Object.entries(DGA).map(([k,v])=>`<div class="gas"><small>${k}</small><b>${v} ppm</b><input class="dga-input" type="number" min="0" value="${v}" onchange="DGA['${k}']=Number(this.value)||0;localStorage.setItem('tr_dga_demo',JSON.stringify(DGA));renderDGA()"></div>`).join('')}
-function analyzeDGA(){
- const hydro=DGA.H2+DGA.CH4+DGA.C2H2+DGA.C2H4+DGA.C2H6;
- let key=Object.entries({H2:DGA.H2,CH4:DGA.CH4,C2H2:DGA.C2H2,C2H4:DGA.C2H4,C2H6:DGA.C2H6,CO:DGA.CO}).sort((a,b)=>b[1]-a[1])[0][0];
- let msg="ค่าจำลองควรพิจารณา trend และข้อมูลประกอบเพิ่มเติม";
- if(key==="C2H2") msg="Acetylene เด่น: pattern นี้ควรตรวจสอบความเป็นไปได้ของ electrical discharge/arcing ด้วยวิธีวินิจฉัยที่เหมาะสม";
- else if(key==="C2H4") msg="Ethylene เด่น: pattern นี้อาจสัมพันธ์กับ thermal fault ที่อุณหภูมิสูง ควรตรวจ trend และ ratios เพิ่มเติม";
- else if(key==="H2") msg="Hydrogen เด่น: ควรตรวจสอบ pattern ของ partial discharge / low-energy discharge ร่วมกับก๊าซอื่น";
- else if(key==="CO") msg="CO เด่น: ควรประเมิน cellulose/paper insulation และ CO₂/CO trend ร่วมด้วย";
- dgaScreen.textContent="Preliminary Key-gas Screening: "+key; dgaText.textContent=msg+" • Total hydrocarbon/H₂ group = "+hydro+" ppm";
-}
-renderDGA();
+            <!-- TAB 4: HEALTH INDEX -->
+            <section id="tab-hi" class="tab-content hidden space-y-6">
+                <div class="bg-white dark:bg-industrial-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                            <i class="fa-solid fa-heart-pulse text-blue-500 mr-2"></i> ประเมินสุขภาพหม้อแปลง (Health Index - HI)
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">บันทึกและประเมินคะแนนสุขภาพรายเครื่องเพื่อบริหารจัดการตามสภาพ</p>
+                    </div>
+                </div>
 
-const RCM_OPTIONS=["Scheduled On-Condition / CBM","Scheduled Restoration","Scheduled Discard","Failure-Finding","No Scheduled Maintenance / Run-to-Failure","Redesign / Modification","Corrective / Immediate Repair"];
-function consequenceOf(x){
- const t=(x.mode+" "+x.cause+" "+x.consequence).toLowerCase();
- if(/protect|relay|alarm|buchholz|pressure relief|indicator|gauge/.test(t)) return "Hidden / Protective";
- if(x.s>=5 || /fire|explosion|electric shock|flashover/.test(t)) return "Safety / Environmental";
- if(x.s>=4) return "Operational";
- return "Non-operational";
-}
-function recommendRCM(x){
- const t=(x.mode+" "+x.cause).toLowerCase(), c=consequenceOf(x);
- if(/protect|relay|alarm|buchholz|pressure relief|indicator|gauge/.test(t)) return ["Failure-Finding","Hidden/protective function: ตรวจพิสูจน์ว่าฟังก์ชันยังทำงานได้"];
- if(/leak|oil deterioration|overheat|hot spot|temperature|moisture|insulation|partial discharge|discharge|corrosion|loose|abnormal noise|vibration/.test(t)) return ["Scheduled On-Condition / CBM","มี condition indicator ที่ตรวจติดตาม degradation ได้ก่อน functional failure"];
- if(/gasket|seal|desiccant|silica gel|filter|fan|pump|bearing/.test(t)) return ["Scheduled Restoration","เหมาะกับงานฟื้นสภาพตาม condition/อายุ เมื่อมีหลักฐานว่า deterioration สัมพันธ์กับเวลาใช้งาน"];
- if(c==="Safety / Environmental") return ["Redesign / Modification","ผลกระทบสูงและไม่มี on-condition task ที่ชัดเจน: ต้องพิจารณาลด consequence/probability ด้วย engineering change"];
- if(c==="Non-operational") return ["No Scheduled Maintenance / Run-to-Failure","ผลกระทบต่ำ: ใช้ได้เมื่อการปล่อยให้เสียยอมรับได้และไม่มี proactive task ที่คุ้มค่า"];
- return ["Scheduled On-Condition / CBM","Operational consequence: เริ่มจาก condition-based task หากตรวจ degradation ได้"];
-}
-let STRAT=JSON.parse(localStorage.getItem("tr_rcm_strategy")||"{}");
-function renderCorrectedStrategies(){
- correctedStrategyRows.innerHTML=DATA.map((x,i)=>{let rec=recommendRCM(x), chosen=STRAT[i]||rec[0], con=consequenceOf(x);return `<tr><td><b>${esc(x.component)}</b></td><td>${esc(x.mode)}</td><td><span class="badge info">${esc(con)}</span></td><td>${x.s}</td><td><b>${x.rpn}</b></td><td><select class="edit-select" onchange="STRAT[${i}]=this.value;localStorage.setItem('tr_rcm_strategy',JSON.stringify(STRAT))">${RCM_OPTIONS.map(o=>`<option ${o===chosen?'selected':''}>${esc(o)}</option>`).join('')}</select></td><td>${esc(rec[1])}</td></tr>`}).join('');
-}
-function resetStrategies(){STRAT={};localStorage.removeItem("tr_rcm_strategy");renderCorrectedStrategies()} renderCorrectedStrategies();
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white dark:bg-industrial-850 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-slate-200 dark:border-slate-800 font-bold text-sm text-slate-900 dark:text-white">
+                            ตารางบันทึกคะแนน HI รายสถานีหม้อแปลง
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs sm:text-sm">
+                                <thead class="bg-slate-50 dark:bg-industrial-700 text-slate-700 dark:text-slate-200 font-bold">
+                                    <tr>
+                                        <th class="p-4">รหัสหม้อแปลง</th>
+                                        <th class="p-4">ชื่อสถานี / พิกัด</th>
+                                        <th class="p-4 text-center">คะแนน HI (0-100)</th>
+                                        <th class="p-4">สถานะสภาพ</th>
+                                        <th class="p-4 text-center">บันทึก</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hiTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-</script></body></html>
+                    <div class="bg-white dark:bg-industrial-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center">
+                            <i class="fa-solid fa-circle-info text-blue-500 mr-2"></i> เกณฑ์มาตรฐานคะแนน Health Index
+                        </h3>
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-900">
+                                <div class="font-bold text-emerald-700 dark:text-emerald-400">HI 85 - 100 (Normal - สภาพดีเยี่ยม)</div>
+                                <div class="text-slate-600 dark:text-slate-300 mt-1">บำรุงรักษาตามรอบปกติ (Time-based PM)</div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900">
+                                <div class="font-bold text-blue-700 dark:text-blue-400">HI 70 - 84.9 (Aged - เริ่มเสื่อมสภาพ)</div>
+                                <div class="text-slate-600 dark:text-slate-300 mt-1">เพิ่มความถี่ในการทดสอบน้ำมันและ DGA</div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-900">
+                                <div class="font-bold text-amber-700 dark:text-amber-400">HI 50 - 69.9 (At Risk - มีความเสี่ยง)</div>
+                                <div class="text-slate-600 dark:text-slate-300 mt-1">ต้องทำ Condition-based Maintenance หรือกรองน้ำมัน</div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900">
+                                <div class="font-bold text-rose-700 dark:text-rose-400">HI < 50 (Critical - วิกฤต)</div>
+                                <div class="text-slate-600 dark:text-slate-300 mt-1">อันตรายสูง ต้อง Overhaul หรือเปลี่ยนทดแทนเร่งด่วน</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: DGA & DUVAL TRIANGLE -->
+            <section id="tab-dga" class="tab-content hidden space-y-6">
+                <div class="bg-white dark:bg-industrial-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                            <i class="fa-solid fa-flask text-blue-500 mr-2"></i> วิเคราะห์ก๊าซละลายในน้ำมัน (DGA) และสามเหลี่ยม Duval
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">บันทึกค่าก๊าซและจำลองพิกัดสามเหลี่ยม Duval ตามมาตรฐาน IEC 60599</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-industrial-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center">
+                            <i class="fa-solid fa-table-list text-blue-500 mr-2"></i> บันทึกค่าก๊าซละลาย (ppm)
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4 text-xs">
+                            <div>
+                                <label class="block font-medium text-slate-600 dark:text-slate-300 mb-1">Hydrogen (H2)</label>
+                                <input type="number" id="dgaH2" value="45" class="w-full p-2.5 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-800 dark:text-slate-100">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-600 dark:text-slate-300 mb-1">Methane (CH4)</label>
+                                <input type="number" id="dgaCH4" value="20" class="w-full p-2.5 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-800 dark:text-slate-100">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-600 dark:text-slate-300 mb-1">Acetylene (C2H2)</label>
+                                <input type="number" id="dgaC2H2" value="2" class="w-full p-2.5 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-800 dark:text-slate-100">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-600 dark:text-slate-300 mb-1">Ethylene (C2H4)</label>
+                                <input type="number" id="dgaC2H4" value="30" class="w-full p-2.5 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-800 dark:text-slate-100">
+                            </div>
+                        </div>
+                        <button onclick="runDgaAnalysis()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs py-3 rounded-xl shadow transition">
+                            <i class="fa-solid fa-calculator mr-1"></i> ประมวลผลและวิเคราะห์ Duval Triangle
+                        </button>
+
+                        <div id="dgaResultBox" class="p-4 rounded-xl bg-slate-50 dark:bg-industrial-700 border border-slate-200 dark:border-slate-600 text-xs space-y-2">
+                            <div class="font-bold text-slate-900 dark:text-white text-sm">ผลการวินิจฉัย DGA:</div>
+                            <div id="dgaResultText" class="text-slate-700 dark:text-slate-200">คลิกปุ่มประมวลผลเพื่อวิเคราะห์สถานะความผิดปกติ</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-industrial-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center space-y-4">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white self-start flex items-center">
+                            <i class="fa-solid fa-triangle-exclamation text-blue-500 mr-2"></i> สามเหลี่ยม Duval Triangle (CH4 - C2H4 - C2H2)
+                        </h3>
+                        <div class="relative w-72 h-64 bg-slate-100 dark:bg-industrial-700 rounded-2xl border border-slate-200 dark:border-slate-600 flex items-center justify-center overflow-hidden">
+                            <svg viewBox="0 0 200 180" class="w-full h-full p-4">
+                                <polygon points="100,10 10,160 190,160" fill="none" stroke="#0066cc" stroke-width="2.5"/>
+                                <text x="100" y="5" font-size="8" fill="#94a3b8" text-anchor="middle" font-weight="bold">C2H2</text>
+                                <text x="0" y="172" font-size="8" fill="#94a3b8" font-weight="bold">CH4</text>
+                                <text x="175" y="172" font-size="8" fill="#94a3b8" font-weight="bold">C2H4</text>
+                                <text x="100" y="90" font-size="7" fill="#0066cc" font-weight="bold" text-anchor="middle">PD / D1</text>
+                                <text x="100" y="125" font-size="7" fill="#10b981" font-weight="bold" text-anchor="middle">T1 / T2 / T3 (Thermal)</text>
+                                <circle id="duvalPoint" cx="100" cy="110" r="7" fill="#ef4444" class="transition-all duration-500 shadow-lg"/>
+                            </svg>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 text-center">จุดพิกัดตำแหน่งความผิดปกติอ้างอิงตามมาตรฐานสากล</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: RCM STRATEGY & DECISION TREE -->
+            <section id="tab-strategy" class="tab-content hidden space-y-6">
+                <div class="bg-white dark:bg-industrial-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                            <i class="fa-solid fa-chess-board text-blue-500 mr-2"></i> กลยุทธ์การบำรุงรักษา RCM & Decision Tree
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">สรุปกลยุทธ์การบำรุงรักษาที่สอดคล้องกับประเภทผลกระทบและค่า RPN</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-industrial-850 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-industrial-700 text-slate-700 dark:text-slate-200 font-bold border-b border-slate-200 dark:border-slate-800">
+                                    <th class="p-4">Component</th>
+                                    <th class="p-4 text-center">RPN</th>
+                                    <th class="p-4">ประเภทผลกระทบ (Consequence Category)</th>
+                                    <th class="p-4">กลยุทธ์บำรุงรักษาที่แนะนำ (RCM Strategy)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="strategyTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Add Maintenance Modal -->
+    <div id="scheduleModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-industrial-850 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center">
+                    <i class="fa-solid fa-calendar-plus text-blue-500 mr-2"></i> เพิ่มแผนงานบำรุงรักษาใหม่
+                </h3>
+                <button onclick="closeAddScheduleModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-medium text-slate-600 dark:text-slate-300 mb-1">รหัสสถานี / หม้อแปลง</label>
+                    <input type="text" id="newAssetId" value="TR-01 (Main Substation)" class="w-full p-2.5 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-800 dark:text-slate-100">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-600 dark:text-slate-300 mb-1">กิจกรรมบำรุงรักษา</label>
+                    <input type="text" id="newActivity" placeholder="เช่น ตรวจสอบอุณหภูมิและกรองน้ำมัน" class="w-full p-2.5 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-800 dark:text-slate-100">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-600 dark:text-slate-300 mb-1">วันที่กำหนด</label>
+                    <input type="date" id="newDate" class="w-full p-2.5 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-800 dark:text-slate-100">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-600 dark:text-slate-300 mb-1">กลยุทธ์</label>
+                    <select id="newStrategy" class="w-full p-2.5 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-800 dark:text-slate-100">
+                        <option>Condition-based (PdM)</option>
+                        <option>Time-based (PM) บังคับ</option>
+                        <option>Run-to-failure (CM)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button onclick="closeAddScheduleModal()" class="px-4 py-2 bg-slate-200 dark:bg-industrial-700 text-slate-700 dark:text-slate-200 font-medium rounded-xl text-xs">ยกเลิก</button>
+                <button onclick="saveNewSchedule()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-xs">บันทึกแผนงาน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Transformer FMEA Dataset extracted from Excel (46 items)
+        const transformerFmeaData = [
+            { component: "TR_Counter L/A", mode: "T001 Counter Lightning Arrester ชำรุด", cause: "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", s: 2, o: 2, d: 2, rpn: 8, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" },
+            { component: "TR_OLevelGauge", mode: "T002 Oil level gauge ชำรุด", cause: "โครงแตก, กลไกชำรุด", s: 3, o: 2, d: 1, rpn: 6, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM) หรือ PM ตามรอบ" },
+            { component: "TR_OtempGauge", mode: "T003 Oil temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", s: 3, o: 2, d: 1, rpn: 6, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM) หรือ PM ตามรอบ" },
+            { component: "TR_Sgel/ABreather", mode: "T004 Silicagel เปลี่ยนสี / Air Breather ชำรุด", cause: "Silicagel เสื่อมสภาพ, การอุดตัน / ฝุ่นละออง", s: 2, o: 3, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" },
+            { component: "TR_WTempGauge", mode: "T005 Winding temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ, กลไกชำรุด", s: 3, o: 2, d: 1, rpn: 6, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM) หรือ PM ตามรอบ" },
+            { component: "TR_TOP", mode: "T006 น้ำมันรั่วซึมด้านบนหม้อแปลง", cause: "ซีลเสื่อมสภาพ", s: 3, o: 3, d: 2, rpn: 18, priority: "ปานกลาง/ต่ำ", consequence: "Operational-moderate", strategy: "Time-based (PM)" },
+            { component: "TR_Bushing", mode: "T007 น้ำมันรั่วซึมที่ Bushing หม้อแปลง", cause: "ซีลเสื่อมสภาพ, แตกหัก, ติดตั้งไม่ถูกต้อง", s: 4, o: 2, d: 3, rpn: 24, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" },
+            { component: "TR_CableBox", mode: "T008 น้ำมันรั่วซึมที่ Cable box", cause: "ซีลเสื่อมสภาพ, ความร้อนสูงเกินไป", s: 3, o: 2, d: 3, rpn: 18, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_Radiator", mode: "T009 น้ำมันรั่วซึมที่ Radiator", cause: "ซีลเสื่อมสภาพ, แรงดันภายในสูง", s: 3, o: 3, d: 2, rpn: 18, priority: "ปานกลาง/ต่ำ", consequence: "Operational-moderate", strategy: "Time-based (PM)" },
+            { component: "TR_MainTank", mode: "T012 น้ำมันหม้อแปลงต่ำ", cause: "ระบบระบายความร้อนผิดปกติ, ซีลเสื่อม", s: 4, o: 2, d: 1, rpn: 8, priority: "เฝ้าระวัง", consequence: "Operational", strategy: "Condition-based (PdM)" },
+            { component: "TR_MainTank", mode: "T015 หม้อแปลงชำรุด", cause: "การเกิดไฟฟ้าลัดวงจร, อายุการใช้งาน", s: 5, o: 1, d: 1, rpn: 5, priority: "วิกฤต", consequence: "Safety-critical", strategy: "Redesign / Scheduled Discard" },
+            { component: "TR_Trip", mode: "T016 หม้อแปลง Trip", cause: "การทำงานผิดพลาดของรีเลย์", s: 4, o: 2, d: 1, rpn: 8, priority: "เฝ้าระวัง", consequence: "Operational", strategy: "Condition-based (PdM)" },
+            { component: "TR_FAN", mode: "T018 เปลี่ยนพัดลมหม้อแปลง", cause: "สึกหรอจากการใช้งานนาน", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_FAN", mode: "T019 พัดลมหม้อแปลงถอดไปซ่อม", cause: "สึกหรอจากการใช้งานนาน", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_FAN", mode: "T020 พัดลมหม้อแปลงไม่ทำงาน", cause: "การเสียหายของมอเตอร์", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_Coil", mode: "T023 ขดลวดหม้อแปลงชำรุด", cause: "โอเวอร์โหลด, ความชื้น, แรงดันผิดปกติ", s: 5, o: 1, d: 4, rpn: 20, priority: "วิกฤต", consequence: "Safety-critical", strategy: "Redesign / Scheduled Discard" },
+            { component: "TR_Core", mode: "T024 แกนเหล็กหม้อแปลงชำรุด", cause: "ความเครียดจากการเปลี่ยนแปลงกระแส", s: 4, o: 1, d: 4, rpn: 16, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" },
+            { component: "TR_HVBushing", mode: "T025 HVBushing ชำรุด", cause: "เสื่อมสภาพตามอายุการใช้งาน", s: 4, o: 2, d: 3, rpn: 24, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" },
+            { component: "TR_MVBushing", mode: "T026 MVBushing ชำรุด", cause: "เสื่อมสภาพตามอายุการใช้งาน", s: 4, o: 2, d: 3, rpn: 24, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" },
+            { component: "TR_OFFLTAP", mode: "T027 OFF LOAD TAP ชำรุด", cause: "เสื่อมสภาพจากอายุใช้งาน", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_BuchRelay", mode: "T028 Buchholz relay ชำรุด", cause: "ลัดวงจรภายใน, อุณหภูมิสูง, กลไกติดขัด", s: 4, o: 1, d: 2, rpn: 8, priority: "เฝ้าระวัง", consequence: "Operational", strategy: "Condition-based (PdM)" },
+            { component: "TR_PresRelief", mode: "T029 Pressure relief ชำรุด", cause: "กลไกติดขัด, แรงดันเกินขีดจำกัด", s: 4, o: 1, d: 2, rpn: 8, priority: "เฝ้าระวัง", consequence: "Operational", strategy: "Condition-based (PdM)" },
+            { component: "TR_Control_desk", mode: "T101 Control desk tap อ่านไม่ตรง", cause: "เสื่อมสภาพ, ความชื้นหรือสิ่งสกปรก", s: 2, o: 2, d: 1, rpn: 4, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" },
+            { component: "TR_Control_Lampdesk", mode: "T102 Control desk หลอดขาด", cause: "เสื่อมสภาพจากอายุใช้งาน", s: 2, o: 2, d: 1, rpn: 4, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" },
+            { component: "TR_FanControl", mode: "T103 Control พัดลมชำรุด", cause: "เสื่อมสภาพจากอายุใช้งาน", s: 2, o: 2, d: 1, rpn: 4, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" },
+            { component: "TR_Relay", mode: "T104 Differential relay ชำรุด", cause: "ทำงานผิดพลาด, CT Malfunction", s: 4, o: 1, d: 3, rpn: 12, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" },
+            { component: "TR_DifRelay", mode: "T105 Differential relay เปลี่ยน", cause: "เสื่อมสภาพจากอายุใช้งาน", s: 4, o: 1, d: 3, rpn: 12, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" },
+            { component: "TR_TrippingRelay", mode: "T107 Tripping relay เปลี่ยน", cause: "เสื่อมสภาพจากอายุใช้งาน", s: 4, o: 1, d: 3, rpn: 12, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" },
+            { component: "TR_CountTap", mode: "T206 Counter Tap ไม่ทำงาน", cause: "กลไกติดขัด, ชุดเฟืองภายในชำรุด", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_Microlimit", mode: "T208 Micro sw. Lower & upper limit ค้าง", cause: "กลไกติดขัด", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_OLTC Tap", mode: "T209 OLTC เปลี่ยน Tap ทางไฟฟ้าไม่ได้", cause: "OLTC ไม่ทำงานจริง", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_OLTC Tap", mode: "T210 น้ำมันรั่วซึมที่ฝาบ่อ OLTC", cause: "ซีลเสื่อมสภาพ", s: 3, o: 3, d: 2, rpn: 18, priority: "ปานกลาง/ต่ำ", consequence: "Operational-moderate", strategy: "Time-based (PM)" },
+            { component: "TR_OLTC Tap", mode: "T211 เปลี่ยน Tap แล้วมีเสียงดัง", cause: "เสียงดังผิดปกติจากกลไก", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_OLTC Tap", mode: "T212 ระดับน้ำมันต่ำที่ OLTC", cause: "ซีลเสื่อมสภาพ", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_OLTC_ProRelay", mode: "T215 Tap protective relay ชำรุด", cause: "กลไกเสื่อมสภาพ, ความชื้น ฝุ่น", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_OLTC_MainContact", mode: "T216 Main contact ชำรุด", cause: "การอาร์ก, อุณหภูมิสูง, น้ำมันเสื่อม", s: 4, o: 2, d: 3, rpn: 24, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" },
+            { component: "TR_OLTC_TransitContact", mode: "T217 Transition contact ชำรุด", cause: "การอาร์กซ้ำซ้อน, สปริงเสียหาย", s: 4, o: 2, d: 3, rpn: 24, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" },
+            { component: "TR_OLTC_Gear", mode: "T218 Gear unit ชำรุด", cause: "สึกหรอตามอายุการใช้งาน", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_OLTC_Access", mode: "T219 OLTC Accessories ชำรุด", cause: "ชำรุดจากอุปกรณ์ประกอบ", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_OLTC_MotorControlBoard", mode: "T220 Motor drive control board ชำรุด", cause: "แรงดันผิดปกติ, ความชื้นฝุ่นละออง", s: 3, o: 2, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
+            { component: "TR_OilFilter", mode: "T301 Counter oil filter ทำงานผิดปกติ", cause: "Sensor/Trigger เสียหาย", s: 2, o: 2, d: 2, rpn: 8, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" },
+            { component: "TR_OilFilter", mode: "T302 Motor oil filter หมุนกลับทาง", cause: "ต่อท่อผิดด้าน (Inlet/Outlet สลับ)", s: 2, o: 2, d: 2, rpn: 8, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" },
+            { component: "TR_OilFilter", mode: "T303 Oil filter unit มีน้ำมันรั่วซึม", cause: "ซีลเสื่อมสภาพ", s: 3, o: 3, d: 2, rpn: 18, priority: "ปานกลาง/ต่ำ", consequence: "Operational-moderate", strategy: "Time-based (PM)" },
+            { component: "TR_OilFilter", mode: "T304 Oil filter ไม่ทำงานหลังจากเปลี่ยน Tap", cause: "ระบบปั๊มน้ำมันหยุดทำงาน", s: 2, o: 2, d: 2, rpn: 8, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" },
+            { component: "TR_OilFilter", mode: "T305 Pressure gauge oil filter เสีย", cause: "Overpressure, สิ่งสกปรก", s: 2, o: 2, d: 2, rpn: 8, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" }
+        ];
+
+        // Maintenance Schedule Data
+        let maintenanceSchedules = [
+            { id: "TR-01", name: "Main Power Transformer #1", activity: "ตรวจวัดค่า DGA และทดสอบความเป็นฉนวนน้ำมัน (BDV)", date: "2026-09-28", strategy: "Condition-based (PdM)", status: "Upcoming" },
+            { id: "TR-02", name: "Main Power Transformer #2", activity: "Overhaul ชุดควบคุม OLTC และตรวจวัด Contact Resistance", date: "2026-09-25", strategy: "Time-based (PM) บังคับ", status: "Overdue" },
+            { id: "TR-03", name: "Station Service Transformer", activity: "ทำความสะอาดลูกถ้วย Bushing และตรวจสอบการรั่วซึม", date: "2026-10-05", strategy: "Time-based (PM)", status: "Upcoming" },
+            { id: "TR-04", name: "Step-Down Transformer #1", activity: "ตรวจสอบระบบระบายความร้อน พัดลม และตู้ Control Desk", date: "2026-10-12", strategy: "Condition-based (PdM)", status: "Upcoming" }
+        ];
+
+        // Transformer Assets List (6 units)
+        const transformerAssets = [
+            { id: "TR-01", name: "Main Power Transformer #1", mva: "50 MVA", voltage: "115/22 kV", hi: 88.5, status: "Normal", img: "https://images.unsplash.com/photo-1544724569-5f546fd6f2b8?auto=format&fit=crop&w=600&q=80" },
+            { id: "TR-02", name: "Main Power Transformer #2", mva: "50 MVA", voltage: "115/22 kV", hi: 74.2, status: "Aged", img: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80" },
+            { id: "TR-03", name: "Station Service Transformer", mva: "5 MVA", voltage: "22/0.4 kV", hi: 92.0, status: "Normal", img: "https://images.unsplash.com/photo-1544724569-5f546fd6f2b8?auto=format&fit=crop&w=600&q=80" },
+            { id: "TR-04", name: "Step-Down Transformer #1", mva: "30 MVA", voltage: "115/6.6 kV", hi: 65.5, status: "At Risk", img: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80" },
+            { id: "TR-05", name: "Step-Down Transformer #2", mva: "30 MVA", voltage: "115/6.6 kV", hi: 90.1, status: "Normal", img: "https://images.unsplash.com/photo-1544724569-5f546fd6f2b8?auto=format&fit=crop&w=600&q=80" },
+            { id: "TR-06", name: "Backup Auxiliary Transformer", mva: "2 MVA", voltage: "22/0.4 kV", hi: 82.4, status: "Aged", img: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            renderDashboardCharts();
+            renderMaintenanceTable();
+            renderAssetsGrid();
+            renderFmeaTable();
+            renderHiTable();
+            renderStrategyTable();
+        });
+
+        function initClock() {
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('clockText').innerText = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH');
+            }, 1000);
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = 'fa-solid fa-moon';
+            } else {
+                html.classList.add('dark');
+                icon.className = 'fa-solid fa-sun';
+            }
+        }
+
+        document.getElementById('sidebarToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('hidden');
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-blue-50', 'dark:bg-industrial-700', 'text-blue-600', 'dark:text-blue-400', 'font-bold'));
+            
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-blue-50', 'dark:bg-industrial-700', 'text-blue-600', 'dark:text-blue-400', 'font-bold');
+            }
+        }
+
+        function renderDashboardCharts() {
+            const rpnCtx = document.getElementById('rpnChart').getContext('2d');
+            new Chart(rpnCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Critical (>20)', 'High (15-20)', 'Moderate (10-14)', 'Low (<10)'],
+                    datasets: [{
+                        data: [4, 6, 14, 22],
+                        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'],
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            const hiCtx = document.getElementById('hiChart').getContext('2d');
+            new Chart(hiCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Normal (85-100)', 'Aged (70-84)', 'At Risk (50-69)', 'Critical (<50)'],
+                    datasets: [{
+                        data: [3, 2, 1, 0],
+                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function renderMaintenanceTable() {
+            const tbody = document.getElementById('maintenanceTableBody');
+            tbody.innerHTML = maintenanceSchedules.map(item => `
+                <tr class="hover:bg-slate-50 dark:hover:bg-industrial-700/50 transition">
+                    <td class="p-4 font-bold text-blue-600 dark:text-blue-400">${item.id}</td>
+                    <td class="p-4 font-medium text-slate-900 dark:text-white">${item.name}</td>
+                    <td class="p-4 text-slate-700 dark:text-slate-300">${item.activity}</td>
+                    <td class="p-4 text-slate-500">${item.date}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-lg text-[11px] bg-slate-100 dark:bg-industrial-700 text-slate-700 dark:text-slate-200">${item.strategy}</span></td>
+                    <td class="p-4">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold ${item.status === 'Overdue' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAssetsGrid() {
+            const grid = document.getElementById('transformerCardGrid');
+            grid.innerHTML = transformerAssets.map(asset => `
+                <div class="bg-white dark:bg-industrial-850 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+                    <div class="h-40 overflow-hidden relative">
+                        <img src="${asset.img}" alt="Transformer" class="w-full h-full object-cover">
+                        <div class="absolute top-3 right-3">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold shadow ${asset.status === 'Normal' ? 'bg-emerald-500 text-white' : asset.status === 'Aged' ? 'bg-blue-500 text-white' : 'bg-amber-500 text-white'}">
+                                ${asset.status} (HI: ${asset.hi})
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="text-xs font-semibold text-blue-600 dark:text-blue-400">${asset.id}</div>
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white mt-0.5">${asset.name}</h3>
+                            <div class="flex items-center space-x-4 mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                <span><i class="fa-solid fa-bolt mr-1 text-amber-500"></i> ${asset.mva}</span>
+                                <span><i class="fa-solid fa-wave-square mr-1 text-blue-500"></i> ${asset.voltage}</span>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs">
+                            <span class="text-slate-500">คะแนนสุขภาพ: <b class="text-slate-900 dark:text-white">${asset.hi}%</b></span>
+                            <button onclick="switchTab('hi')" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline">จัดการ HI &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderFmeaTable() {
+            document.getElementById('fmeaCount').innerText = transformerFmeaData.length;
+            const tbody = document.getElementById('fmeaTableBody');
+            tbody.innerHTML = transformerFmeaData.map((item, index) => `
+                <tr class="hover:bg-slate-50 dark:hover:bg-industrial-700/50 transition">
+                    <td class="p-4 font-bold text-blue-600 dark:text-blue-400">${item.component}</td>
+                    <td class="p-4 font-medium text-slate-900 dark:text-white">${item.mode}</td>
+                    <td class="p-4 text-slate-600 dark:text-slate-300 text-xs">${item.cause}</td>
+                    <td class="p-4 text-center"><input type="number" min="1" max="5" value="${item.s}" onchange="updateFmeaScore(${index}, 's', this.value)" class="w-12 text-center p-1 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded font-bold text-slate-800 dark:text-slate-100"></td>
+                    <td class="p-4 text-center"><input type="number" min="1" max="5" value="${item.o}" onchange="updateFmeaScore(${index}, 'o', this.value)" class="w-12 text-center p-1 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded font-bold text-slate-800 dark:text-slate-100"></td>
+                    <td class="p-4 text-center"><input type="number" min="1" max="5" value="${item.d}" onchange="updateFmeaScore(${index}, 'd', this.value)" class="w-12 text-center p-1 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded font-bold text-slate-800 dark:text-slate-100"></td>
+                    <td class="p-4 text-center font-bold text-base ${item.rpn >= 20 ? 'text-rose-500' : item.rpn >= 15 ? 'text-amber-500' : 'text-emerald-500'}" id="rpn-val-${index}">${item.rpn}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold ${item.priority === 'วิกฤต' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400' : 'bg-slate-100 dark:bg-industrial-700 text-slate-700 dark:text-slate-200'}">${item.priority}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function updateFmeaScore(index, type, val) {
+            val = parseInt(val) || 1;
+            if (type === 's') transformerFmeaData[index].s = val;
+            if (type === 'o') transformerFmeaData[index].o = val;
+            if (type === 'd') transformerFmeaData[index].d = val;
+            
+            const item = transformerFmeaData[index];
+            item.rpn = item.s * item.o * item.d;
+            document.getElementById(`rpn-val-${index}`).innerText = item.rpn;
+        }
+
+        function renderHiTable() {
+            const tbody = document.getElementById('hiTableBody');
+            tbody.innerHTML = transformerAssets.map((asset, index) => `
+                <tr class="hover:bg-slate-50 dark:hover:bg-industrial-700/50 transition">
+                    <td class="p-4 font-bold text-blue-600 dark:text-blue-400">${asset.id}</td>
+                    <td class="p-4 font-medium text-slate-900 dark:text-white">${asset.name} (${asset.mva})</td>
+                    <td class="p-4 text-center">
+                        <input type="number" step="0.1" min="0" max="100" value="${asset.hi}" onchange="updateAssetHi(${index}, this.value)" class="w-16 text-center p-1.5 bg-slate-50 dark:bg-industrial-700 border border-slate-300 dark:border-slate-600 rounded font-bold text-blue-600 dark:text-blue-400">
+                    </td>
+                    <td class="p-4">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold ${asset.hi >= 85 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' : asset.hi >= 70 ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400'}">
+                            ${asset.status}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <button onclick="alert('บันทึกคะแนน Health Index ของ ${asset.id} เรียบร้อย')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium">บันทึก</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateAssetHi(index, val) {
+            val = parseFloat(val) || 0;
+            transformerAssets[index].hi = val;
+            if (val >= 85) transformerAssets[index].status = 'Normal';
+            else if (val >= 70) transformerAssets[index].status = 'Aged';
+            else if (val >= 50) transformerAssets[index].status = 'At Risk';
+            else transformerAssets[index].status = 'Critical';
+            renderHiTable();
+        }
+
+        function renderStrategyTable() {
+            const tbody = document.getElementById('strategyTableBody');
+            tbody.innerHTML = transformerFmeaData.map(item => `
+                <tr class="hover:bg-slate-50 dark:hover:bg-industrial-700/50 transition">
+                    <td class="p-4 font-bold text-blue-600 dark:text-blue-400">${item.component}</td>
+                    <td class="p-4 text-center font-bold text-slate-800 dark:text-slate-200">${item.rpn}</td>
+                    <td class="p-4 text-slate-600 dark:text-slate-300">${item.consequence}</td>
+                    <td class="p-4"><span class="px-3 py-1 rounded-lg text-xs font-semibold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900">${item.strategy}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function runDgaAnalysis() {
+            const c2h2 = parseFloat(document.getElementById('dgaC2H2').value) || 0;
+            const c2h4 = parseFloat(document.getElementById('dgaC2H4').value) || 0;
+            const resText = document.getElementById('dgaResultText');
+            const point = document.getElementById('duvalPoint');
+
+            if (c2h2 > 10) {
+                resText.innerHTML = `<b class="text-rose-500">ตรวจพบก๊าซ Acetylene (C2H2) สูง:</b> วินิจฉัยเกิดการอาร์กพลังงานสูง (High Energy Discharge - D2) แนะนำปลดโหลดตรวจสอบเร่งด่วน`;
+                point.setAttribute('cx', '100'); point.setAttribute('cy', '35');
+            } else if (c2h4 > 50) {
+                resText.innerHTML = `<b class="text-amber-500">ตรวจพบก๊าซ Ethylene (C2H4) สูง:</b> วินิจฉัยเกิดความร้อนสูง (Thermal Fault > 700°C - T3) ที่แกนเหล็กหรือจุดต่อ`;
+                point.setAttribute('cx', '150'); point.setAttribute('cy', '130');
+            } else {
+                resText.innerHTML = `<b class="text-emerald-500">สภาพก๊าซปกติ (Normal):</b> สัดส่วนก๊าซอยู่ในเกณฑ์มาตรฐาน ดำเนินการบำรุงรักษาตามรอบปกติ`;
+                point.setAttribute('cx', '100'); point.setAttribute('cy', '110');
+            }
+        }
+
+        function showAddScheduleModal() { document.getElementById('scheduleModal').classList.remove('hidden'); }
+        function closeAddScheduleModal() { document.getElementById('scheduleModal').classList.add('hidden'); }
+        function saveNewSchedule() {
+            const id = document.getElementById('newAssetId').value;
+            const activity = document.getElementById('newActivity').value;
+            const date = document.getElementById('newDate').value || '2026-10-15';
+            const strategy = document.getElementById('newStrategy').value;
+
+            if(!activity) { alert('กรุณาระบุกิจกรรมบำรุงรักษา'); return; }
+
+            maintenanceSchedules.unshift({ id: id.split(' ')[0], name: id, activity, date, strategy, status: 'Upcoming' });
+            renderMaintenanceTable();
+            closeAddScheduleModal();
+            alert('เพิ่มแผนบำรุงรักษาสำเร็จเรียบร้อยแล้ว');
+        }
+
+        function filterAssets() {
+            const query = document.getElementById('assetSearchInput').value.toLowerCase();
+            document.querySelectorAll('#transformerCardGrid > div').forEach(card => {
+                card.style.display = card.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>
