@@ -1,645 +1,160 @@
-<!DOCTYPE html>
-<html lang="th" class="light">
+<!doctype html>
+<html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Power Transformer RCM Enterprise Dashboard</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        sidebar: {
-                            dark: '#0f172a',
-                            light: '#1e293b'
-                        },
-                        dashboard: {
-                            bg: '#f8fafc',
-                            card: '#ffffff'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontPrompt & FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: 'Prompt', sans-serif; background-color: #f1f5f9; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Transformer RCM Workspace</title>
+<style>
+:root{--bg:#f4f7fb;--panel:#fff;--ink:#15243a;--muted:#6f7f94;--line:#dfe7f1;--nav:#10233f;--blue:#1769e0;--soft:#edf4ff;--good:#198754;--warn:#d98b00;--bad:#c53b45;--r:16px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px Inter,"Segoe UI",Tahoma,sans-serif}
+header{height:72px;background:var(--nav);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 28px;box-shadow:0 3px 14px #10233f20}
+.brand b{font-size:19px}.brand span{display:block;color:#aebbd0;font-size:12px;margin-top:3px}
+.asset{display:flex;gap:10px;align-items:center}.asset select,.asset button{border:1px solid #ffffff28;background:#ffffff10;color:#fff;border-radius:10px;padding:9px 12px}.asset option{color:#111}
+nav{height:52px;background:#fff;border-bottom:1px solid var(--line);display:flex;gap:4px;padding:7px 24px;overflow:auto;position:sticky;top:0;z-index:5}
+nav button{white-space:nowrap;border:0;background:transparent;color:#53657c;border-radius:9px;padding:9px 14px;cursor:pointer;font-weight:600}nav button.active{background:var(--soft);color:var(--blue)}
+main{max-width:1500px;margin:auto;padding:24px}.page{display:none}.page.active{display:block}
+.title{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}.title h1{font-size:25px;margin:0}.title p{margin:5px 0 0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.hero{background:linear-gradient(120deg,#10233f,#174f92);color:#fff;border-radius:22px;padding:25px 27px;margin-bottom:18px;display:flex;justify-content:space-between;gap:20px;align-items:center;box-shadow:0 14px 34px #153f7025}.hero h1{font-size:27px;margin:0 0 8px}.hero p{margin:0;color:#cfdbeb}.hero .badge{background:#ffffff16;border:1px solid #ffffff25;padding:10px 14px;border-radius:12px;white-space:nowrap}.fleet-card{position:relative;overflow:hidden}.fleet-card:after{content:'';position:absolute;width:90px;height:90px;border-radius:50%;right:-30px;top:-30px;background:#1769e00b}.fleet-card .v{font-size:34px}.status-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px}.normal{background:#198754}.watch{background:#d98b00}.critical{background:#c53b45}.asset-table td:first-child{font-weight:700}.health-pill{display:inline-block;min-width:86px;text-align:center;border-radius:99px;padding:5px 9px;font-size:11px;font-weight:750}.hp-normal{background:#e9f7ef;color:#137044}.hp-watch{background:#fff5df;color:#9a6500}.hp-critical{background:#fdebed;color:#a72c38}.overview-layout{display:grid;grid-template-columns:1.45fr .55fr;gap:14px}.distribution{display:flex;align-items:center;justify-content:center;min-height:230px}.donut{width:170px;height:170px;border-radius:50%;position:relative;background:conic-gradient(#198754 0 60%,#d98b00 60% 85%,#c53b45 85% 100%)}.donut:after{content:'20\A Transformers';white-space:pre;position:absolute;inset:29px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:750;line-height:1.5}.card,.box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 4px 18px #1b355008}
+.card{padding:18px}.k{color:var(--muted);font-size:12px}.v{font-size:28px;font-weight:750;margin:6px 0}.tag{display:inline-block;border-radius:99px;padding:5px 9px;font-size:11px;font-weight:700;background:var(--soft);color:var(--blue)}
+.box{padding:20px;margin-top:14px}.box h3{margin:0 0 15px;font-size:16px}
+table{width:100%;border-collapse:collapse;min-width:900px}th{background:#f7f9fc;color:#66768a;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em}th,td{padding:11px;border-bottom:1px solid var(--line);vertical-align:top}.scroll{overflow:auto}
+input,select,textarea{width:100%;border:1px solid #ccd7e5;background:#fff;border-radius:8px;padding:8px;color:var(--ink);font:inherit}input[type=number]{min-width:65px}.mini{width:68px}
+.btn{border:0;border-radius:9px;padding:9px 13px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer}.btn.secondary{background:#edf2f7;color:#31445d}.btn.danger{background:#fff0f1;color:var(--bad)}
+.formgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}.meter{height:10px;background:#e9eef5;border-radius:99px;overflow:hidden}.meter i{display:block;height:100%;background:var(--blue);width:0}
+.strategy{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.strat{padding:16px;border:1px solid var(--line);border-radius:13px;background:#fff}.strat b{font-size:18px}.strat p{color:var(--muted);font-size:12px;line-height:1.5}
+.logic{text-align:center}.question{max-width:620px;margin:20px auto;padding:24px;border:1px solid var(--line);border-radius:15px;background:#f9fbfd}.question h2{margin-top:0}.logic-actions{display:flex;justify-content:center;gap:10px}
+.result{padding:16px;border-left:4px solid var(--blue);background:var(--soft);border-radius:8px;margin-top:14px}
+.duval-wrap{display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap}.duval-info{min-width:260px;max-width:420px}
+svg{max-width:520px;width:100%;height:auto}.zone{stroke:#fff;stroke-width:2;opacity:.78}.point{fill:#111;stroke:#fff;stroke-width:3}
+.timeline{display:grid;grid-template-columns:1fr 80px 1fr;gap:12px;align-items:stretch}.arrow{display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--blue)}
+.note{color:var(--muted);font-size:12px;line-height:1.6}.right{text-align:right}
+@media(max-width:900px){.grid,.formgrid,.strategy{grid-template-columns:1fr 1fr}.overview-layout{grid-template-columns:1fr}.split,.timeline{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}}
+@media(max-width:560px){main{padding:14px}.grid,.formgrid,.strategy{grid-template-columns:1fr}header{padding:0 14px}.asset select{max-width:130px}}
+</style>
 </head>
-<body class="min-h-screen flex flex-col antialiased text-slate-700">
+<body>
+<header>
+ <div class="brand"><b>Transformer RCM Workspace</b><span>Reliability Centered Maintenance • Power Transformer</span></div>
+ <div class="asset"><select><option>TR-01 • 115/24 kV</option><option>TR-02 • 115/24 kV</option></select><button onclick="exportData()">Export JSON</button></div>
+</header>
+<nav id="nav"></nav>
+<main>
+<section id="overview" class="page active">
+ <div class="hero"><div><div class="k" style="color:#9fb7d5">TRANSFORMER RELIABILITY CENTER</div><h1>RCM Fleet Intelligence</h1><p>ภาพรวมสุขภาพ ความเสี่ยง และ Maintenance Strategy ของหม้อแปลงทั้งระบบ</p></div><div class="badge">Updated • Prototype Dataset</div></div>
+ <div class="grid">
+  <div class="card fleet-card"><div class="k">TOTAL ASSETS</div><div class="v" id="fleetTotal">20</div><span class="tag">Transformers</span></div>
+  <div class="card fleet-card"><div class="k"><i class="status-dot normal"></i>NORMAL</div><div class="v" id="fleetNormal">12</div><span class="health-pill hp-normal">ปกติ</span></div>
+  <div class="card fleet-card"><div class="k"><i class="status-dot watch"></i>WATCHLIST</div><div class="v" id="fleetWatch">5</div><span class="health-pill hp-watch">เฝ้าระวัง</span></div>
+  <div class="card fleet-card"><div class="k"><i class="status-dot critical"></i>CRITICAL</div><div class="v" id="fleetCritical">3</div><span class="health-pill hp-critical">วิกฤต</span></div>
+ </div>
+ <div class="overview-layout">
+  <div class="box"><h3>Transformer Fleet • 20 Assets</h3><div class="scroll"><table class="asset-table"><thead><tr><th>Asset</th><th>Rating</th><th>HI</th><th>RPN</th><th>DGA</th><th>Strategy</th><th>Status</th></tr></thead><tbody id="assetBody"></tbody></table></div></div>
+  <div class="box"><h3>Fleet Health Distribution</h3><div class="distribution"><div class="donut" id="fleetDonut"></div></div><div id="fleetLegend"></div></div>
+ </div>
+ <div class="box"><h3>Maintenance Strategy Framework</h3><div class="strategy">
+  <div class="strat"><b>BM</b><p>Breakdown Maintenance<br>พังแล้วจึงดำเนินการซ่อม</p></div>
+  <div class="strat"><b>CM</b><p>Corrective Maintenance<br>พบเสียง/อาการผิดปกติ แล้ววางแผนแก้ไข</p></div>
+  <div class="strat"><b>PM</b><p>Preventive Maintenance<br>บำรุงรักษาตามรอบเวลา</p></div>
+  <div class="strat"><b>CBM</b><p>Condition-Based Maintenance<br>ดำเนินการเมื่อ Condition เข้าเกณฑ์</p></div>
+  <div class="strat"><b>PdM</b><p>Predictive Maintenance<br>ติดตาม Trend เพื่อวางแผนก่อนถึงจุดที่ต้องซ่อม</p></div>
+ </div></div>
+</section>
 
-    <div class="flex flex-1 overflow-hidden">
-        
-        <!-- Sidebar ด้านซ้าย (ตามเรฟเฟอเรนซ์) -->
-        <aside class="w-64 bg-[#0B132B] text-slate-300 flex flex-col z-20 shrink-0 shadow-xl">
-            <!-- Logo Brand -->
-            <div class="h-16 flex items-center px-6 space-x-3 border-b border-slate-800">
-                <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-md">
-                    <i class="fa-solid fa-bolt text-sm"></i>
-                </div>
-                <span class="font-bold text-base tracking-wider text-white">Lector<span class="text-blue-500">.RCM</span></span>
-            </div>
+<section id="fmea" class="page">
+ <div class="title"><div><h1>FMEA & RPN</h1><p>แก้ไข S / O / D ได้ และระบบคำนวณ RPN = S × O × D อัตโนมัติ</p></div><button class="btn" onclick="addFmea()">+ Failure Mode</button></div>
+ <div class="box scroll"><table><thead><tr><th>Component</th><th>Function</th><th>Failure Mode</th><th>Failure Effect</th><th>Cause</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th></th></tr></thead><tbody id="fmeaBody"></tbody></table></div>
+</section>
 
-            <!-- เมนูนำทางด้านซ้าย -->
-            <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto text-xs font-medium">
-                <a href="#" onclick="switchTab('dashboard')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-white bg-blue-600 shadow-md transition" data-tab="dashboard">
-                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#" onclick="switchTab('assets')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition" data-tab="assets">
-                    <i class="fa-solid fa-industry w-5 text-center text-slate-400"></i>
-                    <span>Transformers Inventory</span>
-                </a>
-                <a href="#" onclick="switchTab('fmea')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition" data-tab="fmea">
-                    <i class="fa-solid fa-table-cells w-5 text-center text-slate-400"></i>
-                    <span>FMEA & RPN Analysis</span>
-                </a>
-                <a href="#" onclick="switchTab('hi')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition" data-tab="hi">
-                    <i class="fa-solid fa-heart-pulse w-5 text-center text-slate-400"></i>
-                    <span>Health Index (HI)</span>
-                </a>
-                <a href="#" onclick="switchTab('dga')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition" data-tab="dga">
-                    <i class="fa-solid fa-flask w-5 text-center text-slate-400"></i>
-                    <span>DGA & Duval Triangle</span>
-                </a>
-                <a href="#" onclick="switchTab('strategy')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition" data-tab="strategy">
-                    <i class="fa-solid fa-chess-board w-5 text-center text-slate-400"></i>
-                    <span>RCM Decision Tree</span>
-                </a>
-                <div class="pt-4 pb-2 px-4 text-[10px] uppercase text-slate-500 font-bold tracking-wider">System & Tools</div>
-                <a href="#" class="flex items-center space-x-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-bell w-5 text-center text-slate-400"></i>
-                    <span>Notifications</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-gear w-5 text-center text-slate-400"></i>
-                    <span>Settings</span>
-                </a>
-            </nav>
+<section id="hi" class="page">
+ <div class="title"><div><h1>Health Index • Lab Assessment</h1><p>ประเมิน HI จากผลตรวจน้ำมันและสภาพหม้อแปลง</p></div><button class="btn" onclick="calcHI()">คำนวณ HI</button></div>
+ <div class="split"><div class="box"><h3>Laboratory Results</h3><div class="formgrid" id="labFields"></div></div>
+ <div class="box"><h3>Health Index Result</h3><div class="v"><span id="hiScore">—</span>/100</div><div class="meter"><i id="hiBar"></i></div><div id="hiText" class="result">กรอกผล Lab แล้วกดคำนวณ</div><p class="note">ตัวอย่างนี้เป็น scoring engine สำหรับ prototype ควรแทนเกณฑ์ด้วยมาตรฐาน/เกณฑ์องค์กรที่อนุมัติก่อนใช้ตัดสินใจจริง</p></div></div>
+</section>
 
-            <!-- User Mini Profile at bottom -->
-            <div class="p-4 border-t border-slate-800 flex items-center space-x-3 bg-slate-900/50">
-                <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">PP</div>
-                <div>
-                    <div class="text-xs font-semibold text-white">Panissara P.</div>
-                    <div class="text-[10px] text-emerald-400">● Online</div>
-                </div>
-            </div>
-        </aside>
+<section id="dga" class="page">
+ <div class="title"><div><h1>Dissolved Gas Analysis</h1><p>กรอกค่าก๊าซ (ppm) แล้วส่งผลไปวิเคราะห์ Duval Triangle</p></div><button class="btn" onclick="analyzeDGA()">วิเคราะห์ DGA</button></div>
+ <div class="box"><div class="formgrid" id="gasFields"></div><div id="dgaResult" class="result">รอข้อมูล DGA</div></div>
+</section>
 
-        <!-- Main Content Panel -->
-        <main class="flex-1 flex flex-col overflow-y-auto bg-[#F8FAFC]">
-            
-            <!-- Top Header Bar -->
-            <header class="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs text-slate-400 font-medium">Dashboard /</span>
-                    <span class="text-xs font-bold text-slate-800">Transformer RCM Analytics</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div id="realtimeClock" class="text-xs font-semibold bg-slate-100 px-3 py-1.5 rounded-lg text-slate-600 border border-slate-200">
-                        <i class="fa-regular fa-clock text-blue-500 mr-1.5"></i> <span id="clockText">--/--/---- --:--:--</span>
-                    </div>
-                    <div class="relative">
-                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white"></span>
-                        <button class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition"><i class="fa-regular fa-bell text-sm"></i></button>
-                    </div>
-                </div>
-            </header>
+<section id="duval" class="page">
+ <div class="title"><div><h1>Duval Triangle</h1><p>Visualization จาก CH₄ / C₂H₄ / C₂H₂ ที่กรอกในหน้า DGA</p></div></div>
+ <div class="box duval-wrap">
+  <svg viewBox="0 0 600 530" aria-label="Duval Triangle prototype">
+   <polygon points="300,35 35,490 565,490" fill="#f7f9fc" stroke="#aab8ca" stroke-width="3"/>
+   <polygon class="zone" points="300,35 235,146 365,146" fill="#b9d8ff"/><text x="300" y="118" text-anchor="middle">PD</text>
+   <polygon class="zone" points="235,146 95,386 245,386 300,292" fill="#cfe9db"/><text x="190" y="310">T1</text>
+   <polygon class="zone" points="365,146 300,292 355,386 505,386" fill="#ffe1a8"/><text x="400" y="310">T2</text>
+   <polygon class="zone" points="95,386 35,490 245,490 245,386" fill="#ffd0d3"/><text x="145" y="450">D1</text>
+   <polygon class="zone" points="355,386 355,490 565,490 505,386" fill="#e0d4ff"/><text x="450" y="450">D2</text>
+   <polygon class="zone" points="245,386 300,292 355,386 355,490 245,490" fill="#ffc994"/><text x="300" y="420" text-anchor="middle">T3</text>
+   <circle id="duvalPoint" class="point" cx="300" cy="300" r="9" visibility="hidden"/>
+   <text x="300" y="20" text-anchor="middle" font-weight="700">CH₄</text><text x="18" y="510" font-weight="700">C₂H₄</text><text x="530" y="510" font-weight="700">C₂H₂</text>
+  </svg>
+  <div class="duval-info"><div class="k">NORMALIZED GAS</div><div id="duvalPct" class="v" style="font-size:20px">—</div><div id="duvalDiagnosis" class="result">กรอก DGA ก่อน</div><p class="note">กราฟนี้เป็น prototype visualization สำหรับ UX/UI ไม่ควรใช้ zone geometry นี้เป็นเกณฑ์วินิจฉัยทางวิศวกรรมจริงจนกว่าจะใส่ boundary ตามมาตรฐานที่องค์กรเลือกใช้</p></div>
+ </div>
+</section>
 
-            <div class="p-8 space-y-6">
+<section id="logic" class="page">
+ <div class="title"><div><h1>RCM Decision Logic Tree</h1><p>วิเคราะห์เส้นทางตัดสินใจและจัดเข้ากลยุทธ์ BM → CM → PM → CBM → PdM</p></div><button class="btn secondary" onclick="resetLogic()">เริ่มใหม่</button></div>
+ <div class="box logic"><div id="logicBox"></div></div>
+</section>
 
-                <!-- TAB 1: DASHBOARD ANALYTICS -->
-                <section id="tab-dashboard" class="tab-content space-y-6">
-                    
-                    <!-- Top Row: Main Line Chart & Doughnut Traffic Chart -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        
-                        <!-- Main Line Chart Card -->
-                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <div class="text-2xl font-bold text-slate-900">$3,468.96</div>
-                                    <div class="text-xs text-slate-400 mt-0.5">Transformer Maintenance Budget Usage</div>
-                                </div>
-                                <div class="flex items-center space-x-2 text-xs">
-                                    <span class="px-2.5 py-1 bg-amber-50 text-amber-600 font-semibold rounded-lg border border-amber-200">82 Units Monitored</span>
-                                </div>
-                            </div>
-                            <div class="h-48">
-                                <canvas id="mainLineChart"></canvas>
-                            </div>
-                            <!-- Mini Stat badges below chart -->
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-100 text-xs">
-                                <div class="p-2.5 rounded-xl bg-slate-50">
-                                    <div class="text-slate-400 text-[10px]">Total Assets</div>
-                                    <div class="font-bold text-slate-800 text-sm mt-0.5">6 Units</div>
-                                </div>
-                                <div class="p-2.5 rounded-xl bg-slate-50">
-                                    <div class="text-slate-400 text-[10px]">Critical RPN</div>
-                                    <div class="font-bold text-rose-600 text-sm mt-0.5">4 Items</div>
-                                </div>
-                                <div class="p-2.5 rounded-xl bg-slate-50">
-                                    <div class="text-slate-400 text-[10px]">Avg Health Index</div>
-                                    <div class="font-bold text-emerald-600 text-sm mt-0.5">86.4%</div>
-                                </div>
-                                <div class="p-2.5 rounded-xl bg-slate-50">
-                                    <div class="text-slate-400 text-[10px]">Pending PM</div>
-                                    <div class="font-bold text-blue-600 text-sm mt-0.5">3 Tasks</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Doughnut Traffic / Status Chart -->
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-bold text-sm text-slate-800">Health Index Status</h3>
-                                <button class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                            </div>
-                            <div class="h-40 flex items-center justify-center my-2">
-                                <canvas id="trafficDoughnut"></canvas>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2 text-center text-xs pt-3 border-t border-slate-100">
-                                <div>
-                                    <div class="text-slate-400 text-[10px]">Normal</div>
-                                    <div class="font-bold text-emerald-600">50%</div>
-                                </div>
-                                <div>
-                                    <div class="text-slate-400 text-[10px]">Aged</div>
-                                    <div class="font-bold text-blue-600">33%</div>
-                                </div>
-                                <div>
-                                    <div class="text-slate-400 text-[10px]">At Risk</div>
-                                    <div class="font-bold text-amber-500">17%</div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- Middle Row: 4 Pastel Metric Cards (ตามเรฟ) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100 shadow-sm">
-                            <div class="text-xs font-semibold text-blue-600 uppercase">Active Substation</div>
-                            <div class="flex justify-between items-end mt-3">
-                                <div class="text-2xl font-bold text-slate-800">12 Sub</div>
-                                <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-lg"><i class="fa-solid fa-arrow-up mr-1"></i> +12.4%</span>
-                            </div>
-                            <div class="h-10 mt-3"><canvas id="spark1"></canvas></div>
-                        </div>
-
-                        <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-2xl border border-amber-100 shadow-sm">
-                            <div class="text-xs font-semibold text-amber-600 uppercase">Page View / Audit</div>
-                            <div class="flex justify-between items-end mt-3">
-                                <div class="text-2xl font-bold text-slate-800">5,432</div>
-                                <span class="text-xs font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-lg"><i class="fa-solid fa-arrow-up mr-1"></i> +5.1%</span>
-                            </div>
-                            <div class="h-10 mt-3"><canvas id="spark2"></canvas></div>
-                        </div>
-
-                        <div class="bg-gradient-to-br from-rose-50 to-pink-50 p-5 rounded-2xl border border-rose-100 shadow-sm">
-                            <div class="text-xs font-semibold text-rose-600 uppercase">Bounce Rate / Risk</div>
-                            <div class="flex justify-between items-end mt-3">
-                                <div class="text-2xl font-bold text-slate-800">4.32%</div>
-                                <span class="text-xs font-bold text-rose-600 bg-rose-100 px-2 py-0.5 rounded-lg"><i class="fa-solid fa-arrow-down mr-1"></i> -1.2%</span>
-                            </div>
-                            <div class="h-10 mt-3"><canvas id="spark3"></canvas></div>
-                        </div>
-
-                        <div class="bg-gradient-to-br from-purple-50 to-violet-50 p-5 rounded-2xl border border-purple-100 shadow-sm">
-                            <div class="text-xs font-semibold text-purple-600 uppercase">Revenue / Savings</div>
-                            <div class="flex justify-between items-end mt-3">
-                                <div class="text-2xl font-bold text-slate-800">$4,320</div>
-                                <span class="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-lg"><i class="fa-solid fa-arrow-up mr-1"></i> +18.9%</span>
-                            </div>
-                            <div class="h-10 mt-3"><canvas id="spark4"></canvas></div>
-                        </div>
-                    </div>
-
-                    <!-- Bottom Row: Recent Activities & Data Table (ตามเรฟ) -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        
-                        <!-- Recent Activities List -->
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
-                            <h3 class="font-bold text-sm text-slate-800">Recent Activities</h3>
-                            <div class="space-y-4 text-xs">
-                                <div class="flex items-start space-x-3">
-                                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 font-bold"><i class="fa-solid fa-bolt text-xs"></i></div>
-                                    <div>
-                                        <div class="font-semibold text-slate-800">Task Updated: TR-01 Maintenance</div>
-                                        <div class="text-slate-400 text-[11px]">2 mins ago • Edited by Engineer PP</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-start space-x-3">
-                                    <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 font-bold"><i class="fa-solid fa-triangle-exclamation text-xs"></i></div>
-                                    <div>
-                                        <div class="font-semibold text-slate-800">Deal Added: Bushing Oil Leak</div>
-                                        <div class="text-slate-400 text-[11px]">1 hour ago • Priority set to High</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-start space-x-3">
-                                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 font-bold"><i class="fa-solid fa-file-lines text-xs"></i></div>
-                                    <div>
-                                        <div class="font-semibold text-slate-800">Published Article: RCM Standard</div>
-                                        <div class="text-slate-400 text-[11px]">4 hours ago • MIL-STD-1629A</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-start space-x-3">
-                                    <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 font-bold"><i class="fa-solid fa-flask text-xs"></i></div>
-                                    <div>
-                                        <div class="font-semibold text-slate-800">DGA Tested: Sample #TR-02</div>
-                                        <div class="text-slate-400 text-[11px]">Yesterday • Acetylene within limits</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Data Table & Maintenance Schedule -->
-                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-bold text-sm text-slate-800">Transformer Status Table (Excel Data)</h3>
-                                <button onclick="showAddScheduleModal()" class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg shadow transition">
-                                    <i class="fa-solid fa-plus mr-1"></i> Add Schedule
-                                </button>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-xs">
-                                    <thead>
-                                        <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
-                                            <th class="p-3">INVOICE / ID</th>
-                                            <th class="p-3">CUSTOMERS / STATION</th>
-                                            <th class="p-3">MVA / VOLT</th>
-                                            <th class="p-3">HI SCORE</th>
-                                            <th class="p-3">STATUS</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="dashTableBody" class="divide-y divide-slate-100">
-                                        <!-- Populated by JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                    </div>
-                </section>
-
-                <!-- TAB 2: ASSETS (TRANSFORMERS) -->
-                <section id="tab-assets" class="tab-content hidden space-y-6">
-                    <div class="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-800">Transformers Inventory (เฉพาะหม้อแปลงไฟฟ้า TR)</h2>
-                            <p class="text-xs text-slate-400">ข้อมูลหม้อแปลงหลัก 6 เครื่องพร้อมรูปภาพและสเปกพิกัด</p>
-                        </div>
-                        <input type="text" id="assetSearchInput" onkeyup="filterAssets()" placeholder="ค้นหารหัสหม้อแปลง..." class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="transformerCardGrid">
-                        <!-- Populated by JS -->
-                    </div>
-                </section>
-
-                <!-- TAB 3: FMEA & RPN -->
-                <section id="tab-fmea" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center">
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-800">วิเคราะห์ FMEA และคำนวณ RPN (46 รายการหม้อแปลง)</h2>
-                            <p class="text-xs text-slate-400">สามารถคลิกแก้ไขคะแนน S, O, D ได้สดๆ ระบบคำนวณ RPN อัตโนมัติ</p>
-                        </div>
-                        <span class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded-xl border border-blue-200">รวม 46 รายการ</span>
-                    </div>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
-                                    <tr>
-                                        <th class="p-4">Component</th>
-                                        <th class="p-4">Failure Mode</th>
-                                        <th class="p-4">Failure Cause</th>
-                                        <th class="p-4 text-center">S (1-5)</th>
-                                        <th class="p-4 text-center">O (1-5)</th>
-                                        <th class="p-4 text-center">D (1-5)</th>
-                                        <th class="p-4 text-center">RPN</th>
-                                        <th class="p-4">Priority Flag</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="fmeaTableBody" class="divide-y divide-slate-100">
-                                    <!-- Populated by JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- TAB 4: HEALTH INDEX -->
-                <section id="tab-hi" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h2 class="text-lg font-bold text-slate-800">ประเมินคะแนน Health Index (HI) หม้อแปลงไฟฟ้า</h2>
-                        <p class="text-xs text-slate-400">ประเมินจากสภาพจริง DGA, น้ำมันฉนวน และชิ้นส่วนหลัก</p>
-                    </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-50 text-slate-500 font-semibold border-b">
-                                    <tr>
-                                        <th class="p-4">รหัสหม้อแปลง</th>
-                                        <th class="p-4">ชื่อสถานี / พิกัด</th>
-                                        <th class="p-4 text-center">คะแนน HI (0-100)</th>
-                                        <th class="p-4">สถานะสภาพ</th>
-                                        <th class="p-4 text-center">บันทึก</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="hiTableBody" class="divide-y divide-slate-100">
-                                    <!-- Populated by JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3 text-xs">
-                            <h3 class="font-bold text-slate-800">เกณฑ์คะแนน Health Index</h3>
-                            <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 font-medium">HI 85-100: สภาพดีเยี่ยม (Normal) - PM ปกติ</div>
-                            <div class="p-3 rounded-xl bg-blue-50 border border-blue-100 text-blue-700 font-medium">HI 70-84.9: เริ่มเสื่อมสภาพ (Aged) - เพิ่มความถี่ทดสอบ</div>
-                            <div class="p-3 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 font-medium">HI 50-69.9: มีความเสี่ยง (At Risk) - CBM / กรองน้ำมัน</div>
-                            <div class="p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 font-medium">HI < 50: วิกฤต (Critical) - Overhaul ด่วน</div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- TAB 5: DGA ANALYSIS -->
-                <section id="tab-dga" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h2 class="text-lg font-bold text-slate-800">วิเคราะห์ DGA & สามเหลี่ยม Duval (IEC 60599)</h2>
-                        <p class="text-xs text-slate-400">บันทึกค่าก๊าซละลายและจำลองพิกัดความผิดปกติของหม้อแปลง</p>
-                    </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                            <h3 class="font-bold text-sm text-slate-800">บันทึกค่าก๊าซละลายในน้ำมัน (ppm)</h3>
-                            <div class="grid grid-cols-2 gap-4 text-xs">
-                                <div><label class="block font-medium text-slate-600 mb-1">Hydrogen (H2)</label><input type="number" id="dgaH2" value="45" class="w-full p-2.5 bg-slate-50 border rounded-xl"></div>
-                                <div><label class="block font-medium text-slate-600 mb-1">Methane (CH4)</label><input type="number" id="dgaCH4" value="20" class="w-full p-2.5 bg-slate-50 border rounded-xl"></div>
-                                <div><label class="block font-medium text-slate-600 mb-1">Acetylene (C2H2)</label><input type="number" id="dgaC2H2" value="2" class="w-full p-2.5 bg-slate-50 border rounded-xl"></div>
-                                <div><label class="block font-medium text-slate-600 mb-1">Ethylene (C2H4)</label><input type="number" id="dgaC2H4" value="30" class="w-full p-2.5 bg-slate-50 border rounded-xl"></div>
-                            </div>
-                            <button onclick="runDgaAnalysis()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs py-3 rounded-xl shadow transition">ประมวลผล DGA & Duval Triangle</button>
-                            <div id="dgaResultBox" class="p-4 rounded-xl bg-slate-50 border text-xs space-y-1">
-                                <div class="font-bold text-slate-800">ผลวินิจฉัยเบื้องต้น:</div>
-                                <div id="dgaResultText" class="text-slate-600">คลิกปุ่มประมวลผลด้านบนเพื่อวิเคราะห์</div>
-                            </div>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center space-y-3">
-                            <h3 class="font-bold text-sm text-slate-800 self-start">Duval Triangle Schematic</h3>
-                            <div class="relative w-64 h-56 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-center">
-                                <svg viewBox="0 0 200 180" class="w-full h-full p-4">
-                                    <polygon points="100,10 10,160 190,160" fill="none" stroke="#2563eb" stroke-width="2.5"/>
-                                    <text x="100" y="5" font-size="8" fill="#64748b" text-anchor="middle" font-weight="bold">C2H2</text>
-                                    <text x="0" y="172" font-size="8" fill="#64748b" font-weight="bold">CH4</text>
-                                    <text x="175" y="172" font-size="8" fill="#64748b" font-weight="bold">C2H4</text>
-                                    <circle id="duvalPoint" cx="100" cy="110" r="7" fill="#ef4444" class="transition-all duration-500 shadow-lg"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- TAB 6: STRATEGY -->
-                <section id="tab-strategy" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h2 class="text-lg font-bold text-slate-800">กลยุทธ์การบำรุงรักษา RCM & Decision Logic Tree</h2>
-                        <p class="text-xs text-slate-400">สรุปกลยุทธ์ที่เหมาะสมกับหม้อแปลงไฟฟ้า</p>
-                    </div>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 text-slate-500 font-semibold border-b">
-                                <tr>
-                                    <th class="p-4">Component</th>
-                                    <th class="p-4 text-center">RPN</th>
-                                    <th class="p-4">ประเภทผลกระทบ (Consequence)</th>
-                                    <th class="p-4">กลยุทธ์บำรุงรักษาที่แนะนำ (RCM Strategy)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="strategyTableBody" class="divide-y divide-slate-100">
-                                <!-- Populated by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-            </div>
-        </main>
-    </div>
-
-    <!-- Modal เพิ่มแผนบำรุงรักษา -->
-    <div id="scheduleModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-base text-slate-800">เพิ่มแผนงานบำรุงรักษา</h3>
-                <button onclick="closeAddScheduleModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div><label class="block font-medium text-slate-600 mb-1">รหัสหม้อแปลง</label><input type="text" id="newAssetId" value="TR-01 (Main Substation)" class="w-full p-2.5 bg-slate-50 border rounded-xl"></div>
-                <div><label class="block font-medium text-slate-600 mb-1">กิจกรรมบำรุงรักษา</label><input type="text" id="newActivity" placeholder="เช่น กรองน้ำมันและวัดความเป็นฉนวน" class="w-full p-2.5 bg-slate-50 border rounded-xl"></div>
-                <div><label class="block font-medium text-slate-600 mb-1">วันที่กำหนด</label><input type="date" id="newDate" class="w-full p-2.5 bg-slate-50 border rounded-xl"></div>
-            </div>
-            <div class="flex justify-end space-x-3 pt-2">
-                <button onclick="closeAddScheduleModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-medium rounded-xl text-xs">ยกเลิก</button>
-                <button onclick="saveNewSchedule()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-xs">บันทึกแผนงาน</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript Application Logic -->
-    <script>
-        // Transformer FMEA Dataset extracted from Excel (46 items)
-        const transformerFmeaData = [
-            { component: "TR_Counter L/A", mode: "T001 Counter Lightning Arrester ชำรุด", cause: "โครงแตก, ซีลเสื่อมสภาพ, กลไกชำรุด", s: 2, o: 2, d: 2, rpn: 8, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" },
-            { component: "TR_OLevelGauge", mode: "T002 Oil level gauge ชำรุด", cause: "โครงแตก, กลไกชำรุด", s: 3, o: 2, d: 1, rpn: 6, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
-            { component: "TR_OtempGauge", mode: "T003 Oil temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ", s: 3, o: 2, d: 1, rpn: 6, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
-            { component: "TR_Sgel/ABreather", mode: "T004 Silicagel เปลี่ยนสีชำรุด", cause: "Silicagel เสื่อมสภาพ", s: 2, o: 3, d: 2, rpn: 12, priority: "ปานกลาง/ต่ำ", consequence: "Economic-minor", strategy: "Run-to-failure (CM)" },
-            { component: "TR_WTempGauge", mode: "T005 Winding temp ชำรุด", cause: "โครงแตก, เสื่อมสภาพ", s: 3, o: 2, d: 1, rpn: 6, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
-            { component: "TR_TOP", mode: "T006 น้ำมันรั่วซึมด้านบนหม้อแปลง", cause: "ซีลเสื่อมสภาพ", s: 3, o: 3, d: 2, rpn: 18, priority: "ปานกลาง/ต่ำ", consequence: "Operational-moderate", strategy: "Time-based (PM)" },
-            { component: "TR_Bushing", mode: "T007 น้ำมันรั่วซึมที่ Bushing หม้อแปลง", cause: "ซีลเสื่อมสภาพ, แตกหัก", s: 4, o: 2, d: 3, rpn: 24, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" },
-            { component: "TR_CableBox", mode: "T008 น้ำมันรั่วซึมที่ Cable box", cause: "ความร้อนสูงเกินไป", s: 3, o: 2, d: 3, rpn: 18, priority: "ปานกลาง/ต่ำ", consequence: "Economic-low", strategy: "Condition-based (PdM)" },
-            { component: "TR_Radiator", mode: "T009 น้ำมันรั่วซึมที่ Radiator", cause: "แรงดันภายในสูง", s: 3, o: 3, d: 2, rpn: 18, priority: "ปานกลาง/ต่ำ", consequence: "Operational-moderate", strategy: "Time-based (PM)" },
-            { component: "TR_MainTank", mode: "T012 น้ำมันหม้อแปลงต่ำ", cause: "ระบบระบายความร้อนผิดปกติ", s: 4, o: 2, d: 1, rpn: 8, priority: "เฝ้าระวัง", consequence: "Operational", strategy: "Condition-based (PdM)" },
-            { component: "TR_MainTank", mode: "T015 หม้อแปลงชำรุด", cause: "ลัดวงจรภายใน, อายุการใช้งาน", s: 5, o: 1, d: 1, rpn: 5, priority: "วิกฤต", consequence: "Safety-critical", strategy: "Redesign / Discard" },
-            { component: "TR_Trip", mode: "T016 หม้อแปลง Trip", cause: "รีเลย์ทำงานผิดพลาด", s: 4, o: 2, d: 1, rpn: 8, priority: "เฝ้าระวัง", consequence: "Operational", strategy: "Condition-based (PdM)" },
-            { component: "TR_Coil", mode: "T023 ขดลวดหม้อแปลงชำรุด", cause: "โอเวอร์โหลด, ความชื้น", s: 5, o: 1, d: 4, rpn: 20, priority: "วิกฤต", consequence: "Safety-critical", strategy: "Redesign / Discard" },
-            { component: "TR_HVBushing", mode: "T025 HVBushing ชำรุด", cause: "เสื่อมสภาพตามอายุ", s: 4, o: 2, d: 3, rpn: 24, priority: "เฝ้าระวัง", consequence: "Operational-significant", strategy: "Time-based (PM) บังคับ" }
-        ];
-
-        let dashboardTableData = [
-            { id: "12396", customer: "Main Transformer #1", mva: "50 MVA / 115kV", hi: "88.5%", status: "Active" },
-            { id: "12395", customer: "Main Transformer #2", mva: "50 MVA / 115kV", hi: "74.2%", status: "Pending" },
-            { id: "12394", customer: "Station Service TR", mva: "5 MVA / 22kV", hi: "92.0%", status: "Active" },
-            { id: "12393", customer: "Step-Down TR #1", mva: "30 MVA / 115kV", hi: "65.5%", status: "Warning" },
-            { id: "12392", customer: "Step-Down TR #2", mva: "30 MVA / 115kV", hi: "90.1%", status: "Active" }
-        ];
-
-        const transformerAssets = [
-            { id: "TR-01", name: "Main Power Transformer #1", mva: "50 MVA", voltage: "115/22 kV", hi: 88.5, status: "Normal", img: "https://images.unsplash.com/photo-1544724569-5f546fd6f2b8?auto=format&fit=crop&w=600&q=80" },
-            { id: "TR-02", name: "Main Power Transformer #2", mva: "50 MVA", voltage: "115/22 kV", hi: 74.2, status: "Aged", img: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80" },
-            { id: "TR-03", name: "Station Service Transformer", mva: "5 MVA", voltage: "22/0.4 kV", hi: 92.0, status: "Normal", img: "https://images.unsplash.com/photo-1544724569-5f546fd6f2b8?auto=format&fit=crop&w=600&q=80" },
-            { id: "TR-04", name: "Step-Down Transformer #1", mva: "30 MVA", voltage: "115/6.6 kV", hi: 65.5, status: "At Risk", img: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80" },
-            { id: "TR-05", name: "Step-Down Transformer #2", mva: "30 MVA", voltage: "115/6.6 kV", hi: 90.1, status: "Normal", img: "https://images.unsplash.com/photo-1544724569-5f546fd6f2b8?auto=format&fit=crop&w=600&q=80" },
-            { id: "TR-06", name: "Backup Auxiliary Transformer", mva: "2 MVA", voltage: "22/0.4 kV", hi: 82.4, status: "Aged", img: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80" }
-        ];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initClock();
-            renderCharts();
-            renderDashboardTable();
-            renderAssetsGrid();
-            renderFmeaTable();
-            renderHiTable();
-            renderStrategyTable();
-        });
-
-        function initClock() {
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('clockText').innerText = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH');
-            }, 1000);
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('bg-blue-600', 'text-white', 'shadow-md'));
-            
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
-            if (activeBtn) activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
-        }
-
-        function renderCharts() {
-            // Main Line Chart
-            new Chart(document.getElementById('mainLineChart').getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-                    datasets: [
-                        { label: 'Budget Actual', data: [12, 19, 15, 25, 22, 30, 28, 35, 38], borderColor: '#2563eb', tension: 0.4, fill: true, backgroundColor: 'rgba(37, 99, 235, 0.05)' },
-                        { label: 'Forecast', data: [10, 15, 18, 20, 26, 24, 32, 30, 34], borderColor: '#f59e0b', tension: 0.4, borderDash: [4, 4] }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
-            });
-
-            // Doughnut Traffic Chart
-            new Chart(document.getElementById('trafficDoughnut').getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Normal', 'Aged', 'At Risk'],
-                    datasets: [{ data: [50, 33, 17], backgroundColor: ['#2563eb', '#f59e0b', '#38bdf8'], borderWidth: 0 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
-            });
-
-            // Sparklines
-            const sparkOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } };
-            new Chart(document.getElementById('spark1').getContext('2d'), { type: 'line', data: { labels: [1,2,3,4,5], datasets: [{ data: [10,25,18,30,40], borderColor: '#2563eb', tension: 0.3 }] }, options: sparkOpts });
-            new Chart(document.getElementById('spark2').getContext('2d'), { type: 'line', data: { labels: [1,2,3,4,5], datasets: [{ data: [20,15,25,22,35], borderColor: '#f59e0b', tension: 0.3 }] }, options: sparkOpts });
-            new Chart(document.getElementById('spark3').getContext('2d'), { type: 'line', data: { labels: [1,2,3,4,5], datasets: [{ data: [30,25,20,15,10], borderColor: '#e11d48', tension: 0.3 }] }, options: sparkOpts });
-            new Chart(document.getElementById('spark4').getContext('2d'), { type: 'line', data: { labels: [1,2,3,4,5], datasets: [{ data: [12,22,18,35,45], borderColor: '#9333ea', tension: 0.3 }] }, options: sparkOpts });
-        }
-
-        function renderDashboardTable() {
-            const tbody = document.getElementById('dashTableBody');
-            tbody.innerHTML = dashboardTableData.map(row => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-3 font-bold text-blue-600">${row.id}</td>
-                    <td class="p-3 font-semibold text-slate-800">${row.customer}</td>
-                    <td class="p-3 text-slate-500">${row.mva}</td>
-                    <td class="p-3 font-bold text-slate-700">${row.hi}</td>
-                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${row.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : row.status === 'Warning' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}">${row.status}</span></td>
-                </tr>
-            `).join('');
-        }
-
-        function renderAssetsGrid() {
-            document.getElementById('transformerCardGrid').innerHTML = transformerAssets.map(asset => `
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-                    <div class="h-40 relative"><img src="${asset.img}" class="w-full h-full object-cover"><span class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-600 text-white">${asset.status}</span></div>
-                    <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
-                        <div><div class="text-xs font-bold text-blue-600">${asset.id}</div><h3 class="font-bold text-slate-800 mt-0.5">${asset.name}</h3><div class="text-xs text-slate-400 mt-1">${asset.mva} • ${asset.voltage}</div></div>
-                        <div class="pt-3 border-t flex justify-between items-center text-xs"><span>HI: <b>${asset.hi}%</b></span><button onclick="switchTab('hi')" class="text-blue-600 font-semibold hover:underline">จัดการ HI &rarr;</button></div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderFmeaTable() {
-            document.getElementById('fmeaTableBody').innerHTML = transformerFmeaData.map((item, index) => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-4 font-bold text-blue-600">${item.component}</td>
-                    <td class="p-4 font-semibold text-slate-800">${item.mode}</td>
-                    <td class="p-4 text-slate-500 text-xs">${item.cause}</td>
-                    <td class="p-4 text-center"><input type="number" min="1" max="5" value="${item.s}" onchange="updateFmea(${index}, 's', this.value)" class="w-10 text-center p-1 bg-slate-50 border rounded font-bold"></td>
-                    <td class="p-4 text-center"><input type="number" min="1" max="5" value="${item.o}" onchange="updateFmea(${index}, 'o', this.value)" class="w-10 text-center p-1 bg-slate-50 border rounded font-bold"></td>
-                    <td class="p-4 text-center"><input type="number" min="1" max="5" value="${item.d}" onchange="updateFmea(${index}, 'd', this.value)" class="w-10 text-center p-1 bg-slate-50 border rounded font-bold"></td>
-                    <td class="p-4 text-center font-bold text-sm ${item.rpn >= 20 ? 'text-rose-600' : 'text-emerald-600'}" id="rpn-${index}">${item.rpn}</td>
-                    <td class="p-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.priority === 'วิกฤต' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'}">${item.priority}</span></td>
-                </tr>
-            `).join('');
-        }
-
-        function updateFmea(index, type, val) {
-            val = parseInt(val) || 1;
-            if (type === 's') transformerFmeaData[index].s = val;
-            if (type === 'o') transformerFmeaData[index].o = val;
-            if (type === 'd') transformerFmeaData[index].d = val;
-            transformerFmeaData[index].rpn = transformerFmeaData[index].s * transformerFmeaData[index].o * transformerFmeaData[index].d;
-            document.getElementById(`rpn-${index}`).innerText = transformerFmeaData[index].rpn;
-        }
-
-        function renderHiTable() {
-            document.getElementById('hiTableBody').innerHTML = transformerAssets.map((asset, index) => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-4 font-bold text-blue-600">${asset.id}</td>
-                    <td class="p-4 font-semibold text-slate-800">${asset.name}</td>
-                    <td class="p-4 text-center"><input type="number" value="${asset.hi}" onchange="transformerAssets[${index}].hi = this.value" class="w-16 text-center p-1 border rounded font-bold text-blue-600"></td>
-                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">${asset.status}</span></td>
-                    <td class="p-4 text-center"><button onclick="alert('บันทึกสำเร็จ')" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs">บันทึก</button></td>
-                </tr>
-            `).join('');
-        }
-
-        function renderStrategyTable() {
-            document.getElementById('strategyTableBody').innerHTML = transformerFmeaData.map(item => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-4 font-bold text-blue-600">${item.component}</td>
-                    <td class="p-4 text-center font-bold">${item.rpn}</td>
-                    <td class="p-4 text-slate-600">${item.consequence}</td>
-                    <td class="p-4"><span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200">${item.strategy}</span></td>
-                </tr>
-            `).join('');
-        }
-
-        function runDgaAnalysis() {
-            document.getElementById('dgaResultText').innerHTML = `<b class="text-emerald-600">สถานะปกติ (Normal):</b> สัดส่วนก๊าซละลายอยู่ในเกณฑ์มาตรฐาน IEC 60599 แนะนำตรวจติดตามตามรอบ`;
-            document.getElementById('duvalPoint').setAttribute('cx', '100');
-            document.getElementById('duvalPoint').setAttribute('cy', '110');
-        }
-
-        function showAddScheduleModal() { document.getElementById('scheduleModal').classList.remove('hidden'); }
-        function closeAddScheduleModal() { document.getElementById('scheduleModal').classList.add('hidden'); }
-        function saveNewSchedule() {
-            alert('เพิ่มแผนงานสำเร็จ');
-            closeAddScheduleModal();
-        }
-
-        function filterAssets() {
-            const query = document.getElementById('assetSearchInput').value.toLowerCase();
-            document.querySelectorAll('#transformerCardGrid > div').forEach(card => {
-                card.style.display = card.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
-            });
-        }
-    </script>
-</body>
-</html>
+<section id="plan" class="page">
+ <div class="title"><div><h1>Maintenance Planning • Before / After RCM</h1><p>เปรียบเทียบแผนเดิมกับแผนหลังวิเคราะห์ RCM</p></div><button class="btn" onclick="addPlan()">+ รายการ</button></div>
+ <div class="box scroll"><table><thead><tr><th>Equipment / Failure Mode</th><th>Before RCM</th><th>RCM Evidence</th><th>After RCM</th><th>Strategy</th><th>Interval / Trigger</th><th></th></tr></thead><tbody id="planBody"></tbody></table></div>
+</section>
+</main>
+<script>
+const pages=[['overview','Overview'],['fmea','FMEA & RPN'],['hi','HI & Lab'],['dga','DGA'],['duval','Duval Triangle'],['logic','Decision Logic Tree'],['plan','Maintenance Plan']];
+const nav=document.getElementById('nav');
+pages.forEach((p,i)=>{let b=document.createElement('button');b.textContent=p[1];b.className=i?'':'active';b.onclick=()=>show(p[0],b);nav.appendChild(b)});
+function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
+const assets=[
+['TR-01','115/24 kV',92,72,'Normal','PM','Normal'],['TR-02','115/24 kV',88,90,'Normal','PM','Normal'],
+['TR-03','69/24 kV',84,108,'Normal','CBM','Normal'],['TR-04','115/24 kV',81,96,'Normal','PM','Normal'],
+['TR-05','69/24 kV',86,105,'Normal','PM','Normal'],['TR-06','115/24 kV',79,120,'T1','CBM','Normal'],
+['TR-07','69/24 kV',83,112,'Normal','PM','Normal'],['TR-08','115/24 kV',77,126,'T1','CBM','Normal'],
+['TR-09','69/24 kV',90,80,'Normal','PM','Normal'],['TR-10','115/24 kV',82,110,'Normal','PM','Normal'],
+['TR-11','69/24 kV',76,128,'T1','CBM','Normal'],['TR-12','115/24 kV',85,98,'Normal','PM','Normal'],
+['TR-13','69/24 kV',68,168,'T2','CBM','Watch'],['TR-14','115/24 kV',64,180,'T2','CBM','Watch'],
+['TR-15','69/24 kV',61,192,'D1','PdM','Watch'],['TR-16','115/24 kV',58,210,'T2','PdM','Watch'],
+['TR-17','69/24 kV',55,224,'D1','PdM','Watch'],['TR-18','115/24 kV',38,315,'D2','CM','Critical'],
+['TR-19','69/24 kV',32,360,'T3','CM','Critical'],['TR-20','115/24 kV',27,420,'D2','BM','Critical']
+];
+function renderFleet(){
+ let body=document.getElementById('assetBody'); if(!body)return;
+ let counts={Normal:0,Watch:0,Critical:0}; body.innerHTML='';
+ assets.forEach(a=>{counts[a[6]]++;let cls=a[6]=='Normal'?'hp-normal':a[6]=='Watch'?'hp-watch':'hp-critical';let th=a[6]=='Normal'?'ปกติ':a[6]=='Watch'?'เฝ้าระวัง':'วิกฤต';body.innerHTML+=`<tr><td>${a[0]}</td><td>${a[1]}</td><td><b>${a[2]}</b>/100</td><td>${a[3]}</td><td>${a[4]}</td><td><b>${a[5]}</b></td><td><span class="health-pill ${cls}">${th}</span></td></tr>`});
+ document.getElementById('fleetTotal').textContent=assets.length;document.getElementById('fleetNormal').textContent=counts.Normal;document.getElementById('fleetWatch').textContent=counts.Watch;document.getElementById('fleetCritical').textContent=counts.Critical;
+ let n=counts.Normal/assets.length*100,w=counts.Watch/assets.length*100;
+ document.getElementById('fleetDonut').style.background=`conic-gradient(#198754 0 ${n}%,#d98b00 ${n}% ${n+w}%,#c53b45 ${n+w}% 100%)`;
+ document.getElementById('fleetLegend').innerHTML=`<p><i class="status-dot normal"></i> ปกติ <b style="float:right">${counts.Normal} เครื่อง</b></p><p><i class="status-dot watch"></i> เฝ้าระวัง <b style="float:right">${counts.Watch} เครื่อง</b></p><p><i class="status-dot critical"></i> วิกฤต <b style="float:right">${counts.Critical} เครื่อง</b></p>`;
+}
+renderFleet();
+let fmea=[
+ ['Main Tank','Contain insulation oil','Oil leakage','Reduced insulation / cooling','Seal deterioration',7,4,4],
+ ['Bushing','Insulate conductor','Insulation deterioration','Flashover / outage','Ageing / contamination',9,3,5],
+ ['OLTC','Voltage regulation','Contact wear','Poor switching / overheating','Mechanical wear',8,5,4]
+];
+function renderFmea(){let t=document.getElementById('fmeaBody');t.innerHTML='';fmea.forEach((r,i)=>{let tr=document.createElement('tr');tr.innerHTML=r.slice(0,5).map((x,j)=>`<td><input value="${x}" onchange="fmea[${i}][${j}]=this.value"></td>`).join('')+[5,6,7].map(j=>`<td><input class="mini" type="number" min="1" max="10" value="${r[j]}" onchange="fmea[${i}][${j}]=+this.value;renderFmea()"></td>`).join('')+`<td><b>${r[5]*r[6]*r[7]}</b></td><td><button class="btn danger" onclick="fmea.splice(${i},1);renderFmea()">×</button></td>`;t.appendChild(tr)});let mx=Math.max(...fmea.map(r=>r[5]*r[6]*r[7]),0);document.getElementById('ovRPN').textContent=mx||'—'}
+function addFmea(){fmea.push(['','','','','',5,5,5]);renderFmea()} renderFmea();
+const labs=[['bdv','BDV','kV'],['moisture','Moisture','ppm'],['acidity','Acidity','mg KOH/g'],['ift','IFT','mN/m'],['tand','Tan δ','%'],['furan','Furan','ppb'],['age','Transformer Age','year'],['load','Loading','%']];
+document.getElementById('labFields').innerHTML=labs.map(x=>`<div class="field"><label>${x[1]} (${x[2]})</label><input id="${x[0]}" type="number" step="any" placeholder="0"></div>`).join('');
+function val(id){return +document.getElementById(id).value||0}
+function calcHI(){let score=100;if(val('bdv')&&val('bdv')<40)score-=15;if(val('moisture')>30)score-=15;if(val('acidity')>.2)score-=15;if(val('ift')&&val('ift')<25)score-=10;if(val('tand')>.5)score-=10;if(val('furan')>1000)score-=20;if(val('age')>30)score-=10;if(val('load')>100)score-=10;score=Math.max(0,score);document.getElementById('hiScore').textContent=score;document.getElementById('ovHI').textContent=score;document.getElementById('hiBar').style.width=score+'%';let s=score>=80?'Good':score>=60?'Moderate':score>=40?'Poor':'Critical';document.getElementById('hiText').innerHTML=`<b>${s}</b> • Health Index ${score}/100`;document.getElementById('hiTag').textContent=s}
+const gases=[['h2','H₂'],['ch4','CH₄'],['c2h6','C₂H₆'],['c2h4','C₂H₄'],['c2h2','C₂H₂'],['co','CO'],['co2','CO₂']];
+document.getElementById('gasFields').innerHTML=gases.map(x=>`<div class="field"><label>${x[1]} (ppm)</label><input id="${x[0]}" type="number" min="0" step="any" placeholder="0"></div>`).join('');
+function analyzeDGA(){let a=val('ch4'),b=val('c2h4'),c=val('c2h2'),sum=a+b+c;if(!sum){alert('กรอก CH₄, C₂H₄ หรือ C₂H₂ อย่างน้อย 1 ค่า');return}let A=a/sum*100,B=b/sum*100,C=c/sum*100;let diag=C>25?'D2':C>10?'D1':B>50?'T3':B>25?'T2':B>10?'T1':'PD';document.getElementById('dgaResult').innerHTML=`Normalized: CH₄ ${A.toFixed(1)}% • C₂H₄ ${B.toFixed(1)}% • C₂H₂ ${C.toFixed(1)}% &nbsp; → &nbsp; <b>${diag}</b>`;document.getElementById('ovDGA').textContent=diag;document.getElementById('duvalPct').textContent=`${A.toFixed(1)} / ${B.toFixed(1)} / ${C.toFixed(1)} %`;document.getElementById('duvalDiagnosis').innerHTML=`Duval prototype diagnosis: <b>${diag}</b>`;let L={x:35,y:490},R={x:565,y:490},T={x:300,y:35};let x=(A*T.x+B*L.x+C*R.x)/100,y=(A*T.y+B*L.y+C*R.y)/100,p=document.getElementById('duvalPoint');p.setAttribute('cx',x);p.setAttribute('cy',y);p.setAttribute('visibility','visible')}
+let logicStep=0,answers=[];
+const qs=[['เกิด Functional Failure แล้วหรือยัง?','BM'],['ตรวจพบความผิดปกติ/เสียง/อาการที่ต้องวางแผนแก้ไขหรือไม่?','CM'],['Failure มีความสัมพันธ์กับอายุหรือรอบเวลาชัดเจนหรือไม่?','PM'],['มี Condition Indicator และเกณฑ์ Trigger ที่ตรวจติดตามได้หรือไม่?','CBM'],['มีข้อมูล Trend เพียงพอสำหรับคาดการณ์และวางแผนล่วงหน้าหรือไม่?','PdM']];
+function renderLogic(){let b=document.getElementById('logicBox');if(logicStep>=qs.length){return setStrategy('BM','ยังไม่เข้าเงื่อนไขงานเชิงรุกที่กำหนด — ทบทวน consequence และเกณฑ์เพิ่มเติม')}let q=qs[logicStep];b.innerHTML=`<div class="question"><div class="k">QUESTION ${logicStep+1} / ${qs.length}</div><h2>${q[0]}</h2><div class="logic-actions"><button class="btn" onclick="logicYes()">ใช่</button><button class="btn secondary" onclick="logicNo()">ไม่ใช่</button></div></div>`}
+function logicYes(){setStrategy(qs[logicStep][1],'เลือกจาก Decision Logic ขั้นที่ '+(logicStep+1))}
+function logicNo(){logicStep++;renderLogic()}
+function setStrategy(s,why){document.getElementById('logicBox').innerHTML=`<div class="question"><div class="k">RECOMMENDED STRATEGY</div><div class="v">${s}</div><p>${why}</p><button class="btn secondary" onclick="resetLogic()">วิเคราะห์ใหม่</button></div>`;document.getElementById('ovStrategy').textContent=s}
+function resetLogic(){logicStep=0;answers=[];renderLogic()}renderLogic();
+let plans=[['Bushing insulation','PM inspection every 6 months','FMEA + Lab/DGA trend','Condition inspection + trend review','CBM','Condition threshold'],['OLTC contact wear','Fixed interval inspection','FMEA / operating count','Planned inspection based on duty','PM','Operating interval']];
+function renderPlan(){let t=document.getElementById('planBody');t.innerHTML='';plans.forEach((r,i)=>{let tr=document.createElement('tr');tr.innerHTML=r.map((x,j)=>j==4?`<td><select onchange="plans[${i}][${j}]=this.value">${['BM','CM','PM','CBM','PdM'].map(s=>`<option ${s==x?'selected':''}>${s}</option>`).join('')}</select></td>`:`<td><input value="${x}" onchange="plans[${i}][${j}]=this.value"></td>`).join('')+`<td><button class="btn danger" onclick="plans.splice(${i},1);renderPlan()">×</button></td>`;t.appendChild(tr)})}
+function addPlan(){plans.push(['','','','','CBM','']);renderPlan()}renderPlan();
+function exportData(){let data={fmea,plans,healthIndex:document.getElementById('ovHI').textContent,dga:document.getElementById('ovDGA').textContent,strategy:document.getElementById('ovStrategy').textContent};let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='transformer-rcm.json';a.click()}
+</script>
+</body></html>
