@@ -24,8 +24,8 @@
   :root:not([data-theme="light"]){ --bg:#0b1120; --card:#131b2c; --border:#232e45; --text:#e7ebf3; --muted:#93a0bd; --green-bg:#0f2a20; --amber-bg:#2e2412; --red-bg:#2e1616; --blue-bg:#0f1f3d; }
 }
 :root[data-theme="dark"]{ --bg:#0b1120; --card:#131b2c; --border:#232e45; --text:#e7ebf3; --muted:#93a0bd; --green-bg:#0f2a20; --amber-bg:#2e2412; --red-bg:#2e1616; --blue-bg:#0f1f3d; }
-*{box-sizing:border-box;}
-html,body{height:100%;}
+*{box-sizing:border-box; min-width:0;}
+html,body{height:100%; overflow-x:hidden; max-width:100%;}
 body{margin:0; background:var(--bg); color:var(--text); padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); -webkit-font-smoothing:antialiased;}
 html{scroll-padding-top:env(safe-area-inset-top,0px);}
 a{color:inherit;}
