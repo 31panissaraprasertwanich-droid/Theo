@@ -302,6 +302,7 @@ select.chip-input{cursor:pointer;}
       <div class="topbar-right">
         <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="globalSearch" placeholder="Search asset ID or location..."></div>
         <div class="langtoggle"><button id="langEn" class="active" data-lang="en">EN</button><button id="langTh" data-lang="th">TH</button></div>
+        <div class="bell" id="guideBtn" title="Help / Guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.8.5-1.1 1-1.1 1.9"/><circle cx="12" cy="17.2" r="1" fill="currentColor" stroke="none"/></svg></div>
         <div style="position:relative;">
           <div class="bell" id="bellBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot" id="bellCount">3</span></div>
           <div id="bellDropdown"></div>
@@ -321,6 +322,23 @@ select.chip-input{cursor:pointer;}
 <script>
 /* ============ TRANSLATIONS ============ */
 const UI = {
+ guide_title:['User Guide','คู่มือการใช้งาน'],
+ guide_intro:['A quick tour of what each page in RCM Transformer does, and a few tips to get around faster.','คำแนะนำสั้นๆ ว่าแต่ละหน้าของ RCM Transformer ใช้ทำอะไร พร้อมเคล็ดลับใช้งานให้เร็วขึ้น'],
+ guide_intro_short:['How to use this app','วิธีใช้งานแอปนี้'],
+ guide_overview_t:['Overview','ภาพรวม'], guide_overview_d:['A snapshot of the whole fleet: how many transformers are healthy/warning/critical, which ones need attention now, and a quick list of all assets.','สรุปภาพรวมทั้งฟลีท: มีหม้อแปลงกี่เครื่องที่ปกติ/เฝ้าระวัง/วิกฤต เครื่องไหนต้องดูแลด่วน และรายการสินทรัพย์ทั้งหมดแบบย่อ'],
+ guide_assets_t:['Transformer Assets','สินทรัพย์หม้อแปลง'], guide_assets_d:['The full list of all 20 transformers with search and status filters. Click "View" on any row to open its full detail.','รายการหม้อแปลงทั้ง 20 เครื่อง พร้อมค้นหาและกรองตามสถานะ กด "ดู" ที่แถวไหนก็ได้เพื่อเปิดรายละเอียดเต็ม'],
+ guide_hi_t:['Health Index','ดัชนีสุขภาพ'], guide_hi_d:['Opens to a fleet-wide ranking first. Pick a transformer to see its full health score breakdown, criteria table, and contributor radar chart.','เปิดมาจะเห็นอันดับสุขภาพของทั้งฟลีทก่อน เลือกหม้อแปลงเพื่อดูรายละเอียดคะแนนสุขภาพ ตารางเกณฑ์ และกราฟปัจจัยต่างๆ'],
+ guide_dga_t:['DGA Analysis','วิเคราะห์ DGA'], guide_dga_d:['Dissolved Gas Analysis results for the selected transformer — gas levels, Duval Triangle, Rogers/IEC ratios, historical trend, and a plain-language interpretation.','ผลวิเคราะห์ก๊าซละลายในน้ำมันของหม้อแปลงที่เลือก — ระดับก๊าซ, Duval Triangle, อัตราส่วน Rogers/IEC, แนวโน้มย้อนหลัง และคำอธิบายแบบเข้าใจง่าย'],
+ guide_fmea_t:['FMEA & RPN','FMEA & RPN'], guide_fmea_d:['Opens to a fleet-wide ranking of each transformer\'s worst failure mode first. Pick one to see its complete Failure Mode & Effects table and risk matrix.','เปิดมาจะเห็นโหมดความล้มเหลวที่แย่ที่สุดของแต่ละหม้อแปลงก่อน เลือกเครื่องเพื่อดูตาราง FMEA และเมทริกซ์ความเสี่ยงแบบเต็ม'],
+ guide_rcm_t:['RCM Decision','การตัดสินใจ RCM'], guide_rcm_d:['Opens to a fleet-wide summary of recommended strategies first. Pick a transformer to walk through its interactive decision tree.','เปิดมาจะเห็นสรุปกลยุทธ์ที่แนะนำของทั้งฟลีทก่อน เลือกหม้อแปลงเพื่อเดินตามแผนผังการตัดสินใจแบบโต้ตอบได้'],
+ guide_plan_t:['Maintenance Plan','แผนบำรุงรักษา'], guide_plan_d:['The schedule of upcoming maintenance tasks for the selected transformer, with a list or Gantt view and the ability to add new tasks.','ตารางงานบำรุงรักษาที่จะเกิดขึ้นของหม้อแปลงที่เลือก ดูแบบรายการหรือ Gantt และเพิ่มงานใหม่ได้'],
+ guide_reports_t:['Reports','รายงาน'], guide_reports_d:['Fleet-wide analytics: health distribution, failure mode trends, maintenance task summary, and a full worst-to-best health ranking.','การวิเคราะห์ภาพรวมทั้งฟลีท: การกระจายสุขภาพ แนวโน้มโหมดความล้มเหลว สรุปงานบำรุงรักษา และอันดับสุขภาพเรียงจากแย่ไปดี'],
+ guide_settings_t:['Settings','ตั้งค่า'], guide_settings_d:['System-wide criteria, the failure mode library, maintenance strategy definitions, user management, and appearance options.','เกณฑ์ของระบบ, คลังโหมดความล้มเหลว, นิยามกลยุทธ์บำรุงรักษา, จัดการผู้ใช้ และตัวเลือกการแสดงผล'],
+ guide_tips_title:['Quick Tips','เคล็ดลับใช้งาน'],
+ guide_tip1:['Use the "Viewing:" dropdown at the top of any transformer detail page to jump straight to another unit without going back.','ใช้ดรอปดาวน์ "กำลังดู:" ที่หัวหน้ารายละเอียดหม้อแปลง เพื่อสลับไปดูเครื่องอื่นได้ทันทีโดยไม่ต้องย้อนกลับ'],
+ guide_tip2:['Switch the whole app between English and Thai with the EN / TH buttons in the top-right.','สลับภาษาทั้งแอประหว่างอังกฤษกับไทยได้ที่ปุ่ม EN / TH มุมขวาบน'],
+ guide_tip3:['Every table wider than your screen can be scrolled left-right — swipe or drag it directly.','ตารางที่กว้างเกินจอเลื่อนซ้าย-ขวาได้ — ปัดหรือลากที่ตัวตารางได้เลย'],
+ guide_tip4:['Data shown here is illustrative and regenerated per transformer for this demo — it is not live telemetry.','ข้อมูลที่แสดงเป็นข้อมูลตัวอย่างที่สร้างขึ้นต่อหม้อแปลงแต่ละเครื่องสำหรับสาธิตเท่านั้น ไม่ใช่ข้อมูลเรียลไทม์จริง'],
  nav_overview:['Overview','ภาพรวม'], nav_assets:['Transformer Assets','สินทรัพย์หม้อแปลง'], nav_healthindex:['Health Index','ดัชนีสุขภาพ'],
  nav_dga:['DGA Analysis','วิเคราะห์ DGA'], nav_fmea:['FMEA & RPN','FMEA & RPN'], nav_rcm:['RCM Decision','การตัดสินใจ RCM'],
  nav_plan:['Maintenance Plan','แผนบำรุงรักษา'], nav_reports:['Reports','รายงาน'], nav_settings:['Settings','ตั้งค่า'],
@@ -335,6 +353,11 @@ const UI = {
  sub_overview:['Monitor · Analyze · Plan · Maintain','ติดตาม · วิเคราะห์ · วางแผน · บำรุงรักษา'],
  sub_assets:['Manage and monitor all transformer assets','จัดการและติดตามสินทรัพย์หม้อแปลงทั้งหมด'],
  sub_detail:['Asset detail & analysis','รายละเอียดและการวิเคราะห์สินทรัพย์'],
+ sub_fleet_overview:['Fleet-wide summary — pick a transformer to see full details','สรุปภาพรวมทั้งฟลีท — เลือกหม้อแปลงเพื่อดูรายละเอียดเต็ม'],
+ fleet_overview:['Fleet Overview','ภาพรวมทั้งฟลีท'], top_risk_item:['Top Risk Item','รายการความเสี่ยงสูงสุด'],
+ ov_healthindex_desc:['All 20 transformers, sorted from worst to best Health Index. Click a row to see the full breakdown for that unit.','หม้อแปลงทั้ง 20 เครื่อง เรียงจากดัชนีสุขภาพแย่ที่สุดไปดีที่สุด กดแถวเพื่อดูรายละเอียดเต็มของเครื่องนั้น'],
+ ov_fmea_desc:['Each transformer\'s single highest-risk failure mode. Click a row to see its full FMEA table.','โหมดความล้มเหลวที่มีความเสี่ยงสูงสุดของแต่ละหม้อแปลง กดแถวเพื่อดูตาราง FMEA เต็มของเครื่องนั้น'],
+ ov_rcm_desc:['The top risk for each transformer and the maintenance strategy RCM recommends for it. Click a row to open its decision tree.','ความเสี่ยงสูงสุดของแต่ละหม้อแปลงและกลยุทธ์บำรุงรักษาที่ RCM แนะนำ กดแถวเพื่อเปิดแผนผังการตัดสินใจของเครื่องนั้น'],
  sub_reports:['Turn data into actionable maintenance decisions','เปลี่ยนข้อมูลเป็นการตัดสินใจบำรุงรักษา'],
  sub_settings:['Configure system parameters, criteria, and user management','ตั้งค่าพารามิเตอร์ระบบ เกณฑ์ และผู้ใช้งาน'],
  hero_title:['Reliable Transformers<br>for a Sustainable Tomorrow','หม้อแปลงที่เชื่อถือได้<br>เพื่ออนาคตที่ยั่งยืน'],
@@ -342,6 +365,7 @@ const UI = {
  health_dist:['Health Status Distribution','การกระจายสถานะสุขภาพ'], hi_trend:['Health Index Trend','แนวโน้มดัชนีสุขภาพ'], all_assets:['All Assets ▾','สินทรัพย์ทั้งหมด ▾'],
  attention:['Assets Requiring Attention','สินทรัพย์ที่ต้องเฝ้าระวัง'], asset:['Asset','สินทรัพย์'], status:['Status','สถานะ'], main_issue:['Main Issue','ปัญหาหลัก'],
  assets_title:['Transformer Assets','สินทรัพย์หม้อแปลง'], add_asset:['Add Asset','เพิ่มสินทรัพย์'],
+ showing:['Showing','แสดง'], of:['of','จาก'], prev:['Prev','ก่อนหน้า'], next:['Next','ถัดไป'],
  asset_id:['Asset ID','รหัสสินทรัพย์'], location:['Location','สถานที่'], capacity:['Cap.(MVA)','ขนาด(MVA)'], voltage:['Voltage(kV)','แรงดัน(kV)'],
  manufacturer:['Manufacturer','ผู้ผลิต'], year:['Year','ปีที่ผลิต'], last_inspection:['Last Inspection','ตรวจล่าสุด'], next_plan:['Next Plan','แผนถัดไป'], view:['View','ดู'],
  asset_location:['Asset Location','ตำแหน่งสินทรัพย์'], view_map:['View Map','ดูแผนที่'], recent_activities:['Recent Activities','กิจกรรมล่าสุด'],
@@ -349,6 +373,10 @@ const UI = {
  all_status:['All Status','สถานะทั้งหมด'], all_voltage:['All Voltage','แรงดันทั้งหมด'], search_assets:['Search assets...','ค้นหาสินทรัพย์...'],
  back_to_assets:['← Back to Assets','← กลับไปยังสินทรัพย์'], viewing_asset:['Viewing:','กำลังดู:'], export_report:['Export Report','ส่งออกรายงาน'], more_actions:['More Actions ▾','การกระทำอื่นๆ ▾'],
  health_index:['Health Index','ดัชนีสุขภาพ'], rpn_max:['RPN (Max)','RPN (สูงสุด)'], dga_diagnosis:['DGA Diagnosis','ผลวินิจฉัย DGA'], next_action:['Next Action','การกระทำถัดไป'],
+ kpi_hi_tip:['Overall condition score (0–100) combining DGA, oil test, and inspection results. Higher is healthier.','คะแนนสภาพโดยรวม (0–100) รวมผล DGA, ตรวจน้ำมัน และตรวจสอบด้วยสายตา ยิ่งสูงยิ่งสุขภาพดี'],
+ kpi_rpn_tip:['Risk Priority Number of the worst failure mode found in FMEA (Severity × Occurrence × Detection). Higher = more urgent.','ค่าความสำคัญความเสี่ยงของโหมดความล้มเหลวที่แย่ที่สุดจาก FMEA (ความรุนแรง × โอกาสเกิด × การตรวจจับ) ยิ่งสูงยิ่งเร่งด่วน'],
+ kpi_dga_tip:['Dissolved Gas Analysis code from the latest oil sample — tells you what type of internal fault (if any) the gases suggest.','รหัสผลตรวจก๊าซละลายในน้ำมัน (DGA) จากตัวอย่างล่าสุด บอกประเภทข้อบกพร่องภายในที่ก๊าซบ่งชี้'],
+ kpi_next_tip:['The next maintenance action recommended for this transformer.','การกระทำบำรุงรักษาถัดไปที่แนะนำสำหรับหม้อแปลงนี้'],
  tab_overview:['Overview','ภาพรวม'], tab_healthindex:['Health Index','ดัชนีสุขภาพ'], tab_dga:['DGA Analysis','วิเคราะห์ DGA'],
  tab_fmea:['FMEA & RPN','FMEA & RPN'], tab_rcm:['RCM Decision','การตัดสินใจ RCM'], tab_plan:['Maintenance Plan','แผนบำรุงรักษา'],
  tab_history:['History','ประวัติ'], tab_docs:['Documents','เอกสาร'],
@@ -381,8 +409,11 @@ const UI = {
  fmea_table:['FMEA Table','ตาราง FMEA'], add_failure_mode:['Add Failure Mode','เพิ่มโหมดความล้มเหลว'],
  fmea_sub:['Identify and assess potential failure modes of transformer components','ระบุและประเมินโหมดความล้มเหลวที่อาจเกิดขึ้นของส่วนประกอบหม้อแปลง'],
  component:['Component','ส่วนประกอบ'], failure_mode:['Failure Mode','โหมดความล้มเหลว'], effect:['Effect','ผลกระทบ'], risk:['Risk','ความเสี่ยง'],
- risk_matrix:['Risk Matrix','เมทริกซ์ความเสี่ยง'], rpn_dist:['RPN Distribution','การกระจาย RPN'], modes:['Modes','โหมด'],
+ risk_matrix:['Risk Matrix','เมทริกซ์ความเสี่ยง'],
+ risk_matrix_desc:['Each dot is one failure mode, plotted by how likely it is (Occurrence, x-axis) and how severe it would be (Severity, y-axis). Dots in the top-right are the biggest risks — hover a dot to see which component it is.','แต่ละจุดคือโหมดความล้มเหลว 1 รายการ แกน x คือโอกาสเกิด แกน y คือความรุนแรง จุดมุมขวาบนคือความเสี่ยงสูงสุด เอาเมาส์ไปชี้ที่จุดเพื่อดูว่าเป็นส่วนประกอบไหน'],
+ rpn_dist:['RPN Distribution','การกระจาย RPN'], modes:['Modes','โหมด'],
  top5_risk:['Top 5 Risk Items','5 อันดับความเสี่ยงสูงสุด'], rec_actions_summary:['Recommended Actions Summary','สรุปการกระทำที่แนะนำ'],
+ rec_actions_desc:['Failure modes grouped by risk level — High needs action now, Medium can be scheduled, Low just needs periodic monitoring.','จัดกลุ่มโหมดความล้มเหลวตามระดับความเสี่ยง — เสี่ยงสูงต้องแก้ไขทันที ปานกลางวางแผนได้ ต่ำแค่ติดตามเป็นระยะ'],
  immediate:['Immediate','ทันที'], plan_word:['Plan','วางแผน'], monitor:['Monitor','ติดตาม'],
  key_takeaway_fmea:['Main risks come from winding overheating and tap changer contact wear. Focus on DGA monitoring and cooling system improvement.','ความเสี่ยงหลักมาจากขดลวดร้อนเกินและหน้าสัมผัส Tap Changer สึกหรอ ควรเน้นการติดตาม DGA และปรับปรุงระบบระบายความร้อน'],
  rcm_tree_title:['RCM Decision Logic Tree','แผนผังการตัดสินใจ RCM'], rcm_tree_sub:['Select failure mode to analyze and get recommended maintenance strategy','เลือกโหมดความล้มเหลวเพื่อวิเคราะห์และรับกลยุทธ์บำรุงรักษาที่แนะนำ'],
@@ -408,6 +439,9 @@ const UI = {
  period:['Period','ช่วงเวลา'], cost_reduction:['Cost Reduction','ลดต้นทุน'], asset_health_dist:['Asset Health Distribution','การกระจายสุขภาพสินทรัพย์'],
  hi_trend_avg:['Health Index Trend (Average)','แนวโน้มดัชนีสุขภาพ (ค่าเฉลี่ย)'], failure_mode_dist:['Failure Mode Distribution (from FMEA)','การกระจายโหมดความล้มเหลว (จาก FMEA)'],
  dga_fault_dist:['DGA Fault Type Distribution','การกระจายประเภทข้อบกพร่อง DGA'], maint_task_summary:['Maintenance Task Summary','สรุปงานบำรุงรักษา'],
+ maint_task_summary_desc:['How many maintenance tasks are Planned, Completed, Pending or Overdue, broken down by strategy type (BM/CM/PM/CBM/PdM).','จำนวนงานบำรุงรักษาที่วางแผนไว้ เสร็จแล้ว รอดำเนินการ หรือเลยกำหนด แยกตามประเภทกลยุทธ์ (BM/CM/PM/CBM/PdM)'],
+ as_of:['As of','ข้อมูล ณ'],
+ health_ranking_desc:['All 20 transformers ranked from worst to best health index, right now.','อันดับหม้อแปลงทั้ง 20 เครื่อง เรียงจากดัชนีสุขภาพแย่ที่สุดไปดีที่สุด ณ ขณะนี้'],
  health_ranking:['Transformer Health Ranking','อันดับสุขภาพหม้อแปลง'], rank:['Rank','อันดับ'], id:['ID','รหัส'], key_takeaways:['Key Takeaways','สรุปประเด็นสำคัญ'],
  kt1:['Overall fleet health improved 12% vs last year','สุขภาพโดยรวมของฟลีทดีขึ้น 12% เทียบกับปีก่อน'], kt2:['Maintenance cost reduced 33% after RCM','ต้นทุนบำรุงรักษาลดลง 33% หลังใช้ RCM'],
  kt3:['Thermal faults remain top failure mode (28%)','ข้อบกพร่องทางความร้อนยังคงเป็นสาเหตุหลัก (28%)'], kt4:['Continue CBM for high-risk transformers','ดำเนินการ CBM ต่อสำหรับหม้อแปลงความเสี่ยงสูง'],
@@ -572,9 +606,25 @@ let DGA_STORE = {};
 function getDgaFor(asset){ if(!DGA_STORE[asset.id]) DGA_STORE[asset.id] = asset.id==='TR-014' ? DGA_SAMPLES_TR014.map(s=>({date:s.date, gases:s.gases.slice()})) : genDgaForAsset(asset); return DGA_STORE[asset.id]; }
 let DGA_SAMPLES = DGA_SAMPLES_TR014;
 function currentDgaGases(){ return DGA_SAMPLES[state.dgaSampleIdx] ? DGA_SAMPLES[state.dgaSampleIdx].gases : DGA_SAMPLES[0].gases; }
-const DGA_HIST = {months:['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'],
- H2:[60,65,68,72,78,85,92,98,105,112,118,125], CH4:[35,38,40,45,50,55,60,64,68,73,78,84], C2H6:[20,21,22,24,26,28,30,33,36,39,42,45],
- CO:[210,220,230,240,250,262,275,285,295,305,312,320], CO2:[420,440,455,470,490,510,540,565,590,615,650,680]};
+const DGA_HIST_MONTHS = ['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+function genDgaHistForAsset(asset){
+  const cat = categoryFor(asset); const seed = assetSeed(asset.id);
+  const gasNames = ['H2','CH4','C2H6','CO','CO2'];
+  const endVals = {H2:{healthy:38,warning:70,critical:125}, CH4:{healthy:26,warning:46,critical:84}, C2H6:{healthy:16,warning:28,critical:45}, CO:{healthy:140,warning:230,critical:320}, CO2:{healthy:300,warning:470,critical:680}};
+  const out = {months: DGA_HIST_MONTHS};
+  gasNames.forEach((g,gi)=>{
+    const end = endVals[g][cat];
+    const startFactor = cat==='healthy' ? 0.85 : cat==='warning' ? 0.55 : 0.35;
+    const start = Math.round(end*startFactor);
+    const vals = [];
+    for(let i=0;i<12;i++){ const frac=i/11; const jitter=(seededFrac(seed,gi*13+i)-0.5)*end*0.04; vals.push(Math.max(1,Math.round(start+(end-start)*frac+jitter))); }
+    vals[11] = end;
+    out[g] = vals;
+  });
+  return out;
+}
+let DGA_HIST_STORE = {};
+function getDgaHistFor(asset){ if(!DGA_HIST_STORE[asset.id]) DGA_HIST_STORE[asset.id] = asset.id==='TR-014' ? {months:DGA_HIST_MONTHS, H2:[60,65,68,72,78,85,92,98,105,112,118,125], CH4:[35,38,40,45,50,55,60,64,68,73,78,84], C2H6:[20,21,22,24,26,28,30,33,36,39,42,45], CO:[210,220,230,240,250,262,275,285,295,305,312,320], CO2:[420,440,455,470,490,510,540,565,590,615,650,680]} : genDgaHistForAsset(asset); return DGA_HIST_STORE[asset.id]; }
 
 /* ---- FMEA table per asset (curated for TR-014, generated for the rest) ---- */
 const FMEA_TR014 = [
@@ -697,7 +747,7 @@ const NOTIFICATIONS = [
 
 /* ============ STATE ============ */
 let state = {page:'overview', assetId:'TR-014', detailTab:'overview', rcmMode:'Winding - Overheating', lang:'en',
-  dgaSubTab:'gas', settingsTab:'general', planView:'list', assetFilterStatus:'All', assetSearch:'', globalSearch:'', dgaSampleIdx:0, rcmAnswers:{}, loggedIn:false};
+  dgaSubTab:'gas', settingsTab:'general', planView:'list', assetFilterStatus:'All', assetSearch:'', globalSearch:'', dgaSampleIdx:0, rcmAnswers:{}, loggedIn:false, ovPage:1};
 let chartRegistry = {};
 
 const NAV = [
@@ -854,11 +904,19 @@ const commonOpts = ()=>({ responsive:true, maintainAspectRatio:false });
 /* ============ NAV RENDER ============ */
 function renderNav(){
   const el = document.getElementById('navlist');
-  el.innerHTML = NAV.map(n=>`<div class="navitem ${state.page===n.id?'active':''}" data-nav="${n.id}">${badge(n.badge,26)}<span>${t(n.key)}</span></div>`).join('');
+  const OVERVIEW_FIRST = ['healthindex','fmea','rcm'];
+  el.innerHTML = NAV.map(n=>{
+    const isActive = OVERVIEW_FIRST.includes(n.id)
+      ? (state.page===n.id+'-overview' || (state.page==='detail' && state.detailTab===n.id))
+      : (n.id==='dga'||n.id==='plan') ? (state.page==='detail' && state.detailTab===n.id)
+      : state.page===n.id;
+    return `<div class="navitem ${isActive?'active':''}" data-nav="${n.id}">${badge(n.badge,26)}<span>${t(n.key)}</span></div>`;
+  }).join('');
   el.querySelectorAll('.navitem').forEach(item=>{
     item.addEventListener('click', ()=>{
       const id = item.dataset.nav;
-      if(['healthindex','dga','fmea','rcm','plan'].includes(id)){ state.page='detail'; state.detailTab=id; }
+      if(OVERVIEW_FIRST.includes(id)){ state.page = id+'-overview'; }
+      else if(['dga','plan'].includes(id)){ state.page='detail'; state.detailTab=id; }
       else { state.page = id; }
       render(); closeSidebar(); window.scrollTo(0,0);
     });
@@ -870,6 +928,43 @@ function renderNav(){
 }
 
 /* ============ OVERVIEW PAGE ============ */
+/* ============ CATEGORY OVERVIEW PAGES (Health Index / FMEA / RCM) ============ */
+function goToAssetDetail(id, tab){ state.assetId = id; state.page='detail'; state.detailTab = tab; render(); window.scrollTo(0,0); }
+function renderCategoryOverview(kind){
+  const titleKey = {healthindex:'nav_healthindex', fmea:'nav_fmea', rcm:'nav_rcm'}[kind];
+  const descKey = {healthindex:'ov_healthindex_desc', fmea:'ov_fmea_desc', rcm:'ov_rcm_desc'}[kind];
+  const sorted = ASSETS.slice().sort((x,y)=>x.hi-y.hi);
+  const rows = sorted.map(a=>{
+    const cat = categoryFor(a);
+    if(kind==='healthindex'){
+      const cls = a.hi>=80?t('good'):a.hi>=60?t('moderate'):a.hi>=40?t('poor'):t('critical');
+      return `<tr><td><b>${a.id}</b></td><td>${a.loc}</td><td style="font-weight:800;color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${cls}</span></td><td><button class="viewlink" data-goto-detail="${a.id}|healthindex">${t('view_details')}</button></td></tr>`;
+    }
+    if(kind==='fmea'){
+      const fmea = getFmeaFor(a); const maxF = fmea.slice().sort((x,y)=>y.rpn-x.rpn)[0];
+      return `<tr><td><b>${a.id}</b></td><td>${a.loc}</td><td>${maxF.comp} — ${maxF.mode}</td><td style="font-weight:800;">${maxF.rpn}</td><td><span class="pill ${maxF.risk==='High'?'pill-critical':maxF.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(maxF.risk)}</span></td><td><button class="viewlink" data-goto-detail="${a.id}|fmea">${t('view_details')}</button></td></tr>`;
+    }
+    const prof = dgaProfileFor(cat); const fmea = getFmeaFor(a); const topF = fmea.slice().sort((x,y)=>y.rpn-x.rpn)[0];
+    return `<tr><td><b>${a.id}</b></td><td>${a.loc}</td><td>${topF.comp} — ${topF.mode}</td><td><b>${prof.strategy}</b></td><td><button class="viewlink" data-goto-detail="${a.id}|rcm">${t('view_details')}</button></td></tr>`;
+  }).join('');
+  const headCols = kind==='healthindex'
+    ? `<th>${t('asset_id')}</th><th>${t('location')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th></th>`
+    : kind==='fmea'
+    ? `<th>${t('asset_id')}</th><th>${t('location')}</th><th>${t('top_risk_item')}</th><th>RPN</th><th>${t('risk')}</th><th></th>`
+    : `<th>${t('asset_id')}</th><th>${t('location')}</th><th>${t('top_risk_item')}</th><th>${t('recommended_strategy')}</th><th></th>`;
+  return `
+  <div class="card">
+    <div class="card-head"><h3>${t(titleKey)} — ${t('fleet_overview')}</h3></div>
+    <p class="card-sub">${t(descKey)}</p>
+    <div class="tbl-wrap"><table><thead><tr>${headCols}</tr></thead><tbody>${rows}</tbody></table></div>
+  </div>`;
+}
+function attachCategoryOverviewEvents(){
+  document.querySelectorAll('[data-goto-detail]').forEach(el=> el.addEventListener('click', ()=>{
+    const [id,tab] = el.dataset.gotoDetail.split('|');
+    goToAssetDetail(id, tab);
+  }));
+}
 function renderOverview(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
   return `
@@ -887,14 +982,14 @@ function renderOverview(){
     <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">${critical}</div><div class="delta down">▼ 10%</div></div></div>
   </div>
   <div class="grid g2" style="margin-bottom:16px; align-items:stretch;">
-    <div class="card">
+    <div class="card" style="display:flex; flex-direction:column;">
       <div class="card-head"><h3>${t('health_dist')}</h3></div>
-      <div style="display:flex; align-items:center; gap:16px;">
-        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('ovDonut',130)}<div class="donut-center"><div class="n">20</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
-        <div class="legend">
-          <div class="li"><span class="sw" style="background:var(--green)"></span>${t('healthy')}<span class="lval">${healthy} (${Math.round(healthy/20*100)}%)</span></div>
-          <div class="li"><span class="sw" style="background:var(--amber)"></span>${t('warning')}<span class="lval">${warning} (${Math.round(warning/20*100)}%)</span></div>
-          <div class="li"><span class="sw" style="background:var(--red)"></span>${t('critical')}<span class="lval">${critical} (${Math.round(critical/20*100)}%)</span></div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:28px; flex:1;">
+        <div class="donut-wrap" style="width:170px;height:170px;">${chartBox('ovDonut',170)}<div class="donut-center"><div class="n" style="font-size:28px;">20</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
+        <div class="legend" style="font-size:13.5px; gap:14px;">
+          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--green)"></span>${t('healthy')}<span class="lval">${healthy} (${Math.round(healthy/20*100)}%)</span></div>
+          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--amber)"></span>${t('warning')}<span class="lval">${warning} (${Math.round(warning/20*100)}%)</span></div>
+          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--red)"></span>${t('critical')}<span class="lval">${critical} (${Math.round(critical/20*100)}%)</span></div>
         </div>
       </div>
     </div>
@@ -913,11 +1008,26 @@ function renderOverview(){
         <span class="pill pill-healthy selectable ${state.assetFilterStatus==='Healthy'?'on':''}" data-ov-filter="Healthy">${t('healthy')} (${healthy})</span>
         <span class="pill pill-warning selectable ${state.assetFilterStatus==='Warning'?'on':''}" data-ov-filter="Warning">${t('warning')} (${warning})</span>
         <span class="pill pill-critical selectable ${state.assetFilterStatus==='Critical'?'on':''}" data-ov-filter="Critical">${t('critical')} (${critical})</span>
-        <button class="btn btn-primary" style="margin-left:auto;" id="btnAddAssetOv">${icon('box',' style="width:13px;height:13px"')} ${t('add_asset')}</button>
       </div>
-      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset_id')}</th><th>${t('location')}</th><th>${t('capacity')}</th><th>${t('voltage')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${t('next_plan')}</th><th></th></tr></thead><tbody>
-      ${filteredAssets(state.assetFilterStatus).slice(0,10).map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td>${a.loc}</td><td>${a.cap}</td><td>${a.volt}</td><td style="font-weight:800;color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${a.next}</td><td><button class="viewlink" data-view="${a.id}">${t('view')}</button></td></tr>`).join('')}
-      </tbody></table></div>
+      ${(()=>{
+        const list = filteredAssets(state.assetFilterStatus);
+        const pageSize = 10;
+        const totalPages = Math.max(1, Math.ceil(list.length/pageSize));
+        if(state.ovPage>totalPages) state.ovPage = totalPages;
+        const startIdx = (state.ovPage-1)*pageSize;
+        const pageItems = list.slice(startIdx, startIdx+pageSize);
+        return `<div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset_id')}</th><th>${t('location')}</th><th>${t('capacity')}</th><th>${t('voltage')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${t('next_plan')}</th><th></th></tr></thead><tbody>
+        ${pageItems.map((a,i)=>`<tr><td>${startIdx+i+1}</td><td><b>${a.id}</b></td><td>${a.loc}</td><td>${a.cap}</td><td>${a.volt}</td><td style="font-weight:800;color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${a.next}</td><td><button class="viewlink" data-view="${a.id}">${t('view')}</button></td></tr>`).join('')}
+        </tbody></table></div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+          <span class="small-muted">${t('showing')} ${startIdx+1}–${Math.min(startIdx+pageSize,list.length)} ${t('of')} ${list.length}</span>
+          <div class="filter-row">
+            <button class="btn btn-outline" id="ovPagePrev" ${state.ovPage<=1?'disabled':''} style="padding:6px 11px;font-size:12px;">${t('prev')}</button>
+            <span class="small-muted">${state.ovPage} / ${totalPages}</span>
+            <button class="btn btn-outline" id="ovPageNext" ${state.ovPage>=totalPages?'disabled':''} style="padding:6px 11px;font-size:12px;">${t('next')}</button>
+          </div>
+        </div>`;
+      })()}
     </div>
     <div style="display:flex; flex-direction:column; gap:16px;">
       <div class="card" style="flex:1;">
@@ -961,9 +1071,10 @@ function initOverviewCharts(){
   mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:MONTHS9,datasets:[{data:HI_TREND_FLEET,borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#2f7dd1'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
-  document.querySelectorAll('[data-ov-filter]').forEach(el=> el.addEventListener('click',()=>{ state.assetFilterStatus = el.dataset.ovFilter; render(); }));
-  const addBtn = document.getElementById('btnAddAssetOv'); if(addBtn) addBtn.addEventListener('click', openAddAssetModal);
+  document.querySelectorAll('[data-ov-filter]').forEach(el=> el.addEventListener('click',()=>{ state.assetFilterStatus = el.dataset.ovFilter; state.ovPage=1; render(); }));
   const gotoBtns = document.querySelectorAll('[data-goto-assets]'); gotoBtns.forEach(b=>b.addEventListener('click',()=>{ state.page='assets'; render(); window.scrollTo(0,0); }));
+  const prevBtn = document.getElementById('ovPagePrev'); if(prevBtn) prevBtn.addEventListener('click', ()=>{ if(state.ovPage>1){ state.ovPage--; render(); } });
+  const nextBtn = document.getElementById('ovPageNext'); if(nextBtn) nextBtn.addEventListener('click', ()=>{ state.ovPage++; render(); });
 }
 
 /* ============ ASSETS LIST PAGE ============ */
@@ -1033,10 +1144,10 @@ function detailHeader(a){
       <div class="detail-loc">${icon('pin',' style="width:13px;height:13px"')} ${a.loc.replace(' SS',' Substation')}</div>
     </div>
     <div class="kpi-row">
-      <div class="kpi">${badge('health',30)}<div><div class="klabel">${t('health_index').toUpperCase()}</div><div class="kvalue">${a.hi} / 100</div></div></div>
-      <div class="kpi">${badge('risk',30)}<div><div class="klabel">${t('rpn_max').toUpperCase()}</div><div class="kvalue">${rpnMax}</div></div></div>
-      <div class="kpi">${badge('lab',30)}<div><div class="klabel">${t('dga_diagnosis').toUpperCase()}</div><div class="kvalue">${prof.code}</div></div></div>
-      <div class="kpi">${badge('scheduled',30)}<div><div class="klabel">${t('next_action').toUpperCase()}</div><div class="kvalue" style="font-size:12.5px;">${prof.nextAction[state.lang]}</div></div></div>
+      <div class="kpi" title="${t('kpi_hi_tip')}">${badge('health',30)}<div><div class="klabel">${t('health_index').toUpperCase()}</div><div class="kvalue">${a.hi} / 100</div></div></div>
+      <div class="kpi" title="${t('kpi_rpn_tip')}">${badge('risk',30)}<div><div class="klabel">${t('rpn_max').toUpperCase()}</div><div class="kvalue">${rpnMax}</div></div></div>
+      <div class="kpi" title="${t('kpi_dga_tip')}">${badge('lab',30)}<div><div class="klabel">${t('dga_diagnosis').toUpperCase()}</div><div class="kvalue">${prof.code}</div></div></div>
+      <div class="kpi" title="${t('kpi_next_tip')}">${badge('scheduled',30)}<div><div class="klabel">${t('next_action').toUpperCase()}</div><div class="kvalue" style="font-size:12.5px;">${prof.nextAction[state.lang]}</div></div></div>
     </div>
   </div>
   <div style="display:flex; gap:10px; margin-bottom:14px;">
@@ -1276,7 +1387,7 @@ function detailFmeaTab(a){
     <div class="card"><div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('code')}</th><th>${t('asset')}</th><th>${t('component')}</th><th>${t('failure_mode')}</th><th>${t('effect')}</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>${t('risk')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
       ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td>${a.id}</td><td><b>${f.comp}</b></td><td>${f.mode}</td><td class="small-muted">${f.effect}</td><td>${f.s}</td><td>${f.o}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':'pill-warning'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
       </tbody></table></div></div>
-    <div class="card"><h3>${t('risk_matrix')}</h3>${chartBox('fmeaScatter',260)}</div>
+    <div class="card"><h3>${t('risk_matrix')}</h3><p class="card-sub">${t('risk_matrix_desc')}</p>${chartBox('fmeaScatter',260)}</div>
   </div>
   <div class="grid" style="grid-template-columns:1fr 1.4fr 1fr; align-items:stretch;">
     <div class="card"><h3>${t('rpn_dist')}</h3>
@@ -1288,15 +1399,20 @@ function detailFmeaTab(a){
     <div class="card"><h3>${t('top5_risk')}</h3>
       ${FMEA.slice().sort((x,y)=>y.rpn-x.rpn).slice(0,5).map(f=>`<div class="bar-row"><div class="bar-label">${f.comp}</div><div class="bar-track"><div class="bar-fill" style="width:${f.rpn/2.8}%; background:${f.rpn>=150?'var(--red)':'var(--amber)'}"></div></div><div class="bar-val">${f.rpn}</div></div>`).join('')}
     </div>
-    <div class="card"><h3>${t('rec_actions_summary')}</h3>
+    <div class="card"><h3>${t('rec_actions_summary')}</h3><p class="card-sub">${t('rec_actions_desc')}</p>
       <div class="grid g3" style="gap:8px; margin-bottom:12px;">
-        <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--red)">4</div><div class="small-muted" style="font-size:10.5px;">${t('immediate')}</div></div>
-        <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--amber)">2</div><div class="small-muted" style="font-size:10.5px;">${t('plan_word')}</div></div>
-        <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--green)">2</div><div class="small-muted" style="font-size:10.5px;">${t('monitor')}</div></div>
+        <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--red)">${high}</div><div class="small-muted" style="font-size:10.5px;">${t('immediate')}</div></div>
+        <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--amber)">${med}</div><div class="small-muted" style="font-size:10.5px;">${t('plan_word')}</div></div>
+        <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--green)">${low}</div><div class="small-muted" style="font-size:10.5px;">${t('monitor')}</div></div>
       </div>
-      <div class="notebox">${icon('info')}<div>${t('key_takeaway_fmea')}</div></div>
+      <div class="notebox">${icon('info')}<div>${fmeaTakeaway(a)}</div></div>
     </div>
   </div>`;
+}
+function fmeaTakeaway(a){
+  const top2 = FMEA.slice().sort((x,y)=>y.rpn-x.rpn).slice(0,2).map(f=>f.comp);
+  if(state.lang==='th') return `ความเสี่ยงหลักของ ${a.id} มาจาก ${top2.join(' และ ')} ควรเน้นติดตาม DGA และตรวจสอบส่วนประกอบเหล่านี้อย่างใกล้ชิด`;
+  return `Main risk for ${a.id} comes from ${top2.join(' and ')}. Focus on DGA monitoring and close inspection of these components.`;
 }
 function openEditFmeaModal(no){
   const f = FMEA.find(x=>x.no===no); if(!f) return;
@@ -1486,10 +1602,10 @@ function initDetailCharts(a){
   if(document.getElementById('hiTrend')){ const trendCol2 = categoryFor(a)==='critical'?'#e0473d':categoryFor(a)==='warning'?'#eba020':'#1fa571'; mkChart('hiTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:trendForAsset(a),borderColor:trendCol2,backgroundColor:trendCol2+'22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:trendCol2}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}}); }
   if(document.getElementById('hiGauge')){ const gc = categoryFor(a); const gaugeColor = gc==='critical'?'#e0473d':gc==='warning'?'#eba020':'#1fa571'; mkChart('hiGauge',{type:'doughnut',data:{datasets:[{data:[a.hi,100-a.hi],backgroundColor:[gaugeColor, gridColor],borderWidth:0,circumference:180,rotation:270}]},options:{...commonOpts(),cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}}); }
   if(document.getElementById('hiRadar')){ const hib = hiBreakdownFor(categoryFor(a)); mkChart('hiRadar',{type:'radar',data:{labels:hib.map(h=>h.k),datasets:[{label:state.lang==='th'?'คะแนนปัจจุบัน':'Current Score',data:hib.map(h=>h.v),borderColor:'#e0473d',backgroundColor:'#e0473d33',pointRadius:4,pointHoverRadius:6,pointBackgroundColor:'#e0473d'},{label:state.lang==='th'?'เป้าหมาย':'Target',data:[85,85,85,85,85],borderColor:'#8b9099',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}]},options:{...commonOpts(),interaction:{mode:'nearest',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:(ctx)=>`${ctx.dataset.label}: ${ctx.parsed.r} / 100`}}},scales:{r:{min:0,max:100,grid:{color:gridColor},angleLines:{color:gridColor},pointLabels:{font:{size:10}}}}}}); }
-  if(document.getElementById('dgaHist')) mkChart('dgaHist',{type:'line',data:{labels:DGA_HIST.months,datasets:[
-      {label:'H2',data:DGA_HIST.H2,borderColor:'#2f7dd1',pointRadius:1,tension:.3},{label:'CH4',data:DGA_HIST.CH4,borderColor:'#1fa571',pointRadius:1,tension:.3},
-      {label:'C2H6',data:DGA_HIST.C2H6,borderColor:'#8759d6',pointRadius:1,tension:.3},{label:'CO',data:DGA_HIST.CO,borderColor:'#e0473d',pointRadius:1,tension:.3},{label:'CO2',data:DGA_HIST.CO2,borderColor:'#8b9099',pointRadius:1,tension:.3},
-    ]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  if(document.getElementById('dgaHist')){ const dh = getDgaHistFor(a); mkChart('dgaHist',{type:'line',data:{labels:dh.months,datasets:[
+      {label:'H2',data:dh.H2,borderColor:'#2f7dd1',pointRadius:1,tension:.3},{label:'CH4',data:dh.CH4,borderColor:'#1fa571',pointRadius:1,tension:.3},
+      {label:'C2H6',data:dh.C2H6,borderColor:'#8759d6',pointRadius:1,tension:.3},{label:'CO',data:dh.CO,borderColor:'#e0473d',pointRadius:1,tension:.3},{label:'CO2',data:dh.CO2,borderColor:'#8b9099',pointRadius:1,tension:.3},
+    ]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}}); }
   if(document.getElementById('fmeaDonut')){ const high = FMEA.filter(f=>f.risk==='High').length, med=FMEA.filter(f=>f.risk==='Medium').length, low=FMEA.length-high-med;
     mkChart('fmeaDonut',{type:'doughnut',data:{labels:['High','Medium','Low'],datasets:[{data:[high,med,low],backgroundColor:['#e0473d','#eba020','#1fa571'],borderWidth:0}]},options:{...commonOpts(),cutout:'70%',plugins:{legend:{display:false}}}}); }
   if(document.getElementById('fmeaScatter')) mkChart('fmeaScatter',{type:'scatter',data:{datasets:[{label:'Failure Modes',data:FMEA.map(f=>({x:f.o,y:f.s})),backgroundColor: FMEA.map(f=>f.risk==='High'?'#e0473d':f.risk==='Medium'?'#eba020':'#1fa571'),pointRadius:7}]},
@@ -1575,15 +1691,14 @@ function renderReports(){
       </div>
     </div>
   </div>
-  <div class="grid" style="grid-template-columns:1.4fr 1fr; margin-bottom:16px; align-items:stretch;">
-    <div class="card"><h3>${t('maint_task_summary')}</h3>${chartBox('repTaskBar',180)}</div>
-    <div class="card"><h3>${t('cost_comparison')}</h3>${chartBox('repCostBar',180)}</div>
+  <div class="grid" style="grid-template-columns:1fr; margin-bottom:16px; align-items:stretch;">
+    <div class="card"><h3>${t('maint_task_summary')}</h3><p class="card-sub">${t('maint_task_summary_desc')}</p>${chartBox('repTaskBar',200)}</div>
   </div>
   <div class="grid" style="grid-template-columns:1.6fr 1fr;">
-    <div class="card"><h3>${t('health_ranking')}</h3>
+    <div class="card"><div class="card-head"><h3>${t('health_ranking')}</h3><span class="small-muted">${t('as_of')} ${new Date().toLocaleDateString(state.lang==='th'?'th-TH':'en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span></div>
+      <p class="card-sub">${t('health_ranking_desc')}</p>
       <div class="tbl-wrap"><table><thead><tr><th>${t('rank')}</th><th>${t('id')}</th><th>${t('health_index')}</th><th>${t('status')}</th></tr></thead><tbody>
-      ${ASSETS.slice().sort((x,y)=>y.hi-x.hi).slice(0,4).map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td>${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td></tr>`).join('')}
-      ${ASSETS.slice().sort((x,y)=>x.hi-y.hi).slice(0,4).reverse().map((a,i)=>`<tr><td>${ASSETS.length-3+i}</td><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td></tr>`).join('')}
+      ${ASSETS.slice().sort((x,y)=>x.hi-y.hi).map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)};font-weight:700;">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td></tr>`).join('')}
       </tbody></table></div>
     </div>
     <div class="card"><h3>${t('key_takeaways')}</h3>
@@ -1598,7 +1713,6 @@ function initReportsCharts(){
   mkChart('repTrend',{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{label:'Avg HI',data:[70,71,70,72,73,72,71,70,72,73,74,75],borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
   mkChart('repFmeaBar',{type:'bar',data:{labels:['Overheating','Insulation Failure','Oil Leakage','Contact Wear','Cooling Failure','Other'],datasets:[{data:[28,20,15,12,10,15],backgroundColor:'#2f7dd1'}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor}},y:{grid:{display:false}}}}});
   mkChart('repTaskBar',{type:'bar',data:{labels:['BM','CM','PM','CBM','PdM'],datasets:[{label:'Planned',data:[0,9,8,5,4],backgroundColor:'#2f7dd1'},{label:'Completed',data:[0,7,7,5,3],backgroundColor:'#1fa571'},{label:'Pending',data:[1,5,4,1,1],backgroundColor:'#eba020'},{label:'Overdue',data:[0,1,1,0,0],backgroundColor:'#e0473d'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}});
-  mkChart('repCostBar',{type:'bar',data:{labels:[''],datasets:[{label:'Before RCM',data:[1.8],backgroundColor:'#e0473d'},{label:'After RCM',data:[1.2],backgroundColor:'#2f7dd1'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{title:{display:true,text:'THB (M)'},grid:{color:gridColor}},x:{grid:{display:false}}}}});
 }
 function attachReportsEvents(){
   const gen = document.getElementById('btnGenerateReport'); if(gen) gen.addEventListener('click', ()=>{
@@ -1617,6 +1731,37 @@ function attachReportsEvents(){
 
 /* ============ SETTINGS PAGE ============ */
 const SETTINGS_TABS = [['general','settings_general'],['hi','settings_hi'],['fm','settings_fm'],['maint','settings_maint'],['users','settings_users'],['sys','settings_sys']];
+/* ============ GUIDE / HELP PAGE ============ */
+function renderGuide(){
+  const items = [
+    ['home','guide_overview_t','guide_overview_d'],
+    ['assets','guide_assets_t','guide_assets_d'],
+    ['health','guide_hi_t','guide_hi_d'],
+    ['lab','guide_dga_t','guide_dga_d'],
+    ['fmea','guide_fmea_t','guide_fmea_d'],
+    ['rcm','guide_rcm_t','guide_rcm_d'],
+    ['plan','guide_plan_t','guide_plan_d'],
+    ['reports','guide_reports_t','guide_reports_d'],
+    ['settings','guide_settings_t','guide_settings_d'],
+  ];
+  return `
+  <div class="card" style="margin-bottom:16px;">
+    <h3>${t('guide_title')}</h3>
+    <p class="card-sub" style="margin-bottom:0;">${t('guide_intro')}</p>
+  </div>
+  <div class="grid g2">
+    ${items.map(([b,tk,dk])=>`<div class="card" style="display:flex; gap:12px; align-items:flex-start;">${badge(b,36)}<div><h3 style="margin-bottom:4px;">${t(tk)}</h3><p class="card-sub" style="margin:0;">${t(dk)}</p></div></div>`).join('')}
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <h3>${t('guide_tips_title')}</h3>
+    <ul class="hlist">
+      <li><span class="k">✓ ${t('guide_tip1')}</span></li>
+      <li><span class="k">✓ ${t('guide_tip2')}</span></li>
+      <li><span class="k">✓ ${t('guide_tip3')}</span></li>
+      <li><span class="k">✓ ${t('guide_tip4')}</span></li>
+    </ul>
+  </div>`;
+}
 function renderSettings(){
   return `<div class="tabs">${SETTINGS_TABS.map(s=>`<button class="tab ${state.settingsTab===s[0]?'active':''}" data-stab="${s[0]}">${t(s[1])}</button>`).join('')}</div>
   <div id="settingsBody">${settingsTabContent()}</div>`;
@@ -1735,6 +1880,7 @@ function attachGlobalViewLinks(){
 function attachTopbarEvents(){
   document.getElementById('langEn').addEventListener('click', ()=>setLang('en'));
   document.getElementById('langTh').addEventListener('click', ()=>setLang('th'));
+  document.getElementById('guideBtn').addEventListener('click', ()=>{ state.page='guide'; render(); window.scrollTo(0,0); });
   const userBtn = document.getElementById('userMenuBtn');
   userBtn.addEventListener('click', (e)=>{ e.stopPropagation(); toggleUserDropdown(); });
   document.addEventListener('click', (e)=>{ const ud=document.getElementById('userDropdown'); if(ud && !ud.contains(e.target) && e.target!==userBtn && !userBtn.contains(e.target)) ud.innerHTML=''; });
@@ -1781,6 +1927,10 @@ function pageMeta(){
     detail:[state.assetId, t('sub_detail')],
     reports:[t('nav_reports'), t('sub_reports')],
     settings:[t('nav_settings'), t('sub_settings')],
+    'healthindex-overview':[t('nav_healthindex'), t('sub_fleet_overview')],
+    'fmea-overview':[t('nav_fmea'), t('sub_fleet_overview')],
+    'rcm-overview':[t('nav_rcm'), t('sub_fleet_overview')],
+    guide:[t('guide_title'), t('guide_intro_short')],
   };
   return titles[state.page] || ['RCM Transformer',''];
 }
@@ -1798,6 +1948,10 @@ function render(){
   else if(state.page==='detail'){ syncAssetData(); content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(currentAsset()); }
   else if(state.page==='reports'){ content.innerHTML = renderReports(); initReportsCharts(); attachReportsEvents(); }
   else if(state.page==='settings'){ content.innerHTML = renderSettings(); attachSettingsEvents(); }
+  else if(state.page==='healthindex-overview'){ content.innerHTML = renderCategoryOverview('healthindex'); attachCategoryOverviewEvents(); }
+  else if(state.page==='fmea-overview'){ content.innerHTML = renderCategoryOverview('fmea'); attachCategoryOverviewEvents(); }
+  else if(state.page==='rcm-overview'){ content.innerHTML = renderCategoryOverview('rcm'); attachCategoryOverviewEvents(); }
+  else if(state.page==='guide'){ content.innerHTML = renderGuide(); }
 }
 function openSidebar(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarBackdrop').classList.add('show'); }
 function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarBackdrop').classList.remove('show'); }
