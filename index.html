@@ -437,7 +437,9 @@ const UI = {
  appearance:['Appearance','การแสดงผล'], theme:['Theme','ธีม'], system_opt:['System','ตามระบบ'], light:['Light','สว่าง'], dark:['Dark','มืด'], items_per_page:['Items per page','จำนวนต่อหน้า'],
  save:['Save','บันทึก'], cancel:['Cancel','ยกเลิก'], close:['Close','ปิด'],
  toast_added:['Added successfully','เพิ่มข้อมูลสำเร็จ'], toast_saved:['Changes saved','บันทึกการเปลี่ยนแปลงแล้ว'], toast_exported:['File downloaded','ดาวน์โหลดไฟล์แล้ว'],
- toast_generated:['Report generated','สร้างรายงานแล้ว'], toast_scheduled:['Report scheduled','ตั้งเวลารายงานแล้ว'], toast_no_result:['No matching assets found','ไม่พบสินทรัพย์ที่ตรงกัน'],
+ toast_generated:['Report generated','สร้างรายงานแล้ว'], toast_scheduled:['Report scheduled','ตั้งเวลารายงานแล้ว'], toast_no_result:['No matching assets found','ไม่พบสินทรัพย์ที่ตรงกัน'], toast_deleted:['Deleted','ลบแล้ว'], cannot_delete_last:['Cannot delete the last remaining asset','ไม่สามารถลบสินทรัพย์สุดท้ายได้'],
+ more_actions_title:['More Actions','การกระทำอื่นๆ'], duplicate_asset:['Duplicate Asset','ทำสำเนาสินทรัพย์'], print_report:['Print Report','พิมพ์รายงาน'], archive_asset:['Archive Asset','เก็บเข้าคลัง'], delete_asset:['Delete Asset','ลบสินทรัพย์'],
+ weights_must_sum:['Weights must add up to 100%.','น้ำหนักรวมต้องเท่ากับ 100%'], weights_must_sum_error:['Weights add up to {sum}%, not 100%. Please adjust.','น้ำหนักรวมเท่ากับ {sum}% ไม่ใช่ 100% กรุณาแก้ไข'],
  modal_add_asset:['Add New Asset','เพิ่มสินทรัพย์ใหม่'], modal_add_fmea:['Add Failure Mode','เพิ่มโหมดความล้มเหลว'], modal_edit_fmea:['Edit Failure Mode','แก้ไขโหมดความล้มเหลว'], modal_add_user:['Add User','เพิ่มผู้ใช้'], modal_add_task:['Add Task','เพิ่มงาน'],
  field_location:['Location','สถานที่'], field_capacity:['Capacity (MVA)','ขนาด (MVA)'], field_voltage:['Voltage (kV)','แรงดัน (kV)'], field_manufacturer:['Manufacturer','ผู้ผลิต'], field_year:['Year','ปีที่ผลิต'],
  field_component:['Component','ส่วนประกอบ'], field_mode:['Failure Mode','โหมดความล้มเหลว'], field_effect:['Potential Effect','ผลกระทบ'],
@@ -525,7 +527,7 @@ function hiBreakdownFor(cat){
   return [{k:'DGA',v:88},{k:'Oil Condition',v:85},{k:'Electrical Test',v:87},{k:'Visual Inspection',v:92},{k:'Age / Loading',v:80}];
 }
 const HI_PARAM_NAMES = ['DGA','Breakdown Voltage (BDV)','Moisture','Acidity','Interfacial Tension (IFT)','Furan','Visual Inspection'];
-const HI_WEIGHTS = [25,15,15,10,10,15,10];
+let HI_WEIGHTS = [25,15,15,10,10,15,10];
 function hiCriteriaFor(cat){
   const scores = cat==='critical'?[28,42,50,60,45,68,40] : cat==='warning'?[58,60,65,70,62,72,65] : [88,85,87,90,86,90,92];
   const results = cat==='critical'? ['D2','28 kV','42 ppm','0.28 mgKOH/g','18 mN/m','0.85 ppm','Major leak']
@@ -621,6 +623,7 @@ function syncAssetData(){
   const asset = currentAsset();
   FMEA = getFmeaFor(asset);
   DGA_SAMPLES = getDgaFor(asset);
+  MAINT_PLAN = getMaintFor(asset);
   if(state.dgaSampleIdx >= DGA_SAMPLES.length) state.dgaSampleIdx = 0;
 }
 const RCM_MODES = {
@@ -633,7 +636,7 @@ const RCM_MODES = {
  'OLTC - Oil deterioration':{path:'PdM',control:'Oil test',action:{en:'Trend-based oil filtration schedule',th:'กำหนดกรองน้ำมันตามแนวโน้ม'},
    tasks:[['OLTC oil test','CBM','6 months','Active'],['Oil filtration','CM','As needed','Planned']]},
 };
-let MAINT_PLAN = [
+const MAINT_TR014 = [
  {no:1,task:'Oil Sampling',type:'CBM',start:'18 Sep 2026',end:'18 Sep 2026',dur:'1 day',m:'Sep',len:1},
  {no:2,task:'DGA Analysis',type:'CBM',start:'18 Sep 2026',end:'25 Sep 2026',dur:'7 days',m:'Sep',len:2},
  {no:3,task:'Visual Inspection',type:'PM',start:'10 Oct 2026',end:'10 Oct 2026',dur:'1 day',m:'Oct',len:1},
@@ -644,6 +647,37 @@ let MAINT_PLAN = [
  {no:8,task:'Routine Cleaning',type:'PM',start:'5 Dec 2026',end:'5 Dec 2026',dur:'1 day',m:'Dec',len:1},
 ];
 const GANTT_MONTHS = ['Jul','Aug','Sep','Oct','Nov','Dec'];
+/* offset = months from "today" (Sep 2026, index 2 in GANTT_MONTHS); null = task not scheduled for that category */
+const MAINT_TEMPLATE = [
+ {task:'Oil Sampling', type:'CBM', offset:{healthy:3,warning:1,critical:0}, dur:{healthy:1,warning:1,critical:1}},
+ {task:'DGA Analysis', type:'CBM', offset:{healthy:3,warning:1,critical:0}, dur:{healthy:1,warning:3,critical:7}},
+ {task:'Visual Inspection', type:'PM', offset:{healthy:2,warning:1,critical:1}, dur:{healthy:1,warning:1,critical:1}},
+ {task:'Thermal Imaging', type:'PdM', offset:{healthy:4,warning:2,critical:1}, dur:{healthy:1,warning:1,critical:1}},
+ {task:'Oil Filtration (if needed)', type:'CM', offset:{healthy:null,warning:2,critical:1}, dur:{healthy:1,warning:2,critical:3}},
+ {task:'Bushing Test', type:'PM', offset:{healthy:5,warning:3,critical:2}, dur:{healthy:2,warning:2,critical:2}},
+ {task:'OLTC Inspection', type:'PM', offset:{healthy:5,warning:4,critical:3}, dur:{healthy:3,warning:4,critical:5}},
+ {task:'Routine Cleaning', type:'PM', offset:{healthy:5,warning:4,critical:3}, dur:{healthy:1,warning:1,critical:1}},
+];
+function genMaintForAsset(asset){
+  const cat = categoryFor(asset); const seed = assetSeed(asset.id);
+  let no=1; const tasks=[];
+  MAINT_TEMPLATE.forEach((tpl,i)=>{
+    const offset = tpl.offset[cat]; if(offset===null) return;
+    const monthIdx = Math.min(GANTT_MONTHS.length-1, 2+offset);
+    const day = 5 + Math.floor(seededFrac(seed,i)*12);
+    const dur = tpl.dur[cat];
+    const endDay = day + dur - 1;
+    const mLabel = GANTT_MONTHS[monthIdx];
+    const start = `${day} ${mLabel} 2026`;
+    const end = `${endDay} ${mLabel} 2026`;
+    const durStr = dur+' '+(state.lang==='th'?'วัน':(dur>1?'days':'day'));
+    tasks.push({no:no++, task:tpl.task, type:tpl.type, start, end, dur:durStr, m:mLabel, len: dur<=1?1:dur<=4?2:3});
+  });
+  return tasks;
+}
+let MAINT_STORE = {};
+function getMaintFor(asset){ if(!MAINT_STORE[asset.id]) MAINT_STORE[asset.id] = asset.id==='TR-014' ? MAINT_TR014.map(m=>({...m})) : genMaintForAsset(asset); return MAINT_STORE[asset.id]; }
+let MAINT_PLAN = MAINT_TR014;
 const TYPE_COLOR = {BM:'#94a3b8',CM:'#e0524a',PM:'#2f6fed',CBM:'#1a9e6b',PdM:'#8b5cf6'};
 const REC_ACTIVITIES = [
  {d:'12 Sep 2026',a:{en:'TR-014 DGA result updated',th:'อัปเดตผล DGA ของ TR-014'},t:'12:34',c:'red'},
@@ -764,7 +798,7 @@ function openModal(title, bodyHtml, onSubmit){
   </div></div>`;
   document.getElementById('modalCancel').addEventListener('click', closeModal);
   document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='modalOverlay') closeModal(); });
-  document.getElementById('modalForm').addEventListener('submit', (e)=>{ e.preventDefault(); const fd=new FormData(e.target); const data={}; fd.forEach((v,k)=>data[k]=v); onSubmit(data); closeModal(); });
+  document.getElementById('modalForm').addEventListener('submit', (e)=>{ e.preventDefault(); const fd=new FormData(e.target); const data={}; fd.forEach((v,k)=>data[k]=v); const result=onSubmit(data); if(result!==false) closeModal(); });
 }
 function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
 function openExportChoiceModal(onCsv){
@@ -1274,6 +1308,46 @@ function detailFmeaTab(a){
     </div>
   </div>`;
 }
+function openMoreActionsModal(){
+  const a = currentAsset();
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `<div class="modal-overlay" id="modalOverlay"><div class="modal" style="max-width:340px;">
+    <h3>${t('more_actions_title')}</h3>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
+      <button class="btn btn-ghost" id="actDuplicate" style="justify-content:flex-start;">${icon('box',' style="width:14px;height:14px"')} ${t('duplicate_asset')}</button>
+      <button class="btn btn-ghost" id="actPrint" style="justify-content:flex-start;">${icon('down2',' style="width:14px;height:14px"')} ${t('print_report')}</button>
+      <button class="btn btn-ghost" id="actArchive" style="justify-content:flex-start;">${icon('info',' style="width:14px;height:14px"')} ${t('archive_asset')}</button>
+      <button class="btn btn-ghost" id="actDelete" style="justify-content:flex-start; color:var(--red);">${icon('x',' style="width:14px;height:14px"')} ${t('delete_asset')}</button>
+    </div>
+    <div class="modal-actions"><button type="button" class="btn btn-ghost" id="modalCancel4">${t('close')}</button></div>
+  </div></div>`;
+  document.getElementById('modalCancel4').addEventListener('click', closeModal);
+  document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); });
+  document.getElementById('actDuplicate').addEventListener('click', ()=>{
+    let n = ASSETS.length+1; let newId = `TR-0${n}`.length<6?`TR-0${n}`:`TR-${n}`;
+    while(ASSETS.some(x=>x.id===newId)){ n++; newId = n<100?`TR-${String(n).padStart(3,'0')}`:`TR-${n}`; }
+    ASSETS.push({...a, id:newId, loc:a.loc+' (Copy)'});
+    closeModal(); state.assetId=newId; render(); toast(t('toast_added'),'success');
+  });
+  document.getElementById('actPrint').addEventListener('click', ()=>{ closeModal(); setTimeout(()=>window.print(),200); });
+  document.getElementById('actArchive').addEventListener('click', ()=>{ closeModal(); toast(t('toast_saved'),'success'); });
+  document.getElementById('actDelete').addEventListener('click', ()=>{
+    if(ASSETS.length<=1){ toast(t('cannot_delete_last')); return; }
+    const idx = ASSETS.findIndex(x=>x.id===a.id); if(idx>-1) ASSETS.splice(idx,1);
+    closeModal(); state.page='assets'; render(); toast(t('toast_deleted'),'success');
+  });
+}
+function openEditHiWeightsModal(){
+  const bodyHtml = HI_PARAM_NAMES.map((p,i)=>`<div class="formrow"><label>${p} (%)</label><input name="w${i}" type="number" min="0" max="100" value="${HI_WEIGHTS[i]}" required></div>`).join('')
+    + `<div class="small-muted" id="weightSumHint">${t('weights_must_sum')}</div>`;
+  openModal(t('edit_criteria'), bodyHtml, (data)=>{
+    const newWeights = HI_PARAM_NAMES.map((_,i)=>Number(data['w'+i])||0);
+    const sum = newWeights.reduce((s,v)=>s+v,0);
+    if(sum!==100){ toast(t('weights_must_sum_error').replace('{sum}',sum), 'error'); return false; }
+    HI_WEIGHTS = newWeights;
+    render(); toast(t('toast_saved'),'success');
+  });
+}
 function openEditFmeaModal(no){
   const f = FMEA.find(x=>x.no===no); if(!f) return;
   openModal(t('modal_edit_fmea'), `
@@ -1499,9 +1573,9 @@ function attachDetailEvents(){
     openExportChoiceModal(()=>{ const rows = [['Asset ID','Location','Health Index','Status','RPN','DGA Diagnosis'],[a.id,a.loc,a.hi,a.status,'280','D2']]; downloadFile(`${a.id}_report.csv`, toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); });
   });
   const moreBtn = document.getElementById('btnMoreActions');
-  if(moreBtn) moreBtn.addEventListener('click', ()=>toast(state.lang==='th'?'เมนูการดำเนินการเพิ่มเติม (ตัวอย่าง)':'More actions menu (demo)'));
+  if(moreBtn) moreBtn.addEventListener('click', openMoreActionsModal);
   const editCriteria = document.getElementById('btnEditCriteria');
-  if(editCriteria) editCriteria.addEventListener('click', ()=>toast(t('toast_saved'),'success'));
+  if(editCriteria) editCriteria.addEventListener('click', openEditHiWeightsModal);
   document.querySelectorAll('[data-create-plan]').forEach(el=> el.addEventListener('click',()=>{ state.detailTab='plan'; render(); }));
   document.querySelectorAll('.dl-doc').forEach(el=> el.addEventListener('click',()=>{
     const csvType = el.dataset.csv;
