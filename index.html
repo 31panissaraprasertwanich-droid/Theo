@@ -12,12 +12,12 @@
 <style>
 :root{
   --navy:#454f4a; --navy-2:#525d57; --navy-3:#64716a;
-  --accent:#d9a56b; --accent-2:#8aa3a6;
-  --green:#86ab8a; --green-bg:#eef3ea;
-  --amber:#d4a86e; --amber-bg:#f7f0e3;
-  --red:#c98b7c; --red-bg:#f6ece8;
+  --accent:#b68b5a; --accent-2:#74898b;
+  --green:#719074; --green-bg:#eef3ea;
+  --amber:#b28d5c; --amber-bg:#f7f0e3;
+  --red:#a97568; --red-bg:#f6ece8;
   --blue-bg:#eef2ed;
-  --bg:#f7f4ee; --card:#fffdfa; --border:#e6e0d4; --text:#3d3a34; --muted:#8c8579;
+  --bg:#f7f4ee; --card:#fffdfa; --border:#e6e0d4; --text:#3d3a34; --muted:#767066;
   --radius:12px;
   font-family:'Inter','Noto Sans Thai',system-ui,sans-serif;
 }
@@ -669,7 +669,7 @@ function genMaintForAsset(asset){
 let MAINT_STORE = {};
 function getMaintFor(asset){ if(!MAINT_STORE[asset.id]) MAINT_STORE[asset.id] = asset.id==='TR-014' ? MAINT_TR014.map(m=>({...m})) : genMaintForAsset(asset); return MAINT_STORE[asset.id]; }
 let MAINT_PLAN = MAINT_TR014;
-const TYPE_COLOR = {BM:'#a3a396',CM:'#c98b7c',PM:'#8aa3a6',CBM:'#86ab8a',PdM:'#a99cc9'};
+const TYPE_COLOR = {BM:'#a3a396',CM:'#a97568',PM:'#74898b',CBM:'#719074',PdM:'#8e83a9'};
 const REC_ACTIVITIES = [
  {d:'12 Sep 2026',a:{en:'TR-014 DGA result updated',th:'อัปเดตผล DGA ของ TR-014'},t:'12:34',c:'red'},
  {d:'11 Sep 2026',a:{en:'TR-006 Inspection completed',th:'ตรวจสอบ TR-006 เสร็จสิ้น'},t:'10:15',c:'green'},
@@ -721,39 +721,39 @@ function icon(name,extra){return `<svg viewBox="0 0 24 24" fill="none" stroke="c
 
 /* ---- Colored badge icon set (matches the RCM icon-library reference) ---- */
 const BADGE_DEFS = {
- home:      {bg:'#8aa3a6', path:'<path d="M4 11l8-7 8 7" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9" fill="none" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"/>'},
- assets:    {bg:'#d9a56b', path:'<rect x="6" y="3.5" width="10" height="15" rx="1.3" fill="#fff"/><line x1="8" y1="7" x2="14" y2="7" stroke="#d9a56b" stroke-width="1.3"/><line x1="8" y1="10" x2="14" y2="10" stroke="#d9a56b" stroke-width="1.3"/><circle cx="16.5" cy="16.5" r="3.6" fill="#d9a56b" stroke="#fff" stroke-width="1.6"/><line x1="19" y1="19" x2="21" y2="21" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>'},
- rcm:       {bg:'#6f9c76', path:'<circle cx="12" cy="4.5" r="2" fill="#fff"/><circle cx="5.5" cy="18.5" r="2" fill="#fff"/><circle cx="18.5" cy="18.5" r="2" fill="#fff"/><path d="M12 6.5v4M12 10.5L5.5 16.5M12 10.5l6.5 6" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/>'},
- fmea:      {bg:'#8aa3a6', path:'<rect x="5.5" y="3" width="13" height="18" rx="1.6" fill="none" stroke="#fff" stroke-width="1.7"/><line x1="8" y1="8" x2="15.5" y2="8" stroke="#fff" stroke-width="1.6"/><line x1="8" y1="12" x2="15.5" y2="12" stroke="#fff" stroke-width="1.6"/><line x1="8" y1="16" x2="12.5" y2="16" stroke="#fff" stroke-width="1.6"/>'},
- risk:      {bg:'#c98b7c', path:'<path d="M12 3.2l9.5 16.8H2.5z" fill="#fff"/><rect x="11.1" y="10" width="1.8" height="5.6" fill="#c98b7c"/><circle cx="12" cy="17.6" r="1.1" fill="#c98b7c"/>'},
- health:    {bg:'#a99cc9', path:'<path d="M12 20s-7.2-4.7-9.4-9.2C1.3 7.9 2.6 4.8 5.7 4.8c1.9 0 3.4 1 4.5 2.5 1.1-1.5 2.6-2.5 4.5-2.5 3.1 0 4.4 3.1 3.1 6-2.2 4.5-9.4 9.2-9.4 9.2z" fill="#fff"/><polyline points="6.2,13.4 9,13.4 10.4,10.6 12,15.4 13.2,12 15.6,12" fill="none" stroke="#a99cc9" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>'},
- lab:       {bg:'#7fada8', path:'<path d="M10.2 3.2h3.6M10.8 3.2v6.4l-5 8.6a1.9 1.9 0 0 0 1.6 2.8h9.2a1.9 1.9 0 0 0 1.6-2.8l-5-8.6V3.2" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.8 15h8.4" stroke="#fff" stroke-width="1.6"/>'},
- plan:      {bg:'#8aa3a6', path:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L2.3 18.7l3 3 7.3-7.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z" fill="#fff"/>'},
- reports:   {bg:'#8aa3a6', path:'<rect x="4.2" y="14" width="3" height="6" rx=".5" fill="#fff"/><rect x="10.5" y="8.5" width="3" height="11.5" rx=".5" fill="#fff"/><rect x="16.8" y="4" width="3" height="16" rx=".5" fill="#fff"/>'},
- settings:  {bg:'#8c8579', path:'<circle cx="12" cy="12" r="2.6" fill="#fff"/><path d="M19 12.6a1.4 1.4 0 0 0 .3 1.6l.1.1a1.7 1.7 0 1 1-2.4 2.4l-.1-.1a1.4 1.4 0 0 0-1.6-.3 1.4 1.4 0 0 0-.9 1.3V18a1.7 1.7 0 1 1-3.4 0v-.1a1.4 1.4 0 0 0-.9-1.3 1.4 1.4 0 0 0-1.6.3l-.1.1a1.7 1.7 0 1 1-2.4-2.4l.1-.1a1.4 1.4 0 0 0 .3-1.6 1.4 1.4 0 0 0-1.3-.9H5a1.7 1.7 0 1 1 0-3.4h.1a1.4 1.4 0 0 0 1.3-.9 1.4 1.4 0 0 0-.3-1.6l-.1-.1a1.7 1.7 0 1 1 2.4-2.4l.1.1a1.4 1.4 0 0 0 1.6.3H10a1.4 1.4 0 0 0 .9-1.3V5a1.7 1.7 0 1 1 3.4 0v.1a1.4 1.4 0 0 0 .9 1.3 1.4 1.4 0 0 0 1.6-.3l.1-.1a1.7 1.7 0 1 1 2.4 2.4l-.1.1a1.4 1.4 0 0 0-.3 1.6c.2.5.7.9 1.3.9H19a1.7 1.7 0 1 1 0 3.4h-.1a1.4 1.4 0 0 0-1.3.9z" fill="none" stroke="#fff" stroke-width="1.3"/>'},
- normal:    {bg:'#86ab8a', path:'<path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>'},
- watch:     {bg:'#d4a86e', path:'<path d="M12 3.2l9.5 16.8H2.5z" fill="#fff"/><rect x="11.1" y="10" width="1.8" height="5.6" fill="#d4a86e"/><circle cx="12" cy="17.6" r="1.1" fill="#d4a86e"/>'},
- critical:  {bg:'#c98b7c', path:'<circle cx="12" cy="12" r="9" fill="#fff"/><rect x="11.1" y="6.2" width="1.8" height="7.6" fill="#c98b7c"/><circle cx="12" cy="16.8" r="1.2" fill="#c98b7c"/>'},
- maintenance:{bg:'#c98b7c', path:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L2.3 18.7l3 3 7.3-7.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z" fill="#fff"/>'},
- inprogress:{bg:'#d4a86e', path:'<path d="M6 3h12M6 21h12" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M7 3c0 4 3 5 5 6-2 1-5 2-5 6M17 3c0 4-3 5-5 6 2 1 5 2 5 6" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>'},
- pending:   {bg:'#7d7568', path:'<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="1.7"/><rect x="9.3" y="8" width="1.9" height="8" rx=".8" fill="#fff"/><rect x="12.8" y="8" width="1.9" height="8" rx=".8" fill="#fff"/>'},
- completed: {bg:'#86ab8a', path:'<rect x="5.5" y="3" width="13" height="18" rx="1.6" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M8.5 12.2l2.4 2.4 4.6-5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>'},
- scheduled: {bg:'#8aa3a6', path:'<rect x="4.2" y="5" width="15.6" height="15" rx="2" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M4.2 9.4h15.6M8 3v4M16 3v4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'},
- review:    {bg:'#8aa3a6', path:'<path d="M4.5 12a7.5 7.5 0 0 1 12.6-5.5M19.5 12a7.5 7.5 0 0 1-12.6 5.5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M17 3.5v3.5h-3.5M7 20.5V17h3.5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/>'},
- notification:{bg:'#8aa3a6', path:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M13.7 21a2 2 0 0 1-3.4 0" fill="none" stroke="#fff" stroke-width="1.6"/>'},
- profile:   {bg:'#8aa3a6', path:'<circle cx="12" cy="8.2" r="3.4" fill="#fff"/><path d="M5 20c0-3.5 3-6.2 7-6.2s7 2.7 7 6.2" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>'},
- users:     {bg:'#8aa3a6', path:'<circle cx="9" cy="9" r="2.6" fill="#fff"/><circle cx="16.5" cy="10" r="2.1" fill="#fff"/><path d="M3.3 19c0-3 2.6-5.2 5.7-5.2s5.7 2.2 5.7 5.2" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M14.5 14.3c2.3.4 3.8 2.1 3.8 4.7" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'},
- access:    {bg:'#8aa3a6', path:'<path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6z" fill="#fff"/><path d="M9 12l2 2 4-4.2" stroke="#8aa3a6" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'},
- database:  {bg:'#8aa3a6', path:'<ellipse cx="12" cy="6" rx="7" ry="2.6" fill="#fff"/><path d="M5 6v12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6V6" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M5 12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6" fill="none" stroke="#fff" stroke-width="1.6"/>'},
- upload:    {bg:'#8aa3a6', path:'<path d="M7.2 17.8a4 4 0 0 1-1-7.9 5 5 0 0 1 9.4-2.3A4.5 4.5 0 0 1 17 16.8" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M12 11.5v7M9.2 14.5l2.8-2.8 2.8 2.8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'},
- help:      {bg:'#8aa3a6', path:'<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.8.5-1.1 1-1.1 1.9" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1" fill="#fff"/>'},
- manual:    {bg:'#8aa3a6', path:'<path d="M4 5.2c2-1 5.4-1 8 0v13.6c-2.6-1-6-1-8 0z" fill="#fff"/><path d="M20 5.2c-2-1-5.4-1-8 0v13.6c2.6-1 6-1 8 0z" fill="#eef2ed"/>'},
- language:  {bg:'#8aa3a6', path:'<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="4" ry="9" fill="none" stroke="#fff" stroke-width="1.5"/><line x1="3.2" y1="12" x2="20.8" y2="12" stroke="#fff" stroke-width="1.5"/>'},
- logout:    {bg:'#c98b7c', path:'<path d="M10 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H10" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M15 8l4 4-4 4M8.5 12h10.3" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>'},
- trend:     {bg:'#a99cc9', path:'<path d="M4 17l5-6 4 3 6-8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 6h4v4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'},
- triangle:  {bg:'#d4a86e', path:'<path d="M12 4l8 16H4z" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><circle cx="13" cy="14" r="1.6" fill="#fff"/>'},
- scale:     {bg:'#7fada8', path:'<path d="M12 3v18M7 21h10" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M12 6l-5 2 2.5 5.5L12 12z M12 6l5 2-2.5 5.5L12 12z" fill="none" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>'},
- target:    {bg:'#8aa3a6', path:'<circle cx="12" cy="12" r="8" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="4.4" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="1" fill="#fff"/>'},
+ home:      {bg:'#74898b', path:'<path d="M4 11l8-7 8 7" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9" fill="none" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"/>'},
+ assets:    {bg:'#b68b5a', path:'<rect x="6" y="3.5" width="10" height="15" rx="1.3" fill="#fff"/><line x1="8" y1="7" x2="14" y2="7" stroke="#b68b5a" stroke-width="1.3"/><line x1="8" y1="10" x2="14" y2="10" stroke="#b68b5a" stroke-width="1.3"/><circle cx="16.5" cy="16.5" r="3.6" fill="#b68b5a" stroke="#fff" stroke-width="1.6"/><line x1="19" y1="19" x2="21" y2="21" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>'},
+ rcm:       {bg:'#5d8363', path:'<circle cx="12" cy="4.5" r="2" fill="#fff"/><circle cx="5.5" cy="18.5" r="2" fill="#fff"/><circle cx="18.5" cy="18.5" r="2" fill="#fff"/><path d="M12 6.5v4M12 10.5L5.5 16.5M12 10.5l6.5 6" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/>'},
+ fmea:      {bg:'#74898b', path:'<rect x="5.5" y="3" width="13" height="18" rx="1.6" fill="none" stroke="#fff" stroke-width="1.7"/><line x1="8" y1="8" x2="15.5" y2="8" stroke="#fff" stroke-width="1.6"/><line x1="8" y1="12" x2="15.5" y2="12" stroke="#fff" stroke-width="1.6"/><line x1="8" y1="16" x2="12.5" y2="16" stroke="#fff" stroke-width="1.6"/>'},
+ risk:      {bg:'#a97568', path:'<path d="M12 3.2l9.5 16.8H2.5z" fill="#fff"/><rect x="11.1" y="10" width="1.8" height="5.6" fill="#a97568"/><circle cx="12" cy="17.6" r="1.1" fill="#a97568"/>'},
+ health:    {bg:'#8e83a9', path:'<path d="M12 20s-7.2-4.7-9.4-9.2C1.3 7.9 2.6 4.8 5.7 4.8c1.9 0 3.4 1 4.5 2.5 1.1-1.5 2.6-2.5 4.5-2.5 3.1 0 4.4 3.1 3.1 6-2.2 4.5-9.4 9.2-9.4 9.2z" fill="#fff"/><polyline points="6.2,13.4 9,13.4 10.4,10.6 12,15.4 13.2,12 15.6,12" fill="none" stroke="#8e83a9" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>'},
+ lab:       {bg:'#6b918d', path:'<path d="M10.2 3.2h3.6M10.8 3.2v6.4l-5 8.6a1.9 1.9 0 0 0 1.6 2.8h9.2a1.9 1.9 0 0 0 1.6-2.8l-5-8.6V3.2" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.8 15h8.4" stroke="#fff" stroke-width="1.6"/>'},
+ plan:      {bg:'#74898b', path:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L2.3 18.7l3 3 7.3-7.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z" fill="#fff"/>'},
+ reports:   {bg:'#74898b', path:'<rect x="4.2" y="14" width="3" height="6" rx=".5" fill="#fff"/><rect x="10.5" y="8.5" width="3" height="11.5" rx=".5" fill="#fff"/><rect x="16.8" y="4" width="3" height="16" rx=".5" fill="#fff"/>'},
+ settings:  {bg:'#767066', path:'<circle cx="12" cy="12" r="2.6" fill="#fff"/><path d="M19 12.6a1.4 1.4 0 0 0 .3 1.6l.1.1a1.7 1.7 0 1 1-2.4 2.4l-.1-.1a1.4 1.4 0 0 0-1.6-.3 1.4 1.4 0 0 0-.9 1.3V18a1.7 1.7 0 1 1-3.4 0v-.1a1.4 1.4 0 0 0-.9-1.3 1.4 1.4 0 0 0-1.6.3l-.1.1a1.7 1.7 0 1 1-2.4-2.4l.1-.1a1.4 1.4 0 0 0 .3-1.6 1.4 1.4 0 0 0-1.3-.9H5a1.7 1.7 0 1 1 0-3.4h.1a1.4 1.4 0 0 0 1.3-.9 1.4 1.4 0 0 0-.3-1.6l-.1-.1a1.7 1.7 0 1 1 2.4-2.4l.1.1a1.4 1.4 0 0 0 1.6.3H10a1.4 1.4 0 0 0 .9-1.3V5a1.7 1.7 0 1 1 3.4 0v.1a1.4 1.4 0 0 0 .9 1.3 1.4 1.4 0 0 0 1.6-.3l.1-.1a1.7 1.7 0 1 1 2.4 2.4l-.1.1a1.4 1.4 0 0 0-.3 1.6c.2.5.7.9 1.3.9H19a1.7 1.7 0 1 1 0 3.4h-.1a1.4 1.4 0 0 0-1.3.9z" fill="none" stroke="#fff" stroke-width="1.3"/>'},
+ normal:    {bg:'#719074', path:'<path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>'},
+ watch:     {bg:'#b28d5c', path:'<path d="M12 3.2l9.5 16.8H2.5z" fill="#fff"/><rect x="11.1" y="10" width="1.8" height="5.6" fill="#b28d5c"/><circle cx="12" cy="17.6" r="1.1" fill="#b28d5c"/>'},
+ critical:  {bg:'#a97568', path:'<circle cx="12" cy="12" r="9" fill="#fff"/><rect x="11.1" y="6.2" width="1.8" height="7.6" fill="#a97568"/><circle cx="12" cy="16.8" r="1.2" fill="#a97568"/>'},
+ maintenance:{bg:'#a97568', path:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L2.3 18.7l3 3 7.3-7.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z" fill="#fff"/>'},
+ inprogress:{bg:'#b28d5c', path:'<path d="M6 3h12M6 21h12" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M7 3c0 4 3 5 5 6-2 1-5 2-5 6M17 3c0 4-3 5-5 6 2 1 5 2 5 6" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>'},
+ pending:   {bg:'#696257', path:'<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="1.7"/><rect x="9.3" y="8" width="1.9" height="8" rx=".8" fill="#fff"/><rect x="12.8" y="8" width="1.9" height="8" rx=".8" fill="#fff"/>'},
+ completed: {bg:'#719074', path:'<rect x="5.5" y="3" width="13" height="18" rx="1.6" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M8.5 12.2l2.4 2.4 4.6-5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>'},
+ scheduled: {bg:'#74898b', path:'<rect x="4.2" y="5" width="15.6" height="15" rx="2" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M4.2 9.4h15.6M8 3v4M16 3v4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'},
+ review:    {bg:'#74898b', path:'<path d="M4.5 12a7.5 7.5 0 0 1 12.6-5.5M19.5 12a7.5 7.5 0 0 1-12.6 5.5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M17 3.5v3.5h-3.5M7 20.5V17h3.5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/>'},
+ notification:{bg:'#74898b', path:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M13.7 21a2 2 0 0 1-3.4 0" fill="none" stroke="#fff" stroke-width="1.6"/>'},
+ profile:   {bg:'#74898b', path:'<circle cx="12" cy="8.2" r="3.4" fill="#fff"/><path d="M5 20c0-3.5 3-6.2 7-6.2s7 2.7 7 6.2" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>'},
+ users:     {bg:'#74898b', path:'<circle cx="9" cy="9" r="2.6" fill="#fff"/><circle cx="16.5" cy="10" r="2.1" fill="#fff"/><path d="M3.3 19c0-3 2.6-5.2 5.7-5.2s5.7 2.2 5.7 5.2" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M14.5 14.3c2.3.4 3.8 2.1 3.8 4.7" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'},
+ access:    {bg:'#74898b', path:'<path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6z" fill="#fff"/><path d="M9 12l2 2 4-4.2" stroke="#74898b" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'},
+ database:  {bg:'#74898b', path:'<ellipse cx="12" cy="6" rx="7" ry="2.6" fill="#fff"/><path d="M5 6v12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6V6" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M5 12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6" fill="none" stroke="#fff" stroke-width="1.6"/>'},
+ upload:    {bg:'#74898b', path:'<path d="M7.2 17.8a4 4 0 0 1-1-7.9 5 5 0 0 1 9.4-2.3A4.5 4.5 0 0 1 17 16.8" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M12 11.5v7M9.2 14.5l2.8-2.8 2.8 2.8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'},
+ help:      {bg:'#74898b', path:'<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.8.5-1.1 1-1.1 1.9" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1" fill="#fff"/>'},
+ manual:    {bg:'#74898b', path:'<path d="M4 5.2c2-1 5.4-1 8 0v13.6c-2.6-1-6-1-8 0z" fill="#fff"/><path d="M20 5.2c-2-1-5.4-1-8 0v13.6c2.6-1 6-1 8 0z" fill="#eef2ed"/>'},
+ language:  {bg:'#74898b', path:'<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="4" ry="9" fill="none" stroke="#fff" stroke-width="1.5"/><line x1="3.2" y1="12" x2="20.8" y2="12" stroke="#fff" stroke-width="1.5"/>'},
+ logout:    {bg:'#a97568', path:'<path d="M10 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H10" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M15 8l4 4-4 4M8.5 12h10.3" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>'},
+ trend:     {bg:'#8e83a9', path:'<path d="M4 17l5-6 4 3 6-8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 6h4v4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'},
+ triangle:  {bg:'#b28d5c', path:'<path d="M12 4l8 16H4z" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><circle cx="13" cy="14" r="1.6" fill="#fff"/>'},
+ scale:     {bg:'#6b918d', path:'<path d="M12 3v18M7 21h10" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M12 6l-5 2 2.5 5.5L12 12z M12 6l5 2-2.5 5.5L12 12z" fill="none" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>'},
+ target:    {bg:'#74898b', path:'<circle cx="12" cy="12" r="8" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="4.4" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="1" fill="#fff"/>'},
 };
 function badge(key, size){
   size = size||30;
@@ -933,10 +933,10 @@ function renderOverview(){
       <div style="display:flex; align-items:center; gap:16px;">
         <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('ovStrategy',130)}<div class="donut-center"><div class="n">20</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
         <div class="legend">
-          <div class="li"><span class="sw" style="background:#8aa3a6"></span>PM<span class="lval">8 (40%)</span></div>
-          <div class="li"><span class="sw" style="background:#86ab8a"></span>CBM<span class="lval">6 (30%)</span></div>
-          <div class="li"><span class="sw" style="background:#a99cc9"></span>PdM<span class="lval">3 (15%)</span></div>
-          <div class="li"><span class="sw" style="background:#c98b7c"></span>CM<span class="lval">2 (10%)</span></div>
+          <div class="li"><span class="sw" style="background:#74898b"></span>PM<span class="lval">8 (40%)</span></div>
+          <div class="li"><span class="sw" style="background:#719074"></span>CBM<span class="lval">6 (30%)</span></div>
+          <div class="li"><span class="sw" style="background:#8e83a9"></span>PdM<span class="lval">3 (15%)</span></div>
+          <div class="li"><span class="sw" style="background:#a97568"></span>CM<span class="lval">2 (10%)</span></div>
           <div class="li"><span class="sw" style="background:#a3a396"></span>BM<span class="lval">1 (5%)</span></div>
         </div>
       </div>
@@ -956,9 +956,9 @@ function initOverviewCharts(){
   updateClock();
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
   const gridColor = cssv('--border');
-  mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#86ab8a','#d4a86e','#c98b7c'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','PdM','CM','BM'],datasets:[{data:[8,6,3,2,1],backgroundColor:['#8aa3a6','#86ab8a','#a99cc9','#c98b7c','#a3a396'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:MONTHS9,datasets:[{data:HI_TREND_FLEET,borderColor:'#8aa3a6',backgroundColor:'#8aa3a622',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#8aa3a6'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
+  mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#719074','#b28d5c','#a97568'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','PdM','CM','BM'],datasets:[{data:[8,6,3,2,1],backgroundColor:['#74898b','#719074','#8e83a9','#a97568','#a3a396'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:MONTHS9,datasets:[{data:HI_TREND_FLEET,borderColor:'#74898b',backgroundColor:'#74898b22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#74898b'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
   document.querySelectorAll('[data-ov-filter]').forEach(el=> el.addEventListener('click',()=>{ state.assetFilterStatus = el.dataset.ovFilter; render(); }));
@@ -1187,7 +1187,7 @@ function detailHealthIndexTab(a){
       <h3>${t('hi_classification')}</h3>
       <ul class="hlist">
       <li><span class="k"><span class="pill pill-healthy">●</span> 80–100</span><span class="v">${t('good')}</span></li>
-      <li><span class="k"><span class="pill" style="background:#eef3ea;color:#6f9c76;">●</span> 60–79</span><span class="v">${t('moderate')}</span></li>
+      <li><span class="k"><span class="pill" style="background:#eef3ea;color:#5d8363;">●</span> 60–79</span><span class="v">${t('moderate')}</span></li>
       <li><span class="k"><span class="pill pill-warning">●</span> 40–59</span><span class="v">${t('poor')}</span></li>
       <li><span class="k"><span class="pill pill-critical">●</span> 20–39</span><span class="v">${t('critical')}</span></li>
       <li><span class="k"><span class="pill" style="background:#f6ece8;color:#b06f60;">●</span> 0–19</span><span class="v">${t('very_critical')}</span></li>
@@ -1398,7 +1398,7 @@ function detailPlanTab(a){
     <div class="strategy-step" style="border-top:3px solid var(--red);"><div class="stitle">CM</div><div class="ssub">${state.lang==='th'?'แก้ไข':'Corrective'}</div></div><div class="strategy-arrow">→</div>
     <div class="strategy-step" style="border-top:3px solid var(--accent-2);"><div class="stitle">PM</div><div class="ssub">${state.lang==='th'?'ป้องกัน':'Preventive'}</div></div><div class="strategy-arrow">→</div>
     <div class="strategy-step" style="border-top:3px solid var(--green); background:var(--green-bg);"><div class="stitle">CBM</div><div class="ssub">${state.lang==='th'?'ตามสภาพ':'Condition Based'}</div></div><div class="strategy-arrow">→</div>
-    <div class="strategy-step" style="border-top:3px solid #a99cc9;"><div class="stitle">PdM</div><div class="ssub">${state.lang==='th'?'คาดการณ์':'Predictive'}</div></div>
+    <div class="strategy-step" style="border-top:3px solid #8e83a9;"><div class="stitle">PdM</div><div class="ssub">${state.lang==='th'?'คาดการณ์':'Predictive'}</div></div>
   </div>
   <div class="grid g4" style="margin-bottom:16px;">
     <div class="card stat"><div class="icon ic-blue">${icon('doc')}</div><div><div class="label">${t('total_tasks')}</div><div class="value">${total}</div></div></div>
@@ -1482,17 +1482,17 @@ function detailDocsTab(a){
 }
 function initDetailCharts(a){
   const gridColor = cssv('--border');
-  if(document.getElementById('detTrend')){ const trendCol = categoryFor(a)==='critical'?'#c98b7c':categoryFor(a)==='warning'?'#d4a86e':'#86ab8a'; mkChart('detTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:trendForAsset(a),borderColor:trendCol,backgroundColor:trendCol+'22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:trendCol}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}}); }
-  if(document.getElementById('hiTrend')){ const trendCol2 = categoryFor(a)==='critical'?'#c98b7c':categoryFor(a)==='warning'?'#d4a86e':'#86ab8a'; mkChart('hiTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:trendForAsset(a),borderColor:trendCol2,backgroundColor:trendCol2+'22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:trendCol2}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}}); }
-  if(document.getElementById('hiGauge')){ const gc = categoryFor(a); const gaugeColor = gc==='critical'?'#c98b7c':gc==='warning'?'#d4a86e':'#86ab8a'; mkChart('hiGauge',{type:'doughnut',data:{datasets:[{data:[a.hi,100-a.hi],backgroundColor:[gaugeColor, gridColor],borderWidth:0,circumference:180,rotation:270}]},options:{...commonOpts(),cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}}); }
-  if(document.getElementById('hiRadar')){ const hib = hiBreakdownFor(categoryFor(a)); mkChart('hiRadar',{type:'radar',data:{labels:hib.map(h=>h.k),datasets:[{label:state.lang==='th'?'คะแนนปัจจุบัน':'Current Score',data:hib.map(h=>h.v),borderColor:'#c98b7c',backgroundColor:'#c98b7c33',pointRadius:4,pointHoverRadius:6,pointBackgroundColor:'#c98b7c'},{label:state.lang==='th'?'เป้าหมาย':'Target',data:[85,85,85,85,85],borderColor:'#a3a396',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}]},options:{...commonOpts(),interaction:{mode:'nearest',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:(ctx)=>`${ctx.dataset.label}: ${ctx.parsed.r} / 100`}}},scales:{r:{min:0,max:100,grid:{color:gridColor},angleLines:{color:gridColor},pointLabels:{font:{size:10}}}}}}); }
+  if(document.getElementById('detTrend')){ const trendCol = categoryFor(a)==='critical'?'#a97568':categoryFor(a)==='warning'?'#b28d5c':'#719074'; mkChart('detTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:trendForAsset(a),borderColor:trendCol,backgroundColor:trendCol+'22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:trendCol}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}}); }
+  if(document.getElementById('hiTrend')){ const trendCol2 = categoryFor(a)==='critical'?'#a97568':categoryFor(a)==='warning'?'#b28d5c':'#719074'; mkChart('hiTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:trendForAsset(a),borderColor:trendCol2,backgroundColor:trendCol2+'22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:trendCol2}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}}); }
+  if(document.getElementById('hiGauge')){ const gc = categoryFor(a); const gaugeColor = gc==='critical'?'#a97568':gc==='warning'?'#b28d5c':'#719074'; mkChart('hiGauge',{type:'doughnut',data:{datasets:[{data:[a.hi,100-a.hi],backgroundColor:[gaugeColor, gridColor],borderWidth:0,circumference:180,rotation:270}]},options:{...commonOpts(),cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}}); }
+  if(document.getElementById('hiRadar')){ const hib = hiBreakdownFor(categoryFor(a)); mkChart('hiRadar',{type:'radar',data:{labels:hib.map(h=>h.k),datasets:[{label:state.lang==='th'?'คะแนนปัจจุบัน':'Current Score',data:hib.map(h=>h.v),borderColor:'#a97568',backgroundColor:'#a9756833',pointRadius:4,pointHoverRadius:6,pointBackgroundColor:'#a97568'},{label:state.lang==='th'?'เป้าหมาย':'Target',data:[85,85,85,85,85],borderColor:'#a3a396',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}]},options:{...commonOpts(),interaction:{mode:'nearest',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:(ctx)=>`${ctx.dataset.label}: ${ctx.parsed.r} / 100`}}},scales:{r:{min:0,max:100,grid:{color:gridColor},angleLines:{color:gridColor},pointLabels:{font:{size:10}}}}}}); }
   if(document.getElementById('dgaHist')) mkChart('dgaHist',{type:'line',data:{labels:DGA_HIST.months,datasets:[
-      {label:'H2',data:DGA_HIST.H2,borderColor:'#8aa3a6',pointRadius:1,tension:.3},{label:'CH4',data:DGA_HIST.CH4,borderColor:'#86ab8a',pointRadius:1,tension:.3},
-      {label:'C2H6',data:DGA_HIST.C2H6,borderColor:'#a99cc9',pointRadius:1,tension:.3},{label:'CO',data:DGA_HIST.CO,borderColor:'#c98b7c',pointRadius:1,tension:.3},{label:'CO2',data:DGA_HIST.CO2,borderColor:'#a3a396',pointRadius:1,tension:.3},
+      {label:'H2',data:DGA_HIST.H2,borderColor:'#74898b',pointRadius:1,tension:.3},{label:'CH4',data:DGA_HIST.CH4,borderColor:'#719074',pointRadius:1,tension:.3},
+      {label:'C2H6',data:DGA_HIST.C2H6,borderColor:'#8e83a9',pointRadius:1,tension:.3},{label:'CO',data:DGA_HIST.CO,borderColor:'#a97568',pointRadius:1,tension:.3},{label:'CO2',data:DGA_HIST.CO2,borderColor:'#a3a396',pointRadius:1,tension:.3},
     ]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}});
   if(document.getElementById('fmeaDonut')){ const high = FMEA.filter(f=>f.risk==='High').length, med=FMEA.filter(f=>f.risk==='Medium').length, low=FMEA.length-high-med;
-    mkChart('fmeaDonut',{type:'doughnut',data:{labels:['High','Medium','Low'],datasets:[{data:[high,med,low],backgroundColor:['#c98b7c','#d4a86e','#86ab8a'],borderWidth:0}]},options:{...commonOpts(),cutout:'70%',plugins:{legend:{display:false}}}}); }
-  if(document.getElementById('fmeaScatter')) mkChart('fmeaScatter',{type:'scatter',data:{datasets:[{label:'Failure Modes',data:FMEA.map(f=>({x:f.o,y:f.s})),backgroundColor: FMEA.map(f=>f.risk==='High'?'#c98b7c':f.risk==='Medium'?'#d4a86e':'#86ab8a'),pointRadius:7}]},
+    mkChart('fmeaDonut',{type:'doughnut',data:{labels:['High','Medium','Low'],datasets:[{data:[high,med,low],backgroundColor:['#a97568','#b28d5c','#719074'],borderWidth:0}]},options:{...commonOpts(),cutout:'70%',plugins:{legend:{display:false}}}}); }
+  if(document.getElementById('fmeaScatter')) mkChart('fmeaScatter',{type:'scatter',data:{datasets:[{label:'Failure Modes',data:FMEA.map(f=>({x:f.o,y:f.s})),backgroundColor: FMEA.map(f=>f.risk==='High'?'#a97568':f.risk==='Medium'?'#b28d5c':'#719074'),pointRadius:7}]},
     options:{...commonOpts(),plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>FMEA[c.dataIndex].comp+' - '+FMEA[c.dataIndex].mode}}},scales:{x:{title:{display:true,text:'Occurrence'},min:0,max:10,grid:{color:gridColor}},y:{title:{display:true,text:'Severity'},min:0,max:10,grid:{color:gridColor}}}}});
 }
 function attachDetailEvents(){
@@ -1566,10 +1566,10 @@ function renderReports(){
       <div style="display:flex;align-items:center;gap:16px;">
         <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('repDgaDonut',130)}<div class="donut-center"><div class="n">20</div><div class="l">${state.lang==='th'?'ตัวอย่าง':'Samples'}</div></div></div>
         <div class="legend">
-          <div class="li"><span class="sw" style="background:#c98b7c"></span>${state.lang==='th'?'ความร้อน':'Thermal Fault'}<span class="lval">7 (35%)</span></div>
-          <div class="li"><span class="sw" style="background:#d4a86e"></span>${state.lang==='th'?'ไฟฟ้า':'Electrical Fault'}<span class="lval">6 (30%)</span></div>
-          <div class="li"><span class="sw" style="background:#a99cc9"></span>PD<span class="lval">4 (20%)</span></div>
-          <div class="li"><span class="sw" style="background:#86ab8a"></span>${t('normal')}<span class="lval">2 (10%)</span></div>
+          <div class="li"><span class="sw" style="background:#a97568"></span>${state.lang==='th'?'ความร้อน':'Thermal Fault'}<span class="lval">7 (35%)</span></div>
+          <div class="li"><span class="sw" style="background:#b28d5c"></span>${state.lang==='th'?'ไฟฟ้า':'Electrical Fault'}<span class="lval">6 (30%)</span></div>
+          <div class="li"><span class="sw" style="background:#8e83a9"></span>PD<span class="lval">4 (20%)</span></div>
+          <div class="li"><span class="sw" style="background:#719074"></span>${t('normal')}<span class="lval">2 (10%)</span></div>
           <div class="li"><span class="sw" style="background:#a3a396"></span>${state.lang==='th'?'ไม่แน่ชัด':'Uncertain'}<span class="lval">1 (5%)</span></div>
         </div>
       </div>
@@ -1593,12 +1593,12 @@ function renderReports(){
 }
 function initReportsCharts(){
   const gridColor = cssv('--border');
-  mkChart('repDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[13,5,2],backgroundColor:['#86ab8a','#d4a86e','#c98b7c'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('repDgaDonut',{type:'doughnut',data:{labels:['Thermal','Electrical','PD','Normal','Uncertain'],datasets:[{data:[7,6,4,2,1],backgroundColor:['#c98b7c','#d4a86e','#a99cc9','#86ab8a','#a3a396'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('repTrend',{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{label:'Avg HI',data:[70,71,70,72,73,72,71,70,72,73,74,75],borderColor:'#8aa3a6',backgroundColor:'#8aa3a622',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
-  mkChart('repFmeaBar',{type:'bar',data:{labels:['Overheating','Insulation Failure','Oil Leakage','Contact Wear','Cooling Failure','Other'],datasets:[{data:[28,20,15,12,10,15],backgroundColor:'#8aa3a6'}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor}},y:{grid:{display:false}}}}});
-  mkChart('repTaskBar',{type:'bar',data:{labels:['BM','CM','PM','CBM','PdM'],datasets:[{label:'Planned',data:[0,9,8,5,4],backgroundColor:'#8aa3a6'},{label:'Completed',data:[0,7,7,5,3],backgroundColor:'#86ab8a'},{label:'Pending',data:[1,5,4,1,1],backgroundColor:'#d4a86e'},{label:'Overdue',data:[0,1,1,0,0],backgroundColor:'#c98b7c'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}});
-  mkChart('repCostBar',{type:'bar',data:{labels:[''],datasets:[{label:'Before RCM',data:[1.8],backgroundColor:'#c98b7c'},{label:'After RCM',data:[1.2],backgroundColor:'#8aa3a6'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{title:{display:true,text:'THB (M)'},grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('repDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[13,5,2],backgroundColor:['#719074','#b28d5c','#a97568'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('repDgaDonut',{type:'doughnut',data:{labels:['Thermal','Electrical','PD','Normal','Uncertain'],datasets:[{data:[7,6,4,2,1],backgroundColor:['#a97568','#b28d5c','#8e83a9','#719074','#a3a396'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('repTrend',{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{label:'Avg HI',data:[70,71,70,72,73,72,71,70,72,73,74,75],borderColor:'#74898b',backgroundColor:'#74898b22',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('repFmeaBar',{type:'bar',data:{labels:['Overheating','Insulation Failure','Oil Leakage','Contact Wear','Cooling Failure','Other'],datasets:[{data:[28,20,15,12,10,15],backgroundColor:'#74898b'}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor}},y:{grid:{display:false}}}}});
+  mkChart('repTaskBar',{type:'bar',data:{labels:['BM','CM','PM','CBM','PdM'],datasets:[{label:'Planned',data:[0,9,8,5,4],backgroundColor:'#74898b'},{label:'Completed',data:[0,7,7,5,3],backgroundColor:'#719074'},{label:'Pending',data:[1,5,4,1,1],backgroundColor:'#b28d5c'},{label:'Overdue',data:[0,1,1,0,0],backgroundColor:'#a97568'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('repCostBar',{type:'bar',data:{labels:[''],datasets:[{label:'Before RCM',data:[1.8],backgroundColor:'#a97568'},{label:'After RCM',data:[1.2],backgroundColor:'#74898b'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{title:{display:true,text:'THB (M)'},grid:{color:gridColor}},x:{grid:{display:false}}}}});
 }
 function attachReportsEvents(){
   const gen = document.getElementById('btnGenerateReport'); if(gen) gen.addEventListener('click', ()=>{
@@ -1634,7 +1634,7 @@ function settingsTabContent(){
     <div class="card"><div class="card-head"><h3>${t('risk_thresholds')}</h3><button class="btn btn-outline" id="btnEditRisk" style="padding:6px 11px;font-size:12px;">${t('edit')}</button></div>
       <div class="tbl-wrap"><table><thead><tr><th>${t('level')}</th><th>${t('hi_range')}</th><th>${t('action')}</th></tr></thead><tbody>
       <tr><td><span class="pill pill-healthy">${t('good')}</span></td><td>80–100</td><td class="small-muted">${state.lang==='th'?'ทำงานปกติ':'Normal operation'}</td></tr>
-      <tr><td><span class="pill" style="background:#eef3ea;color:#6f9c76;">${t('moderate')}</span></td><td>60–79</td><td class="small-muted">${state.lang==='th'?'ติดตามใกล้ชิด':'Close monitoring'}</td></tr>
+      <tr><td><span class="pill" style="background:#eef3ea;color:#5d8363;">${t('moderate')}</span></td><td>60–79</td><td class="small-muted">${state.lang==='th'?'ติดตามใกล้ชิด':'Close monitoring'}</td></tr>
       <tr><td><span class="pill pill-warning">${state.lang==='th'?'สูง':'High'}</span></td><td>40–59</td><td class="small-muted">${state.lang==='th'?'วางแผนบำรุงรักษา':'Plan maintenance'}</td></tr>
       <tr><td><span class="pill pill-critical">${t('critical')}</span></td><td>20–39</td><td class="small-muted">${state.lang==='th'?'ดำเนินการทันที':'Immediate action'}</td></tr>
       <tr><td><span class="pill" style="background:#f6ece8;color:#b06f60;">${t('very_critical')}</span></td><td>0–19</td><td class="small-muted">${state.lang==='th'?'หยุดใช้งานด่วน':'Urgent shutdown'}</td></tr>
