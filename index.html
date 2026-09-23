@@ -11,7 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --navy:#202b28; --navy-2:#283530; --navy-3:#34433c;
+  --navy:#37453f; --navy-2:#415249; --navy-3:#4f6157;
   --accent:#ed9145; --accent-2:#2f7dd1;
   --green:#1fa571; --green-bg:#e5f5ee;
   --amber:#eba020; --amber-bg:#fcf1dc;
@@ -262,7 +262,7 @@ select.chip-input{cursor:pointer;}
   .card{ border:1px solid #ccc !important; break-inside:avoid; box-shadow:none !important; }
   .main{ display:block !important; }
 }
-.login-overlay{position:fixed; inset:0; background:linear-gradient(120deg,#202b28,#5c6b62); z-index:500; display:flex; align-items:center; justify-content:center; padding:20px;}
+.login-overlay{position:fixed; inset:0; background:linear-gradient(120deg,#37453f,#6b7d73); z-index:500; display:flex; align-items:center; justify-content:center; padding:20px;}
 .login-card{background:var(--card); border-radius:16px; padding:32px 28px; width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,.35);}
 .login-card h2{margin:0 0 4px; font-size:20px;}
 .login-card p{margin:0 0 20px; font-size:12.5px; color:var(--muted);}
@@ -873,7 +873,7 @@ function renderNav(){
 function renderOverview(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
   return `
-  <div class="card" style="background:linear-gradient(120deg,#202b28,#3f4a44); color:#fff; margin-bottom:18px; padding:26px; border:none;">
+  <div class="card" style="background:linear-gradient(120deg,#37453f,#57695f); color:#fff; margin-bottom:18px; padding:26px; border:none;">
     <div style="display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap;">
       <div style="max-width:520px;"><div style="font-size:22px; font-weight:800; line-height:1.35;">${t('hero_title')}</div>
       <div style="margin-top:10px; font-size:12.5px; color:#e8ebe4; font-weight:600;">${t('sub_overview')}</div></div>
