@@ -232,7 +232,7 @@ select.chip-input{cursor:pointer;}
 .dcol{display:flex; flex-direction:column; align-items:center; gap:8px;}
 .dline{width:1px; height:14px; background:var(--border);}
 .timeline-row{display:grid; grid-template-columns:130px 1fr; align-items:center; gap:10px; margin-bottom:8px; font-size:11.5px;}
-.timeline-track{position:relative; height:18px; background:var(--bg); border-radius:5px;}
+.timeline-track{position:relative; height:18px; background:var(--bg); border-radius:5px; overflow:hidden;}
 .timeline-bar{position:absolute; top:2px; height:14px; border-radius:4px;}
 .today-line{position:absolute; top:0; bottom:0; width:2px; background:var(--red);}
 .small-muted{font-size:11px; color:var(--muted);}
@@ -376,7 +376,9 @@ const UI = {
  good:['Good','ดี'], moderate:['Moderate','ปานกลาง'], poor:['Poor','แย่'], very_critical:['Very Critical','วิกฤตมาก'],
  hi_assessment:['Health Index Assessment','การประเมินดัชนีสุขภาพ'], edit_criteria:['Edit Criteria','แก้ไขเกณฑ์'],
  parameter:['Parameter','พารามิเตอร์'], score:['Score','คะแนน'], weight:['Weight','น้ำหนัก'], wscore:['W.Score','คะแนนถ่วงน้ำหนัก'], remark:['Remark','หมายเหตุ'], total:['Total','รวม'],
- hi_contributors:['Health Index Contributors','ปัจจัยดัชนีสุขภาพ'], assessment_summary:['Assessment Summary','สรุปการประเมิน'],
+ hi_contributors:['Health Index Contributors','ปัจจัยดัชนีสุขภาพ'],
+ hi_contributors_desc:['Each axis is one health sub-score out of 100 — further from the center is healthier. The red line is this transformer now; the dashed grey line is the target (85). Hover a point to see its exact score.','แต่ละแกนคือคะแนนย่อยด้านสุขภาพเต็ม 100 — ยิ่งไกลจากจุดศูนย์กลางยิ่งดี เส้นสีแดงคือค่าปัจจุบันของหม้อแปลงนี้ เส้นประสีเทาคือเป้าหมาย (85) เอาเมาส์ไปชี้ที่จุดเพื่อดูคะแนนที่แน่นอน'],
+ assessment_summary:['Assessment Summary','สรุปการประเมิน'],
  main_issue2:['Main Issue','ปัญหาหลัก'], secondary_issue:['Secondary Issue','ปัญหารอง'], risk_level:['Risk Level','ระดับความเสี่ยง'],
  gas_results:['Gas Results','ผลก๊าซ'], duval_triangle:['Duval Triangle','สามเหลี่ยมดูวาล'], rogers_ratio:['Rogers Ratio','อัตราส่วนโรเจอร์'],
  iec_ratio:['IEC Ratio','อัตราส่วน IEC'], trend_analysis:['Trend Analysis','วิเคราะห์แนวโน้ม'], interpretation:['Interpretation','การตีความ'],
@@ -1050,7 +1052,6 @@ function detailHeader(a){
   </div>
   <div style="display:flex; gap:10px; margin-bottom:14px;">
     <button class="btn btn-primary" id="btnExportReport">${icon('down2',' style="width:13px;height:13px"')} ${t('export_report')}</button>
-    <button class="btn btn-ghost" id="btnMoreActions">${t('more_actions')}</button>
   </div>`;
 }
 function renderDetail(){
@@ -1206,13 +1207,13 @@ function detailHealthIndexTab(a){
   </div>
   <div class="grid" style="grid-template-columns:1.6fr 1fr; margin-bottom:16px; align-items:stretch;">
     <div class="card">
-      <div class="card-head"><h3>${t('hi_assessment')}</h3><button class="btn btn-primary" id="btnEditCriteria" style="padding:7px 12px;font-size:12px;">${t('edit_criteria')}</button></div>
+      <div class="card-head"><h3>${t('hi_assessment')}</h3></div>
       <div class="tbl-wrap"><table><thead><tr><th>${t('parameter')}</th><th>${t('result')}</th><th>${t('score')}</th><th>${t('weight')}</th><th>${t('wscore')}</th><th>${t('status')}</th><th>${t('remark')}</th></tr></thead><tbody>
       ${hiCriteriaFor(cat).map(h=>`<tr><td><b>${h.p}</b></td><td>${h.res}</td><td>${h.score}</td><td>${h.weight}%</td><td>${h.ws}</td><td><span class="pill ${statusPillClass(h.status)}">${trStatus(h.status)}</span></td><td class="small-muted">${h.remark[state.lang]}</td></tr>`).join('')}
       <tr><td colspan="4" style="font-weight:800;">${t('total')}</td><td style="font-weight:800;">${a.hi}.0</td><td></td><td></td></tr>
       </tbody></table></div>
     </div>
-    <div class="card"><div class="card-head"><h3>${t('hi_contributors')}</h3></div>${chartBox('hiRadar',260)}</div>
+    <div class="card"><div class="card-head"><h3>${t('hi_contributors')}</h3></div><p class="card-sub">${t('hi_contributors_desc')}</p>${chartBox('hiRadar',260)}</div>
   </div>
   <div class="card">
     <h3>${t('assessment_summary')}</h3>
@@ -1307,46 +1308,6 @@ function detailFmeaTab(a){
       <div class="notebox">${icon('info')}<div>${t('key_takeaway_fmea')}</div></div>
     </div>
   </div>`;
-}
-function openMoreActionsModal(){
-  const a = currentAsset();
-  const root = document.getElementById('modalRoot');
-  root.innerHTML = `<div class="modal-overlay" id="modalOverlay"><div class="modal" style="max-width:340px;">
-    <h3>${t('more_actions_title')}</h3>
-    <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
-      <button class="btn btn-ghost" id="actDuplicate" style="justify-content:flex-start;">${icon('box',' style="width:14px;height:14px"')} ${t('duplicate_asset')}</button>
-      <button class="btn btn-ghost" id="actPrint" style="justify-content:flex-start;">${icon('down2',' style="width:14px;height:14px"')} ${t('print_report')}</button>
-      <button class="btn btn-ghost" id="actArchive" style="justify-content:flex-start;">${icon('info',' style="width:14px;height:14px"')} ${t('archive_asset')}</button>
-      <button class="btn btn-ghost" id="actDelete" style="justify-content:flex-start; color:var(--red);">${icon('x',' style="width:14px;height:14px"')} ${t('delete_asset')}</button>
-    </div>
-    <div class="modal-actions"><button type="button" class="btn btn-ghost" id="modalCancel4">${t('close')}</button></div>
-  </div></div>`;
-  document.getElementById('modalCancel4').addEventListener('click', closeModal);
-  document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); });
-  document.getElementById('actDuplicate').addEventListener('click', ()=>{
-    let n = ASSETS.length+1; let newId = `TR-0${n}`.length<6?`TR-0${n}`:`TR-${n}`;
-    while(ASSETS.some(x=>x.id===newId)){ n++; newId = n<100?`TR-${String(n).padStart(3,'0')}`:`TR-${n}`; }
-    ASSETS.push({...a, id:newId, loc:a.loc+' (Copy)'});
-    closeModal(); state.assetId=newId; render(); toast(t('toast_added'),'success');
-  });
-  document.getElementById('actPrint').addEventListener('click', ()=>{ closeModal(); setTimeout(()=>window.print(),200); });
-  document.getElementById('actArchive').addEventListener('click', ()=>{ closeModal(); toast(t('toast_saved'),'success'); });
-  document.getElementById('actDelete').addEventListener('click', ()=>{
-    if(ASSETS.length<=1){ toast(t('cannot_delete_last')); return; }
-    const idx = ASSETS.findIndex(x=>x.id===a.id); if(idx>-1) ASSETS.splice(idx,1);
-    closeModal(); state.page='assets'; render(); toast(t('toast_deleted'),'success');
-  });
-}
-function openEditHiWeightsModal(){
-  const bodyHtml = HI_PARAM_NAMES.map((p,i)=>`<div class="formrow"><label>${p} (%)</label><input name="w${i}" type="number" min="0" max="100" value="${HI_WEIGHTS[i]}" required></div>`).join('')
-    + `<div class="small-muted" id="weightSumHint">${t('weights_must_sum')}</div>`;
-  openModal(t('edit_criteria'), bodyHtml, (data)=>{
-    const newWeights = HI_PARAM_NAMES.map((_,i)=>Number(data['w'+i])||0);
-    const sum = newWeights.reduce((s,v)=>s+v,0);
-    if(sum!==100){ toast(t('weights_must_sum_error').replace('{sum}',sum), 'error'); return false; }
-    HI_WEIGHTS = newWeights;
-    render(); toast(t('toast_saved'),'success');
-  });
 }
 function openEditFmeaModal(no){
   const f = FMEA.find(x=>x.no===no); if(!f) return;
@@ -1470,7 +1431,7 @@ function detailPlanTab(a){
     ${state.planView==='gantt' ? `
     <div style="margin-top:16px;">
       <div class="timeline-row"><div></div><div style="display:flex; font-size:10.5px; color:var(--muted); font-weight:700;">${GANTT_MONTHS.map(m=>`<div style="flex:1;">${m}</div>`).join('')}</div></div>
-      ${MAINT_PLAN.map(tk=>{ const startIdx = monthStart[tk.m]; const leftPct = (startIdx/GANTT_MONTHS.length)*100; const widthPct = (tk.len/GANTT_MONTHS.length)*100;
+      ${MAINT_PLAN.map(tk=>{ const startIdx = monthStart[tk.m]; const leftPct = (startIdx/GANTT_MONTHS.length)*100; const clampedLen = Math.max(0.4, Math.min(tk.len, GANTT_MONTHS.length-startIdx)); const widthPct = (clampedLen/GANTT_MONTHS.length)*100;
         return `<div class="timeline-row"><div class="small-muted">${tk.task}</div><div class="timeline-track"><div class="timeline-bar" style="left:${leftPct}%; width:${widthPct}%; background:${TYPE_COLOR[tk.type]};"></div><div class="today-line" style="left:${(2.1/6)*100}%;"></div></div></div>`; }).join('')}
     </div>` : ''}
   </div>
@@ -1535,7 +1496,7 @@ function initDetailCharts(a){
   if(document.getElementById('detTrend')){ const trendCol = categoryFor(a)==='critical'?'#e0524a':categoryFor(a)==='warning'?'#e8a13a':'#1a9e6b'; mkChart('detTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:trendForAsset(a),borderColor:trendCol,backgroundColor:trendCol+'22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:trendCol}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}}); }
   if(document.getElementById('hiTrend')){ const trendCol2 = categoryFor(a)==='critical'?'#e0524a':categoryFor(a)==='warning'?'#e8a13a':'#1a9e6b'; mkChart('hiTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:trendForAsset(a),borderColor:trendCol2,backgroundColor:trendCol2+'22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:trendCol2}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}}); }
   if(document.getElementById('hiGauge')){ const gc = categoryFor(a); const gaugeColor = gc==='critical'?'#e0524a':gc==='warning'?'#e8a13a':'#1a9e6b'; mkChart('hiGauge',{type:'doughnut',data:{datasets:[{data:[a.hi,100-a.hi],backgroundColor:[gaugeColor, gridColor],borderWidth:0,circumference:180,rotation:270}]},options:{...commonOpts(),cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}}); }
-  if(document.getElementById('hiRadar')){ const hib = hiBreakdownFor(categoryFor(a)); mkChart('hiRadar',{type:'radar',data:{labels:hib.map(h=>h.k),datasets:[{label:'Current',data:hib.map(h=>h.v),borderColor:'#e0524a',backgroundColor:'#e0524a33',pointRadius:2},{label:'Target',data:[85,85,85,85,85],borderColor:'#94a3b8',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{r:{min:0,max:100,grid:{color:gridColor},angleLines:{color:gridColor},pointLabels:{font:{size:10}}}}}}); }
+  if(document.getElementById('hiRadar')){ const hib = hiBreakdownFor(categoryFor(a)); mkChart('hiRadar',{type:'radar',data:{labels:hib.map(h=>h.k),datasets:[{label:state.lang==='th'?'คะแนนปัจจุบัน':'Current Score',data:hib.map(h=>h.v),borderColor:'#e0524a',backgroundColor:'#e0524a33',pointRadius:4,pointHoverRadius:6,pointBackgroundColor:'#e0524a'},{label:state.lang==='th'?'เป้าหมาย':'Target',data:[85,85,85,85,85],borderColor:'#94a3b8',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}]},options:{...commonOpts(),interaction:{mode:'nearest',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:(ctx)=>`${ctx.dataset.label}: ${ctx.parsed.r} / 100`}}},scales:{r:{min:0,max:100,grid:{color:gridColor},angleLines:{color:gridColor},pointLabels:{font:{size:10}}}}}}); }
   if(document.getElementById('dgaHist')) mkChart('dgaHist',{type:'line',data:{labels:DGA_HIST.months,datasets:[
       {label:'H2',data:DGA_HIST.H2,borderColor:'#2f6fed',pointRadius:1,tension:.3},{label:'CH4',data:DGA_HIST.CH4,borderColor:'#1a9e6b',pointRadius:1,tension:.3},
       {label:'C2H6',data:DGA_HIST.C2H6,borderColor:'#8b5cf6',pointRadius:1,tension:.3},{label:'CO',data:DGA_HIST.CO,borderColor:'#e0524a',pointRadius:1,tension:.3},{label:'CO2',data:DGA_HIST.CO2,borderColor:'#94a3b8',pointRadius:1,tension:.3},
@@ -1572,10 +1533,6 @@ function attachDetailEvents(){
     const a = ASSETS.find(x=>x.id===state.assetId);
     openExportChoiceModal(()=>{ const rows = [['Asset ID','Location','Health Index','Status','RPN','DGA Diagnosis'],[a.id,a.loc,a.hi,a.status,'280','D2']]; downloadFile(`${a.id}_report.csv`, toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); });
   });
-  const moreBtn = document.getElementById('btnMoreActions');
-  if(moreBtn) moreBtn.addEventListener('click', openMoreActionsModal);
-  const editCriteria = document.getElementById('btnEditCriteria');
-  if(editCriteria) editCriteria.addEventListener('click', openEditHiWeightsModal);
   document.querySelectorAll('[data-create-plan]').forEach(el=> el.addEventListener('click',()=>{ state.detailTab='plan'; render(); }));
   document.querySelectorAll('.dl-doc').forEach(el=> el.addEventListener('click',()=>{
     const csvType = el.dataset.csv;
