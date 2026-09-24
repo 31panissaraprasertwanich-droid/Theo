@@ -403,7 +403,7 @@ const UI = {
  tab_history:['History','ประวัติ'], tab_docs:['Documents','เอกสาร'],
  operating_status:['Operating Status','สถานะการทำงาน'], in_service:['In Service','ใช้งานอยู่'], load:['Load','โหลด'], top_oil:['Top Oil Temp.','อุณหภูมิน้ำมันบน'],
  amb_temp:['Ambient Temp.','อุณหภูมิแวดล้อม'], oil_level:['Oil Level','ระดับน้ำมัน'], normal:['Normal','ปกติ'], cooling_system:['Cooling System','ระบบระบายความร้อน'], alarms:['Alarms','สัญญาณเตือน'],
- view_details:['View Details →','ดูรายละเอียด →'], type:['Type','ประเภท'], severity:['Severity','ความรุนแรง'], confidence:['Confidence','ความเชื่อมั่น'],
+ view_details:['View Details →','ดูรายละเอียด →'], type:['Type','ประเภท'], severity:['Severity','ความรุนแรง'], confidence:['Methods agreeing','จำนวนวิธีที่ให้ผลตรงกัน'],
  date:['Date','วันที่'], activity:['Activity','กิจกรรม'], result:['Result','ผลลัพธ์'], by:['By','โดย'],
  recommended_strategy:['Recommended Strategy','กลยุทธ์ที่แนะนำ'], cbm_full:['Condition Based Maintenance','บำรุงรักษาตามสภาพ'],
  cbm_rationale:['Deterioration can be detected from DGA and oil condition before functional failure.','สามารถตรวจพบความเสื่อมสภาพจาก DGA และสภาพน้ำมันได้ก่อนเกิดความเสียหายจริง'],
@@ -493,8 +493,8 @@ const UI = {
  field_name:['Name','ชื่อ'], field_role:['Role','บทบาท'], field_email:['Email','อีเมล'],
  field_task_name:['Task Name','ชื่องาน'], field_task_type:['Type','ประเภท'], field_task_interval:['Interval','ความถี่'],
  field_start_date:['Start Date','วันที่เริ่ม'], field_task_duration:['Duration (days)','ระยะเวลา (วัน)'], field_task_details:['Task Details','รายละเอียดงาน'], field_task_details_ph:['e.g. Check bushing gasket and top oil level','เช่น ตรวจปะเก็นบุชชิ่งและระดับน้ำมันด้านบน'],
- note1:['Health Index is assessed from electrical test results, physical condition, and age of use.','ดัชนีสุขภาพประเมินจากผลการทดสอบทางไฟฟ้า สภาพทางกายภาพ และอายุการใช้งาน'],
- note2:['Should be considered together with FMEA and RCM analysis results to determine the maintenance plan.','ควรพิจารณาร่วมกับผลการวิเคราะห์ FMEA และ RCM เพื่อกำหนดแผนบำรุงรักษาที่เหมาะสม'],
+ note1:['How status is decided','วิธีกำหนดสถานะ'],
+ note2:['HI ≥ 60 = Healthy, 40–59 = Warning, < 40 = Critical. If any parameter is in Poor condition, a Healthy unit is raised to Warning. Use together with FMEA and RCM results to set the maintenance plan.','HI ≥ 60 = ปกติ, 40–59 = เฝ้าระวัง, < 40 = วิกฤต หากมีพารามิเตอร์ใดอยู่ในเกณฑ์แย่ หม้อแปลงที่ปกติจะถูกยกเป็นเฝ้าระวัง ใช้ร่วมกับผล FMEA และ RCM เพื่อกำหนดแผนบำรุงรักษา'],
 };
 function t(key){ const row = UI[key]; if(!row) return key; return row[state.lang==='th'?1:0]; }
 
@@ -528,145 +528,306 @@ const ASSETS = [
  {id:'TR-019',loc:'Bangkok Noi SS',cap:60,volt:'115/24',hi:51,status:'Warning',last:'30 Jul 2026',next:'30 Jan 2027',mfr:'Mitsubishi',year:2008,type:'ONAN/ONAF',load:70,topOil:64,amb:32},
  {id:'TR-020',loc:'Yannawa SS',cap:50,volt:'115/24',hi:28,status:'Critical',last:'28 Jul 2026',next:'28 Aug 2026',mfr:'Hyundai',year:2007,type:'ONAN/ONAF',load:66,topOil:69,amb:32},
 ];
-const HI_TREND_FLEET = [72,74,73,75,76,74,73,71,70];
-const MONTHS9 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
-const TR014_TREND = [78,76,75,73,70,65,60,55,50,45,40,34];
-const TR014_MONTHS = ['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
-function trendForAsset(asset){
-  if(asset.id==='TR-014') return TR014_TREND.slice();
-  const seed = assetSeed(asset.id); const cat = categoryFor(asset); const end = asset.hi;
-  const startOffset = cat==='healthy' ? (seededFrac(seed,1)*6-2) : cat==='warning' ? (10+seededFrac(seed,1)*10) : (32+seededFrac(seed,1)*16);
-  const start = Math.min(98, end+startOffset);
-  const vals = [];
-  for(let i=0;i<12;i++){ const frac=i/11; const jitter=(seededFrac(seed,i+3)-0.5)*3; vals.push(Math.max(0,Math.min(100,Math.round(start+(end-start)*frac+jitter)))); }
-  vals[11] = end;
-  return vals;
-}
 function assetSeed(id){ let h=0; for(let i=0;i<id.length;i++) h=(h*31+id.charCodeAt(i))>>>0; return h; }
 function seededFrac(seed,salt){ const x=Math.sin(seed*0.0013+salt*7.13)*10000; return x-Math.floor(x); }
 function categoryFor(asset){ return asset.hi<40?'critical':asset.hi<60?'warning':'healthy'; }
 function currentAsset(){ return ASSETS.find(x=>x.id===state.assetId) || ASSETS[0]; }
+/* =====================================================================
+   CONDITION-ASSESSMENT ENGINE
+   Every number shown for a transformer (Health Index, status, DGA diagnosis,
+   issues, trends, fleet statistics) is COMPUTED here from its lab samples.
+   References: IEC 60422 (oil limits, Cat. B 72.5–170 kV), IEC 60599 & Duval
+   Triangle 1 (fault type), IEEE C57.104 (Rogers ratios, TDCG), DGA factor
+   after Jahromi et al. (2009), furan→DP after Chendong (1991).
+   ===================================================================== */
+function L(en,th){ return state.lang==='th'?th:en; }
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function parseD(s){ if(!s||s==='—') return null; const m=String(s).match(/^(\d{1,2}) (\w{3}) (\d{4})$/); if(m) return new Date(Number(m[3]), MON.indexOf(m[2]), Number(m[1])); const d=new Date(s); return isNaN(d)?null:d; }
+function fmtD(d){ return d ? `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}` : '—'; }
+function addMonths(d,n){ const x=new Date(d.getTime()); const day=x.getDate(); x.setDate(1); x.setMonth(x.getMonth()+n); x.setDate(Math.min(day, new Date(x.getFullYear(),x.getMonth()+1,0).getDate())); return x; }
+function isoD(d){ return d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` : ''; }
+function fmtPpm(v){ return v>=10 ? String(Math.round(v)) : String(Math.round(v*10)/10); }
 
-/* ---- DGA profile (diagnosis text, duval marker, ratios) per health category ---- */
-function dgaProfileFor(cat){
-  if(cat==='critical') return { code:'D2', type:{en:'Thermal Fault',th:'ข้อบกพร่องทางความร้อน'}, typeRange:'(300–700°C)', severity:{en:'High',th:'สูง'}, confidence:82, duval:{px:0.62,py:0.30},
-    rogers:[['CH4 / H2','0.67','Thermal Fault'],['C2H4 / C2H6','3.91','Thermal Fault'],['C2H2 / C2H4','0.02','Thermal Fault']],
-    iec:[['C2H2 / C2H4','0.02','Normal',true],['CH4 / H2','0.67','Abnormal',false],['C2H4 / C2H6','3.91','Abnormal',false]],
-    mainIssue:{en:'DGA – Thermal Fault',th:'DGA – ข้อบกพร่องทางความร้อน'}, secondaryIssue:{en:'Low BDV, High Moisture',th:'BDV ต่ำ, ความชื้นสูง'}, riskLevel:{en:'High',th:'สูง'}, strategy:'CBM + PdM', nextAction:{en:'Oil Sampling (30 days)',th:'เก็บน้ำมัน (30 วัน)'},
-    interp:{en:'High concentration of C2H4 and CH4 indicates thermal fault in the range 300–700°C. Continuous monitoring is recommended.',th:'พบความเข้มข้นสูงของ C2H4 และ CH4 บ่งชี้ข้อบกพร่องทางความร้อนในช่วง 300–700°C แนะนำให้ติดตามอย่างต่อเนื่อง'} };
-  if(cat==='warning') return { code:'D1', type:{en:'Partial Discharge',th:'ดิสชาร์จบางส่วน'}, typeRange:'(Low Energy)', severity:{en:'Moderate',th:'ปานกลาง'}, confidence:70, duval:{px:0.30,py:0.62},
-    rogers:[['CH4 / H2','0.45','Partial Discharge'],['C2H4 / C2H6','1.20','Normal'],['C2H2 / C2H4','0.05','Normal']],
-    iec:[['C2H2 / C2H4','0.05','Normal',true],['CH4 / H2','0.45','Borderline',false],['C2H4 / C2H6','1.20','Normal',true]],
-    mainIssue:{en:'DGA – Partial Discharge',th:'DGA – ดิสชาร์จบางส่วน'}, secondaryIssue:{en:'Moisture trending up',th:'ความชื้นมีแนวโน้มสูงขึ้น'}, riskLevel:{en:'Medium',th:'ปานกลาง'}, strategy:'CBM', nextAction:{en:'Oil Sampling (60 days)',th:'เก็บน้ำมัน (60 วัน)'},
-    interp:{en:'Gas levels are trending upward but remain below critical thresholds. Early-stage partial discharge is suspected — recommend closer monitoring.',th:'ระดับก๊าซมีแนวโน้มสูงขึ้นแต่ยังต่ำกว่าเกณฑ์วิกฤต คาดว่าเป็นดิสชาร์จบางส่วนระยะเริ่มต้น แนะนำให้ติดตามใกล้ชิดขึ้น'} };
-  return { code:'D0', type:{en:'Normal',th:'ปกติ'}, typeRange:'', severity:{en:'Low',th:'ต่ำ'}, confidence:95, duval:{px:0.15,py:0.72},
-    rogers:[['CH4 / H2','0.20','Normal'],['C2H4 / C2H6','0.80','Normal'],['C2H2 / C2H4','0.00','Normal']],
-    iec:[['C2H2 / C2H4','0.00','Normal',true],['CH4 / H2','0.20','Normal',true],['C2H4 / C2H6','0.80','Normal',true]],
-    mainIssue:{en:'None significant',th:'ไม่มีนัยสำคัญ'}, secondaryIssue:{en:'—',th:'—'}, riskLevel:{en:'Low',th:'ต่ำ'}, strategy:'PM', nextAction:{en:'Routine Inspection (6 months)',th:'ตรวจสอบตามปกติ (6 เดือน)'},
-    interp:{en:'All gas concentrations are within normal limits. No corrective action required beyond routine monitoring.',th:'ความเข้มข้นของก๊าซทุกตัวอยู่ในเกณฑ์ปกติ ไม่ต้องดำเนินการแก้ไขนอกเหนือจากการตรวจสอบตามปกติ'} };
+/* ---------- DGA scoring ---------- */
+const GASES = ['H2','CH4','C2H6','C2H4','C2H2','CO','CO2'];
+const DGA_BANDS = {H2:[100,200,300,500,700], CH4:[75,125,200,400,600], C2H6:[65,80,100,120,150], C2H4:[50,80,100,150,200], C2H2:[3,7,35,50,80], CO:[350,700,900,1100,1400], CO2:[2500,3000,4000,5000,7000]};
+const DGA_GAS_W = {H2:2,CH4:3,C2H6:3,C2H4:3,C2H2:5,CO:1,CO2:1};
+function gasBand(g,v){ const b=DGA_BANDS[g]; for(let i=0;i<b.length;i++) if(v<=b[i]) return i+1; return 6; }
+function dgaFactor(gs){ let sw=0,w=0; GASES.forEach(g=>{ sw+=gasBand(g,gs[g])*DGA_GAS_W[g]; w+=DGA_GAS_W[g]; }); return sw/w; }
+function dgaRating(f){ return f<1.2?'A':f<1.5?'B':f<2?'C':f<3?'D':'E'; }
+function tdcgOf(gs){ return Math.round(gs.H2+gs.CH4+gs.C2H6+gs.C2H4+gs.C2H2+gs.CO); }
+function tdcgCond(v){ return v<=720?1:v<=1920?2:v<=4630?3:4; }
+
+const DGA_NAMES = {
+  N:['No fault indicated — gases at typical levels','ไม่พบความผิดปกติ — ก๊าซอยู่ในระดับปกติ'],
+  PD:['Partial discharge (PD)','ดิสชาร์จบางส่วน (PD)'],
+  T1:['Thermal fault < 300 °C','ความร้อนผิดปกติ < 300 °C'],
+  T2:['Thermal fault 300–700 °C','ความร้อนผิดปกติ 300–700 °C'],
+  T3:['Thermal fault > 700 °C','ความร้อนผิดปกติ > 700 °C'],
+  D1:['Low-energy discharge (sparking)','ดิสชาร์จพลังงานต่ำ (สปาร์ก)'],
+  D2:['High-energy discharge (arcing)','ดิสชาร์จพลังงานสูง (อาร์ก)'],
+  DT:['Mixed thermal & electrical fault','ความผิดปกติผสมทางความร้อนและไฟฟ้า'],
+  ND:['Not determined','ระบุไม่ได้'],
+};
+function dgaName(code){ const r=DGA_NAMES[code]||DGA_NAMES.ND; return L(r[0],r[1]); }
+function famOf(code){ if(!code||code==='ND') return null; if(code==='N') return 'N'; if(code==='PD') return 'PD'; if(code[0]==='T') return 'T'; if(code==='DT') return 'DT'; return 'D'; }
+
+/* Duval Triangle 1 — zone boundaries per IEC 60599 */
+function duvalPct(gs){ const s=gs.CH4+gs.C2H4+gs.C2H2; if(s<=0) return null; return {ch4:gs.CH4/s*100, c2h4:gs.C2H4/s*100, c2h2:gs.C2H2/s*100}; }
+function duvalZone(p){
+  if(!p) return 'ND';
+  const {ch4,c2h4,c2h2}=p;
+  if(ch4>=98) return 'PD';
+  if(c2h2<4){ return c2h4<20?'T1':c2h4<50?'T2':'T3'; }
+  if(c2h4>=50 && c2h2<15) return 'T3';
+  if(c2h2>=13 && c2h4<23) return 'D1';
+  if(c2h2>=13 && c2h4<40) return 'D2';
+  if(c2h4>=40 && c2h2>=29) return 'D2';
+  return 'DT';
+}
+function ratio(a,b){ return b>0 ? a/b : (a>0 ? Infinity : 0); }
+function iecCode(r1,r2,r5){ // r1=C2H2/C2H4, r2=CH4/H2, r5=C2H4/C2H6
+  if(r2<0.1 && r5<0.2) return 'PD';
+  if(r1>1 && r2>=0.1 && r2<=0.5 && r5>1) return 'D1';
+  if(r1>=0.6 && r1<=2.5 && r2>=0.1 && r2<=1 && r5>2) return 'D2';
+  if(r1<0.2 && r2>1 && r5>4) return 'T3';
+  if(r1<0.1 && r2>1 && r5>=1 && r5<=4) return 'T2';
+  if(r2>1 && r5<1) return 'T1';
+  return 'ND';
+}
+const ROGERS_CASES = {0:['Case 0 — Normal','กรณี 0 — ปกติ'],1:['Case 1 — Low-energy discharge (PD)','กรณี 1 — ดิสชาร์จพลังงานต่ำ (PD)'],2:['Case 2 — Arcing (high energy)','กรณี 2 — อาร์ก (พลังงานสูง)'],3:['Case 3 — Low-temperature thermal','กรณี 3 — ความร้อนอุณหภูมิต่ำ'],4:['Case 4 — Thermal < 700 °C','กรณี 4 — ความร้อน < 700 °C'],5:['Case 5 — Thermal > 700 °C','กรณี 5 — ความร้อน > 700 °C']};
+function rogersCase(r1,r2,r5){
+  const inR=(x,a,b)=>x>=a&&x<=b;
+  if(r1<0.1 && inR(r2,0.1,1) && r5<1) return 0;
+  if(r1<0.1 && r2<0.1 && r5<1) return 1;
+  if(inR(r1,0.1,3) && inR(r2,0.1,1) && r5>3) return 2;
+  if(r1<0.1 && inR(r2,0.1,1) && inR(r5,1,3)) return 3;
+  if(r1<0.1 && r2>1 && inR(r5,1,3)) return 4;
+  if(r1<0.1 && r2>1 && r5>3) return 5;
+  return null;
+}
+const ROGERS_FAM = {0:'N',1:'PD',2:'D',3:'T',4:'T',5:'T'};
+function diagnoseDGA(gs){
+  const allTypical = GASES.every(g=>gasBand(g,gs[g])===1);
+  const p = duvalPct(gs); const zone = duvalZone(p);
+  const r1=ratio(gs.C2H2,gs.C2H4), r2=ratio(gs.CH4,gs.H2), r5=ratio(gs.C2H4,gs.C2H6);
+  const iec = iecCode(r1,r2,r5); const rog = rogersCase(r1,r2,r5);
+  const f = dgaFactor(gs); const tdcg = tdcgOf(gs);
+  const code = allTypical ? 'N' : zone;
+  let agree = null;
+  if(code!=='N'){ const fam=famOf(zone); agree = [famOf(zone), famOf(iec), rog===null?null:ROGERS_FAM[rog]].filter(x=>x===fam).length; }
+  return {code, zone, pct:p, r1,r2,r5, iec, rogers:rog, dgaf:f, rating:dgaRating(f), tdcg, tdcgCond:tdcgCond(tdcg), agree};
 }
 
-/* ---- Health Index breakdown (radar) + detailed criteria table, per category ---- */
-function hiBreakdownFor(cat){
-  if(cat==='critical') return [{k:'DGA',v:28},{k:'Oil Condition',v:42},{k:'Electrical Test',v:55},{k:'Visual Inspection',v:72},{k:'Age / Loading',v:64}];
-  if(cat==='warning') return [{k:'DGA',v:58},{k:'Oil Condition',v:60},{k:'Electrical Test',v:65},{k:'Visual Inspection',v:75},{k:'Age / Loading',v:68}];
-  return [{k:'DGA',v:88},{k:'Oil Condition',v:85},{k:'Electrical Test',v:87},{k:'Visual Inspection',v:92},{k:'Age / Loading',v:80}];
+/* ---------- Health-Index parameters ---------- */
+function interp(x, pts){
+  if(x<=pts[0][0]) return pts[0][1]; if(x>=pts[pts.length-1][0]) return pts[pts.length-1][1];
+  for(let i=1;i<pts.length;i++){ if(x<=pts[i][0]){ const [x0,y0]=pts[i-1],[x1,y1]=pts[i]; return y0+(y1-y0)*(x-x0)/(x1-x0);} }
 }
-const HI_PARAM_NAMES = ['DGA','Breakdown Voltage (BDV)','Moisture','Acidity','Interfacial Tension (IFT)','Furan','Visual Inspection'];
-let HI_WEIGHTS = [25,15,15,10,10,15,10];
-function hiCriteriaFor(cat){
-  const scores = cat==='critical'?[28,42,50,60,45,68,40] : cat==='warning'?[58,60,65,70,62,72,65] : [88,85,87,90,86,90,92];
-  const results = cat==='critical'? ['D2','28 kV','42 ppm','0.28 mgKOH/g','18 mN/m','0.85 ppm','Major leak']
-    : cat==='warning' ? ['D1','32 kV','35 ppm','0.20 mgKOH/g','24 mN/m','0.55 ppm','Minor stain']
-    : ['D0','40 kV','15 ppm','0.08 mgKOH/g','32 mN/m','0.15 ppm','No abnormality'];
-  const remEn = cat==='critical'? ['Thermal fault (300–700°C)','Below standard','Deterioration starting','Close to threshold','Below standard','Cellulose degradation','Oil leakage found']
-    : cat==='warning' ? ['Partial discharge suspected','Slightly below standard','Watch closely','Within acceptable range','Slightly below standard','Early-stage degradation','Minor staining found']
-    : ['No abnormality detected','Within standard','Within standard','Within standard','Within standard','No degradation','No issues found'];
-  const remTh = cat==='critical'? ['ข้อบกพร่องทางความร้อน (300–700°C)','ต่ำกว่าเกณฑ์','เริ่มเสื่อมสภาพ','ใกล้เกณฑ์สูง','ต่ำกว่าเกณฑ์','มีการเสื่อมของกระดาษฉนวน','พบการรั่วซึมที่บุชชิ่ง']
-    : cat==='warning' ? ['สงสัยดิสชาร์จบางส่วน','ต่ำกว่าเกณฑ์เล็กน้อย','ควรเฝ้าระวังใกล้ชิด','อยู่ในเกณฑ์ที่ยอมรับได้','ต่ำกว่าเกณฑ์เล็กน้อย','เริ่มเสื่อมสภาพระยะแรก','พบคราบเล็กน้อย']
-    : ['ไม่พบความผิดปกติ','อยู่ในเกณฑ์','อยู่ในเกณฑ์','อยู่ในเกณฑ์','อยู่ในเกณฑ์','ไม่มีการเสื่อมสภาพ','ไม่พบปัญหา'];
-  const statuses = cat==='critical'? ['Warning','Warning','Warning','Healthy','Warning','Healthy','Warning']
-    : cat==='warning' ? ['Warning','Warning','Warning','Healthy','Warning','Healthy','Warning']
-    : ['Healthy','Healthy','Healthy','Healthy','Healthy','Healthy','Healthy'];
-  return HI_PARAM_NAMES.map((p,i)=>({p, res:results[i], score:scores[i], weight:HI_WEIGHTS[i], ws:Math.round(scores[i]*HI_WEIGHTS[i]/100*10)/10, status:statuses[i], remark:{en:remEn[i],th:remTh[i]}}));
-}
-
-/* ---- DGA gas samples per asset (curated for TR-014, generated for the rest) ---- */
-const DGA_SAMPLES_TR014 = [
- {date:'18 Sep 2026', gases:[
-   {g:'H2', v:125, range:'< 100', status:'up'},{g:'CH4', v:84, range:'< 60', status:'up'},{g:'C2H6', v:45, range:'< 50', status:'ok'},
-   {g:'C2H4', v:176, range:'< 100', status:'up'},{g:'C2H2', v:3, range:'< 5', status:'ok'},{g:'CO', v:320, range:'< 350', status:'ok'},
-   {g:'CO2', v:680, range:'< 1000', status:'ok'},{g:'TDCG', v:433, range:'-', status:'warn'} ]},
- {date:'15 Aug 2026', gases:[
-   {g:'H2', v:98, range:'< 100', status:'ok'},{g:'CH4', v:66, range:'< 60', status:'up'},{g:'C2H6', v:38, range:'< 50', status:'ok'},
-   {g:'C2H4', v:120, range:'< 100', status:'up'},{g:'C2H2', v:2, range:'< 5', status:'ok'},{g:'CO', v:290, range:'< 350', status:'ok'},
-   {g:'CO2', v:590, range:'< 1000', status:'ok'},{g:'TDCG', v:366, range:'-', status:'warn'} ]},
- {date:'10 May 2026', gases:[
-   {g:'H2', v:70, range:'< 100', status:'ok'},{g:'CH4', v:48, range:'< 60', status:'ok'},{g:'C2H6', v:28, range:'< 50', status:'ok'},
-   {g:'C2H4', v:90, range:'< 100', status:'ok'},{g:'C2H2', v:1, range:'< 5', status:'ok'},{g:'CO', v:250, range:'< 350', status:'ok'},
-   {g:'CO2', v:500, range:'< 1000', status:'ok'},{g:'TDCG', v:236, range:'-', status:'ok'} ]},
+function dpFromFuran(f){ return Math.round((1.51 - Math.log10(Math.max(f,0.01)))/0.0035); }
+const VISUAL_TXT = {1:['Good — no abnormality','ดี — ไม่พบความผิดปกติ'],2:['Fair — minor staining','พอใช้ — มีคราบเล็กน้อย'],3:['Poor — oil leak found','แย่ — พบน้ำมันรั่ว'],4:['Very poor — major leak / damage','แย่มาก — รั่วมากหรือชำรุด']};
+const HI_PARAMS = [
+ {key:'dga', name:['DGA','DGA'], limits:['Rating A–B / C / D–E (DGA factor)','ระดับ A–B / C / D–E (DGA factor)'],
+  res:s=>{ const d=diagnoseDGA(s.gases); return `${d.code} · DGAF ${d.dgaf.toFixed(2)} (${d.rating})`; },
+  score:s=>interp(dgaFactor(s.gases), [[1,100],[1.2,85],[1.5,65],[2,40],[3,15],[4,0]]),
+  cls:s=>{ const f=dgaFactor(s.gases); return f<1.5?'Healthy':f<2?'Warning':'Critical'; },
+  remark:s=>dgaName(diagnoseDGA(s.gases).code),
+  issue:['DGA','DGA']},
+ {key:'bdv', name:['Breakdown Voltage (BDV)','แรงดันเบรกดาวน์ (BDV)'], limits:['> 50 / 40–50 / < 40 kV','> 50 / 40–50 / < 40 kV'],
+  res:s=>`${s.bdv} kV`, score:s=>interp(s.bdv, [[30,0],[40,40],[50,70],[60,100]]),
+  cls:s=>s.bdv>50?'Healthy':s.bdv>=40?'Warning':'Critical', issue:['Low BDV','BDV ต่ำ']},
+ {key:'moisture', name:['Moisture','ความชื้นในน้ำมัน'], limits:['< 15 / 15–20 / > 20 ppm','< 15 / 15–20 / > 20 ppm'],
+  res:s=>`${s.moisture} ppm`, score:s=>interp(s.moisture, [[10,100],[15,75],[20,50],[30,20],[40,0]]),
+  cls:s=>s.moisture<15?'Healthy':s.moisture<=20?'Warning':'Critical', issue:['High moisture','ความชื้นสูง']},
+ {key:'acidity', name:['Acidity','ความเป็นกรด'], limits:['< 0.10 / 0.10–0.15 / > 0.15 mgKOH/g','< 0.10 / 0.10–0.15 / > 0.15 mgKOH/g'],
+  res:s=>`${s.acidity.toFixed(2)} mgKOH/g`, score:s=>interp(s.acidity, [[0.05,100],[0.10,75],[0.15,50],[0.25,20],[0.30,0]]),
+  cls:s=>s.acidity<0.10?'Healthy':s.acidity<=0.15?'Warning':'Critical', issue:['High acidity','ความเป็นกรดสูง']},
+ {key:'ift', name:['Interfacial Tension (IFT)','แรงตึงผิว (IFT)'], limits:['> 28 / 22–28 / < 22 mN/m','> 28 / 22–28 / < 22 mN/m'],
+  res:s=>`${s.ift} mN/m`, score:s=>interp(s.ift, [[15,0],[18,20],[22,45],[28,75],[35,100]]),
+  cls:s=>s.ift>28?'Healthy':s.ift>=22?'Warning':'Critical', issue:['Low IFT (oil ageing)','IFT ต่ำ (น้ำมันเสื่อม)']},
+ {key:'furan', name:['Furan (2-FAL)','ฟูแรน (2-FAL)'], limits:['DP ≥ 500 / 250–500 / < 250','DP ≥ 500 / 250–500 / < 250'],
+  res:s=>`${s.furan.toFixed(2)} ppm (DP≈${dpFromFuran(s.furan)})`, score:s=>interp(dpFromFuran(s.furan), [[200,0],[250,15],[400,50],[700,100]]),
+  cls:s=>{ const dp=dpFromFuran(s.furan); return dp>=500?'Healthy':dp>=250?'Warning':'Critical'; }, issue:['Paper ageing (furan)','กระดาษฉนวนเสื่อม (ฟูแรน)']},
+ {key:'visual', name:['Visual Inspection','ตรวจสภาพภายนอก'], limits:['Good / Fair / Poor–Very poor','ดี / พอใช้ / แย่–แย่มาก'],
+  res:s=>{ const v=VISUAL_TXT[s.visual]; return L(v[0],v[1]).split(' — ')[0]; }, score:s=>({1:100,2:65,3:30,4:0})[s.visual],
+  cls:s=>s.visual===1?'Healthy':s.visual===2?'Warning':'Critical', remark:s=>{ const v=VISUAL_TXT[s.visual]; return L(v[0],v[1]); }, issue:['Visual defect / leak','พบความผิดปกติภายนอก / รั่ว']},
 ];
-const DGA_LIMITS = {H2:100,CH4:60,C2H6:50,C2H4:100,C2H2:5,CO:350,CO2:1000};
-function genDgaForAsset(asset){
-  const cat = categoryFor(asset); const seed = assetSeed(asset.id);
-  const range = cat==='healthy'?[0.25,0.5] : cat==='warning'?[0.6,0.95] : [1.05,1.7];
-  const dates = ['18 Sep 2026','15 Aug 2026','10 May 2026'];
-  return dates.map((date, mIdx)=>{
-    const age = cat==='healthy' ? 1 : Math.max(0.45, 1 - mIdx*0.16);
-    const gases = Object.keys(DGA_LIMITS).map((g,i)=>{
-      const frac = range[0] + seededFrac(seed, i + mIdx*9) * (range[1]-range[0]);
-      const v = Math.max(1, Math.round(DGA_LIMITS[g]*frac*age));
-      return {g, v, range:'< '+DGA_LIMITS[g], status: v>DGA_LIMITS[g] ? 'up' : 'ok'};
-    });
-    const tdcg = gases.reduce((s,g)=>s+g.v,0);
-    gases.push({g:'TDCG', v:tdcg, range:'-', status: tdcg>500?'warn':(tdcg>320?'up':'ok')});
-    return {date, gases};
-  });
+const CLS_REMARK = {Healthy:['Good','ดี'],Warning:['Fair — watch','พอใช้ — เฝ้าระวัง'],Critical:['Poor — action needed','แย่ — ต้องดำเนินการ']};
+let HI_WEIGHTS = [25,15,15,10,10,15,10];
+function statusFromHi(hi){ return hi<40?'Critical':hi<60?'Warning':'Healthy'; }
+/* overriding rule: a parameter in Poor condition never lets the transformer show as Healthy */
+function statusOf(as){ const st=statusFromHi(as.hi); return (st==='Healthy' && as.rows.some(r=>r.status==='Critical')) ? 'Warning' : st; }
+function assessSample(s){
+  const wsum = HI_WEIGHTS.reduce((x,y)=>x+y,0)||1;
+  const rows = HI_PARAMS.map((p,i)=>{ const score=Math.round(p.score(s)); const cls=p.cls(s);
+    return {key:p.key, p:L(p.name[0],p.name[1]), res:p.res(s), score, weight:HI_WEIGHTS[i], ws:Math.round(score*HI_WEIGHTS[i]/wsum*10)/10, status:cls,
+      remark: p.remark ? p.remark(s) : L(CLS_REMARK[cls][0],CLS_REMARK[cls][1]), issue:p.issue}; });
+  const exact = rows.reduce((x,r)=>x+r.score*r.weight,0)/wsum;
+  return {rows, hiExact:exact, hi:Math.round(exact)};
 }
-let DGA_STORE = {};
-function getDgaFor(asset){ if(!DGA_STORE[asset.id]) DGA_STORE[asset.id] = asset.id==='TR-014' ? DGA_SAMPLES_TR014.map(s=>({date:s.date, gases:s.gases.slice()})) : genDgaForAsset(asset); return DGA_STORE[asset.id]; }
-let DGA_SAMPLES = DGA_SAMPLES_TR014;
-function currentDgaGases(){ return DGA_SAMPLES[state.dgaSampleIdx] ? DGA_SAMPLES[state.dgaSampleIdx].gases : DGA_SAMPLES[0].gases; }
-const DGA_HIST_MONTHS = ['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
-function genDgaHistForAsset(asset){
-  const cat = categoryFor(asset); const seed = assetSeed(asset.id);
-  const gasNames = ['H2','CH4','C2H6','CO','CO2'];
-  const endVals = {H2:{healthy:38,warning:70,critical:125}, CH4:{healthy:26,warning:46,critical:84}, C2H6:{healthy:16,warning:28,critical:45}, CO:{healthy:140,warning:230,critical:320}, CO2:{healthy:300,warning:470,critical:680}};
-  const out = {months: DGA_HIST_MONTHS};
-  gasNames.forEach((g,gi)=>{
-    const end = endVals[g][cat];
-    const startFactor = cat==='healthy' ? 0.85 : cat==='warning' ? 0.55 : 0.35;
-    const start = Math.round(end*startFactor);
-    const vals = [];
-    for(let i=0;i<12;i++){ const frac=i/11; const jitter=(seededFrac(seed,gi*13+i)-0.5)*end*0.04; vals.push(Math.max(1,Math.round(start+(end-start)*frac+jitter))); }
-    vals[11] = end;
-    out[g] = vals;
-  });
+
+/* ---------- Lab data (per asset, newest first) ---------- */
+let LAB = {};
+const DEMO_SIGNATURE = {'TR-014':'T2','TR-020':'T3','TR-008':'moist','TR-019':'PD','TR-018':'T1','TR-003':'aging','TR-006':'D1'};
+const GAS_PATTERNS = {
+ N:{H2:40,CH4:22,C2H6:18,C2H4:12,C2H2:0.4,CO:260,CO2:2100},
+ T1:{H2:60,CH4:150,C2H6:95,C2H4:22,C2H2:0.5,CO:300,CO2:2400},
+ T2:{H2:100,CH4:120,C2H6:50,C2H4:90,C2H2:2,CO:300,CO2:2300},
+ T3:{H2:90,CH4:100,C2H6:35,C2H4:210,C2H2:4,CO:320,CO2:2400},
+ PD:{H2:500,CH4:40,C2H6:15,C2H4:0.5,C2H2:0,CO:250,CO2:2000},
+ D1:{H2:160,CH4:20,C2H6:6,C2H4:10,C2H2:30,CO:260,CO2:2100},
+};
+function demoSample(sig, c, seed, k, date){
+  const j = (salt)=>1+(seededFrac(seed, salt+k*17)-0.5)*0.06;
+  const gasSig = GAS_PATTERNS[sig] ? sig : 'N';
+  const m = gasSig==='N' ? 0.3+1.1*c : 0.35+2.4*c;
+  const gases = {}; GASES.forEach((g,i)=>{ const v=GAS_PATTERNS[gasSig][g]*m*j(i); gases[g] = v>=10?Math.round(v):Math.round(v*10)/10; });
+  const moist = sig==='moist', aging = sig==='aging';
+  return { date,
+    gases,
+    bdv: Math.round((75 - 42*c - (moist?10*c+4:0))*j(11)),
+    moisture: Math.round((5 + 26*c + (moist?14*c+6:0))*j(12)),
+    acidity: Math.round((0.02 + 0.22*c + (aging?0.06:0))*j(13)*100)/100,
+    ift: Math.round((40 - 22*c - (aging?4:0))*j(14)),
+    furan: Math.max(0.01, Math.round(0.04*Math.exp(3.4*c)*(aging?3:1)*j(15)*100)/100),
+    visual: c<0.35?1:c<0.6?2:c<0.85?3:4 };
+}
+function genDemoLab(a){
+  const sig = DEMO_SIGNATURE[a.id] || 'N'; const seed = assetSeed(a.id); const target = a.hi;
+  const last = parseD(a.last) || new Date(2026,8,1);
+  let lo=0, hi=1;
+  for(let it=0; it<40; it++){ const mid=(lo+hi)/2; const h=assessSample(demoSample(sig,mid,seed,0,'')).hiExact; if(h>target) lo=mid; else hi=mid; }
+  const c0=(lo+hi)/2; const cat=statusFromHi(target);
+  const step = cat==='Critical'?0.075 : cat==='Warning'?0.045 : 0.012;
+  const out=[];
+  for(let k=0;k<5;k++){ const c=Math.max(0, c0 - k*step*(0.8+seededFrac(seed,40+k)*0.4)); out.push(demoSample(sig, c, seed, k, fmtD(addMonths(last,-3*k)))); }
   return out;
 }
-let DGA_HIST_STORE = {};
-function getDgaHistFor(asset){ if(!DGA_HIST_STORE[asset.id]) DGA_HIST_STORE[asset.id] = asset.id==='TR-014' ? {months:DGA_HIST_MONTHS, H2:[60,65,68,72,78,85,92,98,105,112,118,125], CH4:[35,38,40,45,50,55,60,64,68,73,78,84], C2H6:[20,21,22,24,26,28,30,33,36,39,42,45], CO:[210,220,230,240,250,262,275,285,295,305,312,320], CO2:[420,440,455,470,490,510,540,565,590,615,650,680]} : genDgaHistForAsset(asset); return DGA_HIST_STORE[asset.id]; }
+function labFor(a){ if(!LAB[a.id]) LAB[a.id] = genDemoLab(a); return LAB[a.id]; }
+function sortLab(list){ list.sort((x,y)=>(parseD(y.date)||0)-(parseD(x.date)||0)); return list; }
+
+/* ---------- Asset-level assessment ---------- */
+const NEXT_INTERVAL = {Critical:1, Warning:3, Healthy:6};
+function recomputeAll(){
+  ASSETS.forEach(a=>{
+    const lab = labFor(a);
+    if(!lab.length){ a.hi=0; a.status='Critical'; a._as=null; return; }
+    const s = lab[0]; const as = assessSample(s);
+    a.hi = as.hi; a.status = statusOf(as); a.last = s.date;
+    a.next = fmtD(addMonths(parseD(s.date)||new Date(), NEXT_INTERVAL[a.status]));
+    a._as = {sample:s, rows:as.rows, dga:diagnoseDGA(s.gases)};
+  });
+}
+function issuesOf(rows){ return rows.filter(r=>r.status!=='Healthy').sort((x,y)=>(x.key==='dga'?-1000:0)+x.score-((y.key==='dga'?-1000:0)+y.score)); } // a DGA fault is always listed first
+function issueLabel(r, dga){ if(!r) return L('None significant','ไม่มีนัยสำคัญ'); if(r.key==='dga') return `DGA – ${dgaName(dga.code)}`; return L(r.issue[0],r.issue[1]); }
+function mainIssueOf(a){ if(!a._as) return '—'; return issueLabel(issuesOf(a._as.rows)[0], a._as.dga); }
+function strategyOf(a){ return a.status==='Critical'?'CBM + PdM':a.status==='Warning'?'CBM':'PM'; }
+function recommendedActions(rows, dga){
+  const acts=[]; const bad=new Set(issuesOf(rows).map(r=>r.key)); const fam=famOf(dga.code);
+  if(fam==='T'){ acts.push(L('Check cooling system and loading; infrared thermography','ตรวจระบบระบายความร้อนและโหลด; ถ่ายภาพความร้อน')); }
+  if(fam==='D'||fam==='DT'){ acts.push(L('Electrical tests; inspect bushings, OLTC and earthing connections','ทดสอบทางไฟฟ้า; ตรวจบุชชิ่ง OLTC และจุดต่อลงดิน')); }
+  if(fam==='PD'){ acts.push(L('Partial-discharge measurement; check for moisture / gas bubbles','วัดดิสชาร์จบางส่วน; ตรวจความชื้นและฟองก๊าซ')); }
+  if(fam && fam!=='N') acts.push(L('Resample oil for DGA to confirm the gas-generation rate','เก็บน้ำมันตรวจ DGA ซ้ำเพื่อยืนยันอัตราการเกิดก๊าซ'));
+  if(bad.has('moisture')) acts.push(L('Check breather/silica gel and gaskets; consider oil drying','ตรวจเบรทเทอร์/ซิลิกาเจลและปะเก็น; พิจารณาอบไล่ความชื้น'));
+  if(bad.has('bdv')) acts.push(L('Oil filtration and degassing','กรองและไล่ก๊าซน้ำมัน'));
+  if(bad.has('acidity')||bad.has('ift')) acts.push(L('Oil reclamation or replacement','ฟื้นฟูสภาพหรือเปลี่ยนน้ำมัน'));
+  if(bad.has('furan')) acts.push(L('Paper insulation ageing — plan life assessment and replacement budget','ฉนวนกระดาษเสื่อม — วางแผนประเมินอายุและงบเปลี่ยน'));
+  if(bad.has('visual')) acts.push(L('Repair leaks and seals','ซ่อมจุดรั่วและซีล'));
+  if(!acts.length) acts.push(L('Continue routine monitoring','ติดตามตามรอบปกติ'));
+  return acts;
+}
+/* one object with everything the detail pages need — replaces the old 3 fixed profiles */
+function profileFor(a, sampleIdx){
+  const lab = labFor(a); const s = lab[Math.min(sampleIdx||0, lab.length-1)] || lab[0];
+  const as = assessSample(s); const d = diagnoseDGA(s.gases); const iss = issuesOf(as.rows);
+  const status = statusOf(as);
+  const sev = {A:['Low','ต่ำ'],B:['Low','ต่ำ'],C:['Moderate','ปานกลาง'],D:['High','สูง'],E:['Very high','สูงมาก']}[d.rating];
+  const risk = {Critical:['High','สูง'],Warning:['Medium','ปานกลาง'],Healthy:['Low','ต่ำ']}[status];
+  const nxt = {Critical:['Resample oil & DGA (1 month)','เก็บน้ำมันตรวจซ้ำ (1 เดือน)'],Warning:['Resample oil & DGA (3 months)','เก็บน้ำมันตรวจซ้ำ (3 เดือน)'],Healthy:['Routine sampling (6 months)','เก็บตัวอย่างตามรอบ (6 เดือน)']}[status];
+  const iecTxt = d.iec==='ND'?L('not determined','ระบุไม่ได้'):d.iec;
+  const rogTxt = d.rogers===null?L('not determined','ระบุไม่ได้'):L(ROGERS_CASES[d.rogers][0],ROGERS_CASES[d.rogers][1]).split(' — ')[0];
+  const interpTxt = d.code==='N'
+    ? L(`All gases are within typical levels (DGA factor ${d.dgaf.toFixed(2)}, rating ${d.rating}; TDCG ${d.tdcg} ppm = IEEE condition ${d.tdcgCond}). No fault is indicated — the Duval zone is shown for reference only.`,
+        `ก๊าซทุกตัวอยู่ในระดับปกติ (DGA factor ${d.dgaf.toFixed(2)} ระดับ ${d.rating}; TDCG ${d.tdcg} ppm = IEEE condition ${d.tdcgCond}) ไม่บ่งชี้ความผิดปกติ ตำแหน่งบนสามเหลี่ยม Duval แสดงไว้เพื่ออ้างอิงเท่านั้น`)
+    : L(`Duval Triangle 1 indicates ${d.code} (${dgaName(d.code)}). IEC 60599 ratios: ${iecTxt}; Rogers: ${rogTxt} — ${d.agree}/3 methods agree. DGA factor ${d.dgaf.toFixed(2)} (rating ${d.rating}), TDCG ${d.tdcg} ppm (IEEE condition ${d.tdcgCond}).`,
+        `สามเหลี่ยม Duval 1 บ่งชี้ ${d.code} (${dgaName(d.code)}) อัตราส่วน IEC 60599: ${iecTxt}; Rogers: ${rogTxt} — สอดคล้องกัน ${d.agree}/3 วิธี DGA factor ${d.dgaf.toFixed(2)} (ระดับ ${d.rating}) TDCG ${d.tdcg} ppm (IEEE condition ${d.tdcgCond})`);
+  const overridden = status!==statusFromHi(as.hi);
+  return { sample:s, rows:as.rows, hi:as.hi, hiExact:as.hiExact, status, overridden, dga:d,
+    code:d.code, type:{en:DGA_NAMES[d.code][0], th:DGA_NAMES[d.code][1]}, typeRange:'',
+    severity:{en:sev[0],th:sev[1]}, confidence: d.agree===null?'—':`${d.agree}/3`, duval:d.pct,
+    mainIssue:{en:issueLabel(iss[0],d), th:issueLabel(iss[0],d)},
+    secondaryIssue:{en:iss[1]?issueLabel(iss[1],d):'—', th:iss[1]?issueLabel(iss[1],d):'—'},
+    riskLevel:{en:risk[0],th:risk[1]}, strategy: status==='Critical'?'CBM + PdM':status==='Warning'?'CBM':'PM',
+    nextAction:{en:nxt[0],th:nxt[1]}, interp:{en:interpTxt, th:interpTxt},
+    actions: recommendedActions(as.rows, d) };
+}
+function hiHistory(a){ return labFor(a).slice().reverse().map(s=>({date:s.date, hi:assessSample(s).hi})); }
+function shortDate(s){ const d=parseD(s); return d?`${MON[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`:s; }
+const FLEET_LABELS = [['12 mo ago','12 เดือนก่อน'],['9 mo ago','9 เดือนก่อน'],['6 mo ago','6 เดือนก่อน'],['3 mo ago','3 เดือนก่อน'],['Latest','ล่าสุด']];
+function fleetTrend(){ const vals=[]; for(let k=4;k>=0;k--){ const his=ASSETS.map(a=>{ const s=labFor(a)[k]; return s?assessSample(s).hi:null; }).filter(x=>x!==null); vals.push(his.length?Math.round(his.reduce((x,y)=>x+y,0)/his.length):null); } return vals; }
+function gasRowsOf(s){
+  const rows = GASES.map(g=>{ const b=gasBand(g,s.gases[g]); return {g, v:fmtPpm(s.gases[g]), range:'≤ '+DGA_BANDS[g][0], status: b===1?'ok':b<=3?'warn':'up'}; });
+  const td=tdcgOf(s.gases); rows.push({g:'TDCG', v:String(td), range:'≤ 720', status: td<=720?'ok':td<=1920?'warn':'up'});
+  return rows;
+}
+function attentionList(){ return ASSETS.filter(a=>a.status!=='Healthy').sort((x,y)=>x.hi-y.hi).slice(0,5); }
+function planStatus(tk){ const today=new Date(); const s=parseD(tk.start), e=parseD(tk.end); if(e && e<today) return 'Completed'; if(s && s<=today) return 'In Progress'; return 'Upcoming'; }
+
+/* ---------- Persistence (browser localStorage) ---------- */
+const STORE_KEY = 'rcm_transformer_data_v2';
+function snapshotData(){ return {v:2, assets:ASSETS.map(a=>{ const {_as, ...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, weights:HI_WEIGHTS, rcm:Object.fromEntries(Object.entries(RCM_MODES).map(([k,m])=>[k,m.tasks]))}; }
+function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
+function applyData(d){
+  if(!d || d.v!==2 || !Array.isArray(d.assets)) return false;
+  ASSETS.splice(0, ASSETS.length, ...d.assets); LAB = d.lab||{}; FMEA_STORE = d.fmea||{}; MAINT_STORE = d.maint||{};
+  if(Array.isArray(d.weights) && d.weights.length===HI_PARAMS.length) HI_WEIGHTS = d.weights.map(Number);
+  if(d.rcm) Object.keys(d.rcm).forEach(k=>{ if(RCM_MODES[k]) RCM_MODES[k].tasks = d.rcm[k]; });
+  return true;
+}
+function loadData(){ try{ const raw=localStorage.getItem(STORE_KEY); return raw ? applyData(JSON.parse(raw)) : false; }catch(e){ return false; } }
+
+/* ---------- Lab-result form (used by "Add lab result" and "Add asset") ---------- */
+function labFormFields(p){
+  p = p || {date:fmtD(new Date()), gases:{H2:20,CH4:10,C2H6:8,C2H4:5,C2H2:0,CO:150,CO2:1200}, bdv:70, moisture:6, acidity:0.03, ift:40, furan:0.05, visual:1};
+  const num=(name,label,val,step)=>`<div class="formrow"><label>${label}</label><input name="${name}" type="number" min="0" step="${step||'any'}" value="${val}" required></div>`;
+  return `<div class="formrow"><label>${L('Sampling date','วันที่เก็บตัวอย่าง')}</label><input name="date" type="date" value="${isoD(parseD(p.date)||new Date())}" required></div>
+  <div style="font-weight:800;font-size:12.5px;margin:10px 0 4px;">${L('Dissolved gases (ppm)','ก๊าซที่ละลายในน้ำมัน (ppm)')}</div>
+  <div class="grid g2" style="gap:0 12px;">${GASES.map(g=>num('g_'+g, g, p.gases[g])).join('')}</div>
+  <div style="font-weight:800;font-size:12.5px;margin:10px 0 4px;">${L('Oil & insulation tests','ผลทดสอบน้ำมันและฉนวน')}</div>
+  <div class="grid g2" style="gap:0 12px;">
+    ${num('bdv','BDV (kV)',p.bdv)}${num('moisture',L('Moisture (ppm)','ความชื้น (ppm)'),p.moisture)}
+    ${num('acidity',L('Acidity (mgKOH/g)','ความเป็นกรด (mgKOH/g)'),p.acidity,'0.01')}${num('ift','IFT (mN/m)',p.ift)}
+    ${num('furan',L('Furan 2-FAL (ppm)','ฟูแรน 2-FAL (ppm)'),p.furan,'0.01')}
+    <div class="formrow"><label>${L('Visual inspection','ตรวจสภาพภายนอก')}</label><select name="visual">${[1,2,3,4].map(v=>`<option value="${v}" ${Number(p.visual)===v?'selected':''}>${L(VISUAL_TXT[v][0],VISUAL_TXT[v][1])}</option>`).join('')}</select></div>
+  </div>`;
+}
+function sampleFromForm(data){
+  const d = data.date ? new Date(data.date+'T00:00:00') : new Date();
+  const gases={}; GASES.forEach(g=>gases[g]=Math.max(0,Number(data['g_'+g])||0));
+  return {date:fmtD(d), gases, bdv:Number(data.bdv), moisture:Number(data.moisture), acidity:Number(data.acidity), ift:Number(data.ift), furan:Math.max(0.01,Number(data.furan)), visual:Number(data.visual)||1};
+}
+
+let DGA_SAMPLES = [];
+function currentDgaGases(){ return DGA_SAMPLES[state.dgaSampleIdx] ? DGA_SAMPLES[state.dgaSampleIdx].gases : (DGA_SAMPLES[0]?DGA_SAMPLES[0].gases:[]); }
 
 /* ---- FMEA table per asset (curated for TR-014, generated for the rest) ---- */
 const FMEA_TR014 = [
  {no:1,code:'FM-01',comp:'Winding',mode:'Overheating',effect:'Insulation failure',s:10,o:4,d:7,rpn:280,risk:'High',control:'Temp. monitoring',action:'Improve cooling / DGA',status:'Open'},
- {no:2,code:'FM-06',comp:'Bushing',mode:'Leakage',effect:'Flashover',s:8,o:5,d:4,rpn:160,risk:'High',control:'Visual inspection',action:'Replace gasket',status:'Open'},
- {no:3,code:'FM-05',comp:'Tap Changer',mode:'Contact wear',effect:'Operation failure',s:7,o:6,d:5,rpn:210,risk:'High',control:'OLTC monitoring',action:'Condition monitoring',status:'Open'},
- {no:4,code:'FM-07',comp:'Cooling System',mode:'Fan failure',effect:'Overheating',s:6,o:4,d:5,rpn:120,risk:'Medium',control:'Routine check',action:'Preventive replacement',status:'Open'},
- {no:5,code:'FM-03',comp:'Oil',mode:'Degradation',effect:'Insulation loss',s:7,o:6,d:4,rpn:168,risk:'High',control:'Oil sampling',action:'Shorten sampling interval',status:'Open'},
- {no:6,code:'FM-08',comp:'Conservator',mode:'Breather clog',effect:'Moisture ingress',s:6,o:5,d:5,rpn:150,risk:'High',control:'Visual inspection',action:'Replace desiccant',status:'In Progress'},
- {no:7,code:'FM-05',comp:'OLTC',mode:'Oil deterioration',effect:'Contact failure',s:8,o:4,d:6,rpn:192,risk:'High',control:'Oil test',action:'Oil filtration / replacement',status:'Open'},
- {no:8,code:'FM-04',comp:'Tank',mode:'External leakage',effect:'Environmental risk',s:5,o:3,d:4,rpn:60,risk:'Medium',control:'Visual inspection',action:'Seal / Repair',status:'Closed'},
+ {no:2,code:'FM-02',comp:'Bushing',mode:'Leakage',effect:'Flashover',s:8,o:5,d:4,rpn:160,risk:'High',control:'Visual inspection',action:'Replace gasket',status:'Open'},
+ {no:3,code:'FM-03',comp:'OLTC (Tap Changer)',mode:'Contact wear',effect:'Operation failure',s:7,o:6,d:5,rpn:210,risk:'High',control:'OLTC monitoring',action:'Contact-resistance trending',status:'Open'},
+ {no:4,code:'FM-04',comp:'Cooling System',mode:'Fan failure',effect:'Overheating',s:6,o:4,d:5,rpn:120,risk:'Medium',control:'Routine check',action:'Preventive replacement',status:'Open'},
+ {no:5,code:'FM-05',comp:'Oil',mode:'Degradation',effect:'Insulation loss',s:7,o:6,d:4,rpn:168,risk:'High',control:'Oil sampling',action:'Shorten sampling interval',status:'Open'},
+ {no:6,code:'FM-06',comp:'Breather',mode:'Clogged / saturated',effect:'Moisture ingress',s:6,o:5,d:5,rpn:150,risk:'High',control:'Visual inspection',action:'Replace desiccant',status:'In Progress'},
+ {no:7,code:'FM-07',comp:'Tank',mode:'External leakage',effect:'Environmental risk',s:5,o:3,d:4,rpn:60,risk:'Medium',control:'Visual inspection',action:'Seal / Repair',status:'Closed'},
 ];
 const FMEA_TEMPLATE = [
- {code:'FM-01', comp:'Winding', mode:'Overheating', effect:'Insulation failure', s:{healthy:3,warning:6,critical:10}, o:{healthy:2,warning:4,critical:4}, d:{healthy:3,warning:5,critical:7}, control:'Temp. monitoring', action:'Improve cooling / DGA'},
- {code:'FM-06', comp:'Bushing', mode:'Leakage', effect:'Flashover', s:{healthy:4,warning:7,critical:8}, o:{healthy:2,warning:4,critical:5}, d:{healthy:3,warning:4,critical:4}, control:'Visual inspection', action:'Replace gasket'},
- {code:'FM-05', comp:'Tap Changer', mode:'Contact wear', effect:'Operation failure', s:{healthy:3,warning:6,critical:7}, o:{healthy:2,warning:5,critical:6}, d:{healthy:3,warning:4,critical:5}, control:'OLTC monitoring', action:'Condition monitoring'},
- {code:'FM-07', comp:'Cooling System', mode:'Fan failure', effect:'Overheating', s:{healthy:3,warning:5,critical:6}, o:{healthy:2,warning:3,critical:4}, d:{healthy:3,warning:4,critical:5}, control:'Routine check', action:'Preventive replacement'},
- {code:'FM-03', comp:'Oil', mode:'Degradation', effect:'Insulation loss', s:{healthy:3,warning:6,critical:7}, o:{healthy:2,warning:5,critical:6}, d:{healthy:3,warning:4,critical:4}, control:'Oil sampling', action:'Shorten sampling interval'},
- {code:'FM-08', comp:'Conservator', mode:'Breather clog', effect:'Moisture ingress', s:{healthy:2,warning:5,critical:6}, o:{healthy:2,warning:4,critical:5}, d:{healthy:3,warning:4,critical:5}, control:'Visual inspection', action:'Replace desiccant'},
- {code:'FM-05', comp:'OLTC', mode:'Oil deterioration', effect:'Contact failure', s:{healthy:4,warning:6,critical:8}, o:{healthy:2,warning:3,critical:4}, d:{healthy:3,warning:5,critical:6}, control:'Oil test', action:'Oil filtration / replacement'},
- {code:'FM-04', comp:'Tank', mode:'External leakage', effect:'Environmental risk', s:{healthy:2,warning:4,critical:5}, o:{healthy:1,warning:2,critical:3}, d:{healthy:3,warning:4,critical:4}, control:'Visual inspection', action:'Seal / Repair'},
+ {code:'FM-01', comp:'Winding', mode:'Overheating', effect:'Insulation failure', cat:['Thermal','ความร้อน'], s:{healthy:3,warning:6,critical:10}, o:{healthy:2,warning:4,critical:4}, d:{healthy:3,warning:5,critical:7}, control:'Temp. monitoring', action:'Improve cooling / DGA'},
+ {code:'FM-02', comp:'Bushing', mode:'Leakage', effect:'Flashover', cat:['Electrical','ไฟฟ้า'], s:{healthy:4,warning:7,critical:8}, o:{healthy:2,warning:4,critical:5}, d:{healthy:3,warning:4,critical:4}, control:'Visual inspection', action:'Replace gasket'},
+ {code:'FM-03', comp:'OLTC (Tap Changer)', mode:'Contact wear', effect:'Operation failure', cat:['Mechanical','กลไก'], s:{healthy:3,warning:6,critical:7}, o:{healthy:2,warning:5,critical:6}, d:{healthy:3,warning:4,critical:5}, control:'OLTC monitoring', action:'Contact-resistance trending'},
+ {code:'FM-04', comp:'Cooling System', mode:'Fan failure', effect:'Overheating', cat:['Thermal','ความร้อน'], s:{healthy:3,warning:5,critical:6}, o:{healthy:2,warning:3,critical:4}, d:{healthy:3,warning:4,critical:5}, control:'Routine check', action:'Preventive replacement'},
+ {code:'FM-05', comp:'Oil', mode:'Degradation', effect:'Insulation loss', cat:['Chemical','เคมี'], s:{healthy:3,warning:6,critical:7}, o:{healthy:2,warning:5,critical:6}, d:{healthy:3,warning:4,critical:4}, control:'Oil sampling', action:'Shorten sampling interval'},
+ {code:'FM-06', comp:'Breather', mode:'Clogged / saturated', effect:'Moisture ingress', cat:['Chemical','เคมี'], s:{healthy:2,warning:5,critical:6}, o:{healthy:2,warning:4,critical:5}, d:{healthy:3,warning:4,critical:5}, control:'Visual inspection', action:'Replace desiccant'},
+ {code:'FM-07', comp:'Tank', mode:'External leakage', effect:'Environmental risk', cat:['Mechanical','กลไก'], s:{healthy:2,warning:4,critical:5}, o:{healthy:1,warning:2,critical:3}, d:{healthy:3,warning:4,critical:4}, control:'Visual inspection', action:'Seal / Repair'},
 ];
 function genFmeaForAsset(asset){
   const cat = categoryFor(asset); const seed = assetSeed(asset.id);
@@ -684,19 +845,19 @@ let FMEA = FMEA_TR014;
 function syncAssetData(){
   const asset = currentAsset();
   FMEA = getFmeaFor(asset);
-  DGA_SAMPLES = getDgaFor(asset);
+  DGA_SAMPLES = labFor(asset).map(s=>({date:s.date, gases:gasRowsOf(s)}));
   MAINT_PLAN = getMaintFor(asset);
   if(state.dgaSampleIdx >= DGA_SAMPLES.length) state.dgaSampleIdx = 0;
 }
 const RCM_MODES = {
  'Winding - Overheating':{path:'CBM',control:'Temperature monitoring',action:{en:'Implement CBM (DGA & temperature)',th:'ดำเนินการ CBM (DGA และอุณหภูมิ)'},
    tasks:[['DGA sampling','CBM','3 months','Active'],['Winding temp. monitoring','PdM','Continuous','Active'],['Insulation resistance test','PM','1 year','Active'],['Tightness inspection','CM','As needed','Planned'],['Cooling system check','PM','6 months','Active']]},
- 'Tap Changer - Contact wear':{path:'PdM',control:'OLTC monitoring',action:{en:'Implement PdM (contact resistance trending)',th:'ดำเนินการ PdM (ติดตามค่าความต้านทานหน้าสัมผัส)'},
+ 'OLTC (Tap Changer) - Contact wear':{path:'PdM',control:'OLTC monitoring',action:{en:'Implement PdM (contact resistance trending)',th:'ดำเนินการ PdM (ติดตามค่าความต้านทานหน้าสัมผัส)'},
    tasks:[['Contact resistance test','PdM','6 months','Active'],['OLTC oil sampling','CBM','6 months','Active'],['Mechanism inspection','PM','1 year','Active']]},
  'Bushing - Leakage':{path:'PM',control:'Visual inspection',action:{en:'Time-based gasket replacement',th:'เปลี่ยนปะเก็นตามรอบเวลา'},
    tasks:[['Visual inspection','PM','3 months','Active'],['Gasket replacement','PM','2 years','Planned']]},
- 'OLTC - Oil deterioration':{path:'PdM',control:'Oil test',action:{en:'Trend-based oil filtration schedule',th:'กำหนดกรองน้ำมันตามแนวโน้ม'},
-   tasks:[['OLTC oil test','CBM','6 months','Active'],['Oil filtration','CM','As needed','Planned']]},
+ 'Oil - Degradation':{path:'CBM',control:'Oil sampling',action:{en:'Condition-based oil treatment from lab trends',th:'บำรุงน้ำมันตามสภาพจากแนวโน้มผลแล็บ'},
+   tasks:[['Oil quality test (BDV, moisture, acidity, IFT)','CBM','6 months','Active'],['Oil filtration / reclamation','CM','As needed','Planned']]},
 };
 const MAINT_TR014 = [
  {no:1,task:'Oil Sampling',type:'CBM',start:'18 Sep 2026',end:'18 Sep 2026',dur:'1 day',m:'Sep',len:1},
@@ -741,30 +902,17 @@ let MAINT_STORE = {};
 function getMaintFor(asset){ if(!MAINT_STORE[asset.id]) MAINT_STORE[asset.id] = asset.id==='TR-014' ? MAINT_TR014.map(m=>({...m})) : genMaintForAsset(asset); return MAINT_STORE[asset.id]; }
 let MAINT_PLAN = MAINT_TR014;
 const TYPE_COLOR = {BM:'#8b9099',CM:'#e0473d',PM:'#2f7dd1',CBM:'#1fa571',PdM:'#8759d6'};
-const REC_ACTIVITIES = [
- {d:'12 Sep 2026',a:{en:'TR-014 DGA result updated',th:'อัปเดตผล DGA ของ TR-014'},t:'12:34',c:'red'},
- {d:'11 Sep 2026',a:{en:'TR-006 Inspection completed',th:'ตรวจสอบ TR-006 เสร็จสิ้น'},t:'10:15',c:'green'},
- {d:'10 Sep 2026',a:{en:'TR-008 Health index recalculated',th:'คำนวณดัชนีสุขภาพ TR-008 ใหม่'},t:'09:20',c:'amber'},
- {d:'9 Sep 2026',a:{en:'TR-003 Oil sampling completed',th:'เก็บตัวอย่างน้ำมัน TR-003 เสร็จสิ้น'},t:'16:45',c:'green'},
- {d:'8 Sep 2026',a:{en:'TR-019 FMEA updated',th:'อัปเดต FMEA ของ TR-019'},t:'11:10',c:'blue'},
-];
-const ATTENTION = [
- {id:'TR-014',hi:34,status:'Critical',issue:{en:'DGA - Thermal Fault',th:'DGA - ข้อบกพร่องทางความร้อน'}},
- {id:'TR-020',hi:28,status:'Critical',issue:{en:'DGA - Thermal Fault',th:'DGA - ข้อบกพร่องทางความร้อน'}},
- {id:'TR-008',hi:47,status:'Warning',issue:{en:'Moisture High',th:'ความชื้นสูง'}},
- {id:'TR-019',hi:51,status:'Warning',issue:{en:'Partial Discharge',th:'ดิสชาร์จบางส่วน'}},
- {id:'TR-018',hi:55,status:'Warning',issue:{en:'High Loading',th:'โหลดสูง'}},
-];
 let USERS = [
  {name:'Panissara P.', role:'Admin', email:'panissara.p@rcmtransformer.app', status:'Active'},
  {name:'Maintenance Team', role:'Operator', email:'maint.team@rcmtransformer.app', status:'Active'},
  {name:'Supervisor', role:'Viewer', email:'supervisor@rcmtransformer.app', status:'Active'},
 ];
-const NOTIFICATIONS = [
- {en:'TR-014 Health Index dropped to Critical (34)', th:'ดัชนีสุขภาพ TR-014 ลดลงสู่ระดับวิกฤต (34)', t:'2 min ago'},
- {en:'TR-020 requires immediate oil sampling', th:'TR-020 ต้องเก็บตัวอย่างน้ำมันด่วน', t:'1 hr ago'},
- {en:'Monthly report is ready to generate', th:'พร้อมสร้างรายงานประจำเดือนแล้ว', t:'3 hr ago'},
-];
+function notificationsList(){
+  const out=[];
+  ASSETS.filter(a=>a.status==='Critical').sort((x,y)=>x.hi-y.hi).forEach(a=>out.push({en:`${a.id} is Critical — HI ${a.hi} (${mainIssueOf(a)})`, th:`${a.id} อยู่ในระดับวิกฤต — HI ${a.hi}`, t:a.last}));
+  ASSETS.filter(a=>a.status==='Warning' && a._as && a._as.dga.code!=='N').forEach(a=>out.push({en:`${a.id} DGA indicates ${a._as.dga.code}`, th:`${a.id} ผล DGA บ่งชี้ ${a._as.dga.code}`, t:a.last}));
+  return out;
+}
 
 /* ============ STATE ============ */
 let state = {page:'overview', assetId:'TR-014', detailTab:'overview', rcmMode:'Winding - Overheating', lang:'en',
@@ -1019,7 +1167,7 @@ function renderCategoryOverview(kind){
       const fmea = getFmeaFor(a); const maxF = fmea.slice().sort((x,y)=>y.rpn-x.rpn)[0];
       return `<tr><td><b>${a.id}</b></td><td>${a.loc}</td><td>${maxF.comp} — ${maxF.mode}</td><td style="font-weight:800;">${maxF.rpn}</td><td><span class="pill ${maxF.risk==='High'?'pill-critical':maxF.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(maxF.risk)}</span></td><td><button class="viewlink" data-goto-detail="${a.id}|fmea">${t('view_details')}</button></td></tr>`;
     }
-    const prof = dgaProfileFor(cat); const fmea = getFmeaFor(a); const topF = fmea.slice().sort((x,y)=>y.rpn-x.rpn)[0];
+    const prof = profileFor(a); const fmea = getFmeaFor(a); const topF = fmea.slice().sort((x,y)=>y.rpn-x.rpn)[0];
     return `<tr><td><b>${a.id}</b></td><td>${a.loc}</td><td>${topF.comp} — ${topF.mode}</td><td><b>${prof.strategy}</b></td><td><button class="viewlink" data-goto-detail="${a.id}|rcm">${t('view_details')}</button></td></tr>`;
   }).join('');
   const headCols = kind==='healthindex'
@@ -1042,36 +1190,32 @@ function attachCategoryOverviewEvents(){
 }
 function renderOverview(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
+  const N = ASSETS.length, pct = (n)=>N?Math.round(n/N*100):0, avgHi = N?Math.round(ASSETS.reduce((x,a)=>x+a.hi,0)/N):0;
+  const stratCount = {PM:0,CBM:0,'CBM + PdM':0}; ASSETS.forEach(a=>stratCount[strategyOf(a)]++);
+  const recent = ASSETS.slice().sort((x,y)=>(parseD(y.last)||0)-(parseD(x.last)||0)).slice(0,5);
   return `
-  <div class="card" style="background:linear-gradient(120deg,#37453f,#57695f); color:#fff; margin-bottom:18px; padding:26px; border:none;">
-    <div style="display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap;">
-      <div style="max-width:520px;"><div style="font-size:22px; font-weight:800; line-height:1.35;">${t('hero_title')}</div>
-      <div style="margin-top:10px; font-size:12.5px; color:#e8ebe4; font-weight:600;">${t('sub_overview')}</div></div>
-      <div style="text-align:right; font-size:12px; color:#e8ebe4;"><div style="font-weight:700; color:#fff; font-size:13px;" id="liveClock">–</div><div style="margin-top:4px;">Bangkok · 32°C ☀️</div></div>
-    </div>
-  </div>
   <div class="grid g4" style="margin-bottom:16px;">
-    <div class="card stat">${badge('assets',44)}<div><div class="label">${t('total_assets')}</div><div class="value">20</div><div class="delta up">▲ 100%</div></div></div>
-    <div class="card stat">${badge('normal',44)}<div><div class="label">${t('healthy')}</div><div class="value">${healthy}</div><div class="delta up">▲ 65%</div></div></div>
-    <div class="card stat">${badge('watch',44)}<div><div class="label">${t('warning')}</div><div class="value">${warning}</div><div class="delta up">▲ 25%</div></div></div>
-    <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">${critical}</div><div class="delta down">▼ 10%</div></div></div>
+    <div class="card stat">${badge('assets',44)}<div><div class="label">${t('total_assets')}</div><div class="value">${N}</div><div class="small-muted">${L('Avg HI','HI เฉลี่ย')} ${avgHi}</div></div></div>
+    <div class="card stat">${badge('normal',44)}<div><div class="label">${t('healthy')}</div><div class="value">${healthy}</div><div class="small-muted">${pct(healthy)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
+    <div class="card stat">${badge('watch',44)}<div><div class="label">${t('warning')}</div><div class="value">${warning}</div><div class="small-muted">${pct(warning)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
+    <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">${critical}</div><div class="small-muted">${pct(critical)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
   </div>
   <div class="grid g2" style="margin-bottom:16px; align-items:stretch;">
     <div class="card" style="display:flex; flex-direction:column;">
       <div class="card-head"><h3>${t('health_dist')}</h3></div>
       <div style="display:flex; align-items:center; justify-content:center; gap:28px; flex:1;">
-        <div class="donut-wrap" style="width:170px;height:170px;">${chartBox('ovDonut',170)}<div class="donut-center"><div class="n" style="font-size:28px;">20</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
+        <div class="donut-wrap" style="width:170px;height:170px;">${chartBox('ovDonut',170)}<div class="donut-center"><div class="n" style="font-size:28px;">${N}</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
         <div class="legend" style="font-size:13.5px; gap:14px;">
-          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--green)"></span>${t('healthy')}<span class="lval">${healthy} (${Math.round(healthy/20*100)}%)</span></div>
-          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--amber)"></span>${t('warning')}<span class="lval">${warning} (${Math.round(warning/20*100)}%)</span></div>
-          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--red)"></span>${t('critical')}<span class="lval">${critical} (${Math.round(critical/20*100)}%)</span></div>
+          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--green)"></span>${t('healthy')}<span class="lval">${healthy} (${pct(healthy)}%)</span></div>
+          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--amber)"></span>${t('warning')}<span class="lval">${warning} (${pct(warning)}%)</span></div>
+          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--red)"></span>${t('critical')}<span class="lval">${critical} (${pct(critical)}%)</span></div>
         </div>
       </div>
     </div>
     <div class="card">
       <div class="card-head"><h3>${t('attention')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
       <div class="tbl-wrap"><table><thead><tr><th>${t('asset')}</th><th>HI</th><th>${t('status')}</th><th>${t('main_issue')}</th></tr></thead><tbody>
-      ${ATTENTION.map(a=>`<tr><td><button class="viewlink" data-view="${a.id}"><b>${a.id}</b></button></td><td style="color:${statusColor(a.status)};font-weight:800;">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${a.issue[state.lang]}</td></tr>`).join('')}
+      ${attentionList().map(a=>`<tr><td><button class="viewlink" data-view="${a.id}"><b>${a.id}</b></button></td><td style="color:${statusColor(a.status)};font-weight:800;">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${mainIssueOf(a)}</td></tr>`).join('') || `<tr><td colspan="4" class="small-muted">${L('No transformer needs attention','ไม่มีหม้อแปลงที่ต้องเฝ้าระวัง')}</td></tr>`}
       </tbody></table></div>
     </div>
   </div>
@@ -1079,7 +1223,7 @@ function renderOverview(){
     <div class="card">
       <div class="card-head"><h3>${t('assets_title')}</h3></div>
       <div class="filter-row" style="margin-bottom:12px;">
-        <span class="pill pill-info selectable ${state.assetFilterStatus==='All'?'on':''}" data-ov-filter="All">All (20)</span>
+        <span class="pill pill-info selectable ${state.assetFilterStatus==='All'?'on':''}" data-ov-filter="All">${L('All','ทั้งหมด')} (${N})</span>
         <span class="pill pill-healthy selectable ${state.assetFilterStatus==='Healthy'?'on':''}" data-ov-filter="Healthy">${t('healthy')} (${healthy})</span>
         <span class="pill pill-warning selectable ${state.assetFilterStatus==='Warning'?'on':''}" data-ov-filter="Warning">${t('warning')} (${warning})</span>
         <span class="pill pill-critical selectable ${state.assetFilterStatus==='Critical'?'on':''}" data-ov-filter="Critical">${t('critical')} (${critical})</span>
@@ -1107,7 +1251,7 @@ function renderOverview(){
     <div style="display:flex; flex-direction:column; gap:16px;">
       <div class="card" style="flex:1;">
         <div class="card-head"><h3>${t('recent_activities')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
-        <ul class="recact">${REC_ACTIVITIES.map(r=>`<li><span class="dot" style="background:var(--${r.c==='blue'?'accent-2':r.c})"></span><div><div>${r.a[state.lang]}</div><div class="rt">${r.d} · ${r.t}</div></div></li>`).join('')}</ul>
+        <ul class="recact">${recent.map(a=>`<li><span class="dot" style="background:${statusColor(a.status)}"></span><div><div>${a.id} ${L('lab result','ผลแล็บ')}: HI ${a.hi} · DGA ${a._as?a._as.dga.code:'—'}</div><div class="rt">${a.last}</div></div></li>`).join('')}</ul>
       </div>
     </div>
   </div>
@@ -1116,13 +1260,11 @@ function renderOverview(){
     <div class="card">
       <div class="card-head"><h3>${t('maint_strategy')}</h3></div>
       <div style="display:flex; align-items:center; gap:16px;">
-        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('ovStrategy',130)}<div class="donut-center"><div class="n">20</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
+        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('ovStrategy',130)}<div class="donut-center"><div class="n">${N}</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
         <div class="legend">
-          <div class="li"><span class="sw" style="background:#2f7dd1"></span>PM<span class="lval">8 (40%)</span></div>
-          <div class="li"><span class="sw" style="background:#1fa571"></span>CBM<span class="lval">6 (30%)</span></div>
-          <div class="li"><span class="sw" style="background:#8759d6"></span>PdM<span class="lval">3 (15%)</span></div>
-          <div class="li"><span class="sw" style="background:#e0473d"></span>CM<span class="lval">2 (10%)</span></div>
-          <div class="li"><span class="sw" style="background:#8b9099"></span>BM<span class="lval">1 (5%)</span></div>
+          <div class="li"><span class="sw" style="background:#2f7dd1"></span>PM<span class="lval">${stratCount.PM} (${pct(stratCount.PM)}%)</span></div>
+          <div class="li"><span class="sw" style="background:#1fa571"></span>CBM<span class="lval">${stratCount.CBM} (${pct(stratCount.CBM)}%)</span></div>
+          <div class="li"><span class="sw" style="background:#8759d6"></span>CBM + PdM<span class="lval">${stratCount['CBM + PdM']} (${pct(stratCount['CBM + PdM'])}%)</span></div>
         </div>
       </div>
     </div>
@@ -1135,15 +1277,14 @@ function updateClock(){
   const timeStr = new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Bangkok', hour:'2-digit', minute:'2-digit'}).format(now);
   el.textContent = `${dateStr} · ${timeStr}`;
 }
-setInterval(updateClock, 1000);
 function filteredAssets(status){ let list = ASSETS.slice(); if(status && status!=='All') list = list.filter(a=>a.status===status); return list; }
 function initOverviewCharts(){
-  updateClock();
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
   const gridColor = cssv('--border');
   mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','PdM','CM','BM'],datasets:[{data:[8,6,3,2,1],backgroundColor:['#2f7dd1','#1fa571','#8759d6','#e0473d','#8b9099'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:MONTHS9,datasets:[{data:HI_TREND_FLEET,borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#2f7dd1'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
+  const sc={PM:0,CBM:0,'CBM + PdM':0}; ASSETS.forEach(a=>sc[strategyOf(a)]++);
+  mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','CBM + PdM'],datasets:[{data:[sc.PM,sc.CBM,sc['CBM + PdM']],backgroundColor:['#2f7dd1','#1fa571','#8759d6'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{data:fleetTrend(),borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#2f7dd1'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
   document.querySelectorAll('[data-ov-filter]').forEach(el=> el.addEventListener('click',()=>{ state.assetFilterStatus = el.dataset.ovFilter; state.ovPage=1; render(); }));
@@ -1190,15 +1331,23 @@ function renderAssetsTableOnly(){
   if(state.page==='assets'){ c.innerHTML = renderAssetsPage(); attachAssetsPageEvents(); document.getElementById('assetSearchInput').focus(); document.getElementById('assetSearchInput').setSelectionRange(state.assetSearch.length,state.assetSearch.length); attachGlobalViewLinks(); }
 }
 function openAddAssetModal(){
+  let n = ASSETS.length+1; while(ASSETS.some(a=>a.id===`TR-${String(n).padStart(3,'0')}`)) n++;
   openModal(t('modal_add_asset'), `
-    <div class="formrow"><label>${t('asset_id')}</label><input name="id" value="TR-0${ASSETS.length+1}" required></div>
+    <div class="grid g2" style="gap:0 12px;">
+    <div class="formrow"><label>${t('asset_id')}</label><input name="id" value="TR-${String(n).padStart(3,'0')}" required></div>
     <div class="formrow"><label>${t('field_location')}</label><input name="loc" placeholder="e.g. Rangsit SS" required></div>
     <div class="formrow"><label>${t('field_capacity')}</label><input name="cap" type="number" value="50" required></div>
     <div class="formrow"><label>${t('field_voltage')}</label><input name="volt" value="115/24" required></div>
     <div class="formrow"><label>${t('field_manufacturer')}</label><input name="mfr" placeholder="e.g. ABB" required></div>
-    <div class="formrow"><label>${t('field_year')}</label><input name="year" type="number" value="2026" min="1980" max="2026" required></div>
+    <div class="formrow"><label>${t('field_year')}</label><input name="year" type="number" value="2026" min="1960" max="2030" required></div>
+    </div>
+    <div class="notebox" style="margin:6px 0 4px;">${gicon('help',16)}<div>${L('Enter the latest oil-test results — the Health Index and DGA diagnosis are calculated from them.','กรอกผลตรวจน้ำมันล่าสุด — ระบบจะคำนวณดัชนีสุขภาพและผล DGA จากค่าที่กรอก')}</div></div>
+    ${labFormFields()}
   `, (data)=>{
-    ASSETS.push({id:data.id, loc:data.loc, cap:Number(data.cap), volt:data.volt, hi:85, status:'Healthy', last:'—', next:'—', mfr:data.mfr||'—', year:Number(data.year)||2026, type:'ONAN/ONAF', load:50, topOil:50, amb:31});
+    const id = data.id.trim();
+    if(ASSETS.some(a=>a.id===id)){ toast(L('Asset ID already exists','รหัสนี้มีอยู่แล้ว')); return; }
+    ASSETS.push({id, loc:data.loc, cap:Number(data.cap), volt:data.volt, hi:0, status:'Healthy', last:'—', next:'—', mfr:data.mfr||'—', year:Number(data.year)||2026, type:'ONAN/ONAF', load:50, topOil:50, amb:31});
+    LAB[id] = [sampleFromForm(data)];
     render(); toast(t('toast_added'),'success');
   });
 }
@@ -1209,10 +1358,10 @@ const DETAIL_TABS = [
  {id:'rcm', key:'tab_rcm'}, {id:'plan', key:'tab_plan'}, {id:'history', key:'tab_history'}, {id:'docs', key:'tab_docs'},
 ];
 function detailHeader(a){
-  const cat = categoryFor(a); const prof = dgaProfileFor(cat); const rpnMax = FMEA.length ? Math.max(...FMEA.map(f=>f.rpn)) : 0;
+  const prof = profileFor(a); const rpnMax = FMEA.length ? Math.max(...FMEA.map(f=>f.rpn)) : 0;
   return `
   <div class="detail-head">
-    <img src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=200&h=200&fit=crop" alt="transformer">
+    ${badge('assets',64)}
     <div>
       <div class="detail-title"><h2>${a.id}</h2><span class="pill ${statusPillClass(a.status)}" style="font-size:12px;padding:4px 12px;">${trStatus(a.status)}</span></div>
       <div style="font-size:13px;font-weight:600;color:var(--muted);margin-top:2px;">${a.volt} kV Power Transformer</div>
@@ -1221,7 +1370,7 @@ function detailHeader(a){
     <div class="kpi-row">
       <div class="kpi" title="${t('kpi_hi_tip')}">${badge('health',30)}<div><div class="klabel">${t('health_index').toUpperCase()}</div><div class="kvalue">${a.hi} / 100</div></div></div>
       <div class="kpi" title="${t('kpi_rpn_tip')}">${badge('risk',30)}<div><div class="klabel">${t('rpn_max').toUpperCase()}</div><div class="kvalue">${rpnMax}</div></div></div>
-      <div class="kpi" title="${t('kpi_dga_tip')}">${badge('lab',30)}<div><div class="klabel">${t('dga_diagnosis').toUpperCase()}</div><div class="kvalue">${prof.code}</div></div></div>
+      <div class="kpi" title="${t('kpi_dga_tip')}">${badge('lab',30)}<div><div class="klabel">${t('dga_diagnosis').toUpperCase()}</div><div class="kvalue" title="${prof.type[state.lang]}">${prof.code}</div></div></div>
       <div class="kpi" title="${t('kpi_next_tip')}">${badge('scheduled',30)}<div><div class="klabel">${t('next_action').toUpperCase()}</div><div class="kvalue" style="font-size:12.5px;">${prof.nextAction[state.lang]}</div></div></div>
     </div>
   </div>
@@ -1230,7 +1379,7 @@ function detailHeader(a){
   </div>`;
 }
 function renderDetail(){
-  const a = ASSETS.find(x=>x.id===state.assetId) || ASSETS[13];
+  const a = currentAsset();
   let body = '';
   if(state.detailTab==='overview') body = detailOverviewTab(a);
   else if(state.detailTab==='healthindex') body = detailHealthIndexTab(a);
@@ -1250,7 +1399,7 @@ function renderDetail(){
   <div id="detailBody">${body}</div>`;
 }
 function detailOverviewTab(a){
-  const cat = categoryFor(a); const prof = dgaProfileFor(cat);
+  const cat = categoryFor(a); const prof = profileFor(a); const hist = historyRows(a).slice(0,4);
   const stratColor = prof.strategy.includes('CBM')||prof.strategy==='PdM' ? 'green' : prof.strategy==='PM' ? 'accent-2' : 'amber';
   return `
   <div class="grid" style="grid-template-columns:1.3fr 1fr 1fr; margin-bottom:16px; align-items:stretch;">
@@ -1269,11 +1418,11 @@ function detailOverviewTab(a){
     <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3></div>${chartBox('detTrend',150)}</div>
     <div class="card" style="text-align:center;">
       <div class="card-head" style="text-align:left;"><h3>${t('dga_diagnosis')}</h3><button class="linklike" data-dtab="dga">${t('view_details')}</button></div>
-      <svg class="duval-svg" viewBox="0 0 220 190">${duvalTriangleSvg(prof.duval.px,prof.duval.py)}</svg>
+      ${duvalTriangleSvg(prof)}
       <div style="margin-top:10px; text-align:left;">
-        <ul class="hlist"><li><span class="k">${t('type')}</span><span class="v" style="color:${cat==='healthy'?'var(--green)':'var(--red)'}">${prof.type[state.lang]}</span></li>
-        <li><span class="k">${t('severity')}</span><span class="v" style="color:${cat==='healthy'?'var(--green)':'var(--red)'}">${prof.severity[state.lang]}</span></li>
-        <li><span class="k">${t('confidence')}</span><span class="v">${prof.confidence}%</span></li></ul>
+        <ul class="hlist"><li><span class="k">${t('type')}</span><span class="v" style="color:${prof.code==='N'?'var(--green)':'var(--red)'}">${prof.code} · ${prof.type[state.lang]}</span></li>
+        <li><span class="k">${t('severity')}</span><span class="v" style="color:${prof.code==='N'?'var(--green)':'var(--red)'}">${prof.severity[state.lang]}</span></li>
+        <li><span class="k">${t('confidence')}</span><span class="v">${prof.confidence}</span></li></ul>
       </div>
     </div>
   </div>
@@ -1281,10 +1430,7 @@ function detailOverviewTab(a){
     <div class="card">
       <div class="card-head"><h3>${t('recent_activities')}</h3><button class="linklike" data-dtab="history">${t('view_all')}</button></div>
       <div class="tbl-wrap"><table><thead><tr><th>${t('date')}</th><th>${t('activity')}</th><th>${t('result')}</th><th>${t('by')}</th></tr></thead><tbody>
-      <tr><td>12 Sep 2026</td><td>${state.lang==='th'?'อัปเดตผล DGA':'DGA result updated'}</td><td style="color:${cat==='healthy'?'var(--green)':'var(--red)'};font-weight:700;">${prof.code} (${prof.severity[state.lang]})</td><td>Lab</td></tr>
-      <tr><td>11 Sep 2026</td><td>${state.lang==='th'?'ตรวจสอบเสร็จสิ้น':'Inspection completed'}</td><td>${cat==='critical'?(state.lang==='th'?'น้ำมันรั่วเล็กน้อย':'Minor oil leak'):t('normal')}</td><td>Field Team</td></tr>
-      <tr><td>10 Sep 2026</td><td>${state.lang==='th'?'คำนวณดัชนีสุขภาพใหม่':'Health index recalculated'}</td><td>HI = ${a.hi}</td><td>System</td></tr>
-      <tr><td>28 Aug 2026</td><td>${state.lang==='th'?'เก็บตัวอย่างน้ำมันเสร็จสิ้น':'Oil sampling completed'}</td><td>${t('normal')}</td><td>Field Team</td></tr>
+      ${hist.map(h=>`<tr><td>${h.date}</td><td>${h.act}</td><td style="${h.style||''}">${h.res}</td><td>${h.by}</td></tr>`).join('')}
       </tbody></table></div>
     </div>
     <div class="card">
@@ -1293,8 +1439,7 @@ function detailOverviewTab(a){
       <div class="small-muted" style="margin-bottom:10px;">${prof.interp[state.lang]}</div>
       <div style="font-weight:700;font-size:12.5px;margin-bottom:6px;">${t('recommended_actions')}</div>
       <ul class="hlist">
-      <li><span class="k">✓ ${t('act_oil_sampling')}</span></li><li><span class="k">✓ ${t('act_monitor_dga')}</span></li>
-      <li><span class="k">✓ ${t('act_inspect_cooling')}</span></li><li><span class="k">✓ ${t('act_check_leak')}</span></li><li><span class="k">✓ ${t('act_review_load')}</span></li>
+      ${prof.actions.map(x=>`<li><span class="k" style="white-space:normal;">✓ ${x}</span></li>`).join('')}
       </ul>
       <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;" data-create-plan="1">${gicon('plan',0,'width:13px;height:13px')} ${t('create_maint_plan')}</button>
     </div>
@@ -1306,31 +1451,40 @@ function strategyFullName(code){
   const names = {BM:{en:'Breakdown Maintenance',th:'บำรุงรักษาเมื่อเสีย'},CM:{en:'Corrective Maintenance',th:'บำรุงรักษาเชิงแก้ไข'},PM:{en:'Preventive Maintenance',th:'บำรุงรักษาเชิงป้องกัน'},CBM:{en:'Condition Based Maintenance',th:'บำรุงรักษาตามสภาพ'},PdM:{en:'Predictive Maintenance',th:'บำรุงรักษาเชิงคาดการณ์'}};
   return (names[first]||names.PM)[state.lang];
 }
-function duvalTriangleSvg(px,py){
-  const Ax=110,Ay=15, Bx=15,By=175, Cx=205,Cy=175;
-  const mx = Ax + (Bx-Ax)*px + (Cx-Ax)*py, my = Ay + (By-Ay)*px + (Cy-Ay)*py;
-  return `<polygon points="110,15 15,175 205,175" fill="none" stroke="var(--border)" stroke-width="1.5"/>
-  <line x1="61" y1="95" x2="157" y2="95" stroke="var(--border)"/><line x1="85" y1="175" x2="140" y2="55" stroke="var(--border)"/><line x1="135" y1="175" x2="80" y2="55" stroke="var(--border)"/>
-  <text x="110" y="10" text-anchor="middle" font-size="9" fill="var(--muted)">PD</text><text x="10" y="185" font-size="9" fill="var(--muted)">D1</text><text x="195" y="185" font-size="9" fill="var(--muted)" text-anchor="end">D2</text>
-  <circle cx="${mx}" cy="${my}" r="6" fill="var(--red)"/>`;
+const DUVAL_ZONES = {
+ PD:[[98,2,0],[100,0,0],[98,0,2]],
+ T1:[[98,2,0],[80,20,0],[76,20,4],[96,0,4],[98,0,2]],
+ T2:[[80,20,0],[50,50,0],[46,50,4],[76,20,4]],
+ T3:[[50,50,0],[0,100,0],[0,85,15],[35,50,15]],
+ D1:[[0,0,100],[0,23,77],[64,23,13],[87,0,13]],
+ D2:[[0,23,77],[0,71,29],[31,40,29],[47,40,13],[64,23,13]],
+ DT:[[96,0,4],[87,0,13],[47,40,13],[31,40,29],[0,71,29],[0,85,15],[35,50,15],[46,50,4]],
+};
+const DUVAL_COL = {PD:'#b9c7f0',T1:'#fde7a8',T2:'#fbc98a',T3:'#f59d7a',D1:'#b8dcf5',D2:'#8fc0ea',DT:'#d6c6ee'};
+function duvalXY(ch4,c2h4,c2h2){ const T=[120,14], R=[226,198], Lf=[14,198]; return [(ch4*T[0]+c2h4*R[0]+c2h2*Lf[0])/100, (ch4*T[1]+c2h4*R[1]+c2h2*Lf[1])/100]; }
+function duvalTriangleSvg(prof){
+  const poly = (pts)=>pts.map(p=>duvalXY(p[0],p[1],p[2]).map(v=>v.toFixed(1)).join(',')).join(' ');
+  const lab = {}; Object.keys(DUVAL_ZONES).forEach(z=>{ const pts=DUVAL_ZONES[z].map(p=>duvalXY(p[0],p[1],p[2])); lab[z]=[pts.reduce((x,p)=>x+p[0],0)/pts.length, pts.reduce((x,p)=>x+p[1],0)/pts.length+3]; });
+  lab.PD=[104,17]; lab.T1=[140,40];
+  let zones = Object.keys(DUVAL_ZONES).map(z=>`<polygon points="${poly(DUVAL_ZONES[z])}" fill="${DUVAL_COL[z]}" stroke="#fff" stroke-width="1"/>`).join('');
+  zones += Object.keys(lab).map(z=>`<text x="${lab[z][0]}" y="${lab[z][1]}" text-anchor="middle" font-size="9" font-weight="700" fill="#33415c">${z}</text>`).join('');
+  let pt = '';
+  if(prof.duval){ const [x,y]=duvalXY(prof.duval.ch4,prof.duval.c2h4,prof.duval.c2h2); const col = prof.code==='N'?'#1fa571':'#e0473d';
+    pt = `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6.5" fill="${col}" stroke="#fff" stroke-width="2"/>`; }
+  const pctTxt = prof.duval ? `CH₄ ${prof.duval.ch4.toFixed(0)}% · C₂H₄ ${prof.duval.c2h4.toFixed(0)}% · C₂H₂ ${prof.duval.c2h2.toFixed(0)}%` : L('Not enough gas to plot','ก๊าซไม่เพียงพอสำหรับการพล็อต');
+  return `<svg class="duval-svg" viewBox="0 0 240 222" role="img" aria-label="Duval triangle">${zones}
+    <polygon points="${poly([[100,0,0],[0,100,0],[0,0,100]])}" fill="none" stroke="#33415c" stroke-width="1.2"/>
+    <text x="10" y="214" font-size="8.5" fill="var(--muted)">C₂H₂</text><text x="230" y="214" font-size="8.5" fill="var(--muted)" text-anchor="end">C₂H₄</text><text x="150" y="16" font-size="8.5" fill="var(--muted)">CH₄</text>
+    ${pt}</svg><div class="small-muted" style="font-size:11px;margin-top:2px;">${pctTxt}</div>`;
 }
 function openAddDgaResultModal(){
-  const gasNames = ['H2','CH4','C2H6','C2H4','C2H2','CO','CO2'];
-  const ranges = {H2:'< 100',CH4:'< 60',C2H6:'< 50',C2H4:'< 100',C2H2:'< 5',CO:'< 350',CO2:'< 1000'};
-  openModal(t('modal_add_dga'), `
-    <div class="formrow"><label>${t('field_date')}</label><input name="date" placeholder="e.g. 20 Sep 2026" required></div>
-    ${gasNames.map(g=>`<div class="formrow"><label>${g} (ppm)</label><input name="${g}" type="number" min="0" value="0" required></div>`).join('')}
-  `, (data)=>{
-    const gases = gasNames.map(g=>{
-      const v = Number(data[g]);
-      const limit = parseInt(ranges[g].replace(/[^0-9]/g,''),10);
-      return {g, v, range: ranges[g], status: v>limit? 'up' : 'ok'};
-    });
-    const tdcg = gases.reduce((s,g)=>s+g.v,0);
-    gases.push({g:'TDCG', v:tdcg, range:'-', status: tdcg>500?'warn':'ok'});
-    DGA_SAMPLES.unshift({date:data.date, gases});
-    state.dgaSampleIdx = 0;
-    render(); toast(t('toast_added'),'success');
+  const a = currentAsset(); const latest = labFor(a)[0];
+  openModal(L('Add lab result','เพิ่มผลแล็บ')+' — '+a.id, labFormFields(latest ? {...latest, date:fmtD(new Date())} : null), (data)=>{
+    const smp = sampleFromForm(data);
+    const lab = labFor(a); const i = lab.findIndex(x=>x.date===smp.date); if(i>=0) lab.splice(i,1);
+    lab.push(smp); sortLab(lab);
+    state.dgaSampleIdx = lab.indexOf(smp);
+    render(); toast(L(`Saved — HI recalculated: ${a.hi}`,`บันทึกแล้ว — คำนวณ HI ใหม่: ${a.hi}`),'success');
   });
 }
 function openCompareDgaModal(){
@@ -1358,15 +1512,16 @@ function openCompareDgaModal(){
   document.getElementById('cmpB').addEventListener('change', upd);
 }
 function detailHealthIndexTab(a){
-  const cat = categoryFor(a); const prof = dgaProfileFor(cat);
-  const badgeBg = cat==='critical'?'var(--red-bg)':cat==='warning'?'var(--amber-bg)':'var(--green-bg)';
-  const badgeFg = cat==='critical'?'var(--red)':cat==='warning'?'var(--amber)':'var(--green)';
+  const cat = categoryFor(a); const prof = profileFor(a); const dp = dpFromFuran(prof.sample.furan); const lifeUsed = Math.max(0, Math.min(100, Math.round((1000-dp)/(1000-200)*100)));
+  const badgeBg = a.status==='Critical'?'var(--red-bg)':a.status==='Warning'?'var(--amber-bg)':'var(--green-bg)';
+  const badgeFg = a.status==='Critical'?'var(--red)':a.status==='Warning'?'var(--amber)':'var(--green)';
   return `
   <div class="grid" style="grid-template-columns:1fr 1.4fr 1fr; margin-bottom:16px; align-items:stretch;">
     <div class="card" style="text-align:center;">
       <h3>${t('overall_hi')}</h3>
       <div class="gauge-wrap">${chartBox('hiGauge',110)}<div class="gauge-num">${a.hi}</div><div class="gauge-sub">/ 100</div>
       <div class="badge-lg" style="background:${badgeBg}; color:${badgeFg};">${trStatus(a.status)}</div></div>
+      ${prof.overridden?`<p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('Status raised to Warning: at least one parameter is in Poor condition.','สถานะถูกยกเป็น “เฝ้าระวัง” เพราะมีพารามิเตอร์อยู่ในเกณฑ์แย่')}</p>`:''}
     </div>
     <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3></div>${chartBox('hiTrend',150)}</div>
     <div class="card">
@@ -1382,15 +1537,22 @@ function detailHealthIndexTab(a){
   </div>
   <div class="grid" style="grid-template-columns:1.6fr 1fr; margin-bottom:16px; align-items:stretch;">
     <div class="card">
-      <div class="card-head"><h3>${t('hi_assessment')}</h3></div>
+      <div class="card-head"><h3>${t('hi_assessment')}</h3><button class="btn btn-outline" data-add-lab="1" style="padding:6px 11px;font-size:12px;">${L('Add lab result','เพิ่มผลแล็บ')}</button></div>
       <div class="tbl-wrap"><table><thead><tr><th>${t('parameter')}</th><th>${t('result')}</th><th>${t('score')}</th><th>${t('weight')}</th><th>${t('wscore')}</th><th>${t('status')}</th><th>${t('remark')}</th></tr></thead><tbody>
-      ${hiCriteriaFor(cat).map(h=>`<tr><td><b>${h.p}</b></td><td>${h.res}</td><td>${h.score}</td><td>${h.weight}%</td><td>${h.ws}</td><td><span class="pill ${statusPillClass(h.status)}">${trStatus(h.status)}</span></td><td class="small-muted">${h.remark[state.lang]}</td></tr>`).join('')}
-      <tr><td colspan="4" style="font-weight:800;">${t('total')}</td><td style="font-weight:800;">${a.hi}.0</td><td></td><td></td></tr>
+      ${prof.rows.map(h=>`<tr><td><b>${h.p}</b></td><td>${h.res}</td><td>${h.score}</td><td>${h.weight}%</td><td>${h.ws}</td><td><span class="pill ${statusPillClass(h.status)}">${trStatus(h.status)}</span></td><td class="small-muted" style="white-space:normal;min-width:190px;">${h.remark}</td></tr>`).join('')}
+      <tr><td colspan="4" style="font-weight:800;">${t('total')} (${L('sample','ตัวอย่าง')} ${prof.sample.date})</td><td style="font-weight:800;">${prof.hiExact.toFixed(1)} → ${prof.hi}</td><td></td><td></td></tr>
       </tbody></table></div>
     </div>
-    <div class="card"><div class="card-head"><h3>${t('hi_contributors')}</h3></div><p class="card-sub">${t('hi_contributors_desc')}</p>${chartBox('hiRadar',260)}</div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card"><div class="card-head"><h3>${t('hi_contributors')}</h3></div><p class="card-sub">${L('Score of each parameter (0–100); dashed line = “Good” level (70).','คะแนนแต่ละพารามิเตอร์ (0–100); เส้นประ = ระดับ “ดี” (70)')}</p>${chartBox('hiRadar',230)}</div>
+      <div class="card"><h3>${L('Paper insulation ageing','ความเสื่อมของฉนวนกระดาษ')}</h3>
+        <ul class="hlist"><li><span class="k">${L('Estimated DP (from 2-FAL, Chendong)','DP โดยประมาณ (จาก 2-FAL, Chendong)')}</span><span class="v">≈ ${dp}</span></li>
+        <li><span class="k">${L('Paper life consumed (DP 1000 → 200)','อายุกระดาษที่ใช้ไป (DP 1000 → 200)')}</span><span class="v" style="color:${lifeUsed>70?'var(--red)':lifeUsed>45?'var(--amber)':'var(--green)'}">≈ ${lifeUsed}%</span></li></ul>
+        <p class="small-muted" style="margin:8px 0 0;font-size:11px;">${L('Indicative only — confirm with a paper-sample DP test before a replacement decision.','ใช้เป็นค่าประมาณเท่านั้น — ควรยืนยันด้วยการทดสอบ DP จากตัวอย่างกระดาษก่อนตัดสินใจเปลี่ยน')}</p>
+      </div>
+    </div>
   </div>
-  <div class="card">
+  <div class="card" style="margin-bottom:16px;">
     <h3>${t('assessment_summary')}</h3>
     <div class="grid g3">
       <ul class="hlist"><li><span class="k">${t('main_issue2')}</span><span class="v" style="color:${badgeFg};">${prof.mainIssue[state.lang]}</span></li></ul>
@@ -1399,7 +1561,8 @@ function detailHealthIndexTab(a){
       <ul class="hlist"><li><span class="k">${t('recommended_strategy')}</span><span class="v">${prof.strategy}</span></li></ul>
       <ul class="hlist"><li><span class="k">${t('next_action')}</span><span class="v">${prof.nextAction[state.lang]}</span></li></ul>
     </div>
-  </div>`;
+  </div>
+  <p class="small-muted" style="font-size:11px;">${L('Scoring: oil limits per IEC 60422 (72.5–170 kV); DGA factor after Jahromi et al. (2009); weights editable in Settings → Health Index.','เกณฑ์ให้คะแนน: ค่าน้ำมันตาม IEC 60422 (72.5–170 kV); DGA factor ตาม Jahromi et al. (2009); ปรับน้ำหนักได้ที่ ตั้งค่า → ดัชนีสุขภาพ')}</p>`;
 }
 function detailDgaTab(a){
   const subtabs = [['gas','gas_results'],['duval','duval_triangle'],['rogers','rogers_ratio'],['iec','iec_ratio'],['trend','trend_analysis'],['interp','interpretation']];
@@ -1408,15 +1571,16 @@ function detailDgaTab(a){
     <div class="filter-row">${subtabs.map(s=>`<button class="pill selectable ${state.dgaSubTab===s[0]?'pill-info on':''}" data-dga-tab="${s[0]}">${t(s[1])}</button>`).join('')}</div>
     <div class="filter-row">
       <select class="chip-input" id="dgaSamplingSelect">${DGA_SAMPLES.map((s,i)=>`<option value="${i}" ${i===state.dgaSampleIdx?'selected':''}>${t('sampling')}: ${s.date}</option>`).join('')}</select>
-      <button class="btn btn-outline" id="btnAddDgaResult">${icon('box',' style="width:13px;height:13px"')} ${t('add_result')}</button>
+      <button class="btn btn-outline" id="btnAddDgaResult">${icon('box',' style="width:13px;height:13px"')} ${L('Add lab result','เพิ่มผลแล็บ')}</button>
       <button class="btn btn-outline" id="btnCompareDga">${t('compare')}</button>
     </div>
   </div>
   ${dgaSubTabContent(a)}`;
 }
 function dgaSubTabContent(a){
-  const gases = currentDgaGases(); const cat = categoryFor(a); const prof = dgaProfileFor(cat);
-  const fg = cat==='healthy' ? 'var(--green)' : 'var(--red)';
+  const gases = currentDgaGases(); const prof = profileFor(a, state.dgaSampleIdx); const d = prof.dga;
+  const fg = prof.code==='N' ? 'var(--green)' : 'var(--red)';
+  const fr = (x)=>x===Infinity?'∞':x.toFixed(2);
   const gasResultsBlock = `
     <div class="card"><h3>${t('dga_gas_results')}</h3>
       <div class="tbl-wrap"><table><thead><tr><th>${t('gas')}</th><th>${t('result_ppm')}</th><th>${t('normal_range')}</th><th>${t('status')}</th></tr></thead><tbody>
@@ -1424,25 +1588,28 @@ function dgaSubTabContent(a){
       </tbody></table></div></div>`;
   const duvalBlock = `
     <div class="card" style="text-align:center;"><h3>${t('duval_triangle')}</h3>
-      <svg class="duval-svg" viewBox="0 0 220 190">${duvalTriangleSvg(prof.duval.px,prof.duval.py)}</svg>
+      ${duvalTriangleSvg(prof)}
       <div style="text-align:left; margin-top:10px;"><div style="font-weight:800;">${t('diagnosis_result')}</div>
-      <ul class="hlist"><li><span class="k">${t('type')}</span><span class="v" style="color:${fg}">${prof.type[state.lang]} ${prof.typeRange}</span></li>
-      <li><span class="k">${t('severity')}</span><span class="v" style="color:${fg}">${prof.severity[state.lang]}</span></li><li><span class="k">${t('confidence')}</span><span class="v">${prof.confidence}%</span></li></ul></div></div>`;
+      <ul class="hlist"><li><span class="k">${t('type')}</span><span class="v" style="color:${fg};white-space:normal;">${prof.code} · ${prof.type[state.lang]}</span></li>
+      <li><span class="k">${t('severity')}</span><span class="v" style="color:${fg}">${prof.severity[state.lang]}</span></li><li><span class="k">${t('confidence')}</span><span class="v">${prof.confidence}</span></li></ul></div></div>`;
   const rogersBlock = `
-    <div class="card"><h3>${t('rogers_ratio')}</h3>
-      <div class="tbl-wrap"><table><thead><tr><th>${t('ratio')}</th><th>${t('value')}</th><th>${t('diagnosis')}</th></tr></thead><tbody>
-      ${prof.rogers.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="color:${r[2]==='Normal'?'var(--green)':fg};font-weight:700;">${translateDiag(r[2])}</td></tr>`).join('')}
+    <div class="card"><h3>${t('rogers_ratio')} <span class="small-muted" style="font-weight:600;">(IEEE C57.104)</span></h3>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('ratio')}</th><th>${t('value')}</th></tr></thead><tbody>
+      <tr><td>C2H2 / C2H4</td><td>${fr(d.r1)}</td></tr><tr><td>CH4 / H2</td><td>${fr(d.r2)}</td></tr><tr><td>C2H4 / C2H6</td><td>${fr(d.r5)}</td></tr>
+      <tr><td style="font-weight:800;">${t('diagnosis')}</td><td style="font-weight:800;color:${d.rogers===0||d.rogers===null?'var(--muted)':fg};white-space:normal;">${d.rogers===null?dgaName('ND'):L(ROGERS_CASES[d.rogers][0],ROGERS_CASES[d.rogers][1])}</td></tr>
       </tbody></table></div></div>`;
   const iecBlock = `
-    <div class="card"><h3>${t('iec_ratio')}</h3>
-      <div class="tbl-wrap"><table><thead><tr><th>${t('ratio')}</th><th>${t('value')}</th><th>${t('condition')}</th></tr></thead><tbody>
-      ${prof.iec.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="color:${r[3]?'var(--green)':fg};font-weight:700;">${translateDiag(r[2])}</td></tr>`).join('')}
-      </tbody></table></div></div>`;
+    <div class="card"><h3>${t('iec_ratio')} <span class="small-muted" style="font-weight:600;">(IEC 60599)</span></h3>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('ratio')}</th><th>${t('value')}</th></tr></thead><tbody>
+      <tr><td>C2H2 / C2H4</td><td>${fr(d.r1)}</td></tr><tr><td>CH4 / H2</td><td>${fr(d.r2)}</td></tr><tr><td>C2H4 / C2H6</td><td>${fr(d.r5)}</td></tr>
+      <tr><td style="font-weight:800;">${t('diagnosis')}</td><td style="font-weight:800;color:${d.iec==='ND'?'var(--muted)':fg};white-space:normal;">${d.iec} · ${dgaName(d.iec)}</td></tr>
+      </tbody></table></div>
+      <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('Ratio methods apply only when gases exceed typical levels.','วิธีอัตราส่วนใช้ได้เมื่อก๊าซเกินระดับปกติเท่านั้น')}</p></div>`;
   const trendBlock = `<div class="card"><h3>${t('hist_dga_trend')}</h3>${chartBox('dgaHist',280)}</div>`;
   const interpBlock = `<div class="card"><h3>${t('interpretation')}</h3>
     <div class="notebox">${gicon('help',16)}<div>${prof.interp[state.lang]}</div></div>
     <div style="margin-top:14px;"><h3>${t('recommended_action')}</h3>
-    <ul class="hlist"><li><span class="k">✓ ${t('rec_continue_dga')}</span></li><li><span class="k">✓ ${t('rec_check_cooling')}</span></li><li><span class="k">✓ ${t('rec_inspect_oil')}</span></li><li><span class="k">✓ ${t('rec_review_load')}</span></li></ul>
+    <ul class="hlist">${prof.actions.map(x=>`<li><span class="k" style="white-space:normal;">✓ ${x}</span></li>`).join('')}</ul>
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" data-create-plan="1">${gicon('plan',0,'width:13px;height:13px')} ${t('create_maint_plan')}</button></div></div>`;
 
   if(state.dgaSubTab==='duval') return `<div class="grid g2" style="align-items:stretch;">${duvalBlock}${interpBlock}</div>`;
@@ -1460,7 +1627,7 @@ function detailFmeaTab(a){
   <p class="small-muted" style="margin:0 0 14px;">${t('fmea_sub')} — <b>${a.id}</b></p>
   <div class="grid" style="grid-template-columns:2fr 1fr; align-items:stretch; margin-bottom:16px;">
     <div class="card"><div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('code')}</th><th>${t('asset')}</th><th>${t('component')}</th><th>${t('failure_mode')}</th><th>${t('effect')}</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>${t('risk')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
-      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td>${a.id}</td><td><b>${f.comp}</b></td><td>${f.mode}</td><td class="small-muted">${f.effect}</td><td>${f.s}</td><td>${f.o}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':'pill-warning'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
+      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td>${a.id}</td><td><b>${f.comp}</b></td><td>${f.mode}</td><td class="small-muted">${f.effect}</td><td>${f.s}</td><td>${f.o}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':f.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
       </tbody></table></div></div>
     <div class="card"><h3>${t('risk_matrix')}</h3><p class="card-sub">${t('risk_matrix_desc')}</p>${chartBox('fmeaScatter',260)}</div>
   </div>
@@ -1472,7 +1639,7 @@ function detailFmeaTab(a){
       </div>
     </div>
     <div class="card"><h3>${t('top5_risk')}</h3>
-      ${FMEA.slice().sort((x,y)=>y.rpn-x.rpn).slice(0,5).map(f=>`<div class="bar-row"><div class="bar-label">${f.comp}</div><div class="bar-track"><div class="bar-fill" style="width:${f.rpn/2.8}%; background:${f.rpn>=150?'var(--red)':'var(--amber)'}"></div></div><div class="bar-val">${f.rpn}</div></div>`).join('')}
+      ${FMEA.slice().sort((x,y)=>y.rpn-x.rpn).slice(0,5).map(f=>`<div class="bar-row"><div class="bar-label">${f.comp}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,f.rpn/10)}%; background:${f.rpn>=150?'var(--red)':f.rpn>=50?'var(--amber)':'var(--green)'}"></div></div><div class="bar-val">${f.rpn}</div></div>`).join('')}
     </div>
     <div class="card"><h3>${t('rec_actions_summary')}</h3><p class="card-sub">${t('rec_actions_desc')}</p>
       <div class="grid g3" style="gap:8px; margin-bottom:12px;">
@@ -1515,7 +1682,8 @@ function openAddFmeaModal(){
     <div class="formrow"><label>${t('field_d')}</label><input name="d" type="number" min="1" max="10" value="5" required></div>
   `, (data)=>{
     const s=Number(data.s), o=Number(data.o), d=Number(data.d), rpn=s*o*d;
-    FMEA.push({no:FMEA.length+1, code:`FM-${String(FMEA.length+1).padStart(2,'0')}`, comp:data.comp, mode:data.mode, effect:data.effect, s,o,d, rpn, risk: rpn>=150?'High':rpn>=50?'Medium':'Low', control:'-', action:'-', status:'Open'});
+    const nextCode = 1+Math.max(0,...FMEA.map(f=>parseInt(String(f.code).replace(/\D/g,''),10)||0));
+    FMEA.push({no:1+Math.max(0,...FMEA.map(f=>f.no)), code:`FM-${String(nextCode).padStart(2,'0')}`, comp:data.comp, mode:data.mode, effect:data.effect, s,o,d, rpn, risk: rpn>=150?'High':rpn>=50?'Medium':'Low', control:'-', action:'-', status:'Open'});
     render(); toast(t('toast_added'),'success');
   });
 }
@@ -1570,7 +1738,7 @@ function detailRcmTab(a){
       <div class="card"><h3>${t('failure_info')}</h3>
         <ul class="hlist"><li><span class="k">${t('component')}</span><span class="v">${fm.comp}</span></li><li><span class="k">${t('failure_mode')}</span><span class="v">${fm.mode}</span></li>
         <li><span class="k">${t('effect')}</span><span class="v">${fm.effect}</span></li><li><span class="k">S</span><span class="v">${fm.s}</span></li><li><span class="k">O</span><span class="v">${fm.o}</span></li><li><span class="k">D</span><span class="v">${fm.d}</span></li>
-        <li><span class="k">RPN</span><span class="v" style="color:var(--red)">${fm.rpn}</span></li><li><span class="k">${t('current_control')}</span><span class="v">${m.control}</span></li></ul>
+        <li><span class="k">RPN</span><span class="v" style="color:${fm.rpn>=150?'var(--red)':fm.rpn>=50?'var(--amber)':'var(--green)'}">${fm.rpn}</span></li><li><span class="k">${t('current_control')}</span><span class="v">${m.control}</span></li></ul>
       </div>
       <div class="card"><div class="card-head"><h3>${t('applicable_tasks')}</h3><button class="btn btn-primary" id="btnAddRcmTask" style="padding:6px 12px;font-size:12px;">${t('add_task')}</button></div>
         <div class="tbl-wrap"><table><thead><tr><th>${t('task')}</th><th>${t('type')}</th><th>${t('interval')}</th><th>${t('status')}</th></tr></thead><tbody>
@@ -1581,7 +1749,10 @@ function detailRcmTab(a){
   </div>`;
 }
 function detailPlanTab(a){
-  const completed=5, inprog=4, upcoming=3, total=12;
+  const st = MAINT_PLAN.map(planStatus); const total = MAINT_PLAN.length;
+  const completed = st.filter(x=>x==='Completed').length, inprog = st.filter(x=>x==='In Progress').length, upcoming = st.filter(x=>x==='Upcoming').length;
+  const pc = (n)=> total ? Math.round(n/total*100) : 0;
+  const now = new Date(); const todayPos = (now.getFullYear()===2026 && now.getMonth()>=6) ? ((now.getMonth()-6) + (now.getDate()-1)/31)/6*100 : null;
   const monthStart = {Jul:0,Aug:1,Sep:2,Oct:3,Nov:4,Dec:5};
   return `
   <div class="strategy-steps">
@@ -1593,9 +1764,9 @@ function detailPlanTab(a){
   </div>
   <div class="grid g4" style="margin-bottom:16px;">
     <div class="card stat">${badge('workorder',44)}<div><div class="label">${t('total_tasks')}</div><div class="value">${total}</div></div></div>
-    <div class="card stat">${badge('normal',44)}<div><div class="label">${t('completed')}</div><div class="value">${completed} <span style="font-size:12px;">(42%)</span></div></div></div>
-    <div class="card stat">${badge('history',44)}<div><div class="label">${t('in_progress')}</div><div class="value">${inprog} <span style="font-size:12px;">(33%)</span></div></div></div>
-    <div class="card stat">${badge('plan',44)}<div><div class="label">${t('upcoming')}</div><div class="value">${upcoming} <span style="font-size:12px;">(25%)</span></div></div></div>
+    <div class="card stat">${badge('normal',44)}<div><div class="label">${t('completed')}</div><div class="value">${completed} <span style="font-size:12px;">(${pc(completed)}%)</span></div></div></div>
+    <div class="card stat">${badge('history',44)}<div><div class="label">${t('in_progress')}</div><div class="value">${inprog} <span style="font-size:12px;">(${pc(inprog)}%)</span></div></div></div>
+    <div class="card stat">${badge('plan',44)}<div><div class="label">${t('upcoming')}</div><div class="value">${upcoming} <span style="font-size:12px;">(${pc(upcoming)}%)</span></div></div></div>
   </div>
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head"><h3>${t('maint_schedule')}</h3>
@@ -1605,24 +1776,20 @@ function detailPlanTab(a){
         <button class="btn btn-primary" id="btnCreateTask">${t('create_task')}</button>
       </div>
     </div>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>${t('task')}</th><th>${t('type')}</th><th>${t('start')}</th><th>${t('end')}</th><th>${t('duration')}</th></tr></thead><tbody>
-    ${MAINT_PLAN.map(tk=>`<tr><td>${tk.no}</td><td><b>${a.id}</b></td><td>${tk.task}${tk.notes?`<div class="small-muted" style="white-space:normal;">${esc(tk.notes)}</div>`:''}</td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${tk.dur}</td></tr>`).join('')}
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>${t('task')}</th><th>${t('type')}</th><th>${t('start')}</th><th>${t('end')}</th><th>${t('duration')}</th><th>${t('status')}</th></tr></thead><tbody>
+    ${MAINT_PLAN.map((tk,ti)=>`<tr><td>${tk.no}</td><td><b>${a.id}</b></td><td>${tk.task}${tk.notes?`<div class="small-muted" style="white-space:normal;">${esc(tk.notes)}</div>`:''}</td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${tk.dur}</td><td><span class="pill ${st[ti]==='Completed'?'pill-healthy':st[ti]==='In Progress'?'pill-progress':'pill-info'}">${st[ti]==='Completed'?t('completed'):st[ti]==='In Progress'?t('in_progress'):t('upcoming')}</span></td></tr>`).join('')}
     </tbody></table></div>
     ${state.planView==='gantt' ? `
     <div style="margin-top:16px;">
       <div class="timeline-row"><div></div><div style="display:flex; font-size:10.5px; color:var(--muted); font-weight:700;">${GANTT_MONTHS.map(m=>`<div style="flex:1;">${m}</div>`).join('')}</div></div>
       ${MAINT_PLAN.map(tk=>{ const startIdx = monthStart[tk.m]; const leftPct = (startIdx/GANTT_MONTHS.length)*100; const clampedLen = Math.max(0.4, Math.min(tk.len, GANTT_MONTHS.length-startIdx)); const widthPct = (clampedLen/GANTT_MONTHS.length)*100;
-        return `<div class="timeline-row"><div class="small-muted">${tk.task}</div><div class="timeline-track"><div class="timeline-bar" style="left:${leftPct}%; width:${widthPct}%; background:${TYPE_COLOR[tk.type]};"></div><div class="today-line" style="left:${(2.1/6)*100}%;"></div></div></div>`; }).join('')}
+        return `<div class="timeline-row"><div class="small-muted">${tk.task}</div><div class="timeline-track"><div class="timeline-bar" style="left:${leftPct}%; width:${widthPct}%; background:${TYPE_COLOR[tk.type]};"></div>${todayPos===null?'':`<div class="today-line" style="left:${todayPos}%;"></div>`}</div></div>`; }).join('')}
     </div>` : ''}
   </div>
   <div class="card">
     <h3>${t('expected_benefits')}</h3>
-    <div class="grid g4">
-      <ul class="hlist"><li><span class="k">↓ ${t('maint_cost')}</span><span class="v" style="color:var(--green)">33%</span></li></ul>
-      <ul class="hlist"><li><span class="k">↑ ${t('asset_reliability')}</span><span class="v" style="color:var(--green)">25%</span></li></ul>
-      <ul class="hlist"><li><span class="k">↓ ${t('unplanned_failure')}</span><span class="v" style="color:var(--green)">40%</span></li></ul>
-      <ul class="hlist"><li><span class="k">↑ ${t('equip_lifetime')}</span><span class="v" style="color:var(--green)">${t('longer')}</span></li></ul>
-    </div>
+    <ul class="hlist"><li><span class="k">↓ ${t('maint_cost')}</span></li><li><span class="k">↑ ${t('asset_reliability')}</span></li><li><span class="k">↓ ${t('unplanned_failure')}</span></li><li><span class="k">↑ ${t('equip_lifetime')}</span></li></ul>
+    <p class="small-muted" style="font-size:11px;margin:6px 0 0;">${L('Expected direction only — measure actual savings against your own maintenance records.','แสดงทิศทางที่คาดหวังเท่านั้น — ควรวัดผลจริงเทียบกับบันทึกการบำรุงรักษาขององค์กร')}</p>
     <div class="notebox" style="margin-top:10px;">${gicon('help',16)}<div>${t('key_takeaway_plan')}</div></div>
   </div>`;
 }
@@ -1643,44 +1810,44 @@ function openAddTaskModal(){
     render(); toast(t('toast_added'),'success');
   });
 }
+function historyRows(a){
+  const rows = [];
+  labFor(a).forEach(smp=>{ const as=assessSample(smp); const d=diagnoseDGA(smp.gases); const st=statusOf(as);
+    rows.push({date:smp.date, _d:parseD(smp.date), act:L('Oil sampling & lab tests','เก็บตัวอย่างน้ำมันและทดสอบ'), res:`HI ${as.hi} · DGA ${d.code}`, style:`color:${statusColor(st)};font-weight:700;`, by:'Lab'}); });
+  getMaintFor(a).filter(tk=>planStatus(tk)==='Completed').forEach(tk=>rows.push({date:tk.end, _d:parseD(tk.end), act:tk.task, res:t('completed'), by:L('Field team','ทีมภาคสนาม')}));
+  return rows.sort((x,y)=>(y._d||0)-(x._d||0));
+}
 function detailHistoryTab(a){
   return `<div class="card"><h3>${t('inspection_history')}</h3>
   <div class="tbl-wrap"><table><thead><tr><th>${t('date')}</th><th>${t('activity')}</th><th>${t('result')}</th><th>${t('by')}</th></tr></thead><tbody>
-  <tr><td>18 Sep 2026</td><td>${state.lang==='th'?'เก็บตัวอย่าง DGA':'DGA Sampling'}</td><td style="color:var(--red);font-weight:700;">D2 (High)</td><td>Lab</td></tr>
-  <tr><td>12 Sep 2026</td><td>${state.lang==='th'?'อัปเดตผล DGA':'DGA result updated'}</td><td style="color:var(--red);font-weight:700;">D2 (High)</td><td>Lab</td></tr>
-  <tr><td>11 Sep 2026</td><td>${state.lang==='th'?'ตรวจสอบเสร็จสิ้น':'Inspection completed'}</td><td>${state.lang==='th'?'น้ำมันรั่วเล็กน้อย':'Minor oil leak'}</td><td>Field Team</td></tr>
-  <tr><td>10 Sep 2026</td><td>${state.lang==='th'?'คำนวณดัชนีสุขภาพใหม่':'Health index recalculated'}</td><td>HI = 34</td><td>System</td></tr>
-  <tr><td>28 Aug 2026</td><td>${state.lang==='th'?'เก็บตัวอย่างน้ำมันเสร็จสิ้น':'Oil sampling completed'}</td><td>${t('normal')}</td><td>Field Team</td></tr>
-  <tr><td>15 May 2026</td><td>${state.lang==='th'?'เก็บตัวอย่าง DGA':'DGA Sampling'}</td><td>D1 (Medium)</td><td>Lab</td></tr>
-  <tr><td>10 Jan 2026</td><td>${state.lang==='th'?'ตรวจสอบประจำปี':'Annual inspection'}</td><td>${state.lang==='th'?'น่าพอใจ':'Satisfactory'}</td><td>Field Team</td></tr>
+  ${historyRows(a).map(h=>`<tr><td>${h.date}</td><td>${h.act}</td><td style="${h.style||''}">${h.res}</td><td>${h.by}</td></tr>`).join('')}
   </tbody></table></div></div>`;
 }
 function detailDocsTab(a){
-  return `<div class="card"><h3>${t('photos_docs')}</h3>
-  <div class="thumb-grid" style="margin-bottom:16px;">
-    <div class="thumb"><img src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=200&h=140&fit=crop"><div class="cap">${state.lang==='th'?'มุมมองรวม':'Overall View'} · 12 Sep 2026</div></div>
-    <div class="thumb"><img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&h=140&fit=crop"><div class="cap">Bushing (A-Phase) · 12 Sep 2026</div></div>
-    <div class="thumb"><img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=200&h=140&fit=crop"><div class="cap">${state.lang==='th'?'น้ำมันรั่วเล็กน้อย':'Oil Leakage (Minor)'} · 11 Sep 2026</div></div>
-    <div class="thumb"><img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=200&h=140&fit=crop"><div class="cap">Nameplate</div></div>
-  </div>
-  <h3>${t('related_docs')}</h3>
-  <div class="tbl-wrap"><table><thead><tr><th>${t('file')}</th><th>${t('size')}</th><th>${t('date')}</th><th></th></tr></thead><tbody>
-  <tr><td>${a.id}_RCM_Analysis.pdf</td><td>1.2 MB</td><td>12 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_RCM_Analysis.txt">${gicon('download',0,'width:14px;height:14px;color:var(--accent-2)')}</button></td></tr>
-  <tr><td>${a.id}_FMEA.xlsx</td><td>0.8 MB</td><td>10 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_FMEA.csv" data-csv="fmea">${gicon('download',0,'width:14px;height:14px;color:var(--accent-2)')}</button></td></tr>
-  <tr><td>${a.id}_Maintenance_Plan.pdf</td><td>1.5 MB</td><td>8 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_Maintenance_Plan.csv" data-csv="plan">${gicon('download',0,'width:14px;height:14px;color:var(--accent-2)')}</button></td></tr>
-  <tr><td>DGA_${a.id}_20260918.pdf</td><td>1.2 MB</td><td>18 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="DGA_${a.id}_20260918.csv" data-csv="dga">${gicon('download',0,'width:14px;height:14px;color:var(--accent-2)')}</button></td></tr>
+  const d = (parseD(a.last)||new Date()); const ymd = isoD(d).replace(/-/g,'');
+  const dl = (fname,kind)=>`<button class="viewlink dl-doc" data-fname="${fname}" data-csv="${kind}">${gicon('download',0,'width:14px;height:14px;color:var(--accent-2)')}</button>`;
+  return `<div class="card"><h3>${t('related_docs')}</h3>
+  <p class="card-sub">${L('Files are generated from the current data of this transformer when you download them.','ไฟล์สร้างจากข้อมูลปัจจุบันของหม้อแปลงตัวนี้ตอนกดดาวน์โหลด')}</p>
+  <div class="tbl-wrap"><table><thead><tr><th>${t('file')}</th><th>${L('Contents','เนื้อหา')}</th><th>${L('Data as of','ข้อมูล ณ')}</th><th></th></tr></thead><tbody>
+  <tr><td>${a.id}_Condition_Assessment.csv</td><td class="small-muted">${L('Health Index by parameter','ดัชนีสุขภาพรายพารามิเตอร์')}</td><td>${a.last}</td><td>${dl(a.id+'_Condition_Assessment.csv','hi')}</td></tr>
+  <tr><td>${a.id}_FMEA.csv</td><td class="small-muted">FMEA / RPN</td><td>${a.last}</td><td>${dl(a.id+'_FMEA.csv','fmea')}</td></tr>
+  <tr><td>${a.id}_Maintenance_Plan.csv</td><td class="small-muted">${t('maint_schedule')}</td><td>${a.last}</td><td>${dl(a.id+'_Maintenance_Plan.csv','plan')}</td></tr>
+  <tr><td>DGA_${a.id}_${ymd}.csv</td><td class="small-muted">${L('Gas results & diagnosis','ผลก๊าซและการวินิจฉัย')}</td><td>${a.last}</td><td>${dl('DGA_'+a.id+'_'+ymd+'.csv','dga')}</td></tr>
+  <tr><td>${a.id}_Lab_History.csv</td><td class="small-muted">${L('All lab samples','ผลแล็บทุกครั้ง')}</td><td>${a.last}</td><td>${dl(a.id+'_Lab_History.csv','lab')}</td></tr>
   </tbody></table></div></div>`;
 }
 function initDetailCharts(a){
   const gridColor = cssv('--border');
-  if(document.getElementById('detTrend')){ const trendCol = categoryFor(a)==='critical'?'#e0473d':categoryFor(a)==='warning'?'#eba020':'#1fa571'; mkChart('detTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:trendForAsset(a),borderColor:trendCol,backgroundColor:trendCol+'22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:trendCol}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}}); }
-  if(document.getElementById('hiTrend')){ const trendCol2 = categoryFor(a)==='critical'?'#e0473d':categoryFor(a)==='warning'?'#eba020':'#1fa571'; mkChart('hiTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:TR014_MONTHS,datasets:[{data:trendForAsset(a),borderColor:trendCol2,backgroundColor:trendCol2+'22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:trendCol2}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}}); }
-  if(document.getElementById('hiGauge')){ const gc = categoryFor(a); const gaugeColor = gc==='critical'?'#e0473d':gc==='warning'?'#eba020':'#1fa571'; mkChart('hiGauge',{type:'doughnut',data:{datasets:[{data:[a.hi,100-a.hi],backgroundColor:[gaugeColor, gridColor],borderWidth:0,circumference:180,rotation:270}]},options:{...commonOpts(),cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}}); }
-  if(document.getElementById('hiRadar')){ const hib = hiBreakdownFor(categoryFor(a)); mkChart('hiRadar',{type:'radar',data:{labels:hib.map(h=>h.k),datasets:[{label:state.lang==='th'?'คะแนนปัจจุบัน':'Current Score',data:hib.map(h=>h.v),borderColor:'#e0473d',backgroundColor:'#e0473d33',pointRadius:4,pointHoverRadius:6,pointBackgroundColor:'#e0473d'},{label:state.lang==='th'?'เป้าหมาย':'Target',data:[85,85,85,85,85],borderColor:'#8b9099',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}]},options:{...commonOpts(),interaction:{mode:'nearest',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:(ctx)=>`${ctx.dataset.label}: ${ctx.parsed.r} / 100`}}},scales:{r:{min:0,max:100,grid:{color:gridColor},angleLines:{color:gridColor},pointLabels:{font:{size:10}}}}}}); }
-  if(document.getElementById('dgaHist')){ const dh = getDgaHistFor(a); mkChart('dgaHist',{type:'line',data:{labels:dh.months,datasets:[
-      {label:'H2',data:dh.H2,borderColor:'#2f7dd1',pointRadius:1,tension:.3},{label:'CH4',data:dh.CH4,borderColor:'#1fa571',pointRadius:1,tension:.3},
-      {label:'C2H6',data:dh.C2H6,borderColor:'#8759d6',pointRadius:1,tension:.3},{label:'CO',data:dh.CO,borderColor:'#e0473d',pointRadius:1,tension:.3},{label:'CO2',data:dh.CO2,borderColor:'#8b9099',pointRadius:1,tension:.3},
-    ]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}}); }
+  const hh = hiHistory(a); const hLabels = hh.map(h=>shortDate(h.date)), hVals = hh.map(h=>h.hi);
+  const trendCol = categoryFor(a)==='critical'?'#e0473d':categoryFor(a)==='warning'?'#eba020':'#1fa571';
+  const trendCfg = ()=>({type:'line',plugins:[valueLabelPlugin],data:{labels:hLabels,datasets:[{data:hVals,borderColor:trendCol,backgroundColor:trendCol+'22',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:trendCol}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
+  if(document.getElementById('detTrend')) mkChart('detTrend', trendCfg());
+  if(document.getElementById('hiTrend')) mkChart('hiTrend', trendCfg());
+  if(document.getElementById('hiGauge')){ const gaugeColor = trendCol; mkChart('hiGauge',{type:'doughnut',data:{datasets:[{data:[a.hi,100-a.hi],backgroundColor:[gaugeColor, gridColor],borderWidth:0,circumference:180,rotation:270}]},options:{...commonOpts(),cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}}); }
+  if(document.getElementById('hiRadar')){ const rows = profileFor(a).rows; const short = {dga:'DGA',bdv:'BDV',moisture:L('Moisture','ความชื้น'),acidity:L('Acidity','กรด'),ift:'IFT',furan:L('Furan','ฟูแรน'),visual:L('Visual','ภายนอก')};
+    mkChart('hiRadar',{type:'radar',data:{labels:rows.map(r=>short[r.key]),datasets:[{label:L('Current score','คะแนนปัจจุบัน'),data:rows.map(r=>r.score),borderColor:trendCol,backgroundColor:trendCol+'33',pointRadius:4,pointBackgroundColor:trendCol},{label:L('Good level','ระดับดี'),data:rows.map(()=>70),borderColor:'#8b9099',backgroundColor:'transparent',borderDash:[4,4],pointRadius:0}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{r:{min:0,max:100,ticks:{stepSize:25,display:false},grid:{color:gridColor},angleLines:{color:gridColor},pointLabels:{font:{size:10.5}}}}}}); }
+  if(document.getElementById('dgaHist')){ const labs = labFor(a).slice().reverse(); const cols={H2:'#2f7dd1',CH4:'#1fa571',C2H6:'#8759d6',C2H4:'#eba020',C2H2:'#e0473d',CO:'#8b9099'};
+    mkChart('dgaHist',{type:'line',data:{labels:labs.map(x=>shortDate(x.date)),datasets:Object.keys(cols).map(g=>({label:g,data:labs.map(x=>x.gases[g]),borderColor:cols[g],backgroundColor:cols[g],pointRadius:2.5,tension:.3}))},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{type:'logarithmic',title:{display:true,text:'ppm (log)'},grid:{color:gridColor}},x:{grid:{display:false}}}}}); }
   if(document.getElementById('fmeaDonut')){ const high = FMEA.filter(f=>f.risk==='High').length, med=FMEA.filter(f=>f.risk==='Medium').length, low=FMEA.length-high-med;
     mkChart('fmeaDonut',{type:'doughnut',data:{labels:['High','Medium','Low'],datasets:[{data:[high,med,low],backgroundColor:['#e0473d','#eba020','#1fa571'],borderWidth:0}]},options:{...commonOpts(),cutout:'70%',plugins:{legend:{display:false}}}}); }
   if(document.getElementById('fmeaScatter')) mkChart('fmeaScatter',{type:'scatter',data:{datasets:[{label:'Failure Modes',data:FMEA.map(f=>({x:f.o,y:f.s})),backgroundColor: FMEA.map(f=>f.risk==='High'?'#e0473d':f.risk==='Medium'?'#eba020':'#1fa571'),pointRadius:7}]},
@@ -1711,101 +1878,121 @@ function attachDetailEvents(){
   const exportBtn = document.getElementById('btnExportReport');
   if(exportBtn) exportBtn.addEventListener('click', ()=>{
     const a = ASSETS.find(x=>x.id===state.assetId);
-    openExportChoiceModal(()=>{ const rows = [['Asset ID','Location','Health Index','Status','RPN','DGA Diagnosis'],[a.id,a.loc,a.hi,a.status,'280','D2']]; downloadFile(`${a.id}_report.csv`, toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); });
+    openExportChoiceModal(()=>{ const prof = profileFor(a); const rpnMax = FMEA.length?Math.max(...FMEA.map(f=>f.rpn)):0;
+      const rows = [['Asset ID','Location','Sample date','Health Index','Status','Max RPN','DGA code','DGA diagnosis','Main issue','Strategy','Next action'],
+        [a.id,a.loc,prof.sample.date,a.hi,a.status,rpnMax,prof.code,DGA_NAMES[prof.code][0],prof.mainIssue.en,prof.strategy,prof.nextAction.en],[],
+        ['Parameter','Result','Score','Weight %','Weighted','Condition'], ...prof.rows.map(r=>[r.p,r.res,r.score,r.weight,r.ws,r.status])];
+      downloadFile(`${a.id}_report.csv`, toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); });
   });
+  document.querySelectorAll('[data-add-lab]').forEach(el=> el.addEventListener('click', openAddDgaResultModal));
   document.querySelectorAll('[data-create-plan]').forEach(el=> el.addEventListener('click',()=>{ state.detailTab='plan'; render(); }));
   document.querySelectorAll('.dl-doc').forEach(el=> el.addEventListener('click',()=>{
     const csvType = el.dataset.csv;
-    let content = 'Demo document generated by RCM Transformer prototype.';
+    const a = currentAsset(); const prof = profileFor(a);
+    let content = '';
+    if(csvType==='hi') content = toCSV([['Parameter','Result','Score','Weight %','Weighted','Condition','Remark'], ...prof.rows.map(r=>[r.p,r.res,r.score,r.weight,r.ws,r.status,r.remark]), ['Health Index','','','','',prof.hi,a.status]]);
+    if(csvType==='lab') content = toCSV([['Date',...GASES,'BDV kV','Moisture ppm','Acidity','IFT','Furan ppm','Visual','HI','DGA'], ...labFor(a).map(x=>[x.date,...GASES.map(g=>x.gases[g]),x.bdv,x.moisture,x.acidity,x.ift,x.furan,x.visual,assessSample(x).hi,diagnoseDGA(x.gases).code])]);
     if(csvType==='fmea') content = toCSV([['No','Component','Mode','Effect','S','O','D','RPN','Risk'], ...FMEA.map(f=>[f.no,f.comp,f.mode,f.effect,f.s,f.o,f.d,f.rpn,f.risk])]);
     if(csvType==='plan') content = toCSV([['No','Task','Type','Start','End','Duration'], ...MAINT_PLAN.map(p=>[p.no,p.task,p.type,p.start,p.end,p.dur])]);
-    if(csvType==='dga') content = toCSV([['Gas','Result(ppm)','Normal Range'], ...currentDgaGases().map(g=>[g.g,g.v,g.range])]);
+    if(csvType==='dga') content = toCSV([['Gas','Result (ppm)','Typical level'], ...gasRowsOf(prof.sample).map(g=>[g.g,g.v,g.range]), [], ['Duval zone',prof.dga.zone],['IEC 60599',prof.dga.iec],['Rogers case',prof.dga.rogers===null?'ND':prof.dga.rogers],['Diagnosis',prof.code+' '+DGA_NAMES[prof.code][0]]]);
     downloadFile(el.dataset.fname, content, 'text/csv'); toast(t('toast_exported'),'success');
   }));
 }
 
 /* ============ REPORTS PAGE ============ */
+function reportStats(){
+  const N=ASSETS.length, healthy=ASSETS.filter(a=>a.status==='Healthy').length, warning=ASSETS.filter(a=>a.status==='Warning').length, critical=N-healthy-warning;
+  const plans = ASSETS.flatMap(a=>getMaintFor(a)); const dates = plans.map(p=>parseD(p.start)).filter(Boolean).sort((x,y)=>x-y);
+  const fam = {N:0,T:0,D:0,PD:0,DT:0}; ASSETS.forEach(a=>{ const f=famOf(a._as?a._as.dga.code:'N'); if(f in fam) fam[f]++; });
+  const highByComp = {}; ASSETS.forEach(a=>getFmeaFor(a).filter(f=>f.risk==='High').forEach(f=>{ highByComp[f.comp]=(highByComp[f.comp]||0)+1; }));
+  const types=['BM','CM','PM','CBM','PdM'], byType = types.map(ty=>{ const ps=plans.filter(p=>p.type===ty).map(planStatus); return {ty, done:ps.filter(x=>x==='Completed').length, prog:ps.filter(x=>x==='In Progress').length, up:ps.filter(x=>x==='Upcoming').length}; });
+  const trend = fleetTrend();
+  return {N,healthy,warning,critical,plans,dates,fam,highByComp,byType,trend};
+}
 function renderReports(){
+  const r = reportStats(); const pct=(n)=>r.N?Math.round(n/r.N*100):0;
+  const worst = ASSETS.slice().sort((x,y)=>x.hi-y.hi)[0];
+  const famNames = {N:L('No fault','ไม่พบความผิดปกติ'),T:L('Thermal (T1–T3)','ความร้อน (T1–T3)'),D:L('Discharge (D1–D2)','ดิสชาร์จ (D1–D2)'),PD:'PD',DT:L('Mixed (DT)','ผสม (DT)')};
+  const famCol = {N:'#1fa571',T:'#e0473d',D:'#eba020',PD:'#8759d6',DT:'#8b9099'};
+  const topComp = Object.entries(r.highByComp).sort((x,y)=>y[1]-x[1])[0];
+  const topFault = Object.entries(r.fam).filter(([k])=>k!=='N').sort((x,y)=>y[1]-x[1])[0];
+  const delta = (r.trend[4]!=null && r.trend[0]!=null) ? r.trend[4]-r.trend[0] : 0;
+  const kts = [
+    L(`Average fleet HI is ${r.trend[4]} (${delta>=0?'+':''}${delta} vs 12 months ago)`,`HI เฉลี่ยทั้งฟลีท ${r.trend[4]} (${delta>=0?'+':''}${delta} เทียบกับ 12 เดือนก่อน)`),
+    r.critical ? L(`${r.critical} transformer(s) critical: ${ASSETS.filter(a=>a.status==='Critical').map(a=>a.id).join(', ')} — resample within 1 month`,`หม้อแปลงวิกฤต ${r.critical} ตัว: ${ASSETS.filter(a=>a.status==='Critical').map(a=>a.id).join(', ')} — ควรเก็บตัวอย่างซ้ำภายใน 1 เดือน`) : L('No transformer is in the critical range','ไม่มีหม้อแปลงอยู่ในระดับวิกฤต'),
+    worst ? L(`Lowest HI: ${worst.id} (${worst.hi}) — ${mainIssueOf(worst)}`,`HI ต่ำสุด: ${worst.id} (${worst.hi}) — ${mainIssueOf(worst)}`) : '',
+    topFault && topFault[1] ? L(`Most common DGA finding: ${famNames[topFault[0]]} (${topFault[1]} units)`,`ผล DGA ที่พบมากที่สุด: ${famNames[topFault[0]]} (${topFault[1]} ตัว)`) : L('No DGA fault indicated in the fleet','ไม่พบความผิดปกติจาก DGA ในฟลีท'),
+    topComp ? L(`Component with most high-risk failure modes: ${topComp[0]} (${topComp[1]})`,`ส่วนประกอบที่มีความเสี่ยงสูงมากที่สุด: ${topComp[0]} (${topComp[1]})`) : '',
+  ].filter(Boolean);
   return `
   <div class="grid g4" style="margin-bottom:16px;">
-    <div class="card stat">${badge('assets',44)}<div><div class="label">${t('total_transformers')}</div><div class="value">20</div></div></div>
-    <div class="card stat">${badge('normal',44)}<div><div class="label">${t('healthy')}</div><div class="value">13</div></div></div>
-    <div class="card stat">${badge('watch',44)}<div><div class="label">${t('warning')}</div><div class="value">5</div></div></div>
-    <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">2</div></div></div>
+    <div class="card stat">${badge('assets',44)}<div><div class="label">${t('total_transformers')}</div><div class="value">${r.N}</div></div></div>
+    <div class="card stat">${badge('normal',44)}<div><div class="label">${t('healthy')}</div><div class="value">${r.healthy}</div></div></div>
+    <div class="card stat">${badge('watch',44)}<div><div class="label">${t('warning')}</div><div class="value">${r.warning}</div></div></div>
+    <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">${r.critical}</div></div></div>
   </div>
   <div class="grid g2" style="margin-bottom:16px;">
-    <div class="card stat">${badge('maintenance',44)}<div><div class="label">${t('total_maint_tasks')}</div><div class="value">48</div></div></div>
-    <div class="card stat">${badge('plan',44)}<div><div class="label">${t('period')}</div><div class="value" style="font-size:14px;">Jan – Dec 2026</div></div></div>
+    <div class="card stat">${badge('maintenance',44)}<div><div class="label">${t('total_maint_tasks')}</div><div class="value">${r.plans.length}</div></div></div>
+    <div class="card stat">${badge('plan',44)}<div><div class="label">${t('period')}</div><div class="value" style="font-size:14px;">${r.dates.length?fmtD(r.dates[0])+' – '+fmtD(r.dates[r.dates.length-1]):'—'}</div></div></div>
   </div>
-  <div style="display:flex; gap:10px; margin-bottom:16px;">
+  <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
     <button class="btn btn-primary" id="btnGenerateReport">${gicon('reports',0,'width:13px;height:13px')} ${t('generate_report')}</button>
-    <button class="btn btn-ghost" id="btnScheduleReport">${gicon('plan',0,'width:13px;height:13px')} ${t('schedule_report')}</button>
     <button class="btn btn-ghost" id="btnExportAll">${gicon('download',0,'width:13px;height:13px')} ${t('export')}</button>
   </div>
   <div class="grid g2" style="margin-bottom:16px; align-items:stretch;">
     <div class="card"><h3>${t('asset_health_dist')}</h3>
       <div style="display:flex;align-items:center;gap:16px;">
-        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('repDonut',130)}<div class="donut-center"><div class="n">20</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
-        <div class="legend"><div class="li"><span class="sw" style="background:var(--green)"></span>${t('healthy')}<span class="lval">13 (65%)</span></div><div class="li"><span class="sw" style="background:var(--amber)"></span>${t('warning')}<span class="lval">5 (25%)</span></div><div class="li"><span class="sw" style="background:var(--red)"></span>${t('critical')}<span class="lval">2 (10%)</span></div></div>
+        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('repDonut',130)}<div class="donut-center"><div class="n">${r.N}</div><div class="l">${L('Assets','สินทรัพย์')}</div></div></div>
+        <div class="legend"><div class="li"><span class="sw" style="background:var(--green)"></span>${t('healthy')}<span class="lval">${r.healthy} (${pct(r.healthy)}%)</span></div><div class="li"><span class="sw" style="background:var(--amber)"></span>${t('warning')}<span class="lval">${r.warning} (${pct(r.warning)}%)</span></div><div class="li"><span class="sw" style="background:var(--red)"></span>${t('critical')}<span class="lval">${r.critical} (${pct(r.critical)}%)</span></div></div>
       </div>
     </div>
     <div class="card"><h3>${t('hi_trend_avg')}</h3>${chartBox('repTrend',150)}</div>
   </div>
   <div class="grid g2" style="margin-bottom:16px; align-items:stretch;">
-    <div class="card"><h3>${t('failure_mode_dist')}</h3>${chartBox('repFmeaBar',180)}</div>
-    <div class="card"><h3>${t('dga_fault_dist')}</h3>
+    <div class="card"><h3>${L('High-risk failure modes by component','โหมดความเสียหายความเสี่ยงสูงแยกตามส่วนประกอบ')}</h3><p class="card-sub">${L('Count of FMEA items with RPN ≥ 150 across the fleet','จำนวนรายการ FMEA ที่ RPN ≥ 150 ทั้งฟลีท')}</p>${chartBox('repFmeaBar',180)}</div>
+    <div class="card"><h3>${t('dga_fault_dist')}</h3><p class="card-sub">${L('Latest sample of each transformer','ตัวอย่างล่าสุดของหม้อแปลงแต่ละตัว')}</p>
       <div style="display:flex;align-items:center;gap:16px;">
-        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('repDgaDonut',130)}<div class="donut-center"><div class="n">20</div><div class="l">${state.lang==='th'?'ตัวอย่าง':'Samples'}</div></div></div>
-        <div class="legend">
-          <div class="li"><span class="sw" style="background:#e0473d"></span>${state.lang==='th'?'ความร้อน':'Thermal Fault'}<span class="lval">7 (35%)</span></div>
-          <div class="li"><span class="sw" style="background:#eba020"></span>${state.lang==='th'?'ไฟฟ้า':'Electrical Fault'}<span class="lval">6 (30%)</span></div>
-          <div class="li"><span class="sw" style="background:#8759d6"></span>PD<span class="lval">4 (20%)</span></div>
-          <div class="li"><span class="sw" style="background:#1fa571"></span>${t('normal')}<span class="lval">2 (10%)</span></div>
-          <div class="li"><span class="sw" style="background:#8b9099"></span>${state.lang==='th'?'ไม่แน่ชัด':'Uncertain'}<span class="lval">1 (5%)</span></div>
-        </div>
+        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('repDgaDonut',130)}<div class="donut-center"><div class="n">${r.N}</div><div class="l">${L('Samples','ตัวอย่าง')}</div></div></div>
+        <div class="legend">${Object.keys(r.fam).map(k=>`<div class="li"><span class="sw" style="background:${famCol[k]}"></span>${famNames[k]}<span class="lval">${r.fam[k]} (${pct(r.fam[k])}%)</span></div>`).join('')}</div>
       </div>
     </div>
   </div>
   <div class="grid" style="grid-template-columns:1fr; margin-bottom:16px; align-items:stretch;">
-    <div class="card"><h3>${t('maint_task_summary')}</h3><p class="card-sub">${t('maint_task_summary_desc')}</p>${chartBox('repTaskBar',200)}</div>
+    <div class="card"><h3>${t('maint_task_summary')}</h3><p class="card-sub">${L('All planned tasks by type and status (status from task dates vs. today)','งานตามแผนทั้งหมดแยกตามประเภทและสถานะ (สถานะคิดจากวันที่งานเทียบกับวันนี้)')}</p>${chartBox('repTaskBar',200)}</div>
   </div>
   <div class="grid" style="grid-template-columns:1.6fr 1fr;">
     <div class="card"><div class="card-head"><h3>${t('health_ranking')}</h3><span class="small-muted">${t('as_of')} ${new Date().toLocaleDateString(state.lang==='th'?'th-TH':'en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span></div>
       <p class="card-sub">${t('health_ranking_desc')}</p>
-      <div class="tbl-wrap"><table><thead><tr><th>${t('rank')}</th><th>${t('id')}</th><th>${t('health_index')}</th><th>${t('status')}</th></tr></thead><tbody>
-      ${ASSETS.slice().sort((x,y)=>x.hi-y.hi).map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)};font-weight:700;">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td></tr>`).join('')}
+      <div class="tbl-wrap"><table><thead><tr><th>${t('rank')}</th><th>${t('id')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${t('main_issue')}</th></tr></thead><tbody>
+      ${ASSETS.slice().sort((x,y)=>x.hi-y.hi).map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)};font-weight:700;">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td class="small-muted">${mainIssueOf(a)}</td></tr>`).join('')}
       </tbody></table></div>
     </div>
     <div class="card"><h3>${t('key_takeaways')}</h3>
-      <ul class="hlist"><li><span class="k">✓ ${t('kt1')}</span></li><li><span class="k">✓ ${t('kt2')}</span></li><li><span class="k">✓ ${t('kt3')}</span></li><li><span class="k">✓ ${t('kt4')}</span></li><li><span class="k">✓ ${t('kt5')}</span></li></ul>
+      <ul class="hlist">${kts.map(k=>`<li><span class="k" style="white-space:normal;">✓ ${k}</span></li>`).join('')}</ul>
     </div>
   </div>`;
 }
 function initReportsCharts(){
-  const gridColor = cssv('--border');
-  mkChart('repDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[13,5,2],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('repDgaDonut',{type:'doughnut',data:{labels:['Thermal','Electrical','PD','Normal','Uncertain'],datasets:[{data:[7,6,4,2,1],backgroundColor:['#e0473d','#eba020','#8759d6','#1fa571','#8b9099'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('repTrend',{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{label:'Avg HI',data:[70,71,70,72,73,72,71,70,72,73,74,75],borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:2}]},options:{...commonOpts(),plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
-  mkChart('repFmeaBar',{type:'bar',data:{labels:['Overheating','Insulation Failure','Oil Leakage','Contact Wear','Cooling Failure','Other'],datasets:[{data:[28,20,15,12,10,15],backgroundColor:'#2f7dd1'}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor}},y:{grid:{display:false}}}}});
-  mkChart('repTaskBar',{type:'bar',data:{labels:['BM','CM','PM','CBM','PdM'],datasets:[{label:'Planned',data:[0,9,8,5,4],backgroundColor:'#2f7dd1'},{label:'Completed',data:[0,7,7,5,3],backgroundColor:'#1fa571'},{label:'Pending',data:[1,5,4,1,1],backgroundColor:'#eba020'},{label:'Overdue',data:[0,1,1,0,0],backgroundColor:'#e0473d'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  const gridColor = cssv('--border'); const r = reportStats();
+  mkChart('repDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[r.healthy,r.warning,r.critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('repDgaDonut',{type:'doughnut',data:{labels:Object.keys(r.fam),datasets:[{data:Object.values(r.fam),backgroundColor:['#1fa571','#e0473d','#eba020','#8759d6','#8b9099'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('repTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{label:'Avg HI',data:r.trend,borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:3}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  const comps = Object.entries(r.highByComp).sort((x,y)=>y[1]-x[1]);
+  mkChart('repFmeaBar',{type:'bar',data:{labels:comps.map(c=>c[0]),datasets:[{data:comps.map(c=>c[1]),backgroundColor:'#e0473d'}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor},ticks:{precision:0}},y:{grid:{display:false}}}}});
+  mkChart('repTaskBar',{type:'bar',data:{labels:r.byType.map(x=>x.ty),datasets:[{label:t('completed'),data:r.byType.map(x=>x.done),backgroundColor:'#1fa571'},{label:t('in_progress'),data:r.byType.map(x=>x.prog),backgroundColor:'#2f7dd1'},{label:t('upcoming'),data:r.byType.map(x=>x.up),backgroundColor:'#eba020'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:gridColor},ticks:{precision:0}}}}});
 }
+function fleetRows(){ return [['ID','Location','Last sample','Health Index','Status','DGA code','Main issue','Strategy','Next sampling'], ...ASSETS.map(a=>[a.id,a.loc,a.last,a.hi,a.status,a._as?a._as.dga.code:'',mainIssueOf(a),strategyOf(a),a.next])]; }
 function attachReportsEvents(){
   const gen = document.getElementById('btnGenerateReport'); if(gen) gen.addEventListener('click', ()=>{
-    openExportChoiceModal(()=>{ const rows=[['ID','Location','Health Index','Status'], ...ASSETS.map(a=>[a.id,a.loc,a.hi,a.status])]; downloadFile('Asset_Summary_Report.csv', toCSV(rows), 'text/csv'); toast(t('toast_generated'),'success'); });
-  });
-  const sch = document.getElementById('btnScheduleReport'); if(sch) sch.addEventListener('click', ()=>{
-    openModal(t('schedule_report'), `
-      <div class="formrow"><label>${t('frequency')}</label><select name="freq"><option>${state.lang==='th'?'รายวัน':'Daily'}</option><option selected>${state.lang==='th'?'รายสัปดาห์':'Weekly'}</option><option>${state.lang==='th'?'รายเดือน':'Monthly'}</option></select></div>
-      <div class="formrow"><label>${t('field_email')}</label><input name="email" type="email" placeholder="you@example.com" required></div>
-    `, (data)=>{ toast(`${t('toast_scheduled')} (${data.freq} → ${data.email})`,'success'); });
+    openExportChoiceModal(()=>{ downloadFile('Asset_Summary_Report.csv', toCSV(fleetRows()), 'text/csv'); toast(t('toast_generated'),'success'); });
   });
   const exp = document.getElementById('btnExportAll'); if(exp) exp.addEventListener('click', ()=>{
-    openExportChoiceModal(()=>{ const rows=[['ID','Location','Health Index','Status'], ...ASSETS.map(a=>[a.id,a.loc,a.hi,a.status])]; downloadFile('RCM_Transformer_Export.csv', toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); });
+    openExportChoiceModal(()=>{ downloadFile('RCM_Transformer_Export.csv', toCSV(fleetRows()), 'text/csv'); toast(t('toast_exported'),'success'); });
   });
 }
 
 /* ============ SETTINGS PAGE ============ */
-const SETTINGS_TABS = [['general','settings_general'],['hi','settings_hi'],['fm','settings_fm'],['maint','settings_maint'],['users','settings_users'],['sys','settings_sys']];
+const SETTINGS_TABS = [['general','settings_general'],['hi','settings_hi'],['fm','settings_fm'],['maint','settings_maint'],['sys','settings_sys']];
 /* ============ GUIDE / HELP PAGE ============ */
 function renderGuide(){
   const items = [
@@ -1835,7 +2022,7 @@ function renderGuide(){
       <li><span class="k">✓ ${t('guide_tip3')}</span></li>
       <li><span class="k">✓ ${t('guide_tip4')}</span></li>
     </ul>
-  </div>` + renderIconLibrary();
+  </div>`;
 }
 function renderSettings(){
   return `<div class="tabs">${SETTINGS_TABS.map(s=>`<button class="tab ${state.settingsTab===s[0]?'active':''}" data-stab="${s[0]}">${t(s[1])}</button>`).join('')}</div>
@@ -1845,13 +2032,13 @@ function settingsTabContent(){
   if(state.settingsTab==='hi') return `
   <div class="card">
     <div class="card-head"><h3>${t('hi_criteria_settings')}</h3><button class="btn btn-outline" id="btnEditHi" style="padding:6px 11px;font-size:12px;">${t('edit')}</button></div>
-    <div class="tbl-wrap"><table><thead><tr><th>${t('parameter')}</th><th>${t('weight')}</th></tr></thead><tbody>
-    <tr><td>DGA</td><td>25%</td></tr><tr><td>${state.lang==='th'?'สภาพน้ำมัน':'Oil Condition'}</td><td>20%</td></tr><tr><td>${state.lang==='th'?'การทดสอบทางไฟฟ้า':'Electrical Test'}</td><td>15%</td></tr>
-    <tr><td>${state.lang==='th'?'ตรวจสอบด้วยสายตา':'Visual Inspection'}</td><td>15%</td></tr><tr><td>${state.lang==='th'?'อายุ/โหลด':'Age / Loading'}</td><td>15%</td></tr><tr><td>${state.lang==='th'?'สภาพแวดล้อม':'Ambient Condition'}</td><td>10%</td></tr>
-    <tr><td style="font-weight:800;">${t('total')}</td><td style="font-weight:800;">100%</td></tr></tbody></table></div>
+    <p class="card-sub">${L('These weights are used directly in every Health Index calculation. Condition limits are Good / Fair / Poor.','น้ำหนักเหล่านี้ใช้คำนวณดัชนีสุขภาพของทุกหม้อแปลงโดยตรง เกณฑ์สภาพแบ่งเป็น ดี / พอใช้ / แย่')}</p>
+    <div class="tbl-wrap"><table><thead><tr><th>${t('parameter')}</th><th>${t('weight')}</th><th>${L('Good / Fair / Poor','ดี / พอใช้ / แย่')}</th></tr></thead><tbody>
+    ${HI_PARAMS.map((p,i)=>`<tr><td>${L(p.name[0],p.name[1])}</td><td>${HI_WEIGHTS[i]}%</td><td class="small-muted">${L(p.limits[0],p.limits[1])}</td></tr>`).join('')}
+    <tr><td style="font-weight:800;">${t('total')}</td><td style="font-weight:800;">${HI_WEIGHTS.reduce((x,y)=>x+y,0)}%</td><td></td></tr></tbody></table></div>
   </div>
   <div class="grid g2" style="margin-top:16px;">
-    <div class="card"><div class="card-head"><h3>${t('risk_thresholds')}</h3><button class="btn btn-outline" id="btnEditRisk" style="padding:6px 11px;font-size:12px;">${t('edit')}</button></div>
+    <div class="card"><div class="card-head"><h3>${t('risk_thresholds')}</h3></div>
       <div class="tbl-wrap"><table><thead><tr><th>${t('level')}</th><th>${t('hi_range')}</th><th>${t('action')}</th></tr></thead><tbody>
       <tr><td><span class="pill pill-healthy">${t('good')}</span></td><td>80–100</td><td class="small-muted">${state.lang==='th'?'ทำงานปกติ':'Normal operation'}</td></tr>
       <tr><td><span class="pill" style="background:#e5f5ee;color:#178a5e;">${t('moderate')}</span></td><td>60–79</td><td class="small-muted">${state.lang==='th'?'ติดตามใกล้ชิด':'Close monitoring'}</td></tr>
@@ -1865,16 +2052,11 @@ function settingsTabContent(){
   if(state.settingsTab==='fm') return `
   <div class="card"><div class="card-head"><h3>${t('settings_fm')}</h3><button class="linklike" id="btnManageFm">${t('manage')}</button></div>
     <div class="tbl-wrap"><table><thead><tr><th>${t('code')}</th><th>${t('failure_mode')}</th><th>${t('category')}</th></tr></thead><tbody>
-    <tr><td>FM-01</td><td>Overheating</td><td>${state.lang==='th'?'ความร้อน':'Thermal'}</td></tr>
-    <tr><td>FM-02</td><td>Insulation Failure</td><td>${state.lang==='th'?'ไฟฟ้า':'Electrical'}</td></tr>
-    <tr><td>FM-03</td><td>Oil Leakage</td><td>${state.lang==='th'?'กลไก':'Mechanical'}</td></tr>
-    <tr><td>FM-04</td><td>Winding Deformation</td><td>${state.lang==='th'?'กลไก':'Mechanical'}</td></tr>
-    <tr><td>FM-05</td><td>Tap Changer Fault</td><td>${state.lang==='th'?'กลไก':'Mechanical'}</td></tr>
-    <tr><td>FM-06</td><td>Bushing Failure</td><td>${state.lang==='th'?'ไฟฟ้า':'Electrical'}</td></tr>
+    ${FMEA_TEMPLATE.map(f=>`<tr><td>${f.code}</td><td>${f.comp} — ${f.mode}</td><td>${L(f.cat[0],f.cat[1])}</td></tr>`).join('')}
     </tbody></table></div>
   </div>`;
   if(state.settingsTab==='maint') return `
-  <div class="card"><div class="card-head"><h3>${t('maint_strategy_settings')}</h3><button class="btn btn-outline" id="btnEditMaint" style="padding:6px 11px;font-size:12px;">${t('edit')}</button></div>
+  <div class="card"><div class="card-head"><h3>${t('maint_strategy_settings')}</h3></div>
     <div class="tbl-wrap"><table><thead><tr><th>${t('strategy')}</th><th>${t('trigger')}</th></tr></thead><tbody>
     <tr><td><b>BM</b> ${state.lang==='th'?'ซ่อมเมื่อเสีย':'Breakdown'}</td><td class="small-muted">${state.lang==='th'?'ใช้งานจนเสีย':'Run to failure — when failed'}</td></tr>
     <tr><td><b>CM</b> ${state.lang==='th'?'แก้ไข':'Corrective'}</td><td class="small-muted">${state.lang==='th'?'แก้ไขเมื่อพบความผิดปกติ':'Fix after abnormality found'}</td></tr>
@@ -1893,11 +2075,13 @@ function settingsTabContent(){
   <div class="grid g2">
     <div class="card"><h3>${t('data_mgmt')}</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="import">${t('import_data')}</button>
         <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="export">${t('export_data')}</button>
         <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="backup">${t('backup_db')}</button>
         <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="restore">${t('restore_db')}</button>
+        <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;color:var(--red);" data-sys="reset">${L('Reset demo data','รีเซ็ตข้อมูลตัวอย่าง')}</button>
       </div>
+      <input type="file" id="restoreFile" accept="application/json,.json" style="display:none;">
+      <p class="small-muted" style="font-size:11.5px;margin:10px 0 0;">${L('Data is saved automatically in this browser (localStorage). Use Backup to move it to another computer.','ข้อมูลบันทึกอัตโนมัติในเบราว์เซอร์นี้ (localStorage) ใช้ “สำรองข้อมูล” เพื่อย้ายไปเครื่องอื่น')}</p>
     </div>
     <div class="card"><h3>${t('appearance')}</h3>
       <div class="settingsrow"><div class="srlabel">${t('theme')}</div><span class="small-muted">${t('light')}</span></div>
@@ -1907,7 +2091,7 @@ function settingsTabContent(){
   // general
   return `
   <div class="grid g3" style="margin-bottom:16px; align-items:stretch;">
-    <div class="card"><div class="card-head"><h3>${t('system_info')}</h3><button class="btn btn-outline" id="btnEditSystem" style="padding:6px 11px;font-size:12px;">${t('edit')}</button></div>
+    <div class="card"><div class="card-head"><h3>${t('system_info')}</h3></div>
       <ul class="hlist"><li><span class="k">${t('system_name')}</span><span class="v">RCM Transformer</span></li><li><span class="k">${t('version')}</span><span class="v">1.0.0</span></li>
       <li><span class="k">${t('department')}</span><span class="v">${state.lang==='th'?'ฝ่ายบริหารสินทรัพย์':'Asset Management Division'}</span></li>
       <li><span class="k">${t('timezone')}</span><span class="v">(UTC+7) Bangkok</span></li><li><span class="k">${t('date_format')}</span><span class="v">DD/MM/YYYY</span></li>
@@ -1926,10 +2110,24 @@ function settingsTabContent(){
     </div>
   </div>`;
 }
+function attachRestoreInput(){
+  const inp = document.getElementById('restoreFile'); if(!inp) return;
+  inp.addEventListener('change', ()=>{ const f=inp.files[0]; if(!f) return; const rd=new FileReader();
+    rd.onload = ()=>{ try{ if(applyData(JSON.parse(rd.result))){ render(); toast(L('Backup restored','กู้คืนข้อมูลแล้ว'),'success'); } else toast(L('Not a valid backup file','ไฟล์สำรองไม่ถูกต้อง')); }catch(e){ toast(L('Not a valid backup file','ไฟล์สำรองไม่ถูกต้อง')); } };
+    rd.readAsText(f); });
+}
 function attachSettingsEvents(){
+  attachRestoreInput();
   document.querySelectorAll('[data-stab]').forEach(el=> el.addEventListener('click',()=>{ state.settingsTab = el.dataset.stab; render(); }));
   document.querySelectorAll('.toggle[data-toggle]').forEach(tgl=> tgl.addEventListener('click',()=>{ tgl.classList.toggle('on'); toast(t('toast_saved')); }));
-  ['btnEditHi','btnEditRisk','btnEditMaint','btnEditSystem'].forEach(id=>{ const b=document.getElementById(id); if(b) b.addEventListener('click', ()=>toast(t('toast_saved'),'success')); });
+  const editHi = document.getElementById('btnEditHi'); if(editHi) editHi.addEventListener('click', ()=>{
+    openModal(t('hi_criteria_settings'), `<p class="small-muted" style="margin-top:0;">${L('Weights must add up to 100%.','น้ำหนักรวมต้องเท่ากับ 100%')}</p>
+      ${HI_PARAMS.map((p,i)=>`<div class="formrow"><label>${L(p.name[0],p.name[1])} (%)</label><input name="w${i}" type="number" min="0" max="100" value="${HI_WEIGHTS[i]}" required></div>`).join('')}`, (data)=>{
+      const w = HI_PARAMS.map((p,i)=>Math.max(0,Number(data['w'+i])||0)); const sum = w.reduce((x,y)=>x+y,0);
+      if(sum!==100){ toast(L(`Not saved — total is ${sum}%, must be 100%`,`ยังไม่บันทึก — รวมได้ ${sum}% ต้องเท่ากับ 100%`)); return; }
+      HI_WEIGHTS = w; render(); toast(L('Saved — all Health Index values recalculated','บันทึกแล้ว — คำนวณดัชนีสุขภาพใหม่ทั้งหมด'),'success');
+    });
+  });
   const manageFm = document.getElementById('btnManageFm'); if(manageFm) manageFm.addEventListener('click', ()=>{ state.page='detail'; state.detailTab='fmea'; render(); });
   const addUser = document.getElementById('btnAddUser'); if(addUser) addUser.addEventListener('click', ()=>{
     openModal(t('modal_add_user'), `
@@ -1940,9 +2138,10 @@ function attachSettingsEvents(){
   });
   document.querySelectorAll('.sys-btn').forEach(b=> b.addEventListener('click', ()=>{
     const kind = b.dataset.sys;
-    if(kind==='export'){ const rows=[['ID','Location','Health Index','Status'], ...ASSETS.map(a=>[a.id,a.loc,a.hi,a.status])]; downloadFile('rcm_export.csv', toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); }
-    else if(kind==='backup'){ downloadFile('rcm_backup.json', JSON.stringify({ASSETS,FMEA,MAINT_PLAN,USERS}, null, 2), 'application/json'); toast(t('toast_exported'),'success'); }
-    else toast(t('toast_saved'),'success');
+    if(kind==='export'){ downloadFile('rcm_export.csv', toCSV(fleetRows()), 'text/csv'); toast(t('toast_exported'),'success'); }
+    else if(kind==='backup'){ downloadFile('rcm_backup.json', JSON.stringify(snapshotData(), null, 2), 'application/json'); toast(t('toast_exported'),'success'); }
+    else if(kind==='restore'){ document.getElementById('restoreFile').click(); }
+    else if(kind==='reset'){ if(confirm(L('Delete all saved changes and restore the demo data?','ลบการเปลี่ยนแปลงทั้งหมดและกลับไปใช้ข้อมูลตัวอย่าง?'))){ try{ localStorage.removeItem(STORE_KEY); }catch(e){} location.reload(); } }
   }));
 }
 
@@ -1973,12 +2172,13 @@ function attachTopbarEvents(){
     }
   });
 }
+let notifRead = false;
 function toggleBellDropdown(){
   const dd = document.getElementById('bellDropdown');
   if(dd.innerHTML){ dd.innerHTML=''; return; }
   dd.innerHTML = `<div class="dropdown"><div class="dropdown-head"><span>${t('notifications')}</span><button class="linklike" id="markAllRead">${t('mark_all_read')}</button></div>
-  <div class="dropdown-body">${NOTIFICATIONS.map(n=>`<div class="dropdown-item">${n[state.lang]}<div class="dt">${n.t}</div></div>`).join('')}</div></div>`;
-  document.getElementById('markAllRead').addEventListener('click', ()=>{ document.getElementById('bellCount').style.display='none'; dd.innerHTML=''; toast(t('toast_saved')); });
+  <div class="dropdown-body">${notificationsList().map(n=>`<div class="dropdown-item">${n[state.lang]}<div class="dt">${L('Sample','ตัวอย่าง')} ${n.t}</div></div>`).join('') || `<div class="dropdown-item">${L('No alerts','ไม่มีการแจ้งเตือน')}</div>`}</div></div>`;
+  document.getElementById('markAllRead').addEventListener('click', ()=>{ notifRead = true; document.getElementById('bellCount').style.display='none'; dd.innerHTML=''; toast(t('toast_saved')); });
 }
 function toggleUserDropdown(){
   const dd = document.getElementById('userDropdown');
@@ -2010,6 +2210,8 @@ function pageMeta(){
   return titles[state.page] || ['RCM Transformer',''];
 }
 function render(){
+  recomputeAll(); saveData();
+  const nb = document.getElementById('bellCount'); if(nb){ const n = notificationsList().length; nb.textContent = n; if(!notifRead) nb.style.display = n ? '' : 'none'; }
   renderNav();
   document.getElementById('langEn').classList.toggle('active', state.lang==='en');
   document.getElementById('langTh').classList.toggle('active', state.lang==='th');
@@ -2033,6 +2235,7 @@ function closeSidebar(){ document.getElementById('sidebar').classList.remove('op
 document.getElementById('menuBtn').addEventListener('click',()=>{ const sb=document.getElementById('sidebar'); sb.classList.contains('open') ? closeSidebar() : openSidebar(); });
 document.getElementById('sidebarBackdrop').addEventListener('click', closeSidebar);
 
+loadData();
 /* ============ LOGIN GATE ============ */
 document.getElementById('loginTitle').textContent = t('login_title');
 document.getElementById('loginSub').textContent = t('login_sub');
@@ -2040,10 +2243,11 @@ document.getElementById('loginUserLabel').textContent = t('login_user');
 document.getElementById('loginPassLabel').textContent = t('login_pass');
 document.getElementById('loginSubmitBtn').textContent = t('login_submit');
 document.getElementById('loginHint').textContent = t('login_hint');
+let topbarBound = false;
 function showApp(){
   document.getElementById('loginOverlay').classList.add('hidden');
   document.getElementById('appRoot').style.visibility = 'visible';
-  attachTopbarEvents();
+  if(!topbarBound){ attachTopbarEvents(); topbarBound = true; }
   render();
 }
 function showLogin(){
