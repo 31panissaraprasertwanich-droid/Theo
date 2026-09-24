@@ -268,9 +268,30 @@ select.chip-input{cursor:pointer;}
 .login-card p{margin:0 0 20px; font-size:12.5px; color:var(--muted);}
 .login-card .formrow input{width:100%;}
 .login-hint{margin-top:14px; font-size:11px; color:var(--muted); text-align:center;}
+
+/* ===== Glass icon set ===== */
+.gbadge{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;flex:0 0 auto;
+  background:radial-gradient(circle at 32% 26%, #ffffff 0%, #f4f8fc 38%, #dfe8f2 78%, #cfdbe8 100%);
+  box-shadow:0 4px 10px rgba(22,52,92,.16), inset 0 1px 1px rgba(255,255,255,.95), inset 0 -2px 4px rgba(90,120,160,.18);
+  border:1px solid rgba(255,255,255,.85); position:relative;}
+.gbadge svg{display:block; overflow:visible;}
+.gbadge.gstatus{background:radial-gradient(circle at 32% 26%, #fff 0%, #eef3f8 60%, #dbe5ef 100%);}
+.navitem .gbadge{box-shadow:0 2px 6px rgba(0,0,0,.25), inset 0 1px 1px #fff; transition:transform .15s ease;}
+.navitem:hover .gbadge{transform:scale(1.07);}
+.navitem.active .gbadge{box-shadow:0 0 0 2px var(--accent), 0 3px 8px rgba(0,0,0,.3), inset 0 1px 1px #fff;}
+.navitem svg{opacity:1;}
+.settingsrow .srlabel .gbadge svg{color:inherit;}
+.card.stat .gbadge, .kpi .gbadge{transition:transform .15s ease;}
+.card.stat:hover .gbadge{transform:translateY(-2px);}
+.icon-lib{display:grid; grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:14px 8px;}
+.icon-lib .ic{display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;padding:6px 2px;}
+.icon-lib .ic .th{font-size:12px;font-weight:700;color:var(--text,#1f2a37);line-height:1.25;}
+.icon-lib .ic .en{font-size:11px;color:var(--muted);}
+.icon-lib-sep{grid-column:1/-1;height:1px;background:var(--border);margin:4px 0;}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="rcmNavy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d5a8e"/><stop offset="1" stop-color="#0f2744"/></linearGradient></defs></svg>
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
     <h2 id="loginTitle">Sign in</h2>
@@ -769,48 +790,102 @@ const ICONS = {
 };
 function icon(name,extra){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra||''}>${ICONS[name]||''}</svg>`;}
 
-/* ---- Colored badge icon set (matches the RCM icon-library reference) ---- */
-const BADGE_DEFS = {
- home:      {bg:'#2f7dd1', path:'<path d="M4 11l8-7 8 7" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9" fill="none" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"/>'},
- assets:    {bg:'#ed9145', path:'<rect x="6" y="3.5" width="10" height="15" rx="1.3" fill="#fff"/><line x1="8" y1="7" x2="14" y2="7" stroke="#ed9145" stroke-width="1.3"/><line x1="8" y1="10" x2="14" y2="10" stroke="#ed9145" stroke-width="1.3"/><circle cx="16.5" cy="16.5" r="3.6" fill="#ed9145" stroke="#fff" stroke-width="1.6"/><line x1="19" y1="19" x2="21" y2="21" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>'},
- rcm:       {bg:'#178a5e', path:'<circle cx="12" cy="4.5" r="2" fill="#fff"/><circle cx="5.5" cy="18.5" r="2" fill="#fff"/><circle cx="18.5" cy="18.5" r="2" fill="#fff"/><path d="M12 6.5v4M12 10.5L5.5 16.5M12 10.5l6.5 6" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/>'},
- fmea:      {bg:'#2f7dd1', path:'<rect x="5.5" y="3" width="13" height="18" rx="1.6" fill="none" stroke="#fff" stroke-width="1.7"/><line x1="8" y1="8" x2="15.5" y2="8" stroke="#fff" stroke-width="1.6"/><line x1="8" y1="12" x2="15.5" y2="12" stroke="#fff" stroke-width="1.6"/><line x1="8" y1="16" x2="12.5" y2="16" stroke="#fff" stroke-width="1.6"/>'},
- risk:      {bg:'#e0473d', path:'<path d="M12 3.2l9.5 16.8H2.5z" fill="#fff"/><rect x="11.1" y="10" width="1.8" height="5.6" fill="#e0473d"/><circle cx="12" cy="17.6" r="1.1" fill="#e0473d"/>'},
- health:    {bg:'#8759d6', path:'<path d="M12 20s-7.2-4.7-9.4-9.2C1.3 7.9 2.6 4.8 5.7 4.8c1.9 0 3.4 1 4.5 2.5 1.1-1.5 2.6-2.5 4.5-2.5 3.1 0 4.4 3.1 3.1 6-2.2 4.5-9.4 9.2-9.4 9.2z" fill="#fff"/><polyline points="6.2,13.4 9,13.4 10.4,10.6 12,15.4 13.2,12 15.6,12" fill="none" stroke="#8759d6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>'},
- lab:       {bg:'#159c94', path:'<path d="M10.2 3.2h3.6M10.8 3.2v6.4l-5 8.6a1.9 1.9 0 0 0 1.6 2.8h9.2a1.9 1.9 0 0 0 1.6-2.8l-5-8.6V3.2" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.8 15h8.4" stroke="#fff" stroke-width="1.6"/>'},
- plan:      {bg:'#2f7dd1', path:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L2.3 18.7l3 3 7.3-7.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z" fill="#fff"/>'},
- reports:   {bg:'#2f7dd1', path:'<rect x="4.2" y="14" width="3" height="6" rx=".5" fill="#fff"/><rect x="10.5" y="8.5" width="3" height="11.5" rx=".5" fill="#fff"/><rect x="16.8" y="4" width="3" height="16" rx=".5" fill="#fff"/>'},
- settings:  {bg:'#5c554a', path:'<circle cx="12" cy="12" r="2.6" fill="#fff"/><path d="M19 12.6a1.4 1.4 0 0 0 .3 1.6l.1.1a1.7 1.7 0 1 1-2.4 2.4l-.1-.1a1.4 1.4 0 0 0-1.6-.3 1.4 1.4 0 0 0-.9 1.3V18a1.7 1.7 0 1 1-3.4 0v-.1a1.4 1.4 0 0 0-.9-1.3 1.4 1.4 0 0 0-1.6.3l-.1.1a1.7 1.7 0 1 1-2.4-2.4l.1-.1a1.4 1.4 0 0 0 .3-1.6 1.4 1.4 0 0 0-1.3-.9H5a1.7 1.7 0 1 1 0-3.4h.1a1.4 1.4 0 0 0 1.3-.9 1.4 1.4 0 0 0-.3-1.6l-.1-.1a1.7 1.7 0 1 1 2.4-2.4l.1.1a1.4 1.4 0 0 0 1.6.3H10a1.4 1.4 0 0 0 .9-1.3V5a1.7 1.7 0 1 1 3.4 0v.1a1.4 1.4 0 0 0 .9 1.3 1.4 1.4 0 0 0 1.6-.3l.1-.1a1.7 1.7 0 1 1 2.4 2.4l-.1.1a1.4 1.4 0 0 0-.3 1.6c.2.5.7.9 1.3.9H19a1.7 1.7 0 1 1 0 3.4h-.1a1.4 1.4 0 0 0-1.3.9z" fill="none" stroke="#fff" stroke-width="1.3"/>'},
- normal:    {bg:'#1fa571', path:'<path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>'},
- watch:     {bg:'#eba020', path:'<path d="M12 3.2l9.5 16.8H2.5z" fill="#fff"/><rect x="11.1" y="10" width="1.8" height="5.6" fill="#eba020"/><circle cx="12" cy="17.6" r="1.1" fill="#eba020"/>'},
- critical:  {bg:'#e0473d', path:'<circle cx="12" cy="12" r="9" fill="#fff"/><rect x="11.1" y="6.2" width="1.8" height="7.6" fill="#e0473d"/><circle cx="12" cy="16.8" r="1.2" fill="#e0473d"/>'},
- maintenance:{bg:'#e0473d', path:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L2.3 18.7l3 3 7.3-7.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z" fill="#fff"/>'},
- inprogress:{bg:'#eba020', path:'<path d="M6 3h12M6 21h12" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M7 3c0 4 3 5 5 6-2 1-5 2-5 6M17 3c0 4-3 5-5 6 2 1 5 2 5 6" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>'},
- pending:   {bg:'#696257', path:'<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="1.7"/><rect x="9.3" y="8" width="1.9" height="8" rx=".8" fill="#fff"/><rect x="12.8" y="8" width="1.9" height="8" rx=".8" fill="#fff"/>'},
- completed: {bg:'#1fa571', path:'<rect x="5.5" y="3" width="13" height="18" rx="1.6" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M8.5 12.2l2.4 2.4 4.6-5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>'},
- scheduled: {bg:'#2f7dd1', path:'<rect x="4.2" y="5" width="15.6" height="15" rx="2" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M4.2 9.4h15.6M8 3v4M16 3v4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'},
- review:    {bg:'#2f7dd1', path:'<path d="M4.5 12a7.5 7.5 0 0 1 12.6-5.5M19.5 12a7.5 7.5 0 0 1-12.6 5.5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M17 3.5v3.5h-3.5M7 20.5V17h3.5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/>'},
- notification:{bg:'#2f7dd1', path:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M13.7 21a2 2 0 0 1-3.4 0" fill="none" stroke="#fff" stroke-width="1.6"/>'},
- profile:   {bg:'#2f7dd1', path:'<circle cx="12" cy="8.2" r="3.4" fill="#fff"/><path d="M5 20c0-3.5 3-6.2 7-6.2s7 2.7 7 6.2" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>'},
- users:     {bg:'#2f7dd1', path:'<circle cx="9" cy="9" r="2.6" fill="#fff"/><circle cx="16.5" cy="10" r="2.1" fill="#fff"/><path d="M3.3 19c0-3 2.6-5.2 5.7-5.2s5.7 2.2 5.7 5.2" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M14.5 14.3c2.3.4 3.8 2.1 3.8 4.7" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'},
- access:    {bg:'#2f7dd1', path:'<path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6z" fill="#fff"/><path d="M9 12l2 2 4-4.2" stroke="#2f7dd1" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'},
- database:  {bg:'#2f7dd1', path:'<ellipse cx="12" cy="6" rx="7" ry="2.6" fill="#fff"/><path d="M5 6v12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6V6" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M5 12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6" fill="none" stroke="#fff" stroke-width="1.6"/>'},
- upload:    {bg:'#2f7dd1', path:'<path d="M7.2 17.8a4 4 0 0 1-1-7.9 5 5 0 0 1 9.4-2.3A4.5 4.5 0 0 1 17 16.8" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M12 11.5v7M9.2 14.5l2.8-2.8 2.8 2.8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'},
- help:      {bg:'#2f7dd1', path:'<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.8.5-1.1 1-1.1 1.9" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1" fill="#fff"/>'},
- manual:    {bg:'#2f7dd1', path:'<path d="M4 5.2c2-1 5.4-1 8 0v13.6c-2.6-1-6-1-8 0z" fill="#fff"/><path d="M20 5.2c-2-1-5.4-1-8 0v13.6c2.6-1 6-1 8 0z" fill="#e8f0fb"/>'},
- language:  {bg:'#2f7dd1', path:'<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="4" ry="9" fill="none" stroke="#fff" stroke-width="1.5"/><line x1="3.2" y1="12" x2="20.8" y2="12" stroke="#fff" stroke-width="1.5"/>'},
- logout:    {bg:'#e0473d', path:'<path d="M10 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H10" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M15 8l4 4-4 4M8.5 12h10.3" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>'},
- trend:     {bg:'#8759d6', path:'<path d="M4 17l5-6 4 3 6-8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 6h4v4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'},
- triangle:  {bg:'#eba020', path:'<path d="M12 4l8 16H4z" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><circle cx="13" cy="14" r="1.6" fill="#fff"/>'},
- scale:     {bg:'#159c94', path:'<path d="M12 3v18M7 21h10" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M12 6l-5 2 2.5 5.5L12 12z M12 6l5 2-2.5 5.5L12 12z" fill="none" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>'},
- target:    {bg:'#2f7dd1', path:'<circle cx="12" cy="12" r="8" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="4.4" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="1" fill="#fff"/>'},
+/* ---- Glass icon set (RCM Transformer · Icon Set Glass Style) ---- */
+/* glyphs are drawn on a 24×24 grid; F = navy gradient fill, W = white cut-out, S = navy stroke */
+const GF='fill="url(#rcmNavy)"', GW='fill="#fff"', GS='fill="none" stroke="url(#rcmNavy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+const GLASS = {
+ home:`<path ${GF} d="M12 2.8 1.9 11.6a1 1 0 0 0 1.3 1.5l1.3-1.1V20a1.2 1.2 0 0 0 1.2 1.2h3.9v-6h4.8v6h3.9A1.2 1.2 0 0 0 19.5 20v-8l1.3 1.1a1 1 0 0 0 1.3-1.5z"/>`,
+ assets:`<rect ${GF} x="6.1" y="2.6" width="2" height="5" rx=".7"/><rect ${GF} x="11" y="2.6" width="2" height="5" rx=".7"/><rect ${GF} x="15.9" y="2.6" width="2" height="5" rx=".7"/><rect ${GF} x="3.5" y="7" width="17" height="12.5" rx="1.8"/><path d="M7 9.6v7.3M10 9.6v7.3M13 9.6v7.3M16.1 9.6v7.3" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/><rect ${GF} x="5" y="19" width="2.6" height="2.4" rx=".5"/><rect ${GF} x="16.4" y="19" width="2.6" height="2.4" rx=".5"/>`,
+ details:`<path ${GS} d="M13.5 21H6.2A1.7 1.7 0 0 1 4.5 19.3V4.7A1.7 1.7 0 0 1 6.2 3h7.3l5 5v3"/><path ${GS} d="M13.3 3v5h5M8 9h3M8 12.5h4"/><circle ${GS} cx="15.5" cy="16" r="3.4"/><path ${GS} d="m18 18.5 2.6 2.6"/>`,
+ health:`<path ${GF} d="M12 21.2S2.2 15.3 2.2 8.7A5.1 5.1 0 0 1 12 6.2a5.1 5.1 0 0 1 9.8 2.5C21.8 15.3 12 21.2 12 21.2z"/><path d="M4.6 12.2h4l1.6-2.8 2.2 5.2 1.6-3h5.4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+ fmea:`<rect ${GS} x="4.8" y="4.4" width="14.4" height="17" rx="2"/><rect ${GF} x="8.5" y="2.4" width="7" height="4" rx="1.2"/><path ${GS} d="M8.4 10.5h7.2M8.4 14h7.2M8.4 17.5h4.6"/>`,
+ risk:`<path ${GF} d="M10.3 3.3a2 2 0 0 1 3.4 0l8.6 15a2 2 0 0 1-1.7 3H3.4a2 2 0 0 1-1.7-3z"/><rect x="11" y="8.5" width="2" height="6.8" rx="1" fill="#fff"/><circle cx="12" cy="17.8" r="1.25" fill="#fff"/>`,
+ lab:`<path ${GS} d="M9 2.8h6M10 2.8v6.4L4.6 18.6a1.8 1.8 0 0 0 1.6 2.6h11.6a1.8 1.8 0 0 0 1.6-2.6L14 9.2V2.8"/><path fill="#3f7fc4" d="M6.8 15h10.4l1.9 3.4a1 1 0 0 1-.9 1.5H5.8a1 1 0 0 1-.9-1.5z"/>`,
+ triangle:`<path ${GS} d="M12 5 4.6 18.2h14.8z"/><circle ${GF} cx="12" cy="4.6" r="2.6"/><circle ${GF} cx="4.4" cy="18.4" r="2.6"/><circle ${GF} cx="19.6" cy="18.4" r="2.6"/>`,
+ rcm:`<path ${GS} d="M12 6.5v5M5.5 17v-3.2a1.8 1.8 0 0 1 1.8-1.8h9.4a1.8 1.8 0 0 1 1.8 1.8V17"/><circle ${GF} cx="12" cy="4.4" r="2.8"/><circle ${GF} cx="5.5" cy="18.6" r="2.8"/><circle ${GF} cx="18.5" cy="18.6" r="2.8"/>`,
+ maintenance:`<path ${GF} d="M15 2.6a5.3 5.3 0 0 0-5 7.2L2.9 17a2.1 2.1 0 0 0 3 3l7.3-7.2a5.3 5.3 0 0 0 7.1-6.3l-3 3-2.8-.7-.7-2.8 3-3a5.3 5.3 0 0 0-1.8-.4z"/>`,
+ plan:`<rect ${GS} x="3.3" y="5" width="17.4" height="15.6" rx="2.2"/><path ${GS} d="M3.8 10h16.4M8 2.8v4M16 2.8v4"/><path ${GF} d="M3.3 7.2A2.2 2.2 0 0 1 5.5 5h13a2.2 2.2 0 0 1 2.2 2.2V10H3.3z"/>`,
+ strategy:`<circle ${GS} cx="11" cy="13" r="8"/><circle ${GS} cx="11" cy="13" r="4.2"/><circle ${GF} cx="11" cy="13" r="1.5"/><path ${GS} d="m11 13 8.4-8.4"/><path ${GF} d="m17.4 2.6 1.4 2.6 2.6 1.4-2.8 1.5-2.7-.6-.6-2.7z"/>`,
+ schedule:`<path ${GS} d="M14 3H6.5A1.8 1.8 0 0 0 4.7 4.8v14.4A1.8 1.8 0 0 0 6.5 21h11a1.8 1.8 0 0 0 1.8-1.8V8.3z"/><path ${GS} d="M13.8 3v5.4h5.4"/><path ${GS} d="M8.2 11.5h3.6M10.2 14.5h4.6M8.2 17.5h2.6"/>`,
+ workorder:`<path ${GS} d="m3.3 6 1.8 1.8L8.3 4.6M3.3 12l1.8 1.8 3.2-3.2M3.3 18l1.8 1.8 3.2-3.2M11.5 6.2h9M11.5 12.2h9M11.5 18.2h9"/>`,
+ assign:`<path ${GF} d="M6.8 9.6a5.2 5.2 0 0 1 10.4 0z"/><rect ${GF} x="5.6" y="9.2" width="12.8" height="1.8" rx=".9"/><rect x="11.2" y="3.9" width="1.6" height="3" rx=".5" fill="#fff"/><path ${GF} d="M8 11.4h8a4 4 0 0 1-8 0z"/><path ${GF} d="M3.4 21.4c0-3.9 3.3-5.9 5.6-6.2l3 3 3-3c2.3.3 5.6 2.3 5.6 6.2z"/>`,
+ history:`<path ${GS} d="M20.2 12A8.2 8.2 0 1 1 17.6 6"/><path ${GF} d="M21 3.4v5.4h-5.4z"/><path ${GS} d="M12 7.5V12l3 2.2"/>`,
+ results:`<rect ${GF} x="3.6" y="12.5" width="4.4" height="8.6" rx="1"/><rect ${GF} x="9.8" y="7.8" width="4.4" height="13.3" rx="1"/><rect ${GF} x="16" y="2.8" width="4.4" height="18.3" rx="1"/>`,
+ trend:`<path ${GS} d="M3.5 3.5v16.8h17"/><path ${GS} d="m6.8 15.6 3.8-4.2 3.4 2.6 5.2-6.2"/><circle ${GF} cx="10.6" cy="11.4" r="1.6"/><circle ${GF} cx="14" cy="14" r="1.6"/><circle ${GF} cx="19.2" cy="7.8" r="1.8"/>`,
+ compare:`<path ${GF} d="M10.8 3.4a8.8 8.8 0 1 0 9.8 9.8h-9.8z"/><path ${GF} d="M13.2 1.6v9.6h9.6a9.6 9.6 0 0 0-9.6-9.6z" opacity=".75"/>`,
+ scenario:`<path ${GF} d="m12 2.4 9.6 5.3L12 13 2.4 7.7z"/><path ${GS} d="m2.8 12 9.2 5.1 9.2-5.1M2.8 16.3l9.2 5.1 9.2-5.1"/>`,
+ reports:`<path ${GS} d="M14 3H6.5A1.8 1.8 0 0 0 4.7 4.8v14.4A1.8 1.8 0 0 0 6.5 21h11a1.8 1.8 0 0 0 1.8-1.8V8.3z"/><path ${GS} d="M13.8 3v5.4h5.4M8.5 9.2h3"/><rect ${GF} x="8" y="14.6" width="2" height="3.6" rx=".4"/><rect ${GF} x="11" y="12.2" width="2" height="6" rx=".4"/><rect ${GF} x="14" y="13.4" width="2" height="4.8" rx=".4"/>`,
+ notification:`<path ${GF} d="M12 2.5a1.4 1.4 0 0 1 1.4 1.4v.6a6.3 6.3 0 0 1 4.9 6.2v4.2l2 2.6a.9.9 0 0 1-.7 1.5H4.4a.9.9 0 0 1-.7-1.5l2-2.6v-4.2a6.3 6.3 0 0 1 4.9-6.2v-.6A1.4 1.4 0 0 1 12 2.5z"/><path ${GF} d="M9.4 20h5.2a2.6 2.6 0 0 1-5.2 0z"/>`,
+ profile:`<circle ${GF} cx="12" cy="7.4" r="4.6"/><path ${GF} d="M3.2 21.2c0-4.6 3.9-7.6 8.8-7.6s8.8 3 8.8 7.6z"/>`,
+ users:`<circle ${GF} cx="9" cy="7.8" r="3.8"/><path ${GF} d="M1.8 20.6c0-3.9 3.2-6.4 7.2-6.4s7.2 2.5 7.2 6.4z"/><circle ${GF} cx="17.4" cy="8.8" r="2.9" opacity=".7"/><path ${GF} d="M17.6 20.6h4.6c0-3.1-2-5.2-4.8-5.5a7.5 7.5 0 0 1 .2 5.5z" opacity=".7"/>`,
+ settings:`<path ${GF} fill-rule="evenodd" d="M10.3 1.8h3.4l.5 2.7a8 8 0 0 1 2 1.1l2.6-.9 1.7 2.9-2.1 1.8a8 8 0 0 1 0 2.3l2.1 1.8-1.7 2.9-2.6-.9a8 8 0 0 1-2 1.1l-.5 2.7h-3.4l-.5-2.7a8 8 0 0 1-2-1.1l-2.6.9-1.7-2.9 2.1-1.8a8 8 0 0 1 0-2.3L3.5 7.6l1.7-2.9 2.6.9a8 8 0 0 1 2-1.1zM12 8.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2z" transform="translate(0 .1)"/>`,
+ help:`<circle ${GF} cx="12" cy="12" r="10"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.1 2.6c-.9.5-1.3 1.1-1.3 2.1" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.4" r="1.3" fill="#fff"/>`,
+ search:`<circle ${GS} cx="10.5" cy="10.5" r="6.6" stroke-width="2.4"/><path ${GS} stroke-width="2.6" d="m15.4 15.4 5.6 5.6"/>`,
+ filter:`<path ${GF} d="M3 3.4h18a.8.8 0 0 1 .6 1.3l-7.1 8.2V20a.8.8 0 0 1-1.2.7l-3-1.8a.8.8 0 0 1-.4-.7v-5.3L2.4 4.7A.8.8 0 0 1 3 3.4z"/>`,
+ download:`<path ${GS} stroke-width="2.2" d="M12 3.5v11M7.4 10.2 12 14.8l4.6-4.6M3.8 15.5v3.4a1.6 1.6 0 0 0 1.6 1.6h13.2a1.6 1.6 0 0 0 1.6-1.6v-3.4"/>`,
+ upload:`<path ${GS} stroke-width="2.2" d="M12 15V4M7.4 8.3 12 3.7l4.6 4.6M3.8 15.5v3.4a1.6 1.6 0 0 0 1.6 1.6h13.2a1.6 1.6 0 0 0 1.6-1.6v-3.4"/>`,
+ print:`<path ${GS} d="M7 8V3.5h10V8M7 17H4.8a1.6 1.6 0 0 1-1.6-1.6V9.6A1.6 1.6 0 0 1 4.8 8h14.4a1.6 1.6 0 0 1 1.6 1.6v5.8a1.6 1.6 0 0 1-1.6 1.6H17"/><rect ${GS} x="7" y="13.5" width="10" height="7"/>`,
+ view:`<path ${GF} d="M12 5C6.5 5 2.6 9.3 1.4 12c1.2 2.7 5.1 7 10.6 7s9.4-4.3 10.6-7C21.4 9.3 17.5 5 12 5z"/><circle cx="12" cy="12" r="4" fill="#fff"/><circle ${GF} cx="12" cy="12" r="2.2"/>`,
+ edit:`<path ${GS} d="M16.3 3.7a2.2 2.2 0 0 1 3.1 0l.9.9a2.2 2.2 0 0 1 0 3.1L8.8 19.2 3.6 20.4l1.2-5.2zM14.3 5.7l4 4"/>`,
+ delete:`<path ${GS} d="M3.8 6.3h16.4M9.3 6.3V3.8h5.4v2.5M5.8 6.3l1 13.2a1.6 1.6 0 0 0 1.6 1.5h7.2a1.6 1.6 0 0 0 1.6-1.5l1-13.2M10 10.2v7M14 10.2v7"/>`,
+ language:`<circle ${GS} cx="12" cy="12" r="9"/><ellipse ${GS} cx="12" cy="12" rx="3.8" ry="9"/><path ${GS} d="M3.4 9h17.2M3.4 15h17.2"/>`,
+ logout:`<path ${GS} d="M10 4.5H6.4a1.9 1.9 0 0 0-1.9 1.9v11.2a1.9 1.9 0 0 0 1.9 1.9H10M15 8l4 4-4 4M9 12h10"/>`,
+ access:`<path ${GF} d="M12 2.3 20 5.5v6c0 5.1-3.4 8.9-8 10.3C7.4 20.4 4 16.6 4 11.5v-6z"/><path d="m8.6 12 2.4 2.4 4.4-4.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+ database:`<ellipse ${GF} cx="12" cy="5.6" rx="8" ry="3"/><path ${GS} d="M4 5.6v12.6c0 1.7 3.6 3 8 3s8-1.3 8-3V5.6M4 11.9c0 1.7 3.6 3 8 3s8-1.3 8-3"/>`,
+ manual:`<path ${GF} d="M2.8 5.2c2.9-1.4 6.2-1.3 8.4.3v15c-2.2-1.4-5.5-1.5-8.4-.4z"/><path ${GF} opacity=".7" d="M21.2 5.2c-2.9-1.4-6.2-1.3-8.4.3v15c2.2-1.4 5.5-1.5 8.4-.4z"/>`,
+ scale:`<path ${GS} d="M12 3.5v17M7 20.5h10M4.5 6.5h15"/><path ${GF} d="M4.5 7.5 1.8 13.2a2.8 2.8 0 0 0 5.4 0zM19.5 7.5l-2.7 5.7a2.8 2.8 0 0 0 5.4 0z"/>`,
+ inprogress:`<path ${GS} d="M6 2.8h12M6 21.2h12M7.2 2.8c0 4.6 3.3 6 4.8 9.2 1.5-3.2 4.8-4.6 4.8-9.2M7.2 21.2c0-4.6 3.3-6 4.8-9.2 1.5 3.2 4.8 4.6 4.8 9.2"/><path ${GF} d="M9 19.6c.6-2.2 2-3.3 3-4.6 1 1.3 2.4 2.4 3 4.6z"/>`,
+ completed:`<rect ${GS} x="4.8" y="4.4" width="14.4" height="17" rx="2"/><rect ${GF} x="8.5" y="2.4" width="7" height="4" rx="1.2"/><path ${GS} stroke-width="2.3" d="m8.4 13.6 2.5 2.5 4.8-5"/>`,
+ review:`<path ${GS} d="M4.3 12a7.7 7.7 0 0 1 13-5.5M19.7 12a7.7 7.7 0 0 1-13 5.5"/><path ${GF} d="M18.8 3v5.4h-5.4zM5.2 21v-5.4h5.4z"/>`,
 };
+/* status dots render as coloured glossy spheres inside the glass ring */
+const GLASS_STATUS = {
+ normal:  {c1:'#4fd99a', c2:'#12935b', g:'<path d="m7 12.4 3.4 3.4L17.2 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'},
+ watch:   {c1:'#ffc94d', c2:'#e58a06', g:'<rect x="10.8" y="5.6" width="2.4" height="8.4" rx="1.2" fill="#fff"/><circle cx="12" cy="17.6" r="1.5" fill="#fff"/>'},
+ critical:{c1:'#ff6b6b', c2:'#c81d25', g:'<rect x="10.8" y="5.6" width="2.4" height="8.4" rx="1.2" fill="#fff"/><circle cx="12" cy="17.6" r="1.5" fill="#fff"/>'},
+ nodata:  {c1:'#b3bfcd', c2:'#6e7d90', g:'<rect x="6.6" y="10.8" width="10.8" height="2.4" rx="1.2" fill="#fff"/>'},
+ pending: {c1:'#b3bfcd', c2:'#6e7d90', g:'<rect x="8.9" y="7.4" width="2.3" height="9.2" rx="1" fill="#fff"/><rect x="12.8" y="7.4" width="2.3" height="9.2" rx="1" fill="#fff"/>'},
+};
+/* old keys → new glyphs, so every existing badge('...') call keeps working */
+const GLASS_ALIAS = { scheduled:'plan', target:'strategy', plan_nav:'plan', trend_nav:'trend' };
+function glassGlyph(key){ const k = GLASS_ALIAS[key]||key; return GLASS[k]||''; }
 function badge(key, size){
   size = size||30;
-  const d = BADGE_DEFS[key]; if(!d) return '';
-  const r = Math.round(size*0.3), s = Math.round(size*0.58);
-  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;min-width:${size}px;border-radius:${r}px;background:${d.bg};">`+
-    `<svg viewBox="0 0 24 24" width="${s}" height="${s}">${d.path}</svg></span>`;
+  const st = GLASS_STATUS[key];
+  if(st){
+    const inner = Math.round(size*0.78), gid='gs'+key;
+    return `<span class="gbadge gstatus" style="width:${size}px;height:${size}px;min-width:${size}px;">`+
+      `<svg viewBox="0 0 24 24" style="width:${inner}px;height:${inner}px;"><defs><radialGradient id="${gid}" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="${st.c1}"/><stop offset="1" stop-color="${st.c2}"/></radialGradient></defs>`+
+      `<circle cx="12" cy="12" r="11.3" fill="url(#${gid})"/><ellipse cx="10" cy="6" rx="6" ry="3" fill="#fff" opacity=".28"/>${st.g}</svg></span>`;
+  }
+  const g = glassGlyph(key); if(!g) return '';
+  const s = Math.round(size*0.56);
+  return `<span class="gbadge" style="width:${size}px;height:${size}px;min-width:${size}px;"><svg viewBox="0 0 24 24" style="width:${s}px;height:${s}px;">${g}</svg></span>`;
+}
+/* plain glyph (no glass sphere) for use inside buttons */
+function gicon(key, px, extraStyle){ const sz = px===0 ? '' : `width:${px||15}px;height:${px||15}px;flex:0 0 ${px||15}px;`; return `<svg viewBox="0 0 24 24" class="gicon" style="${sz}${extraStyle||''}">${glassGlyph(key).replace(/url\(#rcmNavy\)/g,'currentColor')}</svg>`; }
+/* topbar chrome uses the same glass glyph set */
+(function(){ try{
+  const sb=document.querySelector('.search-box svg'); if(sb) sb.outerHTML=gicon('search',16);
+  const gb=document.querySelector('#guideBtn svg'); if(gb) gb.outerHTML=gicon('help',18);
+  const bb=document.querySelector('#bellBtn svg'); if(bb) bb.outerHTML=gicon('notification',18);
+}catch(e){} })();
+const ICON_LIBRARY = [
+ ['home','หน้าหลัก','Dashboard'],['assets','หม้อแปลง','Assets'],['details','ข้อมูลอุปกรณ์','Asset Details'],['health','ดัชนีสุขภาพ','Health Index'],
+ ['fmea','การประเมินความล้มเหลว','FMEA'],['risk','คะแนนความเสี่ยง','RPN / Risk'],['lab','วิเคราะห์ก๊าซ','DGA Analysis'],['triangle','สามเหลี่ยมก๊าซ','DGA Triangle'],
+ ['rcm','ต้นไม้การตัดสินใจ','Decision Tree'],['maintenance','งานบำรุงรักษา','Maintenance Task'],['plan','แผนการบำรุงรักษา','Maintenance Plan'],['strategy','กลยุทธ์การบำรุงรักษา','Maintenance Strategy'],
+ ['schedule','ตารางงาน','Work Schedule'],['workorder','ใบงาน','Work Order'],['assign','ผู้รับผิดชอบ','Assign Task'],['history','ประวัติการบำรุงรักษา','Maintenance History'],
+ ['results','ผลการทดสอบ','Lab Results'],['trend','แนวโน้มข้อมูล','Trend Analysis'],['compare','เปรียบเทียบข้อมูล','Data Comparison'],['scenario','จำลองสถานการณ์','Scenario'],
+ ['reports','รายงาน','Reports'],['notification','การแจ้งเตือน','Notifications'],['profile','ผู้ใช้งาน','User Profile'],['settings','ตั้งค่า','Settings'],
+ ['help','ช่วยเหลือ','Help & Support'],['search','ค้นหา','Search'],['filter','ตัวกรอง','Filter'],
+ null,
+ ['normal','ปกติ','Normal'],['watch','เฝ้าระวัง','Warning'],['critical','วิกฤต','Critical'],['nodata','ไม่มีข้อมูล','No Data'],
+ ['download','ดาวน์โหลด','Download'],['upload','อัปโหลด','Upload'],['print','พิมพ์','Print'],['view','ดูรายละเอียด','View'],['edit','แก้ไข','Edit'],['delete','ลบ','Delete'],
+];
+function renderIconLibrary(){
+  return `<div class="card" style="margin-top:16px;"><h3>${state.lang==='th'?'ชุดไอคอนของระบบ':'System Icon Set'}</h3>
+  <p class="card-sub">${state.lang==='th'?'ไอคอนสไตล์กระจก (Glass Style) ที่ใช้ทั่วทั้งเว็บ':'Glass-style icons used throughout the app'}</p>
+  <div class="icon-lib">${ICON_LIBRARY.map(r=>r?`<div class="ic">${badge(r[0],54)}<div><div class="th">${r[1]}</div><div class="en">${r[2]}</div></div></div>`:'<div class="icon-lib-sep"></div>').join('')}</div></div>`;
 }
 function statusPillClass(s){ s=(s||'').toLowerCase(); if(s.includes('critical'))return 'pill-critical'; if(s.includes('warn'))return 'pill-warning'; if(s.includes('healthy'))return 'pill-healthy'; if(s.includes('open'))return 'pill-open'; if(s.includes('progress'))return 'pill-progress'; if(s.includes('closed'))return 'pill-closed'; return 'pill-info';}
 function statusColor(s){ s=(s||'').toLowerCase(); if(s.includes('critical'))return 'var(--red)'; if(s.includes('warn'))return 'var(--amber)'; return 'var(--green)';}
@@ -910,7 +985,7 @@ function renderNav(){
       ? (state.page===n.id+'-overview' || (state.page==='detail' && state.detailTab===n.id))
       : (n.id==='dga'||n.id==='plan') ? (state.page==='detail' && state.detailTab===n.id)
       : state.page===n.id;
-    return `<div class="navitem ${isActive?'active':''}" data-nav="${n.id}">${badge(n.badge,26)}<span>${t(n.key)}</span></div>`;
+    return `<div class="navitem ${isActive?'active':''}" data-nav="${n.id}">${badge(n.badge,30)}<span>${t(n.key)}</span></div>`;
   }).join('');
   el.querySelectorAll('.navitem').forEach(item=>{
     item.addEventListener('click', ()=>{
@@ -1151,7 +1226,7 @@ function detailHeader(a){
     </div>
   </div>
   <div style="display:flex; gap:10px; margin-bottom:14px;">
-    <button class="btn btn-primary" id="btnExportReport">${icon('down2',' style="width:13px;height:13px"')} ${t('export_report')}</button>
+    <button class="btn btn-primary" id="btnExportReport">${gicon('download',0,'width:13px;height:13px')} ${t('export_report')}</button>
   </div>`;
 }
 function renderDetail(){
@@ -1214,14 +1289,14 @@ function detailOverviewTab(a){
     </div>
     <div class="card">
       <div class="card-head"><h3>${t('recommended_strategy')}</h3></div>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="icon ic-green" style="width:44px;height:44px;">${icon('wrench')}</div><div><div style="font-weight:800;font-size:16px;">${prof.strategy}</div><div class="small-muted">${strategyFullName(prof.strategy)}</div></div></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">${badge('strategy',44)}<div><div style="font-weight:800;font-size:16px;">${prof.strategy}</div><div class="small-muted">${strategyFullName(prof.strategy)}</div></div></div>
       <div class="small-muted" style="margin-bottom:10px;">${prof.interp[state.lang]}</div>
       <div style="font-weight:700;font-size:12.5px;margin-bottom:6px;">${t('recommended_actions')}</div>
       <ul class="hlist">
       <li><span class="k">✓ ${t('act_oil_sampling')}</span></li><li><span class="k">✓ ${t('act_monitor_dga')}</span></li>
       <li><span class="k">✓ ${t('act_inspect_cooling')}</span></li><li><span class="k">✓ ${t('act_check_leak')}</span></li><li><span class="k">✓ ${t('act_review_load')}</span></li>
       </ul>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;" data-create-plan="1">${icon('calendar',' style="width:13px;height:13px"')} ${t('create_maint_plan')}</button>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;" data-create-plan="1">${gicon('plan',0,'width:13px;height:13px')} ${t('create_maint_plan')}</button>
     </div>
   </div>`;
 }
@@ -1365,10 +1440,10 @@ function dgaSubTabContent(a){
       </tbody></table></div></div>`;
   const trendBlock = `<div class="card"><h3>${t('hist_dga_trend')}</h3>${chartBox('dgaHist',280)}</div>`;
   const interpBlock = `<div class="card"><h3>${t('interpretation')}</h3>
-    <div class="notebox">${icon('info')}<div>${prof.interp[state.lang]}</div></div>
+    <div class="notebox">${gicon('help',16)}<div>${prof.interp[state.lang]}</div></div>
     <div style="margin-top:14px;"><h3>${t('recommended_action')}</h3>
     <ul class="hlist"><li><span class="k">✓ ${t('rec_continue_dga')}</span></li><li><span class="k">✓ ${t('rec_check_cooling')}</span></li><li><span class="k">✓ ${t('rec_inspect_oil')}</span></li><li><span class="k">✓ ${t('rec_review_load')}</span></li></ul>
-    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" data-create-plan="1">${icon('calendar',' style="width:13px;height:13px"')} ${t('create_maint_plan')}</button></div></div>`;
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" data-create-plan="1">${gicon('plan',0,'width:13px;height:13px')} ${t('create_maint_plan')}</button></div></div>`;
 
   if(state.dgaSubTab==='duval') return `<div class="grid g2" style="align-items:stretch;">${duvalBlock}${interpBlock}</div>`;
   if(state.dgaSubTab==='rogers') return `<div class="grid g2" style="align-items:stretch;">${rogersBlock}${iecBlock}</div>`;
@@ -1405,7 +1480,7 @@ function detailFmeaTab(a){
         <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--amber)">${med}</div><div class="small-muted" style="font-size:10.5px;">${t('plan_word')}</div></div>
         <div style="text-align:center;"><div style="font-weight:800;font-size:18px;color:var(--green)">${low}</div><div class="small-muted" style="font-size:10.5px;">${t('monitor')}</div></div>
       </div>
-      <div class="notebox">${icon('info')}<div>${fmeaTakeaway(a)}</div></div>
+      <div class="notebox">${gicon('help',16)}<div>${fmeaTakeaway(a)}</div></div>
     </div>
   </div>`;
 }
@@ -1517,10 +1592,10 @@ function detailPlanTab(a){
     <div class="strategy-step" style="border-top:3px solid #8759d6;"><div class="stitle">PdM</div><div class="ssub">${state.lang==='th'?'คาดการณ์':'Predictive'}</div></div>
   </div>
   <div class="grid g4" style="margin-bottom:16px;">
-    <div class="card stat"><div class="icon ic-blue">${icon('doc')}</div><div><div class="label">${t('total_tasks')}</div><div class="value">${total}</div></div></div>
-    <div class="card stat"><div class="icon ic-green">${icon('info')}</div><div><div class="label">${t('completed')}</div><div class="value">${completed} <span style="font-size:12px;">(42%)</span></div></div></div>
-    <div class="card stat"><div class="icon ic-amber">${icon('clock')}</div><div><div class="label">${t('in_progress')}</div><div class="value">${inprog} <span style="font-size:12px;">(33%)</span></div></div></div>
-    <div class="card stat"><div class="icon ic-blue">${icon('calendar')}</div><div><div class="label">${t('upcoming')}</div><div class="value">${upcoming} <span style="font-size:12px;">(25%)</span></div></div></div>
+    <div class="card stat">${badge('workorder',44)}<div><div class="label">${t('total_tasks')}</div><div class="value">${total}</div></div></div>
+    <div class="card stat">${badge('normal',44)}<div><div class="label">${t('completed')}</div><div class="value">${completed} <span style="font-size:12px;">(42%)</span></div></div></div>
+    <div class="card stat">${badge('history',44)}<div><div class="label">${t('in_progress')}</div><div class="value">${inprog} <span style="font-size:12px;">(33%)</span></div></div></div>
+    <div class="card stat">${badge('plan',44)}<div><div class="label">${t('upcoming')}</div><div class="value">${upcoming} <span style="font-size:12px;">(25%)</span></div></div></div>
   </div>
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head"><h3>${t('maint_schedule')}</h3>
@@ -1548,7 +1623,7 @@ function detailPlanTab(a){
       <ul class="hlist"><li><span class="k">↓ ${t('unplanned_failure')}</span><span class="v" style="color:var(--green)">40%</span></li></ul>
       <ul class="hlist"><li><span class="k">↑ ${t('equip_lifetime')}</span><span class="v" style="color:var(--green)">${t('longer')}</span></li></ul>
     </div>
-    <div class="notebox" style="margin-top:10px;">${icon('info')}<div>${t('key_takeaway_plan')}</div></div>
+    <div class="notebox" style="margin-top:10px;">${gicon('help',16)}<div>${t('key_takeaway_plan')}</div></div>
   </div>`;
 }
 function openAddTaskModal(){
@@ -1590,10 +1665,10 @@ function detailDocsTab(a){
   </div>
   <h3>${t('related_docs')}</h3>
   <div class="tbl-wrap"><table><thead><tr><th>${t('file')}</th><th>${t('size')}</th><th>${t('date')}</th><th></th></tr></thead><tbody>
-  <tr><td>${a.id}_RCM_Analysis.pdf</td><td>1.2 MB</td><td>12 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_RCM_Analysis.txt">${icon('down2',' style="width:14px;height:14px;color:var(--accent-2)"')}</button></td></tr>
-  <tr><td>${a.id}_FMEA.xlsx</td><td>0.8 MB</td><td>10 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_FMEA.csv" data-csv="fmea">${icon('down2',' style="width:14px;height:14px;color:var(--accent-2)"')}</button></td></tr>
-  <tr><td>${a.id}_Maintenance_Plan.pdf</td><td>1.5 MB</td><td>8 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_Maintenance_Plan.csv" data-csv="plan">${icon('down2',' style="width:14px;height:14px;color:var(--accent-2)"')}</button></td></tr>
-  <tr><td>DGA_${a.id}_20260918.pdf</td><td>1.2 MB</td><td>18 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="DGA_${a.id}_20260918.csv" data-csv="dga">${icon('down2',' style="width:14px;height:14px;color:var(--accent-2)"')}</button></td></tr>
+  <tr><td>${a.id}_RCM_Analysis.pdf</td><td>1.2 MB</td><td>12 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_RCM_Analysis.txt">${gicon('download',0,'width:14px;height:14px;color:var(--accent-2)')}</button></td></tr>
+  <tr><td>${a.id}_FMEA.xlsx</td><td>0.8 MB</td><td>10 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_FMEA.csv" data-csv="fmea">${gicon('download',0,'width:14px;height:14px;color:var(--accent-2)')}</button></td></tr>
+  <tr><td>${a.id}_Maintenance_Plan.pdf</td><td>1.5 MB</td><td>8 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="${a.id}_Maintenance_Plan.csv" data-csv="plan">${gicon('download',0,'width:14px;height:14px;color:var(--accent-2)')}</button></td></tr>
+  <tr><td>DGA_${a.id}_20260918.pdf</td><td>1.2 MB</td><td>18 Sep 2026</td><td><button class="viewlink dl-doc" data-fname="DGA_${a.id}_20260918.csv" data-csv="dga">${gicon('download',0,'width:14px;height:14px;color:var(--accent-2)')}</button></td></tr>
   </tbody></table></div></div>`;
 }
 function initDetailCharts(a){
@@ -1659,13 +1734,13 @@ function renderReports(){
     <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">2</div></div></div>
   </div>
   <div class="grid g2" style="margin-bottom:16px;">
-    <div class="card stat"><div class="icon ic-blue">${icon('wrench')}</div><div><div class="label">${t('total_maint_tasks')}</div><div class="value">48</div></div></div>
-    <div class="card stat"><div class="icon ic-blue">${icon('calendar')}</div><div><div class="label">${t('period')}</div><div class="value" style="font-size:14px;">Jan – Dec 2026</div></div></div>
+    <div class="card stat">${badge('maintenance',44)}<div><div class="label">${t('total_maint_tasks')}</div><div class="value">48</div></div></div>
+    <div class="card stat">${badge('plan',44)}<div><div class="label">${t('period')}</div><div class="value" style="font-size:14px;">Jan – Dec 2026</div></div></div>
   </div>
   <div style="display:flex; gap:10px; margin-bottom:16px;">
-    <button class="btn btn-primary" id="btnGenerateReport">${icon('doc',' style="width:13px;height:13px"')} ${t('generate_report')}</button>
-    <button class="btn btn-ghost" id="btnScheduleReport">${icon('calendar',' style="width:13px;height:13px"')} ${t('schedule_report')}</button>
-    <button class="btn btn-ghost" id="btnExportAll">${icon('down2',' style="width:13px;height:13px"')} ${t('export')}</button>
+    <button class="btn btn-primary" id="btnGenerateReport">${gicon('reports',0,'width:13px;height:13px')} ${t('generate_report')}</button>
+    <button class="btn btn-ghost" id="btnScheduleReport">${gicon('plan',0,'width:13px;height:13px')} ${t('schedule_report')}</button>
+    <button class="btn btn-ghost" id="btnExportAll">${gicon('download',0,'width:13px;height:13px')} ${t('export')}</button>
   </div>
   <div class="grid g2" style="margin-bottom:16px; align-items:stretch;">
     <div class="card"><h3>${t('asset_health_dist')}</h3>
@@ -1760,7 +1835,7 @@ function renderGuide(){
       <li><span class="k">✓ ${t('guide_tip3')}</span></li>
       <li><span class="k">✓ ${t('guide_tip4')}</span></li>
     </ul>
-  </div>`;
+  </div>` + renderIconLibrary();
 }
 function renderSettings(){
   return `<div class="tabs">${SETTINGS_TABS.map(s=>`<button class="tab ${state.settingsTab===s[0]?'active':''}" data-stab="${s[0]}">${t(s[1])}</button>`).join('')}</div>
