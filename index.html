@@ -269,6 +269,23 @@ select.chip-input{cursor:pointer;}
 .login-card .formrow input{width:100%;}
 .login-hint{margin-top:14px; font-size:11px; color:var(--muted); text-align:center;}
 
+/* ===== HI calculation steps ===== */
+.cstep{display:flex; gap:12px; padding:14px 0; border-top:1px solid var(--border);}
+.cnum{width:28px;height:28px;border-radius:50%;background:var(--navy,#1f3b5c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 28px;}
+.ctitle{font-weight:800; margin:3px 0 8px;}
+.bchips{display:flex; flex-wrap:wrap; gap:4px;}
+.bchip{border:1px solid var(--border); border-radius:7px; padding:3px 7px; font-size:11px; color:var(--muted); white-space:nowrap;}
+.bchip.on{color:#fff;}
+.ctbl td,.ctbl th{padding:6px 8px; vertical-align:middle;}
+.ctbl.mini{width:auto;} .ctbl.mini td,.ctbl.mini th{text-align:center; min-width:54px;}
+.sdot{display:inline-flex;width:22px;height:22px;border-radius:50%;color:#fff;font-weight:800;font-size:11px;align-items:center;justify-content:center;}
+.cformula{background:var(--blue-bg); border-radius:8px; padding:8px 10px; font-size:12.5px; margin:8px 0; overflow-x:auto;}
+.cresult{margin-top:8px; font-size:13px;}
+.csub{margin:8px 0; padding-left:18px; font-size:12.5px;} .csub li{margin:4px 0;}
+.hibar{display:flex; gap:4px; margin:6px 0;}
+.hiseg{position:relative; background:var(--border); border-radius:6px; height:30px; overflow:hidden;}
+.hifill{position:absolute; left:0; top:0; bottom:0;}
+.hiseg span{position:relative; font-size:11px; font-weight:800; padding:0 6px; line-height:30px; white-space:nowrap; color:#1f2a37;}
 /* ===== Risk matrix ===== */
 .rmx{display:grid; grid-template-columns:34px repeat(5,1fr); gap:4px; font-size:11px;}
 .rmx .cell{min-height:64px; border-radius:8px; padding:5px; display:flex; flex-wrap:wrap; gap:3px; align-content:flex-start; position:relative;}
@@ -829,7 +846,7 @@ function profileFor(a, sampleIdx){
     : L(`The Duval Triangle points to ${d.zone} — ${dgaName(d.zone)}. Gas level is ${['','normal','slightly high','high','very high'][d.Lm]} and ${d.hasRate?['','stable or falling','rising slowly','rising','rising fast'][d.Rm]:'has no earlier sample to compare'}, so the gas condition is ${CODE_NAMES[d.ff][0].toLowerCase()} (${d.ff}).${d.agree!==null?` IEC and Rogers ratio methods agree in ${d.agree} of 3 methods.`:''}`,
         `สามเหลี่ยม Duval บ่งชี้ ${d.zone} — ${dgaName(d.zone)} ระดับก๊าซ${['','ปกติ','สูงเล็กน้อย','สูง','สูงมาก'][d.Lm]} และ${d.hasRate?['','คงที่หรือลดลง','เพิ่มขึ้นช้า','เพิ่มขึ้น','เพิ่มขึ้นเร็ว'][d.Rm]:'ไม่มีผลครั้งก่อนให้เทียบ'} สภาพก๊าซจึงอยู่ในระดับ${CODE_NAMES[d.ff][1]} (${d.ff})${d.agree!==null?` ตรวจทานด้วยวิธี IEC และ Rogers ให้ผลตรงกัน ${d.agree} ใน 3 วิธี`:''}`);
 
-  return { sample:s, rows:as.rows, factors:as.factors, hi:as.hi, hiExact:as.hiExact, status, overridden:false, dga:d,
+  return { sample:s, rates:as.rates, rows:as.rows, factors:as.factors, hi:as.hi, hiExact:as.hiExact, status, overridden:false, dga:d,
     code:d.code, type:{en:DGA_NAMES[d.code][0], th:DGA_NAMES[d.code][1]}, typeRange:'',
     severity:{en:`${d.ff} — ${sev[0]}`, th:`${d.ff} — ${sev[1]}`}, confidence: d.agree===null?'—':`${d.agree}/3`, duval:d.pct,
     mainIssue:{en:issueLabel(iss[0],d), th:issueLabel(iss[0],d)}, secondaryIssue:{en:iss[1]?issueLabel(iss[1],d):'—', th:iss[1]?issueLabel(iss[1],d):'—'},
@@ -1699,22 +1716,55 @@ function detailHealthIndexTab(a){
 }
 const FACTOR_NAMES_SIMPLE = {FF:['Gas / fault condition','ก๊าซและความผิดปกติ'], OQF:['Oil quality','คุณภาพน้ำมัน'], PCF:['Paper insulation','ฉนวนกระดาษ']};
 function hiCalcDetail(prof){
-  const F = prof.factors, d = prof.dga;
-  const codePill = (c)=>`<span class="pill ${statusPillClass(codeStatus(c))}">${c}</span>`;
-  const block = (key, rows)=>{ const f=F[key];
-    return `<tr style="background:var(--blue-bg);"><td colspan="3"><b>${L(FACTOR_NAMES[key][0],FACTOR_NAMES[key][1])}</b> <span class="small-muted">(W = ${f.w})</span></td><td>${f.val!==undefined?f.val.toFixed(2):'—'}</td><td>${codePill(f.code)} → SF ${f.sf}</td></tr>`
-      + rows.map(r=>`<tr><td style="padding-left:22px;">${r.p}</td><td>${r.res}</td><td class="small-muted">${r.lim||''}</td><td>${r.score??'—'}</td><td>${r.key==='ff'?'':r.weight}</td></tr>`).join(''); };
-  const ffRows = [
-    {p:L('Max gas level score','คะแนนระดับก๊าซสูงสุด'), res:FF_GASES.map(g=>`${g}:${d.lv[g]}`).join(' '), lim:'Table 1', score:'L'+d.Lm, key:'ff'},
-    {p:L('Max gas rate score','คะแนนอัตราก๊าซสูงสุด'), res:d.hasRate?FF_GASES.map(g=>`${g}:${d.rs[g]}`).join(' '):L('no previous sample*','ไม่มีตัวอย่างก่อนหน้า*'), lim:'Table 1', score:'R'+d.Rm, key:'ff'},
-    {p:L('Duval Pentagon (paper) → DPM condition','ห้าเหลี่ยม Duval (ตามงานวิจัย) → สภาพ DPM'), res:d.code==='N'?L('normal limit → not applied','อยู่ในเกณฑ์ปกติ → ไม่ต้องใช้'):d.pzone, lim:'Fig. 4', score:d.code==='N'?'—':'Cond.'+d.dc, key:'ff'},
-    {p:L('Gas level + rate condition','สภาพจากระดับ+อัตราก๊าซ'), res:'', lim:'Table 2', score:'Cond.'+d.gc, key:'ff'},
-  ];
-  return `<div class="tbl-wrap" style="margin-top:12px;"><table><thead><tr><th>${t('parameter')}</th><th>${t('result')}</th><th>${L('Limits (score 1 / 2 / 3 / 4 / 5)','เกณฑ์ (คะแนน 1 / 2 / 3 / 4 / 5)')}</th><th>${t('score')}</th><th>${t('weight')}</th></tr></thead><tbody>
-    ${block('FF', ffRows)}${block('OQF', F.OQF.rows)}${block('PCF', F.PCF.rows)}
-    <tr><td colspan="5" style="font-weight:800;white-space:normal;">HI = Σ(SF × W) / Σ(4 × W) × 100 = (${F.FF.sf}×0.348 + ${F.OQF.sf}×0.216 + ${F.PCF.sf}×0.436) / 4 × 100 = ${prof.hi}</td></tr>
-  </tbody></table></div>
-  <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('Method: Tamma, Prasojo & Suwarno (2021), High Voltage 6:314–327. Factor value = Σ(score × weight) / Σ weight → A (<1.2), B (1.2–1.5), C (1.5–2), D (2–3), E (>3) → SF 4 / 3 / 2 / 1 / 0. The fault type shown on screen comes from the Duval Triangle; the HI calculation keeps the paper’s Duval Pentagon rule so the score matches the paper. * Missing 2-FAL is scored 1, as in the paper’s worked examples.','วิธีการ: Tamma, Prasojo & Suwarno (2021), High Voltage 6:314–327 ค่าปัจจัย = Σ(คะแนน × น้ำหนัก) / Σ น้ำหนัก → A (<1.2), B (1.2–1.5), C (1.5–2), D (2–3), E (>3) → SF 4 / 3 / 2 / 1 / 0 ชนิดความผิดปกติที่แสดงบนหน้าจอมาจากสามเหลี่ยม Duval ส่วนการคำนวณ HI ยังใช้กฎห้าเหลี่ยม Duval ตามงานวิจัยเพื่อให้คะแนนตรงกับงานวิจัย * หากไม่มีค่า 2-FAL ให้คะแนน 1 ตามตัวอย่างในงานวิจัย')}</p>`;
+  const F = prof.factors, d = prof.dga, s = prof.sample;
+  const col = {1:'#1fa571',2:'#eba020',3:'#e0473d',4:'#c62d23',5:'#8a1c14'};
+  const gcol = {A:'#1fa571',B:'#5cbf8f',C:'#eba020',D:'#e0473d',E:'#8a1c14'};
+  const chips = (labels, hit)=>`<div class="bchips">${labels.map((lb,i)=>`<span class="bchip${i+1===hit?' on':''}" style="${i+1===hit?`background:${col[i+1]};border-color:${col[i+1]};`:''}"><b>${i+1}</b> ${lb}</span>`).join('')}</div>`;
+  const step = (n,title,body)=>`<div class="cstep"><div class="cnum">${n}</div><div style="flex:1;min-width:0;"><div class="ctitle">${title}</div>${body}</div></div>`;
+  const gradeScale = (v)=>{ const g=factorCode(v); const seg=[['A','< 1.2'],['B','1.2–1.5'],['C','1.5–2'],['D','2–3'],['E','> 3']];
+    return `<div class="bchips">${seg.map(([c,r])=>`<span class="bchip${c===g?' on':''}" style="${c===g?`background:${gcol[c]};border-color:${gcol[c]};`:''}"><b>${c}</b> ${r}</span>`).join('')}</div>`; };
+  const paramTable = (rows, params)=>`<div class="tbl-wrap"><table class="ctbl"><tbody>${rows.map((r,i)=>{ const p=params[i];
+      const labels = p.key==='coco2' ? [L('CO < 350','CO < 350'),L('CO ≥ 350','CO ≥ 350'),'CO₂/CO > 7','CO₂/CO 5–7','CO₂/CO < 5'] : p.lim.split(' / ');
+      return `<tr><td style="width:160px;"><b>${r.p}</b><div class="small-muted">${r.res}</div></td><td>${chips(labels, r.score)}</td><td style="width:70px;" class="small-muted">× ${r.weight}</td></tr>`; }).join('')}</tbody></table></div>`;
+  const avgLine = (key)=>{ const f=F[key]; const rows=f.rows.filter(r=>r.score!=null);
+    const num = rows.map(r=>`${r.score}×${r.weight}`).join(' + '), den = rows.map(r=>r.weight).join(' + ');
+    return `<div class="cformula">(${num}) ÷ (${den}) = <b>${f.val.toFixed(2)}</b></div>`; };
+  const factorOut = (key)=>{ const f=F[key]; return `<div class="cresult"><span style="color:${gcol[f.code]};font-weight:800;">${L('Grade','เกรด')} ${f.code} — ${L(CODE_NAMES[f.code][0],CODE_NAMES[f.code][1])}</span></div>`; };
+
+  /* --- gas factor --- */
+  const rates = prof.rates;
+  const gasTbl = `<div class="tbl-wrap"><table class="ctbl"><thead><tr><th>${L('Gas','ก๊าซ')}</th><th>${L('Now (ppm)','ตอนนี้ (ppm)')}</th><th>${L('Level score','คะแนนระดับ')}</th><th>${L('Change / yr','เปลี่ยนแปลง/ปี')}</th><th>${L('Trend score','คะแนนแนวโน้ม')}</th></tr></thead><tbody>
+    ${FF_GASES.map(g=>`<tr><td><b>${g}</b></td><td>${fmtPpm(s.gases[g])}</td><td><span class="sdot" style="background:${col[d.lv[g]]};">${d.lv[g]}</span></td>
+      <td>${rates?(rates[g]>0?'+':'')+fmtPpm(Math.abs(rates[g])<0.005?0:rates[g]).replace('--','-'):'—'}</td><td><span class="sdot" style="background:${col[d.rs[g]]};">${d.rs[g]}</span></td></tr>`).join('')}
+    </tbody></table></div>`;
+  const t3 = `<div class="tbl-wrap"><table class="ctbl mini"><thead><tr><th></th>${[1,2,3,4].map(c=>`<th>${L('Gas cond.','สภาพก๊าซ')} ${c}</th>`).join('')}</tr></thead><tbody>
+    ${[1,2,3,4].map(r=>`<tr><th>${L('Type cond.','ระดับชนิด')} ${r}</th>${FF_TABLE[r].map((v,c)=>{ const on = !d.falseFlag && d.code!=='N' && r===d.dc && c+1===d.gc; return `<td style="${on?`background:${gcol[v]};color:#fff;font-weight:800;`:''}">${v||'✕'}</td>`; }).join('')}</tr>`).join('')}
+    </tbody></table></div>`;
+  const ffBody = d.code==='N'
+    ? `${gasTbl}<div class="cresult">${L('Every gas is below its normal limit (all level scores = 1) → the gas grade is A straight away.','ก๊าซทุกตัวต่ำกว่าเกณฑ์ปกติ (คะแนนระดับเป็น 1 ทั้งหมด) → ได้เกรด A ทันที')}</div>`
+    : `${gasTbl}
+       <ul class="csub">
+        <li>${L(`Take the <b>worst</b> level score = <b>${d.Lm}</b> and the worst trend score = <b>${d.Rm}</b>${d.hasRate?'':' (no earlier sample, so trend counts as 1)'} → gas condition <b>${d.gc}</b> (paper Table 2)`,`ใช้คะแนน<b>แย่ที่สุด</b>: ระดับ = <b>${d.Lm}</b> และแนวโน้ม = <b>${d.Rm}</b>${d.hasRate?'':' (ไม่มีผลครั้งก่อน จึงถือแนวโน้มเป็น 1)'} → สภาพก๊าซ <b>${d.gc}</b> (ตาราง 2)`)}</li>
+        <li>${L(`Fault type from the gas pattern (paper rule, Duval Pentagon: <b>${d.pzone}</b>) → type condition <b>${d.dc}</b>`,`ชนิดความผิดปกติจากสัดส่วนก๊าซ (กฎตามงานวิจัย ห้าเหลี่ยม Duval: <b>${d.pzone}</b>) → ระดับชนิด <b>${d.dc}</b>`)}</li>
+        <li>${L('Read the grade where the two meet:','อ่านเกรดจากช่องที่ทั้งสองค่าตัดกัน:')}</li>
+       </ul>${t3}${d.falseFlag?`<p class="small-muted" style="font-size:11px;">${L('The two results do not fit together (✕ in the table), so the worse of the two was used.','ผลทั้งสองไม่เข้ากัน (ช่อง ✕) จึงใช้ค่าที่แย่กว่า')}</p>`:''}`;
+
+  /* --- final --- */
+  const parts = ['FF','OQF','PCF'].map(k=>({k, sf:F[k].sf, w:F[k].w, pts:F[k].sf/4*F[k].w*100}));
+  const names = {FF:L('Gas','ก๊าซ'),OQF:L('Oil','น้ำมัน'),PCF:L('Paper','กระดาษ')};
+  const bar = `<div class="hibar">${parts.map(p=>`<div class="hiseg" style="flex:${p.w};"><div class="hifill" style="width:${p.sf/4*100}%;background:${gcol[F[p.k].code]};"></div><span>${names[p.k]} ${p.pts.toFixed(1)} / ${(p.w*100).toFixed(1)}</span></div>`).join('')}</div>`;
+
+  return `<div class="cwrap">
+    <p class="small-muted" style="margin:10px 0 14px;">${L('Each test result gets a score from 1 (best) to 4 or 5 (worst). Results are grouped into three parts, each part gets a grade A–E, and the grades are turned into a 0–100 Health Index.','ผลตรวจแต่ละค่าจะได้คะแนน 1 (ดีที่สุด) ถึง 4 หรือ 5 (แย่ที่สุด) แล้วรวมเป็น 3 กลุ่ม แต่ละกลุ่มได้เกรด A–E จากนั้นแปลงเกรดเป็นดัชนีสุขภาพ 0–100')}</p>
+    ${step(1, L('Gas / fault condition','ก๊าซและความผิดปกติ'), ffBody + factorOut('FF'))}
+    ${step(2, L('Oil quality — score each test, then take the weighted average','คุณภาพน้ำมัน — ให้คะแนนแต่ละค่า แล้วหาค่าเฉลี่ยถ่วงน้ำหนัก'), paramTable(F.OQF.rows, OQ_PARAMS) + avgLine('OQF') + gradeScale(F.OQF.val) + factorOut('OQF'))}
+    ${step(3, L('Paper insulation — same method','ฉนวนกระดาษ — วิธีเดียวกัน'), paramTable(F.PCF.rows, PC_PARAMS) + avgLine('PCF') + gradeScale(F.PCF.val) + factorOut('PCF'))}
+    ${step(4, L('Turn the three grades into the Health Index','แปลงเกรดทั้ง 3 กลุ่มเป็นดัชนีสุขภาพ'), `
+      <p class="small-muted" style="margin:0 0 6px;">${L('Grade A = full marks, B = ¾, C = ½, D = ¼, E = 0. Each part can give at most its weight: gas 34.8, oil 21.6, paper 43.6 points.','เกรด A = ได้เต็ม, B = ¾, C = ½, D = ¼, E = 0 แต่ละกลุ่มให้คะแนนได้สูงสุดเท่ากับน้ำหนัก: ก๊าซ 34.8, น้ำมัน 21.6, กระดาษ 43.6 คะแนน')}</p>
+      ${bar}
+      <div class="cformula">${parts.map(p=>`${names[p.k]} ${F[p.k].code}: ${p.sf}/4 × ${(p.w*100).toFixed(1)} = ${p.pts.toFixed(1)}`).join('<br>')}<br><b>HI = ${parts.map(p=>p.pts.toFixed(1)).join(' + ')} = ${prof.hi}</b></div>`)}
+    <p class="small-muted" style="font-size:10.5px;margin:10px 0 0;">${L('Method: Tamma, Prasojo & Suwarno (2021), High Voltage 6:314–327. The fault type shown on screen uses the Duval Triangle; the grade in step 1 keeps the paper’s Duval Pentagon rule. Missing 2-FAL counts as score 1, as in the paper’s examples.','วิธีการ: Tamma, Prasojo & Suwarno (2021), High Voltage 6:314–327 ชนิดความผิดปกติที่แสดงบนหน้าจอใช้สามเหลี่ยม Duval ส่วนเกรดในขั้นที่ 1 ใช้กฎห้าเหลี่ยม Duval ตามงานวิจัย หากไม่มีค่า 2-FAL ให้คะแนน 1 ตามตัวอย่างในงานวิจัย')}</p>
+  </div>`;
 }
 function detailDgaTab(a){
   const subtabs = [['gas','gas_results'],['duval','duval_triangle'],['rogers','rogers_ratio'],['iec','iec_ratio'],['trend','trend_analysis'],['interp','interpretation']];
