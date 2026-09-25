@@ -287,6 +287,21 @@ select.chip-input{cursor:pointer;}
 .hiseg{position:relative; background:var(--border); border-radius:6px; height:30px; overflow:hidden;}
 .hifill{position:absolute; left:0; top:0; bottom:0;}
 .hiseg span{position:relative; font-size:11px; font-weight:800; padding:0 6px; line-height:30px; white-space:nowrap; color:#1f2a37;}
+.tsum-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0 12px;}
+.tsum-kpi{display:flex;align-items:center;gap:10px;background:var(--bg,#f6f3ec);border-radius:10px;padding:10px 12px;}
+.tsum-dot{width:10px;height:10px;border-radius:50%;flex:0 0 10px;}
+.tsum-n{font-size:20px;font-weight:800;line-height:1.1;}
+.tsum-all{display:flex;height:8px;border-radius:99px;overflow:hidden;gap:2px;margin-bottom:16px;}
+.tsum-rows{display:flex;flex-direction:column;gap:10px;}
+.tsum-row{display:grid;grid-template-columns:170px 1fr 34px;align-items:center;gap:10px;}
+.tsum-lab{display:flex;align-items:center;gap:8px;min-width:0;}
+.tsum-tag{font-weight:800;font-size:11.5px;border-radius:6px;padding:3px 7px;min-width:42px;text-align:center;}
+.tsum-track{background:var(--border);border-radius:8px;height:26px;overflow:hidden;}
+.tsum-bar{display:flex;height:100%;gap:2px;}
+.tsum-seg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11.5px;font-weight:800;min-width:18px;}
+.tsum-seg:first-child{border-radius:8px 0 0 8px;} .tsum-seg:last-child{border-radius:0 8px 8px 0;} .tsum-seg:only-child{border-radius:8px;}
+.tsum-total{font-weight:800;text-align:right;}
+@media (max-width:640px){ .tsum-row{grid-template-columns:1fr 34px;} .tsum-lab{grid-column:1/-1;} .tsum-kpis{grid-template-columns:1fr;} }
 /* ===== Risk matrix ===== */
 .rmx{display:grid; grid-template-columns:34px repeat(5,1fr); gap:4px; font-size:11px;}
 .rmx .cell{min-height:64px; border-radius:8px; padding:5px; display:flex; flex-wrap:wrap; gap:3px; align-content:flex-start; position:relative;}
@@ -2390,6 +2405,26 @@ function reportStats(){
   const trend = fleetTrend();
   return {N,healthy,warning,critical,plans,dates,fam,highByComp,byType,trend};
 }
+function taskSummaryHtml(r){
+  const names = {BM:L('Breakdown','ซ่อมเมื่อเสีย'),CM:L('Corrective','แก้ไข'),PM:L('Preventive','ป้องกัน'),CBM:L('Condition-based','ตามสภาพ'),PdM:L('Predictive','คาดการณ์')};
+  const typeCol = {BM:'#8b9099',CM:'#e0473d',PM:'#2f7dd1',CBM:'#1fa571',PdM:'#8759d6'};
+  const S = [['done','#1fa571',t('completed')],['prog','#2f7dd1',t('in_progress')],['up','#f0b429',t('upcoming')]];
+  const rows = r.byType.map(x=>({...x, n:x.done+x.prog+x.up})).filter(x=>x.n>0);
+  const tot = {done:0,prog:0,up:0}; rows.forEach(x=>S.forEach(([k])=>tot[k]+=x[k])); const all = tot.done+tot.prog+tot.up;
+  const max = Math.max(1,...rows.map(x=>x.n));
+  const pct = (n)=> all? Math.round(n/all*100):0;
+  return `<div class="card"><div class="card-head"><h3>${t('maint_task_summary')}</h3><span class="small-muted">${all} ${L('tasks','งาน')}</span></div>
+    <div class="tsum-kpis">${S.map(([k,c,lb])=>`<div class="tsum-kpi"><span class="tsum-dot" style="background:${c}"></span><div><div class="tsum-n">${tot[k]}</div><div class="small-muted">${lb} · ${pct(tot[k])}%</div></div></div>`).join('')}</div>
+    <div class="tsum-all">${S.map(([k,c])=>tot[k]?`<div style="flex:${tot[k]};background:${c};"></div>`:'').join('')}</div>
+    <div class="tsum-rows">${rows.map(x=>`
+      <div class="tsum-row">
+        <div class="tsum-lab"><span class="tsum-tag" style="background:${typeCol[x.ty]}1f;color:${typeCol[x.ty]};">${x.ty}</span><span class="small-muted">${names[x.ty]}</span></div>
+        <div class="tsum-track"><div class="tsum-bar" style="width:${x.n/max*100}%;">${S.map(([k,c,lb])=>x[k]?`<div class="tsum-seg" style="flex:${x[k]};background:${c};" title="${lb}: ${x[k]}">${x[k]}</div>`:'').join('')}</div></div>
+        <div class="tsum-total">${x.n}</div>
+      </div>`).join('')}</div>
+    <p class="small-muted" style="font-size:11px;margin:10px 0 0;">${L('Status comes from each task’s dates compared with today.','สถานะคิดจากวันที่ของแต่ละงานเทียบกับวันนี้')}</p>
+  </div>`;
+}
 function renderReports(){
   const r = reportStats(); const pct=(n)=>r.N?Math.round(n/r.N*100):0;
   const worst = ASSETS.slice().sort((x,y)=>x.hi-y.hi)[0];
@@ -2441,7 +2476,7 @@ function renderReports(){
     </div>
   </div>
   <div class="grid" style="grid-template-columns:1fr; margin-bottom:16px; align-items:stretch;">
-    <div class="card"><h3>${t('maint_task_summary')}</h3><p class="card-sub">${L('All planned tasks by type and status (status from task dates vs. today)','งานตามแผนทั้งหมดแยกตามประเภทและสถานะ (สถานะคิดจากวันที่งานเทียบกับวันนี้)')}</p>${chartBox('repTaskBar',200)}</div>
+    ${taskSummaryHtml(r)}
   </div>
   <div class="grid" style="grid-template-columns:1.6fr 1fr;">
     <div class="card"><div class="card-head"><h3>${t('health_ranking')}</h3><span class="small-muted">${t('as_of')} ${new Date().toLocaleDateString(state.lang==='th'?'th-TH':'en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span></div>
@@ -2462,7 +2497,6 @@ function initReportsCharts(){
   mkChart('repTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{label:'Avg HI',data:r.trend,borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:3}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
   const comps = Object.entries(r.highByComp).sort((x,y)=>y[1]-x[1]);
   mkChart('repFmeaBar',{type:'bar',data:{labels:comps.map(c=>c[0]),datasets:[{data:comps.map(c=>c[1]),backgroundColor:'#e0473d'}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor},ticks:{precision:0}},y:{grid:{display:false}}}}});
-  mkChart('repTaskBar',{type:'bar',data:{labels:r.byType.map(x=>x.ty),datasets:[{label:t('completed'),data:r.byType.map(x=>x.done),backgroundColor:'#1fa571'},{label:t('in_progress'),data:r.byType.map(x=>x.prog),backgroundColor:'#2f7dd1'},{label:t('upcoming'),data:r.byType.map(x=>x.up),backgroundColor:'#eba020'}]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:gridColor},ticks:{precision:0}}}}});
 }
 function fleetRows(){ return [['ID','Location','Last sample','Health Index','Status','DGA code','Main issue','Strategy','Next sampling','PoF class','CoF class','Risk score','Risk level'], ...ASSETS.map(a=>{ const r=riskOf(a); return [a.id,a.loc,a.last,a.hi,a.status,a._as?a._as.dga.code:'',mainIssueOf(a),strategyOf(a),a.next,r.pofClass,r.cofClass,r.score,r.level]; })]; }
 function attachReportsEvents(){
