@@ -1263,7 +1263,7 @@ const valueLabelPlugin = {
       if(meta.hidden || !meta.data) return;
       meta.data.forEach((point, index)=>{
         const value = ds.data[index];
-        if(value===undefined || value===null) return;
+        if(value===undefined || value===null || ds.noLabel) return;
         ctx.save();
         ctx.fillStyle = ds.borderColor || '#3a362f';
         ctx.font = '700 11px Inter, sans-serif';
@@ -1696,7 +1696,8 @@ function detailHealthIndexTab(a){
       <div class="badge-lg" style="background:${bg}; color:${fg};">${cat.name}</div></div>
     </div>
     <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3></div>${chartBox('hiTrend',150)}
-      <p style="font-size:12.5px;margin:8px 0 0;">${hr.rate===null?L('Not enough history yet.','ยังมีข้อมูลย้อนหลังไม่พอ'):(hr.rate>0.05?L(`Falling about <b>${hr.rate.toFixed(1)} points per year</b>`,`ลดลงประมาณ <b>ปีละ ${hr.rate.toFixed(1)} คะแนน</b>`):L('Stable over time','คงที่ตลอดช่วงที่ผ่านมา'))}</p></div>
+      <p style="font-size:12.5px;margin:8px 0 0;">${hr.rate===null?L('Not enough history yet.','ยังมีข้อมูลย้อนหลังไม่พอ'):(hr.rate>0.05?L(`Falling about <b>${hr.rate.toFixed(1)} points per year</b>`,`ลดลงประมาณ <b>ปีละ ${hr.rate.toFixed(1)} คะแนน</b>`):L('Stable over time','คงที่ตลอดช่วงที่ผ่านมา'))} <span class="small-muted">(${L('dashed line','เส้นประ')})</span></p>
+      ${hr.rate===null?'':rateExplain(a, hr)}</div>
     <div class="card"><h3>${L('In short','สรุป')}</h3>
       <ul class="hlist">
         <li><span class="k">${L('Risk','ความเสี่ยง')}</span><span class="v">${riskPill(rk.level)}</span></li>
@@ -1713,6 +1714,20 @@ function detailHealthIndexTab(a){
   <details class="card" style="margin-bottom:16px;"><summary style="cursor:pointer;font-weight:800;">${L('Show the detailed calculation','ดูวิธีคำนวณแบบละเอียด')}</summary>
     ${hiCalcDetail(prof)}
   </details>`;
+}
+function rateExplain(a, hr){
+  const h = hiHistory(a); const t0 = parseD(h[0].date);
+  const yr = (d)=> (parseD(d)-t0)/(365.25*864e5);
+  const lineStart = hr.intercept, lineEnd = hr.intercept + hr.slope*hr.span;
+  return `<details style="margin-top:8px;"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--accent-2);">${L('How is this calculated?','อัตรานี้คิดยังไง?')}</summary>
+    <ol style="font-size:12px;margin:8px 0 0;padding-left:18px;line-height:1.6;">
+      <li>${L(`Take the Health Index of every lab sample — ${h.length} results over ${hr.span.toFixed(1)} years:`,`นำ HI ของผลแล็บทุกครั้งมาเรียงตามเวลา — ${h.length} ครั้ง ในช่วง ${hr.span.toFixed(1)} ปี:`)}
+        <div class="small-muted" style="margin:4px 0;">${h.map(p=>`${shortDate(p.date)}: <b>${p.hi}</b>`).join(' · ')}</div></li>
+      <li>${L('Draw the straight line that fits these points best (linear regression) — the dashed line in the chart. Using a line instead of just first-vs-last smooths out test-to-test noise.','ลากเส้นตรงที่ผ่านใกล้ทุกจุดมากที่สุด (linear regression) — คือเส้นประในกราฟ การใช้เส้นแทนการเอาครั้งแรกลบครั้งสุดท้าย ช่วยลดผลจากค่าที่แกว่งแต่ละครั้ง')}</li>
+      <li>${L(`The line goes from <b>${lineStart.toFixed(1)}</b> to <b>${lineEnd.toFixed(1)}</b> over ${hr.span.toFixed(1)} years → (${lineStart.toFixed(1)} − ${lineEnd.toFixed(1)}) ÷ ${hr.span.toFixed(1)} = <b>${hr.rate.toFixed(1)} points per year</b>.`,`เส้นเริ่มที่ <b>${lineStart.toFixed(1)}</b> และจบที่ <b>${lineEnd.toFixed(1)}</b> ในเวลา ${hr.span.toFixed(1)} ปี → (${lineStart.toFixed(1)} − ${lineEnd.toFixed(1)}) ÷ ${hr.span.toFixed(1)} = <b>ลดลงปีละ ${hr.rate.toFixed(1)} คะแนน</b>`)}</li>
+      <li>${L('The rate is used with the current HI in the risk table: 0–5 = slow, 5–10 = medium, more than 10 = fast.','นำอัตรานี้ไปใช้คู่กับค่า HI ปัจจุบันในตารางความเสี่ยง: 0–5 = ช้า, 5–10 = ปานกลาง, มากกว่า 10 = เร็ว')}
+        ${hr.enough?'':`<div style="color:var(--amber);">${L('Less than 3 years of results — the paper asks for at least 3 years, so treat this as an estimate.','ข้อมูลน้อยกว่า 3 ปี — งานวิจัยกำหนดอย่างน้อย 3 ปี จึงเป็นค่าประมาณ')}</div>`}</li>
+    </ol></details>`;
 }
 const FACTOR_NAMES_SIMPLE = {FF:['Gas / fault condition','ก๊าซและความผิดปกติ'], OQF:['Oil quality','คุณภาพน้ำมัน'], PCF:['Paper insulation','ฉนวนกระดาษ']};
 function hiCalcDetail(prof){
@@ -2032,7 +2047,9 @@ function initDetailCharts(a){
   const trendCol = categoryFor(a)==='critical'?'#e0473d':categoryFor(a)==='warning'?'#eba020':'#1fa571';
   const trendCfg = ()=>({type:'line',plugins:[valueLabelPlugin],data:{labels:hLabels,datasets:[{data:hVals,borderColor:trendCol,backgroundColor:trendCol+'22',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:trendCol}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
   if(document.getElementById('detTrend')) mkChart('detTrend', trendCfg());
-  if(document.getElementById('hiTrend')) mkChart('hiTrend', trendCfg());
+  if(document.getElementById('hiTrend')){ const cfg = trendCfg(); const hr = hiRateOf(a);
+    if(hr.rate!==null){ const t0=parseD(hh[0].date); cfg.data.datasets.push({label:L('Trend line','เส้นแนวโน้ม'),noLabel:true,data:hh.map(p=>Math.round((hr.intercept+hr.slope*((parseD(p.date)-t0)/(365.25*864e5)))*10)/10),borderColor:'#33415c',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false,tension:0}); }
+    mkChart('hiTrend', cfg); }
   if(document.getElementById('hiGauge')){ const gaugeColor = trendCol; mkChart('hiGauge',{type:'doughnut',data:{datasets:[{data:[a.hi,100-a.hi],backgroundColor:[gaugeColor, gridColor],borderWidth:0,circumference:180,rotation:270}]},options:{...commonOpts(),cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}}); }
   if(document.getElementById('hiRadar')){ const F = profileFor(a).factors; const keys=['FF','OQF','PCF'];
     mkChart('hiRadar',{type:'bar',data:{labels:keys.map(k=>L(FACTOR_NAMES[k][0],FACTOR_NAMES[k][1])),datasets:[{data:keys.map(k=>F[k].sf),backgroundColor:keys.map(k=>({A:'#1fa571',B:'#5cbf8f',C:'#eba020',D:'#e0473d',E:'#8a1c14'})[F[k].code])}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{min:0,max:4,ticks:{stepSize:1},grid:{color:gridColor}},y:{grid:{display:false},ticks:{font:{size:10.5}}}}}}); }
@@ -2120,7 +2137,7 @@ function renderRiskPage(){
   </div>
   <div class="card"><h3>${L('Priority ranking','ลำดับความสำคัญ')}</h3>
     <p class="card-sub">${L('Sorted by risk level, then by faster HI decrease, then by lower HI.','เรียงตามระดับความเสี่ยง ตามด้วยอัตราการลดลงของ HI ที่เร็วกว่า และ HI ที่ต่ำกว่า')}</p>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>HI</th><th>${L('Falling /yr','ลดลง/ปี')}</th><th>${L('Risk','ความเสี่ยง')}</th><th>${L('Condition vs age','สภาพเทียบอายุ')}</th><th>${L('Action','การดำเนินการ')}</th></tr></thead><tbody>
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>HI</th><th title="${L('Slope of the straight line through all HI results — see Health Index tab','ความชันของเส้นตรงที่ลากผ่าน HI ทุกครั้ง — ดูได้ในแท็บดัชนีสุขภาพ')}">${L('Falling /yr','ลดลง/ปี')} ⓘ</th><th>${L('Risk','ความเสี่ยง')}</th><th>${L('Condition vs age','สภาพเทียบอายุ')}</th><th>${L('Action','การดำเนินการ')}</th></tr></thead><tbody>
     ${list.map((o,i)=>{ const ag=o.r.ageing, ri=o.r.rateInfo; return `<tr><td>${i+1}</td><td><button class="viewlink" data-view="${o.a.id}"><b>${o.a.id}</b></button></td>
       <td style="color:${hiColor(o.a.hi)};font-weight:800;">${o.a.hi} <span class="small-muted">${hiCat(o.a.hi).code}</span></td>
       <td>${ri.rate===null?'—':ri.rate.toFixed(2)}${ri.enough?'':'<span class="small-muted">*</span>'}</td><td>${riskPill(o.r.level)}</td>
@@ -2134,11 +2151,12 @@ function initRiskCharts(){
   const gridColor = cssv('--border'); const pts = ASSETS.map(a=>({a, ag:ageingOf(a)})).filter(o=>o.ag);
   const maxAge = Math.max(45, ...pts.map(o=>o.ag.age+3));
   mkChart('riskAgeScatter',{type:'scatter',data:{datasets:[
-    {label:L('Normal ageing','การเสื่อมตามปกติ'),type:'line',data:[{x:0,y:NORMAL_HI.b},{x:maxAge,y:NORMAL_HI.a*maxAge+NORMAL_HI.b}],borderColor:'#8b9099',borderDash:[5,5],pointRadius:0,fill:false},
+    {label:L('Normal ageing','การเสื่อมตามปกติ'),type:'line',data:[{x:(NORMAL_HI.b-100)/(-NORMAL_HI.a),y:100},{x:maxAge,y:Math.max(0,NORMAL_HI.a*maxAge+NORMAL_HI.b)}],borderColor:'#8b9099',borderDash:[5,5],pointRadius:0,fill:false},
     {label:L('Normal or better','ปกติหรือดีกว่า'),data:pts.filter(o=>!o.ag.accelerated).map(o=>({x:o.ag.age,y:o.a.hi,id:o.a.id})),backgroundColor:'#1fa571',pointRadius:5},
     {label:L('Accelerated ageing','เสื่อมเร็วกว่าปกติ'),data:pts.filter(o=>o.ag.accelerated).map(o=>({x:o.ag.age,y:o.a.hi,id:o.a.id})),backgroundColor:'#e0473d',pointRadius:5},
   ]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:(c)=>c.raw.id?`${c.raw.id}: ${L('age','อายุ')} ${c.raw.x}, HI ${c.raw.y}`:''}}},
-    scales:{x:{type:'linear',min:0,max:maxAge,title:{display:true,text:L('Operating age (years)','อายุใช้งาน (ปี)')},grid:{color:gridColor}},y:{min:0,max:100,title:{display:true,text:'HI'},grid:{color:gridColor}}}}});
+    layout:{padding:{top:8,right:10}},
+    scales:{x:{type:'linear',min:0,max:maxAge,title:{display:true,text:L('Operating age (years)','อายุใช้งาน (ปี)')},grid:{color:gridColor}},y:{min:0,max:106,afterBuildTicks:(ax)=>{ ax.ticks=[0,20,40,60,80,100].map(v=>({value:v})); },title:{display:true,text:'HI'},grid:{color:gridColor}}}}});
 }
 function attachCritButtons(){}
 function riskCardHtml(a){
