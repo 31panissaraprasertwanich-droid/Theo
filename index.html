@@ -302,6 +302,42 @@ select.chip-input{cursor:pointer;}
 .tsum-seg:first-child{border-radius:8px 0 0 8px;} .tsum-seg:last-child{border-radius:0 8px 8px 0;} .tsum-seg:only-child{border-radius:8px;}
 .tsum-total{font-weight:800;text-align:right;}
 @media (max-width:640px){ .tsum-row{grid-template-columns:1fr 34px;} .tsum-lab{grid-column:1/-1;} .tsum-kpis{grid-template-columns:1fr;} }
+/* ===== Calmer layout ===== */
+.card.stat .gbadge{display:none;}
+.card.stat{gap:0;}
+.detail-head{align-items:center;}
+.kpi{min-width:0; padding:8px 14px;}
+.kpi .klabel{font-size:10.5px; letter-spacing:.3px; text-transform:uppercase;}
+.kpi .kvalue{font-size:20px;}
+.seg{display:inline-flex; background:var(--border); border-radius:10px; padding:3px; gap:2px;}
+.seg button{border:none; background:none; padding:7px 16px; border-radius:8px; font:inherit; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer;}
+.seg button.on{background:var(--card); color:var(--text,#1f2a37); box-shadow:0 1px 3px rgba(0,0,0,.12);}
+.tip{display:inline-block; position:relative; vertical-align:middle;}
+.tip>summary{list-style:none; cursor:pointer; color:var(--muted); font-size:12px; font-weight:700; padding:0 2px;}
+.tip>summary::-webkit-details-marker{display:none;}
+.tipbox{position:absolute; z-index:30; top:20px; left:-8px; width:250px; background:#1f2a37; color:#fff; font-size:12px; font-weight:500; line-height:1.5; padding:9px 11px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.2);}
+.more{position:relative;}
+.more>summary{list-style:none; cursor:pointer;} .more>summary::-webkit-details-marker{display:none;}
+.morebox{position:absolute; right:0; top:44px; z-index:40; background:var(--card); border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,0,0,.14); padding:6px; min-width:250px;}
+.moreitem{display:flex; align-items:center; gap:8px; width:100%; border:none; background:none; font:inherit; font-size:13px; text-align:left; padding:8px 10px; border-radius:7px; cursor:pointer; color:inherit;}
+.moreitem:hover{background:var(--blue-bg);}
+.morehead{font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; padding:8px 10px 2px; border-top:1px solid var(--border); margin-top:4px;}
+.morehead:empty{padding:0; margin:4px 0;}
+.sumcard{display:flex; flex-direction:column; gap:12px;}
+.sum-hi{display:flex; align-items:center; gap:14px;}
+.sum-num{font-size:46px; font-weight:800; line-height:1;}
+.sum-cat{font-size:18px; font-weight:800;}
+.sum-sentence{margin:0; font-size:14px; font-weight:600;}
+.sum-facts{list-style:none; margin:0; padding:0; border-top:1px solid var(--border);}
+.sum-facts li{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px;}
+.sum-facts li b{text-align:right;}
+.sum-h{font-weight:800; font-size:13px; margin-bottom:4px;}
+.sum-why{background:var(--blue-bg); border-radius:8px; padding:8px 10px;}
+.sum-todo ol{margin:0 0 6px; padding-left:20px; font-size:13px; line-height:1.6;}
+.opstrip{display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px; padding:12px 16px; font-size:12.5px;}
+.op-svc{font-weight:800;}
+table.rowlink tbody tr{cursor:pointer;} table.rowlink tbody tr:hover{background:var(--blue-bg);}
+@media (max-width:760px){ .kpi-row{margin-left:0; width:100%;} .morebox{right:auto; left:0;} }
 /* ===== Risk matrix ===== */
 .rmx{display:grid; grid-template-columns:34px repeat(5,1fr); gap:4px; font-size:11px;}
 .rmx .cell{min-height:64px; border-radius:8px; padding:5px; display:flex; flex-wrap:wrap; gap:3px; align-content:flex-start; position:relative;}
@@ -341,7 +377,7 @@ select.chip-input{cursor:pointer;}
       <div class="formrow"><label id="loginPassLabel">Password</label><input name="password" type="password" required autocomplete="current-password"></div>
       <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;" id="loginSubmitBtn">Sign in</button>
     </form>
-    <div class="login-hint" id="loginHint">Demo access — any username &amp; password works.</div>
+    <div class="login-hint" id="loginHint">Demo mode — for demonstration purposes.</div>
   </div>
 </div>
 <div class="app" id="appRoot" style="visibility:hidden;">
@@ -409,7 +445,7 @@ const UI = {
  role:['Industrial Engineering','วิศวกรรมอุตสาหการ'], logout:['Log out','ออกจากระบบ'],
  login_title:['Sign in','เข้าสู่ระบบ'], login_sub:['Access the RCM Transformer dashboard','เข้าใช้งานแดชบอร์ด RCM Transformer'],
  login_user:['Username','ชื่อผู้ใช้'], login_pass:['Password','รหัสผ่าน'], login_submit:['Sign in','เข้าสู่ระบบ'],
- login_hint:['Demo access — any username & password works.','ตัวอย่างระบบ — ใช้ชื่อผู้ใช้และรหัสผ่านใดก็ได้'],
+ login_hint:['Demo mode — for demonstration purposes.','โหมดสาธิต — สำหรับการนำเสนอ'],
  notifications:['Notifications','การแจ้งเตือน'], mark_all_read:['Mark all read','อ่านทั้งหมด'], view_all:['View All →','ดูทั้งหมด →'],
  sub_overview:['Monitor · Analyze · Plan · Maintain','ติดตาม · วิเคราะห์ · วางแผน · บำรุงรักษา'],
  sub_assets:['Manage and monitor all transformer assets','จัดการและติดตามสินทรัพย์หม้อแปลงทั้งหมด'],
@@ -1103,9 +1139,8 @@ let state = {page:'overview', assetId:'TR-014', detailTab:'overview', rcmMode:'W
 let chartRegistry = {};
 
 const NAV = [
- {id:'overview', key:'nav_overview', badge:'home'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'healthindex', key:'nav_healthindex', badge:'health'},
- {id:'dga', key:'nav_dga', badge:'lab'}, {id:'fmea', key:'nav_fmea', badge:'fmea'}, {id:'rcm', key:'nav_rcm', badge:'rcm'},
- {id:'plan', key:'nav_plan', badge:'plan'}, {id:'risk', key:'nav_risk', badge:'risk'}, {id:'reports', key:'nav_reports', badge:'reports'}, {id:'settings', key:'nav_settings', badge:'settings'},
+ {id:'overview', key:'nav_overview', badge:'home'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'},
+ {id:'reports', key:'nav_reports', badge:'reports'}, {id:'settings', key:'nav_settings', badge:'settings'},
 ];
 const ICONS = {
  home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>', box:'<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>',
@@ -1384,74 +1419,14 @@ function renderOverview(){
     <div class="card stat">${badge('watch',44)}<div><div class="label">${t('warning')}</div><div class="value">${warning}</div><div class="small-muted">${pct(warning)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
     <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">${critical}</div><div class="small-muted">${pct(critical)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
   </div>
-  <div class="grid g2" style="margin-bottom:16px; align-items:stretch;">
-    <div class="card" style="display:flex; flex-direction:column;">
-      <div class="card-head"><h3>${t('health_dist')}</h3></div>
-      <div style="display:flex; align-items:center; justify-content:center; gap:28px; flex:1;">
-        <div class="donut-wrap" style="width:170px;height:170px;">${chartBox('ovDonut',170)}<div class="donut-center"><div class="n" style="font-size:28px;">${N}</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
-        <div class="legend" style="font-size:13.5px; gap:14px;">
-          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--green)"></span>${t('healthy')}<span class="lval">${healthy} (${pct(healthy)}%)</span></div>
-          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--amber)"></span>${t('warning')}<span class="lval">${warning} (${pct(warning)}%)</span></div>
-          <div class="li"><span class="sw" style="width:11px;height:11px;background:var(--red)"></span>${t('critical')}<span class="lval">${critical} (${pct(critical)}%)</span></div>
-        </div>
-      </div>
-    </div>
+  <div class="grid" style="grid-template-columns:1fr; gap:16px;">
     <div class="card">
       <div class="card-head"><h3>${t('attention')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
-      <div class="tbl-wrap"><table><thead><tr><th>${t('asset')}</th><th>HI</th><th>${t('status')}</th><th>${t('main_issue')}</th></tr></thead><tbody>
-      ${attentionList().map(a=>`<tr><td><button class="viewlink" data-view="${a.id}"><b>${a.id}</b></button></td><td style="color:${statusColor(a.status)};font-weight:800;">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${mainIssueOf(a)}</td></tr>`).join('') || `<tr><td colspan="4" class="small-muted">${L('No transformer needs attention','ไม่มีหม้อแปลงที่ต้องเฝ้าระวัง')}</td></tr>`}
+      <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${t('asset')}</th><th>HI</th><th>${L('Risk','ความเสี่ยง')}</th><th>DGA</th><th>${L('Strategy','กลยุทธ์')}</th><th>${L('Action','ต้องทำ')}</th></tr></thead><tbody>
+      ${attentionList().map(a=>`<tr data-view="${a.id}"><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)};font-weight:800;">${a.hi}</td><td>${riskPill(riskOf(a).level)}</td><td>${a._as&&a._as.dga.code!=='N'?a._as.dga.code:'—'}</td><td>${strategyOf(a)}</td><td class="small-muted" style="white-space:normal;">${profileFor(a).nextAction[state.lang]}</td></tr>`).join('') || `<tr><td colspan="6" class="small-muted">${L('No transformer needs attention','ไม่มีหม้อแปลงที่ต้องดูแล')}</td></tr>`}
       </tbody></table></div>
     </div>
-  </div>
-  <div class="grid" style="grid-template-columns:2.1fr 1fr; margin-bottom:16px; align-items:stretch;">
-    <div class="card">
-      <div class="card-head"><h3>${t('assets_title')}</h3></div>
-      <div class="filter-row" style="margin-bottom:12px;">
-        <span class="pill pill-info selectable ${state.assetFilterStatus==='All'?'on':''}" data-ov-filter="All">${L('All','ทั้งหมด')} (${N})</span>
-        <span class="pill pill-healthy selectable ${state.assetFilterStatus==='Healthy'?'on':''}" data-ov-filter="Healthy">${t('healthy')} (${healthy})</span>
-        <span class="pill pill-warning selectable ${state.assetFilterStatus==='Warning'?'on':''}" data-ov-filter="Warning">${t('warning')} (${warning})</span>
-        <span class="pill pill-critical selectable ${state.assetFilterStatus==='Critical'?'on':''}" data-ov-filter="Critical">${t('critical')} (${critical})</span>
-      </div>
-      ${(()=>{
-        const list = filteredAssets(state.assetFilterStatus);
-        const pageSize = 10;
-        const totalPages = Math.max(1, Math.ceil(list.length/pageSize));
-        if(state.ovPage>totalPages) state.ovPage = totalPages;
-        const startIdx = (state.ovPage-1)*pageSize;
-        const pageItems = list.slice(startIdx, startIdx+pageSize);
-        return `<div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset_id')}</th><th>${t('location')}</th><th>${t('capacity')}</th><th>${t('voltage')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${t('next_plan')}</th><th></th></tr></thead><tbody>
-        ${pageItems.map((a,i)=>`<tr><td>${startIdx+i+1}</td><td><b>${a.id}</b></td><td>${a.loc}</td><td>${a.cap}</td><td>${a.volt}</td><td style="font-weight:800;color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${a.next}</td><td><button class="viewlink" data-view="${a.id}">${t('view')}</button></td></tr>`).join('')}
-        </tbody></table></div>
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
-          <span class="small-muted">${t('showing')} ${startIdx+1}–${Math.min(startIdx+pageSize,list.length)} ${t('of')} ${list.length}</span>
-          <div class="filter-row">
-            <button class="btn btn-outline" id="ovPagePrev" ${state.ovPage<=1?'disabled':''} style="padding:6px 11px;font-size:12px;">${t('prev')}</button>
-            <span class="small-muted">${state.ovPage} / ${totalPages}</span>
-            <button class="btn btn-outline" id="ovPageNext" ${state.ovPage>=totalPages?'disabled':''} style="padding:6px 11px;font-size:12px;">${t('next')}</button>
-          </div>
-        </div>`;
-      })()}
-    </div>
-    <div style="display:flex; flex-direction:column; gap:16px;">
-      <div class="card" style="flex:1;">
-        <div class="card-head"><h3>${t('recent_activities')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
-        <ul class="recact">${recent.map(a=>`<li><span class="dot" style="background:${statusColor(a.status)}"></span><div><div>${a.id} ${L('lab result','ผลแล็บ')}: HI ${a.hi} · DGA ${a._as?a._as.dga.code:'—'}</div><div class="rt">${a.last}</div></div></li>`).join('')}</ul>
-      </div>
-    </div>
-  </div>
-  <div class="grid g2">
-    <div class="card"><div class="card-head"><h3>${t('hi_trend_fleet')}</h3></div>${chartBox('ovTrend2',130)}</div>
-    <div class="card">
-      <div class="card-head"><h3>${t('maint_strategy')}</h3></div>
-      <div style="display:flex; align-items:center; gap:16px;">
-        <div class="donut-wrap" style="width:130px;height:130px;">${chartBox('ovStrategy',130)}<div class="donut-center"><div class="n">${N}</div><div class="l">${state.lang==='th'?'สินทรัพย์':'Assets'}</div></div></div>
-        <div class="legend">
-          <div class="li"><span class="sw" style="background:#2f7dd1"></span>PM<span class="lval">${stratCount.PM} (${pct(stratCount.PM)}%)</span></div>
-          <div class="li"><span class="sw" style="background:#1fa571"></span>CBM<span class="lval">${stratCount.CBM} (${pct(stratCount.CBM)}%)</span></div>
-          <div class="li"><span class="sw" style="background:#8759d6"></span>CBM + PdM<span class="lval">${stratCount['CBM + PdM']} (${pct(stratCount['CBM + PdM'])}%)</span></div>
-        </div>
-      </div>
-    </div>
+    <div class="card"><div class="card-head"><h3>${t('hi_trend_fleet')}</h3></div>${chartBox('ovTrend2',180)}</div>
   </div>`;
 }
 function updateClock(){
@@ -1465,9 +1440,9 @@ function filteredAssets(status){ let list = ASSETS.slice(); if(status && status!
 function initOverviewCharts(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
   const gridColor = cssv('--border');
-  mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  if(document.getElementById('ovDonut')) mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
   const sc={PM:0,CBM:0,'CBM + PdM':0}; ASSETS.forEach(a=>sc[strategyOf(a)]++);
-  mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','CBM + PdM'],datasets:[{data:[sc.PM,sc.CBM,sc['CBM + PdM']],backgroundColor:['#2f7dd1','#1fa571','#8759d6'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  if(document.getElementById('ovStrategy')) mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','CBM + PdM'],datasets:[{data:[sc.PM,sc.CBM,sc['CBM + PdM']],backgroundColor:['#2f7dd1','#1fa571','#8759d6'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
   mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{data:fleetTrend(),borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#2f7dd1'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
@@ -1502,8 +1477,8 @@ function renderAssetsPage(){
       </select>
       <span class="small-muted">${list.length} / ${ASSETS.length}</span>
     </div>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset_id')}</th><th>${t('location')}</th><th>${t('capacity')}</th><th>${t('voltage')}</th><th>${t('manufacturer')}</th><th>${t('year')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${t('last_inspection')}</th><th>${t('next_plan')}</th><th></th></tr></thead><tbody>
-    ${list.length ? list.map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td>${a.loc}</td><td>${a.cap}</td><td>${a.volt}</td><td>${a.mfr||'—'}</td><td>${a.year??'—'}</td><td style="font-weight:800;color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${a.last}</td><td>${a.next}</td><td><button class="viewlink" data-view="${a.id}">${t('view')} →</button></td></tr>`).join('') : `<tr><td colspan="12" class="small-muted" style="text-align:center;padding:20px;">${t('toast_no_result')}</td></tr>`}
+    <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${t('asset_id')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${L('Risk','ความเสี่ยง')}</th><th>${t('main_issue')}</th><th>${L('Next sampling','ตรวจครั้งถัดไป')}</th><th></th></tr></thead><tbody>
+    ${list.length ? list.map((a,i)=>`<tr data-view="${a.id}"><td><b>${a.id}</b><div class="small-muted">${a.loc}</div></td><td style="font-weight:800;color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${riskPill(riskOf(a).level)}</td><td class="small-muted" style="white-space:normal;min-width:160px;">${a.status==='Healthy'?'—':mainIssueOf(a)}</td><td>${a.next}</td><td style="color:var(--muted);">›</td></tr>`).join('') : `<tr><td colspan="7" class="small-muted" style="text-align:center;padding:20px;">${t('toast_no_result')}</td></tr>`}
     </tbody></table></div>
   </div>`;
 }
@@ -1516,7 +1491,7 @@ function attachAssetsPageEvents(){
 }
 function renderAssetsTableOnly(){
   const c = document.getElementById('content');
-  if(state.page==='assets'){ c.innerHTML = renderAssetsPage(); attachAssetsPageEvents(); document.getElementById('assetSearchInput').focus(); document.getElementById('assetSearchInput').setSelectionRange(state.assetSearch.length,state.assetSearch.length); attachGlobalViewLinks(); }
+  if(state.page==='assets'){ c.innerHTML = renderAssetsPage(); attachAssetsPageEvents(); attachGlobalViewLinks(); attachDataButtons(); document.getElementById('assetSearchInput').focus(); document.getElementById('assetSearchInput').setSelectionRange(state.assetSearch.length,state.assetSearch.length); attachGlobalViewLinks(); }
 }
 function openAddAssetModal(){
   let n = ASSETS.length+1; while(ASSETS.some(a=>a.id===`TR-${String(n).padStart(3,'0')}`)) n++;
@@ -1542,51 +1517,110 @@ function openAddAssetModal(){
 
 /* ============ ASSET DETAIL ============ */
 const DETAIL_TABS = [
- {id:'overview', key:'tab_overview'}, {id:'healthindex', key:'tab_healthindex'}, {id:'dga', key:'tab_dga'}, {id:'fmea', key:'tab_fmea'},
- {id:'rcm', key:'tab_rcm'}, {id:'plan', key:'tab_plan'}, {id:'history', key:'tab_history'}, {id:'docs', key:'tab_docs'},
+ {id:'summary', en:'Summary', th:'สรุป'}, {id:'condition', en:'Condition (HI · DGA)', th:'สภาพ (HI · DGA)'}, {id:'fmearcm', en:'FMEA & RCM', th:'FMEA & RCM'},
+ {id:'plan', en:'Maintenance plan', th:'แผนบำรุงรักษา'}, {id:'history', en:'History', th:'ประวัติ'},
 ];
 function detailHeader(a){
-  const prof = profileFor(a); const rpnMax = FMEA.length ? Math.max(...FMEA.map(f=>f.rpn)) : 0;
+  const rk = riskOf(a);
   return `
   <div class="detail-head">
-    ${badge('assets',64)}
-    <div>
+    <div style="min-width:0;">
       <div class="detail-title"><h2>${a.id}</h2><span class="pill ${statusPillClass(a.status)}" style="font-size:12px;padding:4px 12px;">${trStatus(a.status)}</span></div>
-      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-top:2px;">${a.volt} kV Power Transformer</div>
-      <div class="detail-loc">${icon('pin',' style="width:13px;height:13px"')} ${a.loc.replace(' SS',' Substation')}</div>
+      <div class="small-muted" style="margin-top:3px;">${a.loc} · ${a.volt} kV${a.cap?` · ${a.cap} MVA`:''}${a.year?` · ${L('built','ผลิตปี')} ${a.year}`:''}</div>
     </div>
     <div class="kpi-row">
-      <div class="kpi" title="${t('kpi_hi_tip')}">${badge('health',30)}<div><div class="klabel">${t('health_index').toUpperCase()}</div><div class="kvalue">${a.hi} / 100</div></div></div>
-      <div class="kpi" title="${t('kpi_rpn_tip')}">${badge('risk',30)}<div><div class="klabel">${t('rpn_max').toUpperCase()}</div><div class="kvalue">${rpnMax}</div></div></div>
-      <div class="kpi" title="${t('kpi_dga_tip')}">${badge('lab',30)}<div><div class="klabel">${t('dga_diagnosis').toUpperCase()}</div><div class="kvalue" title="${prof.type[state.lang]}">${prof.code}</div></div></div>
-      <div class="kpi">${badge('scale',30)}<div><div class="klabel">${L('RISK','ความเสี่ยง')}</div><div class="kvalue" style="color:${riskOf(a).level==='Very high'?'#2b2f36':RISK_COL[riskOf(a).level][1]};">${riskName(riskOf(a).level)}</div></div></div>
-      <div class="kpi" title="${t('kpi_next_tip')}">${badge('scheduled',30)}<div><div class="klabel">${t('next_action').toUpperCase()}</div><div class="kvalue" style="font-size:12.5px;">${prof.nextAction[state.lang]}</div></div></div>
+      <div class="kpi"><div><div class="klabel">Health Index</div><div class="kvalue" style="color:${hiColor(a.hi)};">${a.hi}</div></div></div>
+      <div class="kpi"><div><div class="klabel">${L('Risk','ความเสี่ยง')}</div><div class="kvalue">${riskPill(rk.level)}</div></div></div>
+      <div class="kpi"><div><div class="klabel">${L('Next sampling','ตรวจครั้งถัดไป')}</div><div class="kvalue" style="font-size:14px;">${a.next}</div></div></div>
+      ${detailMoreMenu(a)}
     </div>
-  </div>
-  <div style="display:flex; gap:10px; margin-bottom:14px;">
-    <button class="btn btn-primary" id="btnExportReport">${gicon('download',0,'width:13px;height:13px')} ${t('export_report')}</button>
-    <button class="btn btn-outline" id="btnEditAsset">${gicon('edit',0,'width:13px;height:13px')} ${L('Edit transformer','แก้ไขข้อมูลหม้อแปลง')}</button>
-    <button class="btn btn-outline" id="btnDeleteAsset" style="color:var(--red);">${gicon('delete',0,'width:13px;height:13px')} ${L('Delete','ลบ')}</button>
   </div>`;
+}
+/* ---------- detail: summary tab (one screen, no repetition) ---------- */
+function tip(text){ return `<details class="tip"><summary aria-label="info">ⓘ</summary><div class="tipbox">${text}</div></details>`; }
+function detailSummaryTab(a){
+  const prof = profileFor(a); const rk = riskOf(a); const ag = rk.ageing; const hr = rk.rateInfo; const cat = hiCat(a.hi);
+  const fg = a.status==='Critical'?'var(--red)':a.status==='Warning'?'var(--amber)':'var(--green)';
+  const sentence = a.status==='Healthy'
+    ? L('In good condition. Keep to the routine sampling plan.','สภาพดี ติดตามตามรอบปกติ')
+    : L(`Needs attention — main issue: ${prof.mainIssue.en}.`,`ต้องดูแล — ปัญหาหลัก: ${prof.mainIssue.th}`);
+  const chipsOp = [
+    [t('load'), a.load!=null?a.load+' %':'—'], [t('top_oil'), a.topOil!=null?a.topOil+' °C':'—'],
+    [t('oil_level'), ({Normal:t('normal'),Low:L('Low','ต่ำ'),High:L('High','สูง')})[a.oilLevel||'Normal'], (a.oilLevel||'Normal')!=='Normal'],
+    [t('cooling_system'), a.cooling==='Fault'?L('Fault','ผิดปกติ'):t('normal'), a.cooling==='Fault'],
+    [t('alarms'), a.alarms?esc(a.alarms):'–', !!a.alarms]];
+  return `
+  <div class="grid" style="grid-template-columns:1fr 1.25fr; gap:16px; margin-bottom:16px; align-items:stretch;">
+    <div class="card sumcard">
+      <div class="sum-hi"><div class="sum-num" style="color:${fg};">${a.hi}</div><div><div class="sum-cat" style="color:${fg};">${cat.name}</div><div class="small-muted">Health Index · ${L('sample','ผลตรวจ')} ${a.last}</div></div></div>
+      <p class="sum-sentence">${sentence}</p>
+      <ul class="sum-facts">
+        <li><span>${L('Risk','ความเสี่ยง')} ${tip(L('Health Index combined with how fast it is falling (Tamma et al., 2021, Table 10).','ค่า HI ร่วมกับความเร็วที่ HI ลดลง (Tamma et al., 2021 ตาราง 10)'))}</span><b>${riskPill(rk.level)}</b></li>
+        <li><span>${L('Falling per year','ลดลงต่อปี')}</span><b>${hr.rate===null?'—':hr.rate.toFixed(1)+' '+L('points','คะแนน')}</b></li>
+        ${ag?`<li><span>${L('Condition vs age','สภาพเทียบอายุ')}</span><b style="color:${ag.accelerated?'var(--red)':'inherit'};">${ag.accelerated?L(`like ${ag.apparent.toFixed(0)} yr (actual ${ag.age})`,`เหมือน ${ag.apparent.toFixed(0)} ปี (จริง ${ag.age})`):L('normal','ปกติ')}</b></li>`:''}
+        <li><span>DGA</span><b>${prof.code==='N'?L('normal','ปกติ'):`${prof.code} · ${prof.type[state.lang]}`}</b></li>
+      </ul>
+      <div class="sum-why"><div class="sum-h">${L('Recommended strategy','กลยุทธ์ที่แนะนำ')}: ${strategyOf(a)}</div><div class="small-muted">${strategyWhy(a, rk)}</div></div>
+      <div class="sum-todo"><div class="sum-h">${L('What to do','สิ่งที่ต้องทำ')}</div>
+        <ol>${[prof.nextAction[state.lang], ...prof.actions.filter(x=>!/routine|ตามรอบปกติ|Resample|เก็บน้ำมันตรวจ DGA ซ้ำ/.test(x))].slice(0,3).map(x=>`<li>${x}</li>`).join('')}</ol>
+        <button class="linklike" data-dtab="plan">${L('Open maintenance plan →','ไปที่แผนบำรุงรักษา →')}</button></div>
+    </div>
+    <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3><button class="linklike" data-dtab="condition">${L('How is it scored? →','ดูที่มาของคะแนน →')}</button></div>${chartBox('detTrend',230)}</div>
+  </div>
+  <div class="card opstrip">
+    <span class="op-svc" style="color:${a.svc==='out'?'var(--red)':'var(--green)'};">● ${a.svc==='out'?L('Out of service','หยุดใช้งาน'):t('in_service')}</span>
+    ${chipsOp.map(c=>`<span class="op-chip"><span class="small-muted">${c[0]}</span> <b style="${c[2]?'color:var(--red);':''}">${c[1]}</b></span>`).join('')}
+    <span class="small-muted" style="margin-left:auto;">${a.opDate?L('updated ','อัปเดต ')+a.opDate:(isDemoAsset(a)?L('sample values','ค่าตัวอย่าง'):'')} · <button class="linklike" data-edit-asset="1">${t('edit')}</button></span>
+  </div>`;
+}
+function strategyWhy(a, rk){
+  const r = rk.rate===null?null:rk.rate;
+  if(a.status==='Critical') return L(`Why: HI ${a.hi} is below 50${r!==null?` and falling ${r.toFixed(1)} points/yr`:''} — condition must be watched closely (CBM) and trends used to decide the intervention time (PdM).`,`เหตุผล: HI ${a.hi} ต่ำกว่า 50${r!==null?` และลดลงปีละ ${r.toFixed(1)} คะแนน`:''} — ต้องติดตามสภาพใกล้ชิด (CBM) และใช้แนวโน้มกำหนดเวลาแก้ไข (PdM)`);
+  if(a.status==='Warning') return L(`Why: HI ${a.hi} is in the caution range (50–70) — act on measured condition rather than a fixed calendar (CBM).`,`เหตุผล: HI ${a.hi} อยู่ในช่วงต้องระวัง (50–70) — ควรบำรุงรักษาตามสภาพที่วัดได้แทนการทำตามรอบเวลา (CBM)`);
+  return L(`Why: HI ${a.hi} is 70 or above with no significant fault — routine time-based maintenance and sampling are enough (PM).`,`เหตุผล: HI ${a.hi} ตั้งแต่ 70 ขึ้นไป ไม่พบความผิดปกติสำคัญ — บำรุงรักษาและเก็บตัวอย่างตามรอบเวลาก็เพียงพอ (PM)`);
+}
+function detailConditionTab(a){
+  const v = state.condView==='dga' ? 'dga' : 'healthindex';
+  return `<div class="seg" style="margin-bottom:16px;"><button class="${v==='healthindex'?'on':''}" data-cond="healthindex">${L('Health Index','ดัชนีสุขภาพ')}</button><button class="${v==='dga'?'on':''}" data-cond="dga">DGA</button></div>
+    ${v==='dga' ? detailDgaTab(a) : detailHealthIndexTab(a)}`;
+}
+function detailFmeaRcmTab(a){
+  const v = state.fmView==='rcm' ? 'rcm' : 'fmea';
+  return `<div class="seg" style="margin-bottom:16px;"><button class="${v==='fmea'?'on':''}" data-fmv="fmea">FMEA</button><button class="${v==='rcm'?'on':''}" data-fmv="rcm">${L('RCM decision','การตัดสินใจ RCM')}</button></div>
+    ${v==='rcm' ? detailRcmTab(a) : detailFmeaTab(a)}`;
+}
+function normDetailTab(){
+  const m = {overview:'summary', healthindex:['condition','condView','healthindex'], dga:['condition','condView','dga'], fmea:['fmearcm','fmView','fmea'], rcm:['fmearcm','fmView','rcm'], docs:'history'};
+  const x = m[state.detailTab]; if(!x) return; if(typeof x==='string') state.detailTab=x; else { state.detailTab=x[0]; state[x[1]]=x[2]; }
+}
+function detailMoreMenu(a){
+  const d = (parseD(a.last)||new Date()); const ymd = isoD(d).replace(/-/g,'');
+  const files = [[a.id+'_Condition_Assessment.csv','hi',L('Health Index by parameter','ดัชนีสุขภาพรายพารามิเตอร์')],[a.id+'_Lab_History.csv','lab',L('All lab results','ผลแล็บทุกครั้ง')],['DGA_'+a.id+'_'+ymd+'.csv','dga',L('Gas results & diagnosis','ผลก๊าซและการวินิจฉัย')],[a.id+'_FMEA.csv','fmea','FMEA / RPN'],[a.id+'_Maintenance_Plan.csv','plan',t('maint_schedule')]];
+  return `<details class="more"><summary class="btn btn-outline">⋯ ${L('More','เพิ่มเติม')}</summary><div class="morebox">
+    <button class="moreitem" id="btnExportReport">${gicon('download',0,'width:14px;height:14px')} ${t('export_report')}</button>
+    <div class="morehead">${L('Download files','ดาวน์โหลดไฟล์')}</div>
+    ${files.map(f=>`<button class="moreitem dl-doc" data-fname="${f[0]}" data-csv="${f[1]}">${gicon('reports',0,'width:14px;height:14px')} ${f[2]}</button>`).join('')}
+    <div class="morehead"></div>
+    <button class="moreitem" id="btnEditAsset">${gicon('edit',0,'width:14px;height:14px')} ${L('Edit transformer','แก้ไขข้อมูลหม้อแปลง')}</button>
+    <button class="moreitem" id="btnDeleteAsset" style="color:var(--red);">${gicon('delete',0,'width:14px;height:14px')} ${L('Delete transformer','ลบหม้อแปลง')}</button>
+  </div></details>`;
 }
 function renderDetail(){
   const a = currentAsset();
   let body = '';
-  if(state.detailTab==='overview') body = detailOverviewTab(a);
-  else if(state.detailTab==='healthindex') body = detailHealthIndexTab(a);
-  else if(state.detailTab==='dga') body = detailDgaTab(a);
-  else if(state.detailTab==='fmea') body = detailFmeaTab(a);
-  else if(state.detailTab==='rcm') body = detailRcmTab(a);
+  normDetailTab();
+  if(state.detailTab==='condition') body = detailConditionTab(a);
+  else if(state.detailTab==='fmearcm') body = detailFmeaRcmTab(a);
   else if(state.detailTab==='plan') body = detailPlanTab(a);
   else if(state.detailTab==='history') body = detailHistoryTab(a);
-  else if(state.detailTab==='docs') body = detailDocsTab(a);
+  else { state.detailTab='summary'; body = detailSummaryTab(a); }
   return `
   <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:6px;">
     <button class="linklike" id="backToAssets">${t('back_to_assets')}</button>
     <div class="filter-row"><label class="small-muted" style="font-weight:700;">${t('viewing_asset')}</label><select class="chip-input" id="detailAssetSelect">${ASSETS.map(x=>`<option value="${x.id}" ${x.id===state.assetId?'selected':''}>${x.id} — ${x.loc}</option>`).join('')}</select></div>
   </div>
   <div class="card" style="margin-bottom:16px;">${detailHeader(a)}</div>
-  <div class="tabs">${DETAIL_TABS.map(tb=>`<button class="tab ${state.detailTab===tb.id?'active':''}" data-dtab="${tb.id}">${t(tb.key)}</button>`).join('')}</div>
+  <div class="tabs">${DETAIL_TABS.map(tb=>`<button class="tab ${state.detailTab===tb.id?'active':''}" data-dtab="${tb.id}">${L(tb.en,tb.th)}</button>`).join('')}</div>
   <div id="detailBody">${body}</div>`;
 }
 function detailOverviewTab(a){
@@ -1725,24 +1759,6 @@ function detailHealthIndexTab(a){
     line(L('Duval Triangle','สามเหลี่ยม Duval'), d.code==='N'?L('not needed — gases normal','ไม่ต้องวินิจฉัย — ก๊าซปกติ'):dgaName(d.zone), [d.code==='N'?'—':d.zone, d.code==='N'?'var(--muted)':'var(--red)']);
   const pBody = (rows)=>rows.map(r=>line(r.p, r.res, word(r.score))).join('');
   return `
-  <div class="grid" style="grid-template-columns:0.9fr 1.4fr 1.1fr; margin-bottom:16px; align-items:stretch;">
-    <div class="card" style="text-align:center;">
-      <h3>${t('overall_hi')}</h3>
-      <div class="gauge-wrap">${chartBox('hiGauge',110)}<div class="gauge-num">${prof.hi}</div><div class="gauge-sub">/ 100</div>
-      <div class="badge-lg" style="background:${bg}; color:${fg};">${cat.name}</div></div>
-    </div>
-    <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3></div>${chartBox('hiTrend',150)}
-      <p style="font-size:12.5px;margin:8px 0 0;">${hr.rate===null?L('Not enough history yet.','ยังมีข้อมูลย้อนหลังไม่พอ'):(hr.rate>0.05?L(`Falling about <b>${hr.rate.toFixed(1)} points per year</b>`,`ลดลงประมาณ <b>ปีละ ${hr.rate.toFixed(1)} คะแนน</b>`):L('Stable over time','คงที่ตลอดช่วงที่ผ่านมา'))} <span class="small-muted">(${L('dashed line','เส้นประ')})</span></p>
-      ${hr.rate===null?'':rateExplain(a, hr)}</div>
-    <div class="card"><h3>${L('In short','สรุป')}</h3>
-      <ul class="hlist">
-        <li><span class="k">${L('Risk','ความเสี่ยง')}</span><span class="v">${riskPill(rk.level)}</span></li>
-        <li><span class="k">${t('main_issue2')}</span><span class="v" style="color:${fg};white-space:normal;text-align:right;max-width:60%;">${prof.mainIssue[state.lang]}</span></li>
-        ${ag?`<li><span class="k">${L('Condition vs age','สภาพเทียบกับอายุ')}</span><span class="v" style="color:${ag.accelerated?'var(--red)':'var(--green)'};white-space:normal;text-align:right;max-width:60%;">${ag.accelerated?L(`${ag.age}-yr-old unit in the condition of a ${ag.apparent.toFixed(0)}-yr-old`,`อายุ ${ag.age} ปี แต่สภาพเหมือน ${ag.apparent.toFixed(0)} ปี`):L('Normal for its age','สภาพปกติตามอายุ')}</span></li>`:''}
-        <li><span class="k">${t('next_action')}</span><span class="v" style="white-space:normal;text-align:right;max-width:60%;">${prof.nextAction[state.lang]}</span></li>
-      </ul>
-    </div>
-  </div>
   <div class="card-head" style="margin-bottom:8px;"><h3 style="margin:0;">${L('What makes up the score','ที่มาของคะแนน')} <span class="small-muted" style="font-weight:600;">${L('sample','ผลตรวจวันที่')} ${prof.sample.date}</span></h3><button class="btn btn-outline" data-add-lab="1" style="padding:6px 11px;font-size:12px;">${L('Add lab result','เพิ่มผลแล็บ')}</button></div>
   <div class="grid g3" style="margin-bottom:16px; align-items:stretch;">
     ${factorCard('FF', ffBody)}${factorCard('OQF', pBody(F.OQF.rows))}${factorCard('PCF', pBody(F.PCF.rows))}
@@ -1818,10 +1834,11 @@ function hiCalcDetail(prof){
   </div>`;
 }
 function detailDgaTab(a){
-  const subtabs = [['gas','gas_results'],['duval','duval_triangle'],['rogers','rogers_ratio'],['iec','iec_ratio'],['trend','trend_analysis'],['interp','interpretation']];
+  if(!['gas','ratio','trend'].includes(state.dgaSubTab)) state.dgaSubTab = state.dgaSubTab==='rogers'||state.dgaSubTab==='iec' ? 'ratio' : state.dgaSubTab==='trend' ? 'trend' : 'gas';
+  const subtabs = [['gas',L('Gases & Duval','ผลก๊าซและ Duval')],['ratio',L('Ratio methods','วิธีอัตราส่วน')],['trend',L('Trend','แนวโน้ม')]];
   return `
   <div class="filter-row" style="justify-content:space-between; margin-bottom:14px;">
-    <div class="filter-row">${subtabs.map(s=>`<button class="pill selectable ${state.dgaSubTab===s[0]?'pill-info on':''}" data-dga-tab="${s[0]}">${t(s[1])}</button>`).join('')}</div>
+    <div class="filter-row">${subtabs.map(s=>`<button class="pill selectable ${state.dgaSubTab===s[0]?'pill-info on':''}" data-dga-tab="${s[0]}">${s[1]}</button>`).join('')}</div>
     <div class="filter-row">
       <select class="chip-input" id="dgaSamplingSelect">${DGA_SAMPLES.map((s,i)=>`<option value="${i}" ${i===state.dgaSampleIdx?'selected':''}>${t('sampling')}: ${s.date}</option>`).join('')}</select>
       <button class="btn btn-outline" id="btnAddDgaResult">${icon('box',' style="width:13px;height:13px"')} ${L('Add lab result','เพิ่มผลแล็บ')}</button>
@@ -1865,13 +1882,10 @@ function dgaSubTabContent(a){
     <ul class="hlist">${prof.actions.map(x=>`<li><span class="k" style="white-space:normal;">✓ ${x}</span></li>`).join('')}</ul>
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" data-create-plan="1">${gicon('plan',0,'width:13px;height:13px')} ${t('create_maint_plan')}</button></div></div>`;
 
-  if(state.dgaSubTab==='duval') return `<div class="grid g2" style="align-items:stretch;">${duvalBlock}${interpBlock}</div>`;
-  if(state.dgaSubTab==='rogers') return `<div class="grid g2" style="align-items:stretch;">${rogersBlock}${iecBlock}</div>`;
-  if(state.dgaSubTab==='iec') return `<div class="grid g2" style="align-items:stretch;">${iecBlock}${rogersBlock}</div>`;
-  if(state.dgaSubTab==='trend') return `<div class="grid" style="grid-template-columns:1.7fr 1fr; align-items:stretch;">${trendBlock}${interpBlock}</div>`;
-  if(state.dgaSubTab==='interp') return `<div class="grid" style="grid-template-columns:1fr; align-items:stretch;">${interpBlock}</div>`;
-  return `<div class="grid" style="grid-template-columns:1.2fr 1fr 1fr; margin-bottom:16px; align-items:stretch;">${gasResultsBlock}${duvalBlock}${rogersBlock}</div>
-  <div class="grid" style="grid-template-columns:1.7fr 1fr; align-items:stretch;">${trendBlock}${interpBlock}</div>`;
+  const interpLine = `<div class="notebox" style="margin-top:16px;">${gicon('help',16)}<div>${prof.interp[state.lang]}</div></div>`;
+  if(state.dgaSubTab==='ratio') return `<div class="grid g2" style="align-items:stretch;">${rogersBlock}${iecBlock}</div>`;
+  if(state.dgaSubTab==='trend') return trendBlock;
+  return `<div class="grid g2" style="align-items:stretch;">${gasResultsBlock}${duvalBlock}</div>${interpLine}`;
 }
 function detailFmeaTab(a){
   const high = FMEA.filter(f=>f.risk==='High').length, med = FMEA.filter(f=>f.risk==='Medium').length, low = FMEA.length-high-med;
@@ -2004,13 +2018,6 @@ function detailPlanTab(a){
   <div class="card" style="margin-bottom:16px;"><h3>${L('Suggested from the latest lab result','งานที่ระบบแนะนำจากผลแล็บล่าสุด')} <span class="small-muted" style="font-weight:600;">${a.last}</span></h3>
     <ul class="hlist">${sugs.map((sg,i)=>`<li><span class="k" style="white-space:normal;"><span class="pill ${sg.type==='CM'?'pill-critical':'pill-healthy'}" style="margin-right:6px;">${sg.type}</span>${sg.task}<div class="small-muted">${fmtD(sg.date)} · ${sg.why}</div></span><span class="v">${sg.inPlan?`<span class="small-muted">${L('in plan','อยู่ในแผนแล้ว')} ✓</span>`:`<button class="btn btn-outline" data-add-plan-sug="${i}" style="padding:5px 10px;font-size:12px;">${L('Add to plan','เพิ่มเข้าแผน')}</button>`}</span></li>`).join('')}</ul>
   </div>
-  <div class="strategy-steps">
-    <div class="strategy-step" style="border-top:3px solid #8b9099;"><div class="stitle">BM</div><div class="ssub">${state.lang==='th'?'ซ่อมเมื่อเสีย':'Breakdown'}</div></div><div class="strategy-arrow">→</div>
-    <div class="strategy-step" style="border-top:3px solid var(--red);"><div class="stitle">CM</div><div class="ssub">${state.lang==='th'?'แก้ไข':'Corrective'}</div></div><div class="strategy-arrow">→</div>
-    <div class="strategy-step" style="border-top:3px solid var(--accent-2);"><div class="stitle">PM</div><div class="ssub">${state.lang==='th'?'ป้องกัน':'Preventive'}</div></div><div class="strategy-arrow">→</div>
-    <div class="strategy-step" style="border-top:3px solid var(--green); background:var(--green-bg);"><div class="stitle">CBM</div><div class="ssub">${state.lang==='th'?'ตามสภาพ':'Condition Based'}</div></div><div class="strategy-arrow">→</div>
-    <div class="strategy-step" style="border-top:3px solid #8759d6;"><div class="stitle">PdM</div><div class="ssub">${state.lang==='th'?'คาดการณ์':'Predictive'}</div></div>
-  </div>
   <div class="grid g4" style="margin-bottom:16px;">
     <div class="card stat">${badge('workorder',44)}<div><div class="label">${t('total_tasks')}</div><div class="value">${total}</div></div></div>
     <div class="card stat">${badge('normal',44)}<div><div class="label">${t('completed')}</div><div class="value">${completed} <span style="font-size:12px;">(${pc(completed)}%)</span></div></div></div>
@@ -2035,12 +2042,7 @@ function detailPlanTab(a){
         return `<div class="timeline-row"><div class="small-muted">${tk.task}</div><div class="timeline-track"><div class="timeline-bar" style="left:${leftPct}%; width:${widthPct}%; background:${TYPE_COLOR[tk.type]};"></div>${todayPos===null?'':`<div class="today-line" style="left:${todayPos}%;"></div>`}</div></div>`; }).join('')}
     </div>` : ''}
   </div>
-  <div class="card">
-    <h3>${t('expected_benefits')}</h3>
-    <ul class="hlist"><li><span class="k">↑ ${t('asset_reliability')}</span></li><li><span class="k">↓ ${t('unplanned_failure')}</span></li><li><span class="k">↑ ${t('equip_lifetime')}</span></li></ul>
-    <p class="small-muted" style="font-size:11px;margin:6px 0 0;">${L('Expected direction only — measure actual results against your own maintenance records.','แสดงทิศทางที่คาดหวังเท่านั้น — ควรวัดผลจริงเทียบกับบันทึกการบำรุงรักษาขององค์กร')}</p>
-    <div class="notebox" style="margin-top:10px;">${gicon('help',16)}<div>${t('key_takeaway_plan')}</div></div>
-  </div>`;
+`;
 }
 function openAddTaskModal(){
   const monthNames = {0:'Jan',1:'Feb',2:'Mar',3:'Apr',4:'May',5:'Jun',6:'Jul',7:'Aug',8:'Sep',9:'Oct',10:'Nov',11:'Dec'};
@@ -2142,6 +2144,8 @@ function attachDetailEvents(){
       downloadFile(`${a.id}_report.csv`, toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); });
   });
   attachCritButtons();
+  document.querySelectorAll('[data-cond]').forEach(el=>el.addEventListener('click',()=>{ state.condView=el.dataset.cond; render(); }));
+  document.querySelectorAll('[data-fmv]').forEach(el=>el.addEventListener('click',()=>{ state.fmView=el.dataset.fmv; render(); }));
   document.querySelectorAll('[data-edit-asset]').forEach(el=>el.addEventListener('click',()=>openEditAssetModal(currentAsset())));
   const ea=document.getElementById('btnEditAsset'); if(ea) ea.addEventListener('click',()=>openEditAssetModal(currentAsset()));
   const da=document.getElementById('btnDeleteAsset'); if(da) da.addEventListener('click',()=>deleteAsset(currentAsset()));
@@ -2784,6 +2788,7 @@ document.getElementById('loginUserLabel').textContent = t('login_user');
 document.getElementById('loginPassLabel').textContent = t('login_pass');
 document.getElementById('loginSubmitBtn').textContent = t('login_submit');
 document.getElementById('loginHint').textContent = t('login_hint');
+document.addEventListener('click',(e)=>{ document.querySelectorAll('details.more[open], details.tip[open]').forEach(d=>{ if(!d.contains(e.target)) d.open=false; }); });
 let topbarBound = false;
 function showApp(){
   document.getElementById('loginOverlay').classList.add('hidden');
