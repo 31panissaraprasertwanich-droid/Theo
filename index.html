@@ -380,6 +380,66 @@ table.rowlink tbody tr{cursor:pointer;} table.rowlink tbody tr:hover{background:
 .icon-lib .ic .th{font-size:12px;font-weight:700;color:var(--text,#1f2a37);line-height:1.25;}
 .icon-lib .ic .en{font-size:11px;color:var(--muted);}
 .icon-lib-sep{grid-column:1/-1;height:1px;background:var(--border);margin:4px 0;}
+/* RCM flow strip, before/after, why-list */
+.rcmflow{display:flex; align-items:stretch; overflow-x:auto; margin:0 0 16px; padding:2px 2px 6px; scrollbar-width:thin;}
+.rcmflow .fstep{flex:1 0 112px; min-width:112px; display:flex; flex-direction:column; gap:2px; padding:9px 10px; border:1px solid var(--border); background:var(--card); border-radius:10px; cursor:pointer; text-align:left; font-family:inherit; color:var(--text);}
+.rcmflow .fstep:hover{border-color:var(--accent-2);}
+.rcmflow .fstep.on{border-color:var(--navy); box-shadow:inset 0 -3px 0 var(--navy);}
+.rcmflow .fnum{font-size:10px; font-weight:800; color:var(--muted); letter-spacing:.03em; text-transform:uppercase; white-space:nowrap;}
+.rcmflow .fval{font-size:13.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.rcmflow .fsub{font-size:10.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.rcmflow .farr{flex:0 0 16px; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:12px;}
+.ba-grid{display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:center;}
+.ba-side{border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center;}
+.ba-num{font-size:34px; font-weight:800; line-height:1.1;}
+.ba-arrow{font-size:13px; font-weight:800; text-align:center; white-space:nowrap;}
+.why-list{margin:6px 0 0; padding-left:18px; font-size:12px; line-height:1.65;}
+@media (max-width:720px){ .ba-grid{grid-template-columns:1fr;} .ba-arrow{padding:2px 0;} .ba-ar{display:inline-block; transform:rotate(90deg);} }
+/* v5: mobile fixes, overdue, S>=9, gantt, asset report */
+.tabs .tab{flex:0 0 auto;}
+.seg{max-width:100%; overflow-x:auto;} .seg button{flex:0 0 auto; white-space:nowrap;}
+.pill-overdue{background:var(--red-bg); color:var(--red);}
+.sflag{display:inline-block; margin-left:4px; padding:0 5px; border-radius:6px; background:var(--red-bg); color:var(--red); font-size:10px; font-weight:800; vertical-align:1px;}
+.gantt{margin-top:16px;}
+.gantt .gh{display:flex; font-size:10.5px; color:var(--muted); font-weight:700;}
+.gantt .gh div{flex:1; border-left:1px solid var(--border); padding-left:4px; white-space:nowrap; overflow:hidden;}
+.gantt .timeline-track{height:24px; position:relative;}
+.gantt .gbar{position:absolute; top:4px; height:16px; border-radius:4px; min-width:10px;}
+.gantt .gbar.over{border:2px solid var(--red); box-sizing:border-box;}
+.gantt .gmon{position:absolute; top:0; bottom:0; border-left:1px dashed var(--border);}
+.strat-two{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;}
+.strat-two>div{background:var(--card); border:1px solid var(--border); border-radius:8px; padding:8px 10px;}
+.strat-two .lab{font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
+.strat-two .val{font-size:15px; font-weight:800;}
+#reportRoot{position:fixed; inset:0; z-index:400; background:#5b5f55; overflow:auto; padding:16px;}
+#reportRoot .rtool{position:sticky; top:0; z-index:2; display:flex; gap:8px; justify-content:center; margin-bottom:14px;}
+.rpage{background:#fff; color:#1d2118; width:210mm; max-width:100%; min-height:297mm; margin:0 auto; padding:11mm 12mm; box-shadow:0 8px 30px rgba(0,0,0,.35); font-size:9.6px; line-height:1.42;}
+.rpage h1{font-size:17px; margin:0;} .rpage h2{font-size:11px; margin:9px 0 4px; color:#4A5043; text-transform:uppercase; letter-spacing:.04em; border-bottom:1.5px solid #4A5043; padding-bottom:2px;}
+.rpage table{width:100%; border-collapse:collapse; font-size:9px;} .rpage th{background:#EEF0E8; text-align:left; padding:3px 5px; font-weight:800; font-size:8.3px; letter-spacing:.02em; color:#3a3f33; white-space:nowrap;} .rpage td{font-size:9px;} .rpage td{padding:3px 5px; border-bottom:1px solid #e3e4dc; vertical-align:top;}
+.rpage .rk{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-top:8px;}
+.rpage .rk div{border:1px solid #dcdfd3; border-radius:6px; padding:5px 7px;} .rpage .rk b{display:block; font-size:14px;} .rpage .rk span{font-size:8.5px; color:#626a5c; text-transform:uppercase; font-weight:700;}
+.rpage .r2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.rpage .rbox{background:#f4f5ef; border-radius:6px; padding:6px 8px;}
+.rpage .rsign{display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; margin-top:16px; font-size:9px; color:#626a5c;}
+.rpage .rsign div{border-top:1px solid #9aa08f; padding-top:3px;}
+@media (max-width:720px){
+  .topbar-right{display:contents;}
+  .topbar>div:first-child{flex:1 1 auto; min-width:0;}
+  .page-title{min-width:0;} .page-title h1{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .user .u-name{display:none;}
+  .search-box{order:5; flex:1 1 100%;}
+  .strat-two{grid-template-columns:1fr;}
+  .notebox{flex-wrap:wrap;} .notebox>div{flex:1 1 200px !important; min-width:0;}
+  .topbar{gap:6px !important;} .langtoggle button{padding:7px 8px !important;} .bell{width:32px; height:32px;} .avatar{width:30px; height:30px; flex:0 0 30px; font-size:12px;}
+  .rpage .rk{grid-template-columns:repeat(3,1fr);} .rpage .r2{grid-template-columns:1fr;}
+}
+@media print{
+  body.printing-report > *:not(#reportRoot){display:none !important;}
+  body.printing-report #reportRoot{position:static; background:none; padding:0; overflow:visible;}
+  body.printing-report .rtool{display:none !important;}
+  body.printing-report .rpage{box-shadow:none; margin:0; width:auto; min-height:0; padding:0;}
+  @page{size:A4; margin:10mm;}
+}
 </style>
 </head>
 <body>
@@ -942,16 +1002,25 @@ function gasRowsOf(s){
     const b=levelScore(g,s.gases[g]); return {g, v:fmtPpm(s.gases[g]), range:'< '+CRIT.level[g][0], status: b===1?'ok':b<=2?'warn':'up'}; });
 }
 function attentionList(){ return ASSETS.filter(a=>a.status!=='Healthy').sort((x,y)=>x.hi-y.hi).slice(0,5); }
-function planStatus(tk){ const today=new Date(); today.setHours(0,0,0,0); const s=parseD(tk.start), e=parseD(tk.end); if(e && e<today) return 'Completed'; if(s && s<=today) return 'In Progress'; return 'Upcoming'; }
+function planStatus(tk){ const today=new Date(); today.setHours(0,0,0,0);
+  if(tk.wo){ if(tk.wo.status==='Closed') return 'Completed'; const due=parseD(tk.wo.due); return (due && due<today) ? 'Overdue' : 'In Progress'; }
+  if(tk.done) return 'Completed';
+  const s=parseD(tk.start), e=parseD(tk.end); if(e && e<today) return 'Overdue'; if(s && s<=today) return 'In Progress'; return 'Upcoming'; }
+function statusPill(st){ return `<span class="pill ${st==='Completed'?'pill-healthy':st==='In Progress'?'pill-progress':st==='Overdue'?'pill-overdue':'pill-info'}">${st==='Completed'?t('completed'):st==='In Progress'?t('in_progress'):st==='Overdue'?L('Overdue','เลยกำหนด'):t('upcoming')}</span>`; }
+/* demo tasks already in the past when the data is first created are recorded as done (they match existing lab results) */
+function markPastDone(list){ const today=new Date(); today.setHours(0,0,0,0); (list||[]).forEach(tk=>{ const e=parseD(tk.end); if(!tk.wo && !tk.done && e && e<today) tk.done={date:tk.end}; }); return list; }
 
 /* ---------- Persistence (browser localStorage) ---------- */
 const STORE_KEY = 'rcm_transformer_data_v3';
-function snapshotData(){ return {v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT}; }
+let NOTIF = {risk:true, dga:true, overdue:true};
+function snapshotData(){ return {v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, planV:2}; }
 function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
 function applyData(d){
   if(!d || d.v!==3 || !Array.isArray(d.assets)) return false;
   ASSETS.splice(0, ASSETS.length, ...d.assets); LAB = d.lab||{}; FMEA_STORE = d.fmea||{}; MAINT_STORE = d.maint||{}; RCM_STORE = d.rcmStore||{};
   if(d.crit) CRIT = Object.assign(JSON.parse(JSON.stringify(CRIT_DEFAULT)), d.crit);
+  if(d.notif) NOTIF = Object.assign({risk:true,dga:true,overdue:true}, d.notif);
+  if(d.planV!==2) Object.values(MAINT_STORE).forEach(markPastDone);
   return true;
 }
 function loadData(){ try{ const raw=localStorage.getItem(STORE_KEY); return raw ? applyData(JSON.parse(raw)) : false; }catch(e){ return false; } }
@@ -1118,23 +1187,18 @@ const MAINT_TEMPLATE = [
 ];
 function genMaintForAsset(asset){
   const cat = categoryFor(asset); const seed = assetSeed(asset.id);
+  const base = new Date(); base.setDate(1); base.setHours(0,0,0,0);
   let no=1; const tasks=[];
   MAINT_TEMPLATE.forEach((tpl,i)=>{
     const offset = tpl.offset[cat]; if(offset===null) return;
-    const monthIdx = Math.min(GANTT_MONTHS.length-1, 2+offset);
-    const day = 5 + Math.floor(seededFrac(seed,i)*12);
-    const dur = tpl.dur[cat];
-    const endDay = day + dur - 1;
-    const mLabel = GANTT_MONTHS[monthIdx];
-    const start = `${day} ${mLabel} 2026`;
-    const end = `${endDay} ${mLabel} 2026`;
-    const durStr = dur+' '+(state.lang==='th'?'วัน':(dur>1?'days':'day'));
-    tasks.push({no:no++, task:tpl.task, type:tpl.type, start, end, dur:durStr, m:mLabel, len: dur<=1?1:dur<=4?2:3});
+    const m0 = addMonths(base, offset); const day = 5 + Math.floor(seededFrac(seed,i)*12);
+    const dur = tpl.dur[cat]; const st = new Date(m0.getFullYear(), m0.getMonth(), day); const en = new Date(st.getTime()+(dur-1)*864e5);
+    tasks.push({no:no++, task:tpl.task, type:tpl.type, start:fmtD(st), end:fmtD(en), dur:dur+' '+(state.lang==='th'?'วัน':(dur>1?'days':'day')), m:MON[st.getMonth()], len: dur<=1?1:dur<=4?2:3});
   });
   return tasks;
 }
 let MAINT_STORE = {};
-function getMaintFor(asset){ if(!MAINT_STORE[asset.id]) MAINT_STORE[asset.id] = asset.id==='TR-014' ? MAINT_TR014.map(m=>({...m})) : genMaintForAsset(asset); return MAINT_STORE[asset.id]; }
+function getMaintFor(asset){ if(!MAINT_STORE[asset.id]) MAINT_STORE[asset.id] = markPastDone(asset.id==='TR-014' ? MAINT_TR014.map(m=>({...m})) : genMaintForAsset(asset)); return MAINT_STORE[asset.id]; }
 let MAINT_PLAN = MAINT_TR014;
 const TYPE_COLOR = {BM:'#8b9099',CM:'#e0473d',PM:'#5E7A8C',CBM:'#1fa571',PdM:'#8759d6'};
 let USERS = [
@@ -1144,8 +1208,9 @@ let USERS = [
 ];
 function notificationsList(){
   const out=[];
-  ASSETS.filter(a=>a.status==='Critical').sort((x,y)=>x.hi-y.hi).forEach(a=>out.push({en:`${a.id} is Critical — HI ${a.hi} (${mainIssueOf(a)})`, th:`${a.id} อยู่ในระดับวิกฤต — HI ${a.hi}`, t:a.last}));
-  ASSETS.filter(a=>a.status==='Warning' && a._as && a._as.dga.code!=='N').forEach(a=>out.push({en:`${a.id} DGA indicates ${a._as.dga.code}`, th:`${a.id} ผล DGA บ่งชี้ ${a._as.dga.code}`, t:a.last}));
+  if(NOTIF.risk) ASSETS.filter(a=>a.status==='Critical').sort((x,y)=>x.hi-y.hi).forEach(a=>out.push({en:`${a.id} is Critical — HI ${a.hi} (${mainIssueOf(a)})`, th:`${a.id} อยู่ในระดับวิกฤต — HI ${a.hi}`, t:a.last}));
+  if(NOTIF.dga) ASSETS.filter(a=>a.status==='Warning' && a._as && a._as.dga.code!=='N').forEach(a=>out.push({en:`${a.id} DGA indicates ${a._as.dga.code}`, th:`${a.id} ผล DGA บ่งชี้ ${a._as.dga.code}`, t:a.last}));
+  if(NOTIF.overdue) ASSETS.forEach(a=>{ const n=(MAINT_STORE[a.id]||[]).filter(tk=>planStatus(tk)==='Overdue').length; if(n) out.push({en:`${a.id}: ${n} maintenance task(s) overdue`, th:`${a.id}: งานบำรุงรักษาเลยกำหนด ${n} งาน`, t:fmtD(new Date())}); });
   return out;
 }
 
@@ -1464,7 +1529,7 @@ function renderOverview(){
     <div class="card">
       <div class="card-head"><h3>${t('attention')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
       <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${t('asset')}</th><th>HI</th><th>${L('Risk','ความเสี่ยง')}</th><th>DGA</th><th>${L('Strategy','กลยุทธ์')}</th><th>${L('Action','ต้องทำ')}</th></tr></thead><tbody>
-      ${attentionList().map(a=>`<tr data-view="${a.id}"><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)};font-weight:800;">${a.hi}</td><td>${riskPill(riskOf(a).level)}</td><td>${a._as&&a._as.dga.code!=='N'?a._as.dga.code:'—'}</td><td>${strategyOf(a)}</td><td class="small-muted" style="white-space:normal;">${profileFor(a).nextAction[state.lang]}</td></tr>`).join('') || `<tr><td colspan="6" class="small-muted">${L('No transformer needs attention','ไม่มีหม้อแปลงที่ต้องดูแล')}</td></tr>`}
+      ${attentionList().map(a=>`<tr data-view="${a.id}"><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)};font-weight:800;">${a.hi}</td><td>${riskPill(riskOf(a).level)}</td><td>${a._as&&a._as.dga.code!=='N'?`<b>${a._as.dga.code}</b><div class="small-muted" style="white-space:normal;">${dgaName(a._as.dga.code)}</div>`:'—'}</td><td>${strategyOf(a)}</td><td class="small-muted" style="white-space:normal;">${profileFor(a).nextAction[state.lang]}</td></tr>`).join('') || `<tr><td colspan="6" class="small-muted">${L('No transformer needs attention','ไม่มีหม้อแปลงที่ต้องดูแล')}</td></tr>`}
       </tbody></table></div>
     </div>
     <div class="card"><div class="card-head"><h3>${t('hi_trend_fleet')}</h3></div>${chartBox('ovTrend2',180)}</div>
@@ -1602,7 +1667,10 @@ function detailSummaryTab(a){
         ${ag?`<li><span>${L('Condition vs age','สภาพเทียบอายุ')}</span><b style="color:${ag.accelerated?'var(--red)':'inherit'};">${ag.accelerated?L(`like ${ag.apparent.toFixed(0)} yr (actual ${ag.age})`,`เหมือน ${ag.apparent.toFixed(0)} ปี (จริง ${ag.age})`):L('normal','ปกติ')}</b></li>`:''}
         <li><span>DGA</span><b>${prof.code==='N'?L('normal','ปกติ'):`${prof.code} · ${prof.type[state.lang]}`}</b></li>
       </ul>
-      <div class="sum-why"><div class="sum-h">${L('Recommended strategy','กลยุทธ์ที่แนะนำ')}: ${strategyOf(a)}</div><div class="small-muted">${strategyWhy(a, rk)}</div></div>
+      <div class="sum-why"><div class="sum-h">${L('Maintenance strategy — two levels','กลยุทธ์การบำรุงรักษา — 2 ระดับ')}</div>
+        <div class="strat-two"><div><div class="lab">${L('Asset strategy','ระดับหม้อแปลง')}</div><div class="val">${strategyOf(a)}</div><div class="small-muted" style="font-size:11px;">${L('How closely the whole unit is watched — from HI & risk','ความถี่ในการเฝ้าระวังทั้งตัว — จาก HI และความเสี่ยง')}</div></div>
+        <div><div class="lab">${L('Task strategies (RCM)','ระดับงาน (RCM)')}</div><div class="val" style="font-size:13px;">${taskStratSummary(a)}</div><div class="small-muted" style="font-size:11px;">${L('The job for each failure mode — from the RCM decision logic','งานของแต่ละโหมดความล้มเหลว — จากตรรกะ RCM')}</div></div></div>
+        <div class="small-muted" style="margin-top:6px;">${strategyWhy(a, rk)} ${L('The two work together: the asset strategy sets the monitoring level, the task strategies say what to do on each component.','ทั้งสองทำงานร่วมกัน: ระดับหม้อแปลงกำหนดความเข้มของการเฝ้าระวัง ส่วนระดับงานบอกว่าต้องทำอะไรกับแต่ละชิ้นส่วน')}</div></div>
       <div class="sum-todo"><div class="sum-h">${L('What to do','สิ่งที่ต้องทำ')}</div>
         <ol>${[prof.nextAction[state.lang], ...prof.actions.filter(x=>!/routine|ตามรอบปกติ|Resample|เก็บน้ำมันตรวจ DGA ซ้ำ/.test(x))].slice(0,3).map(x=>`<li>${x}</li>`).join('')}</ol>
         <button class="linklike" data-dtab="plan">${L('Open maintenance plan →','ไปที่แผนบำรุงรักษา →')}</button></div>
@@ -1613,8 +1681,12 @@ function detailSummaryTab(a){
     <span class="op-svc" style="color:${a.svc==='out'?'var(--red)':'var(--green)'};">● ${a.svc==='out'?L('Out of service','หยุดใช้งาน'):t('in_service')}</span>
     ${chipsOp.map(c=>`<span class="op-chip"><span class="small-muted">${c[0]}</span> <b style="${c[2]?'color:var(--red);':''}">${c[1]}</b></span>`).join('')}
     <span class="small-muted" style="margin-left:auto;">${a.opDate?L('updated ','อัปเดต ')+a.opDate:(isDemoAsset(a)?L('sample values','ค่าตัวอย่าง'):'')} · <button class="linklike" data-edit-asset="1">${t('edit')}</button></span>
-  </div>`;
+  </div>
+  <div style="margin-top:16px;">${beforeAfterHtml(a)}</div>`;
 }
+function taskStratSummary(a){ const c={}; let pend=0; FMEA.forEach(f=>{ const e=rcmEvaluate(rcmAnsFor(a,f)); if(e.decision) c[e.decision]=(c[e.decision]||0)+1; else pend++; });
+  const parts = ['CBM','PM','FFT','RTD','BM'].filter(k=>c[k]).map(k=>`${c[k]} ${k}`); if(pend) parts.push(`${pend} ${L('pending','รอวิเคราะห์')}`);
+  return parts.join(' · ') || '—'; }
 function strategyWhy(a, rk){
   const r = rk.rate===null?null:rk.rate;
   if(a.status==='Critical') return L(`Why: HI ${a.hi} is below 50${r!==null?` and falling ${r.toFixed(1)} points/yr`:''} — condition must be watched closely (CBM) and trends used to decide the intervention time (PdM).`,`เหตุผล: HI ${a.hi} ต่ำกว่า 50${r!==null?` และลดลงปีละ ${r.toFixed(1)} คะแนน`:''} — ต้องติดตามสภาพใกล้ชิด (CBM) และใช้แนวโน้มกำหนดเวลาแก้ไข (PdM)`);
@@ -1639,6 +1711,7 @@ function detailMoreMenu(a){
   const d = (parseD(a.last)||new Date()); const ymd = isoD(d).replace(/-/g,'');
   const files = [[a.id+'_Condition_Assessment.csv','hi',L('Health Index by parameter','ดัชนีสุขภาพรายพารามิเตอร์')],[a.id+'_Lab_History.csv','lab',L('All lab results','ผลแล็บทุกครั้ง')],['DGA_'+a.id+'_'+ymd+'.csv','dga',L('Gas results & diagnosis','ผลก๊าซและการวินิจฉัย')],[a.id+'_FMEA.csv','fmea','FMEA / RPN'],[a.id+'_Maintenance_Plan.csv','plan',t('maint_schedule')]];
   return `<details class="more"><summary class="btn btn-outline">⋯ ${L('More','เพิ่มเติม')}</summary><div class="morebox">
+    <button class="moreitem" id="btnAssetReport">${gicon('reports',0,'width:14px;height:14px')} ${L('Asset report (1 page · PDF)','รายงานหม้อแปลง 1 หน้า (PDF)')}</button>
     <button class="moreitem" id="btnExportReport">${gicon('download',0,'width:14px;height:14px')} ${t('export_report')}</button>
     <div class="morehead">${L('Download files','ดาวน์โหลดไฟล์')}</div>
     ${files.map(f=>`<button class="moreitem dl-doc" data-fname="${f[0]}" data-csv="${f[1]}">${gicon('reports',0,'width:14px;height:14px')} ${f[2]}</button>`).join('')}
@@ -1661,7 +1734,8 @@ function renderDetail(){
     <button class="linklike" id="backToAssets">${t('back_to_assets')}</button>
     <div class="filter-row"><label class="small-muted" style="font-weight:700;">${t('viewing_asset')}</label><select class="chip-input" id="detailAssetSelect">${ASSETS.map(x=>`<option value="${x.id}" ${x.id===state.assetId?'selected':''}>${x.id} — ${x.loc}</option>`).join('')}</select></div>
   </div>
-  <div class="card" style="margin-bottom:16px;">${detailHeader(a)}</div>
+  <div class="card" style="margin-bottom:12px;">${detailHeader(a)}</div>
+  ${rcmFlowHtml(a)}
   <div class="tabs">${DETAIL_TABS.map(tb=>`<button class="tab ${state.detailTab===tb.id?'active':''}" data-dtab="${tb.id}">${L(tb.en,tb.th)}</button>`).join('')}</div>
   <div id="detailBody">${body}</div>`;
 }
@@ -1934,14 +2008,16 @@ function detailFmeaTab(a){
   return `
   <div class="card-head" style="margin-bottom:6px;"><h3 style="font-size:16px;">${t('fmea_table')}</h3><button class="btn btn-primary" id="btnAddFmea">${icon('box',' style="width:13px;height:13px"')} ${t('add_failure_mode')}</button></div>
   <p class="small-muted" style="margin:0 0 14px;">${t('fmea_sub')} — <b>${a.id}</b></p>
-  <div class="grid" style="grid-template-columns:2fr 1fr; align-items:stretch; margin-bottom:16px;">
+  <div class="grid" style="grid-template-columns:1fr; margin-bottom:16px;">
     <div class="card"><div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('code')}</th><th>${t('asset')}</th><th>${t('component')}</th><th>${t('failure_mode')}</th><th>${t('effect')}</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>${L('RPN level','ระดับ RPN')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
-      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td>${a.id}</td><td><b>${f.comp}</b></td><td>${f.mode}</td><td class="small-muted">${f.effect}</td><td>${f.s}</td><td>${f.o}${f.oWhy?` <span class="small-muted" title="${esc(L('From lab result: ','จากผลแล็บ: ')+f.oWhy)}" style="cursor:help;">⟳</span>`:''}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':f.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
-      </tbody></table></div></div>
+      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td>${a.id}</td><td><b>${f.comp}</b></td><td>${f.mode}</td><td class="small-muted">${f.effect}</td><td>${f.s}${f.s>=9?'<span class="sflag" title="'+L('Severity 9–10: handle first regardless of RPN','ความรุนแรง 9–10: ต้องจัดการก่อนเสมอไม่ว่า RPN เท่าไร')+'">S≥9</span>':''}</td><td>${f.o}${f.oWhy?` <span class="small-muted" title="${esc(L('From lab result: ','จากผลแล็บ: ')+f.oWhy)}" style="cursor:help;">⟳</span>`:''}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':f.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
+      </tbody></table></div>
+      <p class="small-muted" style="font-size:11px;margin:8px 0 0;"><span class="sflag" style="margin:0 4px 0 0;">S≥9</span>${L('Severity 9–10 is handled first regardless of RPN (AIAG-VDA approach). Priority order everywhere in the app: S ≥ 9 first, then RPN.','ความรุนแรง 9–10 ต้องจัดการก่อนเสมอไม่ว่า RPN เท่าไร (แนวทาง AIAG-VDA) ลำดับความสำคัญทั้งระบบ: S ≥ 9 ก่อน แล้วจึงเรียงตาม RPN')}</p></div>
+
+  </div>
+  <div class="grid" style="grid-template-columns:1fr 1fr; align-items:stretch;">
     <div class="card"><h3>${t('risk_matrix')}</h3><p class="card-sub">${t('risk_matrix_desc')}</p>${chartBox('fmeaScatter',260)}
       <p class="small-muted" style="font-size:11px;margin:8px 0 0;">⟳ ${L('O (occurrence) follows the latest lab result: grade A → 2, B → 3, C → 5, D → 7, E → 9. Edit a row to set O by hand.','O (โอกาสเกิด) ปรับตามผลแล็บล่าสุด: เกรด A → 2, B → 3, C → 5, D → 7, E → 9 กดแก้ไขแถวเพื่อกำหนด O เอง')}</p></div>
-  </div>
-  <div class="grid" style="grid-template-columns:1fr 1.4fr 1fr; align-items:stretch;">
     <div class="card"><h3>${t('rpn_dist')}</h3>
       <div style="display:flex;align-items:center;gap:14px;">
         <div class="donut-wrap" style="width:110px;height:110px;">${chartBox('fmeaDonut',110)}<div class="donut-center"><div class="n">${FMEA.length}</div><div class="l">${t('modes')}</div></div></div>
@@ -1949,7 +2025,7 @@ function detailFmeaTab(a){
       </div>
     </div>
     <div class="card"><h3>${t('top5_risk')}</h3>
-      ${FMEA.slice().sort((x,y)=>y.rpn-x.rpn).slice(0,5).map(f=>`<div class="bar-row"><div class="bar-label">${f.comp}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,f.rpn/10)}%; background:${f.rpn>=150?'var(--red)':f.rpn>=50?'var(--amber)':'var(--green)'}"></div></div><div class="bar-val">${f.rpn}</div></div>`).join('')}
+      ${fmeaPriority(FMEA).slice(0,5).map(f=>`<div class="bar-row"><div class="bar-label">${f.comp}${f.s>=9?'<span class="sflag">S≥9</span>':''}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,f.rpn/10)}%; background:${f.rpn>=150?'var(--red)':f.rpn>=50?'var(--amber)':'var(--green)'}"></div></div><div class="bar-val">${f.rpn}</div></div>`).join('')}
     </div>
     <div class="card"><h3>${t('rec_actions_summary')}</h3><p class="card-sub">${t('rec_actions_desc')}</p>
       <div class="grid g3" style="gap:8px; margin-bottom:12px;">
@@ -2002,7 +2078,7 @@ function openAddFmeaModal(){
 }
 function detailRcmTab(a){
   if(!FMEA.length) return `<div class="card">${L('Add failure modes in the FMEA tab first.','เพิ่มโหมดความล้มเหลวในแท็บ FMEA ก่อน')}</div>`;
-  const f = FMEA.find(x=>x.code===state.rcmFm) || FMEA.slice().sort((x,y)=>y.rpn-x.rpn)[0];
+  const f = FMEA.find(x=>x.code===state.rcmFm) || fmeaPriority(FMEA)[0];
   const lib = rcmLib(f.comp); const ans = rcmAnsFor(a,f); const ev = rcmEvaluate(ans);
   const yn = (k,v)=>`<button class="dnode ${v==='yes'?'yes':'no'}" data-rcm-k="${k}" data-rcm-v="${v}" style="cursor:pointer;border:none;font-family:inherit;min-width:80px;">${v==='yes'?t('yes'):t('no')}</button>`;
   let tree = ev.path.map(p=>`<div class="small-muted" style="text-align:center;max-width:460px;">${L(RCM_Q[p.qKey][0],RCM_Q[p.qKey][1])} → <b>${p.v==='yes'?t('yes'):t('no')}</b> <button class="linklike" data-rcm-undo="${p.k}">↺ ${t('change')}</button></div>`).join('');
@@ -2011,10 +2087,12 @@ function detailRcmTab(a){
   else {
     const dec = RCM_DEC[ev.decision]; const task = rcmTaskFor(f.comp, ev.decision);
     tree += `<div class="dnode result" style="background:${dec.col[0]};color:${dec.col[1]};">${L(dec.name[0],dec.name[1])}</div>`;
-    result = `<div class="card" style="margin-top:16px;"><h3>${L('Q6–7 · Selected task','ข้อ 6–7 · งานที่เลือก')}</h3>
+    result = `<div class="card" style="margin-top:16px;"><h3>${L('Q6–7 · Task strategy for','ข้อ 6–7 · กลยุทธ์ระดับงานของ')} ${f.code}</h3>
       <ul class="hlist"><li><span class="k">${L('Consequence category','ประเภทผลที่ตามมา')}</span><span class="v">${L(RCM_CONS[ev.cons][0],RCM_CONS[ev.cons][1])}</span></li>
       <li><span class="k">${t('task')}</span><span class="v" style="white-space:normal;text-align:right;">${task[0]}</span></li>
       <li><span class="k">${t('interval')}</span><span class="v">${task[1]}</span></li></ul>
+      <div style="font-weight:800;font-size:12.5px;margin:12px 0 0;">${L(`Why ${ev.decision}?`,`ทำไมจึงเลือก ${ev.decision}?`)}</div>
+      <ul class="why-list">${rcmWhyList(a, f, ev)}</ul>
       ${ev.decision==='BM'?`<p class="small-muted" style="font-size:11.5px;margin:8px 0 0;">${L('No scheduled task: the failure has no safety consequence and no proactive task is worth doing. Redesign may still be considered if it is economical.','ไม่มีงานตามแผน: ไม่มีผลต่อความปลอดภัยและไม่มีงานเชิงป้องกันที่คุ้มค่า อาจพิจารณาปรับปรุงหากคุ้มทุน')}</p>`
         : `<button class="btn btn-primary" id="btnRcmToPlan" style="width:100%;justify-content:center;margin-top:12px;">${gicon('plan',0,'width:13px;height:13px')} ${L('Add task to maintenance plan','เพิ่มงานนี้เข้าแผนบำรุงรักษา')}</button>`}
     </div>`;
@@ -2051,7 +2129,7 @@ function detailRcmTab(a){
 }
 function detailPlanTab(a){
   const st = MAINT_PLAN.map(planStatus); const total = MAINT_PLAN.length;
-  const completed = st.filter(x=>x==='Completed').length, inprog = st.filter(x=>x==='In Progress').length, upcoming = st.filter(x=>x==='Upcoming').length;
+  const completed = st.filter(x=>x==='Completed').length, inprog = st.filter(x=>x==='In Progress').length, upcoming = st.filter(x=>x==='Upcoming').length, overdue = st.filter(x=>x==='Overdue').length;
   const pc = (n)=> total ? Math.round(n/total*100) : 0;
   const now = new Date(); const todayPos = (now.getFullYear()===2026 && now.getMonth()>=6) ? ((now.getMonth()-6) + (now.getDate()-1)/31)/6*100 : null;
   const monthStart = {Jul:0,Aug:1,Sep:2,Oct:3,Nov:4,Dec:5};
@@ -2060,11 +2138,12 @@ function detailPlanTab(a){
   <div class="card" style="margin-bottom:16px;"><h3>${L('Suggested from the latest lab result','งานที่ระบบแนะนำจากผลแล็บล่าสุด')} <span class="small-muted" style="font-weight:600;">${a.last}</span></h3>
     <ul class="hlist">${sugs.map((sg,i)=>`<li><span class="k" style="white-space:normal;"><span class="pill ${sg.type==='CM'?'pill-critical':'pill-healthy'}" style="margin-right:6px;">${sg.type}</span>${sg.task}<div class="small-muted">${fmtD(sg.date)} · ${sg.why}</div></span><span class="v">${sg.inPlan?`<span class="small-muted">${L('in plan','อยู่ในแผนแล้ว')} ✓</span>`:`<button class="btn btn-outline" data-add-plan-sug="${i}" style="padding:5px 10px;font-size:12px;">${L('Add to plan','เพิ่มเข้าแผน')}</button>`}</span></li>`).join('')}</ul>
   </div>
-  <div class="grid g4" style="margin-bottom:16px;">
-    <div class="card stat">${badge('workorder',44)}<div><div class="label">${t('total_tasks')}</div><div class="value">${total}</div></div></div>
-    <div class="card stat">${badge('normal',44)}<div><div class="label">${t('completed')}</div><div class="value">${completed} <span style="font-size:12px;">(${pc(completed)}%)</span></div></div></div>
-    <div class="card stat">${badge('history',44)}<div><div class="label">${t('in_progress')}</div><div class="value">${inprog} <span style="font-size:12px;">(${pc(inprog)}%)</span></div></div></div>
-    <div class="card stat">${badge('plan',44)}<div><div class="label">${t('upcoming')}</div><div class="value">${upcoming} <span style="font-size:12px;">(${pc(upcoming)}%)</span></div></div></div>
+  <div class="grid" style="grid-template-columns:repeat(5,1fr); margin-bottom:16px;">
+    <div class="card stat">${badge('workorder',40)}<div><div class="label">${t('total_tasks')}</div><div class="value">${total}</div></div></div>
+    <div class="card stat">${badge('normal',40)}<div><div class="label">${t('completed')}</div><div class="value">${completed} <span style="font-size:12px;">(${pc(completed)}%)</span></div></div></div>
+    <div class="card stat">${badge('history',40)}<div><div class="label">${t('in_progress')}</div><div class="value">${inprog} <span style="font-size:12px;">(${pc(inprog)}%)</span></div></div></div>
+    <div class="card stat">${badge('plan',40)}<div><div class="label">${t('upcoming')}</div><div class="value">${upcoming} <span style="font-size:12px;">(${pc(upcoming)}%)</span></div></div></div>
+    <div class="card stat" style="${overdue?'border-color:var(--red);':''}">${badge('critical',40)}<div><div class="label">${L('Overdue','เลยกำหนด')}</div><div class="value" style="${overdue?'color:var(--red);':''}">${overdue}</div></div></div>
   </div>
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head"><h3>${t('maint_schedule')}</h3>
@@ -2074,17 +2153,31 @@ function detailPlanTab(a){
         <button class="btn btn-primary" id="btnCreateTask">${t('create_task')}</button>
       </div>
     </div>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>${t('task')}</th><th>${t('type')}</th><th>${t('start')}</th><th>${t('end')}</th><th>${t('duration')}</th><th>${t('status')}</th></tr></thead><tbody>
-    ${MAINT_PLAN.map((tk,ti)=>`<tr><td>${tk.no}</td><td><b>${a.id}</b></td><td>${tk.task}${tk.notes?`<div class="small-muted" style="white-space:normal;">${esc(tk.notes)}</div>`:''}</td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${tk.dur}</td><td><span class="pill ${st[ti]==='Completed'?'pill-healthy':st[ti]==='In Progress'?'pill-progress':'pill-info'}">${st[ti]==='Completed'?t('completed'):st[ti]==='In Progress'?t('in_progress'):t('upcoming')}</span></td></tr>`).join('')}
+    ${overdue?`<div class="notebox" style="margin-bottom:12px;background:var(--red-bg);">${L(`${overdue} task(s) are past their end date and not closed. A task is completed only when its work order is closed — issue a WO or reschedule.`,`มี ${overdue} งานเลยวันสิ้นสุดแต่ยังไม่ปิด งานจะเสร็จได้เมื่อปิดใบสั่งงานเท่านั้น — ออกใบงานหรือเลื่อนกำหนด`)}</div>`:''}
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>${t('task')}</th><th>${t('type')}</th><th>${t('start')}</th><th>${t('end')}</th><th>${t('duration')}</th><th>${t('status')}</th><th>${L('Work order','ใบสั่งงาน')}</th></tr></thead><tbody>
+    ${MAINT_PLAN.map((tk,ti)=>`<tr><td>${tk.no}</td><td><b>${a.id}</b></td><td>${tk.task}${tk.notes?`<div class="small-muted" style="white-space:normal;">${esc(tk.notes)}</div>`:''}</td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${tk.dur}</td><td>${statusPill(st[ti])}</td><td>${woCell(tk, st[ti], ti)}</td></tr>`).join('')}
     </tbody></table></div>
-    ${state.planView==='gantt' ? `
-    <div style="margin-top:16px;">
-      <div class="timeline-row"><div></div><div style="display:flex; font-size:10.5px; color:var(--muted); font-weight:700;">${GANTT_MONTHS.map(m=>`<div style="flex:1;">${m}</div>`).join('')}</div></div>
-      ${MAINT_PLAN.map(tk=>{ const startIdx = monthStart[tk.m]; const leftPct = (startIdx/GANTT_MONTHS.length)*100; const clampedLen = Math.max(0.4, Math.min(tk.len, GANTT_MONTHS.length-startIdx)); const widthPct = (clampedLen/GANTT_MONTHS.length)*100;
-        return `<div class="timeline-row"><div class="small-muted">${tk.task}</div><div class="timeline-track"><div class="timeline-bar" style="left:${leftPct}%; width:${widthPct}%; background:${TYPE_COLOR[tk.type]};"></div>${todayPos===null?'':`<div class="today-line" style="left:${todayPos}%;"></div>`}</div></div>`; }).join('')}
-    </div>` : ''}
+    ${state.planView==='gantt' ? ganttHtml(MAINT_PLAN, st) : ''}
   </div>
+  ${woSectionHtml(a)}
 `;
+}
+function ganttHtml(plan, st){
+  const ds = plan.flatMap(tk=>[parseD(tk.start), parseD(tk.end)]).filter(Boolean); if(!ds.length) return '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  let r0 = new Date(Math.min(...ds)); r0 = new Date(r0.getFullYear(), r0.getMonth(), 1);
+  let r1 = new Date(Math.max(...ds)); r1 = new Date(r1.getFullYear(), r1.getMonth()+1, 1);
+  while(((r1.getFullYear()-r0.getFullYear())*12 + r1.getMonth()-r0.getMonth()) < 6) r1 = new Date(r1.getFullYear(), r1.getMonth()+1, 1);
+  const span = r1 - r0; const pos = (d)=> (d - r0)/span*100;
+  const months=[]; for(let d=new Date(r0); d<r1; d=new Date(d.getFullYear(), d.getMonth()+1, 1)) months.push(new Date(d));
+  const lines = months.map(m=>`<div class="gmon" style="left:${pos(m)}%;"></div>`).join('');
+  const tpos = (today>=r0 && today<r1) ? pos(today) : null;
+  return `<div class="gantt">
+    <div class="timeline-row"><div></div><div class="gh">${months.map((m,i)=>`<div>${MON[m.getMonth()]}${(i===0||m.getMonth()===0)?' '+String(m.getFullYear()).slice(2):''}</div>`).join('')}</div></div>
+    ${plan.map((tk,i)=>{ const a=parseD(tk.start), b=parseD(tk.end)||a; if(!a) return ''; const l=pos(a), w=Math.max(0.6, pos(new Date(b.getTime()+864e5))-l);
+      return `<div class="timeline-row"><div class="small-muted" style="white-space:normal;">${esc(tk.task)}</div><div class="timeline-track">${lines}<div class="gbar ${st[i]==='Overdue'?'over':''}" style="left:${l}%; width:${w}%; background:${TYPE_COLOR[tk.type]||'#8b9099'}; opacity:${st[i]==='Completed'?.45:1};" title="${esc(tk.task)} · ${tk.start} → ${tk.end}"></div>${tpos===null?'':`<div class="today-line" style="left:${tpos}%;"></div>`}</div></div>`; }).join('')}
+    <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('Range follows the task dates. Faded = completed, red outline = overdue, vertical line = today.','ช่วงเดือนคำนวณจากวันที่ของงาน · สีจาง = เสร็จแล้ว · ขอบแดง = เลยกำหนด · เส้นตั้ง = วันนี้')}</p>
+  </div>`;
 }
 function openAddTaskModal(){
   const monthNames = {0:'Jan',1:'Feb',2:'Mar',3:'Apr',4:'May',5:'Jun',6:'Jul',7:'Aug',8:'Sep',9:'Oct',10:'Nov',11:'Dec'};
@@ -2103,11 +2196,232 @@ function openAddTaskModal(){
     render(); toast(t('toast_added'),'success');
   });
 }
+
+/* =====================================================================
+   RCM workflow strip: HI → FMEA/RPN → DGA → Decision → Strategy → Plan → WO → History
+   ===================================================================== */
+/* failure-mode priority: Severity >= 9 first (regardless of RPN), then RPN */
+function fmeaPriority(list){ return (list||[]).slice().sort((x,y)=>((y.s>=9)-(x.s>=9)) || (y.rpn-x.rpn)); }
+function rcmFlowHtml(a){
+  const prof = profileFor(a); const rk = riskOf(a);
+  const topF = fmeaPriority(FMEA)[0];
+  const evs = FMEA.map(f=>rcmEvaluate(rcmAnsFor(a,f))); const done = evs.filter(e=>e.decision).length;
+  const topEv = topF ? rcmEvaluate(rcmAnsFor(a,topF)) : null;
+  const plan = MAINT_PLAN; const openTasks = plan.filter(tk=>planStatus(tk)!=='Completed').length; const overdueN = plan.filter(tk=>planStatus(tk)==='Overdue').length;
+  const wos = plan.filter(tk=>tk.wo); const woOpen = wos.filter(tk=>tk.wo.status!=='Closed').length;
+  const cur = state.detailTab==='condition' ? (state.condView==='dga'?'dga':'hi') : state.detailTab==='fmearcm' ? (state.fmView==='rcm'?'dec':'fmea') : state.detailTab==='plan' ? 'plan' : state.detailTab==='history' ? 'hist' : 'strat';
+  const steps = [
+    {k:'hi', n:'Health Index', v:`HI ${a.hi}`, s:trStatus(a.status), c:hiColor(a.hi), tab:'condition', key:'condView', val:'healthindex'},
+    {k:'fmea', n:'FMEA / RPN', v:topF?`RPN ${topF.rpn}`:'—', s:topF?`${topF.code} · ${topF.comp}`:L('no failure modes','ยังไม่มีโหมด'), tab:'fmearcm', key:'fmView', val:'fmea'},
+    {k:'dga', n:'DGA', v:prof.code==='N'?L('Normal','ปกติ'):prof.code, s:prof.type[state.lang], c:prof.code==='N'?'var(--green)':'var(--red)', tab:'condition', key:'condView', val:'dga'},
+    {k:'dec', n:L('Decision logic','ตรรกะตัดสินใจ'), v:topEv&&topEv.decision?topEv.decision:L('Pending','รอวิเคราะห์'), s:`${done}/${FMEA.length} ${L('modes analysed','โหมดวิเคราะห์แล้ว')}`, tab:'fmearcm', key:'fmView', val:'rcm'},
+    {k:'strat', n:L('Asset strategy','กลยุทธ์หม้อแปลง'), v:strategyOf(a), s:L(`${riskName(rk.level)} risk`,`ความเสี่ยง${riskName(rk.level)}`), tab:'summary'},
+    {k:'plan', n:L('Plan','แผนงาน'), v:`${plan.length} ${L('tasks','งาน')}`, s:overdueN?`${overdueN} ${L('overdue','เลยกำหนด')}`:`${openTasks} ${L('not done','ยังไม่เสร็จ')}`, c:overdueN?'var(--red)':'', tab:'plan'},
+    {k:'wo', n:L('Work orders','ใบสั่งงาน'), v:`${wos.length} WO`, s:`${woOpen} ${L('open','เปิดอยู่')}`, tab:'plan', anchor:'woSection'},
+    {k:'hist', n:L('History','ประวัติ'), v:`${historyRows(a).length}`, s:L('records','รายการ'), tab:'history'},
+  ];
+  return `<nav class="rcmflow" aria-label="RCM workflow">${steps.map((x,i)=>`${i?'<span class="farr" aria-hidden="true">→</span>':''}<button class="fstep ${cur===x.k||(cur==='plan'&&x.k==='wo')?'on':''}" data-flow-tab="${x.tab}"${x.key?` data-flow-key="${x.key}" data-flow-val="${x.val}"`:''}${x.anchor?` data-flow-anchor="${x.anchor}"`:''}><span class="fnum">${i+1} · ${x.n}</span><span class="fval" style="${x.c?`color:${x.c};`:''}">${esc(x.v)}</span><span class="fsub">${esc(x.s)}</span></button>`).join('')}</nav>`;
+}
+
+/* ---------- RCM decision: plain-language reasons ---------- */
+const RCM_WHY = {
+  H:{yes:['Loss of function is evident to operators','ผู้ปฏิบัติงานรับรู้ได้เมื่อสูญเสียหน้าที่'], no:['Failure is hidden during normal operation','ความล้มเหลวซ่อนอยู่ระหว่างการใช้งานปกติ']},
+  S:{yes:['It has a safety or environmental consequence','มีผลต่อความปลอดภัยหรือสิ่งแวดล้อม'], no:['No safety or environmental consequence','ไม่มีผลต่อความปลอดภัยหรือสิ่งแวดล้อม']},
+  O:{yes:['It affects supply (outage or derating)','กระทบการจ่ายไฟ (ไฟดับหรือต้องลดโหลด)'], no:['No effect on supply','ไม่กระทบการจ่ายไฟ']},
+  T1:{yes:['The condition can be monitored early enough (e.g. DGA, oil tests)','ตรวจติดตามสภาพได้ทันก่อนเสีย (เช่น DGA และผลน้ำมัน)'], no:['No effective on-condition task','ไม่มีงานตามสภาพที่ได้ผล']},
+  T2:{yes:['A scheduled restoration / replacement is effective','งานซ่อม/เปลี่ยนตามรอบเวลาได้ผล'], no:['A time-based task is not effective','งานตามรอบเวลาไม่ได้ผล']},
+  T3:{yes:['A periodic functional test can find the hidden failure','ทดสอบการทำงานเป็นรอบหาความล้มเหลวที่ซ่อนอยู่ได้'], no:['No failure-finding task is effective','ไม่มีงานตรวจหาความล้มเหลวที่ได้ผล']},
+};
+function rcmWhyList(a, f, ev){
+  const items = ev.path.map(p=>{ const r=RCM_WHY[p.k]&&RCM_WHY[p.k][p.v]; return r?L(r[0],r[1]):''; }).filter(Boolean);
+  const code = a._as ? a._as.dga.code : 'N';
+  if(f.s>=9) items.unshift(L(`Severity ${f.s} (≥ 9) — this mode is handled first regardless of its RPN`,`ความรุนแรง ${f.s} (≥ 9) — โหมดนี้ต้องจัดการก่อนเสมอ ไม่ว่า RPN จะเท่าไร`));
+  items.push(L(`Evidence: ${f.code} RPN ${f.rpn} (S${f.s}·O${f.o}·D${f.d}) · HI ${a.hi} · DGA ${code==='N'?'normal':code}`,`หลักฐาน: ${f.code} RPN ${f.rpn} (S${f.s}·O${f.o}·D${f.d}) · HI ${a.hi} · DGA ${code==='N'?'ปกติ':code}`));
+  return items.map(x=>`<li>${x}</li>`).join('');
+}
+
+/* ---------- Work orders ---------- */
+function nextWoNo(){ let n=0; Object.values(MAINT_STORE).forEach(list=>(list||[]).forEach(tk=>{ if(tk.wo){ const m=/(\d+)$/.exec(tk.wo.no); if(m) n=Math.max(n,Number(m[1])); } }));
+  return `WO-${new Date().getFullYear()}-${String(n+1).padStart(4,'0')}`; }
+function woCell(tk, st, ti){
+  if(tk.wo) return `<span class="pill ${tk.wo.status==='Closed'?'pill-closed':'pill-progress'}">${tk.wo.no}</span>`;
+  if(st==='Completed') return '<span class="small-muted">—</span>';
+  return `<button class="btn btn-outline" data-wo-issue="${ti}" style="padding:4px 9px;font-size:11.5px;">${L('Issue WO','ออกใบงาน')}</button>`;
+}
+function woSectionHtml(a){
+  const list = MAINT_PLAN.map((tk,ti)=>({tk,ti})).filter(x=>x.tk.wo).sort((x,y)=>(x.tk.wo.status==='Closed')-(y.tk.wo.status==='Closed'));
+  const body = list.length ? `<div class="tbl-wrap"><table><thead><tr><th>WO</th><th>${t('task')}</th><th>${L('Assigned to','ผู้รับผิดชอบ')}</th><th>${L('Priority','ความสำคัญ')}</th><th>${L('Due','กำหนดเสร็จ')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
+    ${list.map(({tk,ti})=>{ const w=tk.wo; const closed=w.status==='Closed';
+      return `<tr><td><b>${w.no}</b><div class="small-muted">${L('issued','ออก')} ${w.issued}</div></td>
+        <td style="white-space:normal;">${esc(tk.task)} <span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}</span>${w.instr?`<div class="small-muted">${esc(w.instr)}</div>`:''}${closed&&w.findings?`<div class="small-muted" style="color:var(--green);">✓ ${esc(w.findings)}</div>`:''}</td>
+        <td>${esc(w.assignee||'—')}</td><td><span class="pill ${w.priority==='P1'?'pill-critical':w.priority==='P2'?'pill-warning':'pill-info'}">${w.priority||'—'}</span></td>
+        <td>${closed?`${L('done','เสร็จ')} ${w.closed}`:w.due}</td>
+        <td><span class="pill ${closed?'pill-closed':'pill-progress'}">${closed?L('Closed','ปิดแล้ว'):L('Open','เปิดอยู่')}</span></td>
+        <td style="white-space:nowrap;">${closed?'':`<button class="btn btn-primary" data-wo-close="${ti}" style="padding:4px 10px;font-size:11.5px;">${L('Close','ปิดงาน')}</button> <button class="linklike" data-wo-cancel="${ti}" style="font-size:11.5px;">${L('Cancel','ยกเลิก')}</button>`}</td></tr>`; }).join('')}
+    </tbody></table></div>`
+    : `<p class="small-muted" style="margin:0;">${L('No work orders yet. Press “Issue WO” on a planned task to hand it to the field team.','ยังไม่มีใบสั่งงาน กด “ออกใบงาน” ที่งานในแผนเพื่อส่งต่อให้ทีมภาคสนาม')}</p>`;
+  return `<div class="card" id="woSection" style="margin-bottom:16px;scroll-margin-top:80px;"><div class="card-head"><h3>${L('Work orders','ใบสั่งงาน')}</h3><span class="small-muted">${L('Plan → work order → history','แผน → ใบสั่งงาน → ประวัติ')}</span></div>${body}</div>`;
+}
+function openIssueWoModal(tk){
+  const a = currentAsset(); const rk = riskOf(a);
+  const pri = {'Very high':'P1','High':'P1','Medium':'P2','Low':'P3'}[rk.level] || 'P2';
+  openModal(`${L('Issue work order','ออกใบสั่งงาน')} — ${esc(tk.task)}`, `
+    <div class="notebox" style="margin-bottom:12px;">${a.id} · ${tk.type} · ${L('planned','ตามแผน')} ${tk.start} → ${tk.end} · ${L('risk','ความเสี่ยง')} ${riskName(rk.level)}</div>
+    <div class="formrow"><label>${L('Assign to','ผู้รับผิดชอบ')}</label><select name="assignee">${USERS.map(u=>`<option ${u.role==='Operator'?'selected':''}>${esc(u.name)}</option>`).join('')}</select></div>
+    <div class="formrow"><label>${L('Priority','ความสำคัญ')}</label><select name="priority">${[['P1',L('P1 — urgent','P1 — ด่วน')],['P2',L('P2 — normal','P2 — ปกติ')],['P3',L('P3 — routine','P3 — ตามรอบ')]].map(p=>`<option value="${p[0]}" ${p[0]===pri?'selected':''}>${p[1]}</option>`).join('')}</select></div>
+    <div class="formrow"><label>${L('Due date','กำหนดเสร็จ')}</label><input type="date" name="due" value="${isoD(parseD(tk.end)||new Date())}" required></div>
+    <div class="formrow"><label>${L('Instructions','คำสั่งงาน')}</label><input name="instr" value="${esc(tk.notes||'')}"></div>`,
+  (d)=>{ tk.wo = {no:nextWoNo(), status:'Open', issued:fmtD(new Date()), assignee:d.assignee, priority:d.priority, due:fmtD(new Date(d.due+'T00:00:00')), instr:d.instr||''};
+    render(); toast(L(`Work order ${tk.wo.no} issued`,`ออกใบสั่งงาน ${tk.wo.no} แล้ว`),'success'); });
+}
+function openCloseWoModal(tk){
+  openModal(`${L('Close work order','ปิดใบสั่งงาน')} ${tk.wo.no}`, `
+    <div class="notebox" style="margin-bottom:12px;">${esc(tk.task)} · ${esc(tk.wo.assignee||'')}</div>
+    <div class="formrow"><label>${L('Completed on','วันที่เสร็จ')}</label><input type="date" name="done" value="${isoD(new Date())}" required></div>
+    <div class="formrow"><label>${L('Findings / work done','ผลการดำเนินงาน')}</label><input name="findings" required placeholder="${L('e.g. oil filtered, BDV 72 kV after treatment','เช่น กรองน้ำมันแล้ว BDV หลังกรอง 72 kV')}"></div>
+    <p class="small-muted" style="font-size:11.5px;margin:0;">${L('Add a post-maintenance lab result afterwards — the Before vs After card on the Summary tab will then show the measured effect.','หลังจากนี้ให้เพิ่มผลแล็บหลังบำรุงรักษา — การ์ดก่อน/หลังในแท็บสรุปจะแสดงผลที่วัดได้จริง')}</p>`,
+  (d)=>{ tk.wo.status='Closed'; tk.wo.closed=fmtD(new Date(d.done+'T00:00:00')); tk.wo.findings=d.findings;
+    render(); toast(L(`${tk.wo.no} closed and logged to history`,`ปิด ${tk.wo.no} และบันทึกลงประวัติแล้ว`),'success'); });
+}
+
+/* ---------- Before vs After maintenance ---------- */
+const BA_ACTIONS = {
+  filtration:{name:['Oil filtration & degassing','กรองและไล่ก๊าซน้ำมัน'], days:3},
+  reclamation:{name:['Oil reclamation (regeneration)','ฟื้นฟูสภาพน้ำมัน (Reclamation)'], days:5},
+  replacement:{name:['Oil replacement','เปลี่ยนน้ำมันใหม่'], days:4},
+};
+function defaultBaAction(a){ const bad = new Set(issuesOf(a._as?a._as.rows:[]).map(r=>r.key)); return (bad.has('acidity')||bad.has('ift')||bad.has('colour')) ? 'reclamation' : 'filtration'; }
+/* typical post-treatment oil values; paper (CO/CO2, 2-FAL, age) is NOT restored by oil treatment */
+function simulateAfterSample(s, key, scen){
+  const x = JSON.parse(JSON.stringify(s)); x.date = fmtD(new Date());
+  const rep = key==='replacement';
+  GASES.forEach(g=>{ if(g==='CO'||g==='CO2' || scen==='oil') return; const v=x.gases[g]*(rep?0.05:0.1); x.gases[g] = v>=10?Math.round(v):Math.round(v*100)/100; });
+  x.moisture = Math.min(x.moisture, rep?8:10); x.bdv = Math.max(x.bdv, rep?75:70);
+  if(key!=='filtration'){ x.acidity = Math.min(x.acidity, rep?0.01:0.03); x.ift = Math.max(x.ift, rep?42:38); x.colour = Math.min(x.colour, rep?0.5:1.0); }
+  return x;
+}
+function hasActiveFault(a){ const c=a._as?a._as.dga.code:'N'; const f=famOf(c); return c!=='N' && f!=='S' && f!=='N'; }
+function baScenario(a){ if(!hasActiveFault(a)) return 'fix'; return state.baScen==='fix' ? 'fix' : 'oil'; }
+function baTaskName(key, scen, a){ const n=L(BA_ACTIONS[key].name[0],BA_ACTIONS[key].name[1]); return (hasActiveFault(a) && scen==='fix') ? n+L(' + fault repair',' + แก้ไขต้นเหตุ') : n; }
+function baSimulate(a, key){ const lab=labFor(a); const bS=lab[0]; const scen=baScenario(a); const aS=simulateAfterSample(bS,key,scen); const before=assessAt(a,0); let after=assessSample(aS,bS,a);
+  if(scen==='oil'){ /* fault still active: keep the gas factor exactly as before */
+    const F={...after.factors, FF:before.factors.FF}; const ex=(F.FF.sf*F.FF.w + F.OQF.sf*F.OQF.w + F.PCF.sf*F.PCF.w)/(4*(F.FF.w+F.OQF.w+F.PCF.w))*100;
+    after={...after, factors:F, dga:before.dga, rows:[before.rows[0], ...after.rows.slice(1)], hiExact:ex, hi:Math.round(ex*10)/10}; }
+  return {bS, aS, before, after}; }
+function baMeasured(a){
+  const done = getMaintFor(a).filter(tk=>tk.wo&&tk.wo.status==='Closed').map(tk=>({tk, d:parseD(tk.wo.closed)})).filter(x=>x.d).sort((x,y)=>y.d-x.d)[0];
+  if(!done) return null;
+  const lab = labFor(a); const ai = lab.findIndex(s=>parseD(s.date)>done.d); const bi = lab.findIndex(s=>parseD(s.date)<=done.d);
+  if(ai<0||bi<0) return {done, pending:true};
+  return {done, bS:lab[bi], aS:lab[ai], before:assessAt(a,bi), after:assessAt(a,ai)};
+}
+function stratForStatus(st){ return st==='Critical'?'CBM + PdM':st==='Warning'?'CBM':'PM'; }
+function beforeAfterHtml(a){
+  if(!labFor(a).length) return '';
+  const meas = baMeasured(a); const hasMeas = meas && !meas.pending;
+  const mode = hasMeas && state.baMode!=='sim' ? 'measured' : 'sim';
+  const key = BA_ACTIONS[state.baAction] ? state.baAction : defaultBaAction(a);
+  const r = mode==='measured' ? meas : baSimulate(a, key);
+  const rate = riskOf(a).rate;
+  const lvl = (hi)=>RISK_T10[hiRow(hi)][rateCol(rate)];
+  const side = (label, as, date)=>{ const st=statusFromHi(as.hi); return `<div class="ba-side"><div class="small-muted" style="font-weight:700;">${label}</div><div class="ba-num" style="color:${hiColor(as.hi)};">${as.hi}</div><div class="small-muted">Health Index · ${hiCat(as.hi).name}${date?` · ${date}`:''}</div>
+      <div style="margin-top:9px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">${riskPill(lvl(as.hi))}<span class="pill ${statusPillClass(st)}">${trStatus(st)}</span><span class="pill pill-info">${stratForStatus(st)}</span></div></div>`; };
+  const dHi = Math.round((r.after.hi - r.before.hi)*10)/10;
+  const changed = r.after.rows.map((ra,i)=>({ra, rb:r.before.rows[i]})).filter(x=>x.rb && x.ra.key!=='age' && (x.ra.score!==x.rb.score || x.ra.res!==x.rb.res));
+  const segBtns = Object.keys(BA_ACTIONS).map(k=>`<button class="${mode==='sim'&&k===key?'on':''}" data-ba-act="${k}">${L(BA_ACTIONS[k].name[0],BA_ACTIONS[k].name[1])}</button>`).join('') + (hasMeas?`<button class="${mode==='measured'?'on':''}" data-ba-mode="measured">${L('Measured','ผลจริง')} (${meas.done.tk.wo.no})</button>`:'');
+  const scen = baScenario(a); const fault = hasActiveFault(a); const actName = baTaskName(key, scen, a);
+  const inPlan = MAINT_PLAN.some(p=>p.task===actName && planStatus(p)!=='Completed');
+  const note = mode==='measured'
+    ? L(`Measured: lab result ${meas.bS.date} (before) vs ${meas.aS.date} (after ${meas.done.tk.wo.no}, closed ${meas.done.tk.wo.closed}).`,`ผลจริง: ผลแล็บ ${meas.bS.date} (ก่อน) เทียบกับ ${meas.aS.date} (หลัง ${meas.done.tk.wo.no} ปิดงาน ${meas.done.tk.wo.closed})`)
+    : (fault && scen==='oil' ? L(`Conservative case: the ${a._as.dga.code} fault source is still active, so fault gases are expected back by the next sample and the gas grade stays ${a._as.dga.ff}. Only oil quality improves. `,`กรณีระมัดระวัง: ต้นเหตุ ${a._as.dga.code} ยังอยู่ ก๊าซจะกลับมาในการตรวจครั้งถัดไป เกรดก๊าซจึงคงเป็น ${a._as.dga.ff} ดีขึ้นเฉพาะคุณภาพน้ำมัน `) : '') + ((fault && scen==='oil') ? L('Oil after treatment: BDV ≥ 70 kV, water ≤ 10 ppm (reclamation/replacement also restore acidity, IFT and colour). Paper insulation (CO/CO₂, 2-FAL, age) is unchanged. Risk uses the current HI decreasing rate.','น้ำมันหลังบำรุงรักษา: BDV ≥ 70 kV ความชื้น ≤ 10 ppm (การฟื้นฟู/เปลี่ยนน้ำมันช่วยให้ความเป็นกรด IFT และสีดีขึ้นด้วย) ฉนวนกระดาษ (CO/CO₂, 2-FAL, อายุ) คงเดิม ความเสี่ยงคำนวณจากอัตรา HI ลดลงปัจจุบัน') : L('Expected result using typical post-treatment oil values (BDV ≥ 70 kV, water ≤ 10 ppm, fault gases removed; reclamation/replacement also restore acidity, IFT and colour). Oil treatment does not restore paper insulation, so CO/CO₂, 2-FAL and age stay the same. If the fault source is not repaired, gases will return. Risk uses the current HI decreasing rate.',
+        'ผลที่คาดหวังจากค่าน้ำมันหลังบำรุงรักษาโดยทั่วไป (BDV ≥ 70 kV ความชื้น ≤ 10 ppm ก๊าซจากความผิดปกติถูกไล่ออก; การฟื้นฟู/เปลี่ยนน้ำมันช่วยให้ความเป็นกรด IFT และสีดีขึ้นด้วย) การบำรุงรักษาน้ำมันไม่ได้ฟื้นฟูฉนวนกระดาษ ค่า CO/CO₂, 2-FAL และอายุจึงคงเดิม หากไม่แก้ต้นเหตุ ก๊าซจะกลับมาอีก ความเสี่ยงคำนวณจากอัตรา HI ลดลงปัจจุบัน'));
+  return `<div class="card">
+    <div class="card-head"><h3>${L('Before vs After maintenance','ก่อนและหลังบำรุงรักษา')}</h3><span class="small-muted">${mode==='measured'?L('measured','ผลจริง'):L('expected','คาดการณ์')}</span></div>
+    <div class="seg" style="margin-bottom:10px;flex-wrap:wrap;">${segBtns}</div>
+    ${fault && mode==='sim'?`<div class="seg" style="margin-bottom:14px;flex-wrap:wrap;"><button class="${scen==='oil'?'on':''}" data-ba-scen="oil">${L('Oil treatment only (fault still active)','ทำน้ำมันอย่างเดียว (ต้นเหตุยังอยู่)')}</button><button class="${scen==='fix'?'on':''}" data-ba-scen="fix">${L('Fault repaired + oil treatment','แก้ต้นเหตุ + ทำน้ำมัน')}</button></div>`:''}
+    ${meas&&meas.pending?`<div class="notebox" style="margin-bottom:12px;">${L(`${meas.done.tk.wo.no} was closed on ${meas.done.tk.wo.closed}. Add a post-maintenance lab result to see the measured effect.`,`${meas.done.tk.wo.no} ปิดงานเมื่อ ${meas.done.tk.wo.closed} เพิ่มผลแล็บหลังบำรุงรักษาเพื่อดูผลจริง`)} <button class="linklike" data-add-lab="1">${L('Add lab result →','เพิ่มผลแล็บ →')}</button></div>`:''}
+    <div class="ba-grid">
+      ${side(L('Before','ก่อน'), r.before, mode==='measured'?meas.bS.date:r.bS.date)}
+      <div class="ba-arrow" style="color:${dHi>0?'var(--green)':dHi<0?'var(--red)':'var(--muted)'};"><span class="ba-ar">→</span><br>${dHi>0?'+':''}${dHi} HI</div>
+      ${side(mode==='measured'?L('After','หลัง'):L('After (expected)','หลัง (คาดการณ์)'), r.after, mode==='measured'?meas.aS.date:'')}
+    </div>
+    ${changed.length?`<div class="tbl-wrap" style="margin-top:14px;"><table><thead><tr><th>${L('What changes','สิ่งที่เปลี่ยน')}</th><th>${L('Before','ก่อน')}</th><th>${L('After','หลัง')}</th></tr></thead><tbody>
+      ${changed.map(({ra,rb})=>`<tr><td>${ra.p}</td><td class="small-muted">${rb.res}</td><td style="font-weight:700;color:${(ra.key==='ff'?CODE_SF[ra.score]>CODE_SF[rb.score]:(ra.score||0)<(rb.score||0))?'var(--green)':'inherit'};">${ra.res}</td></tr>`).join('')}
+    </tbody></table></div>`:''}
+    <p class="small-muted" style="font-size:11px;margin:10px 0 0;">${note}</p>
+    ${mode==='sim'?(inPlan?`<div class="small-muted" style="margin-top:10px;">${L('This action is already in the maintenance plan','งานนี้อยู่ในแผนบำรุงรักษาแล้ว')} ✓ <button class="linklike" data-dtab="plan">${L('Open plan →','ไปที่แผน →')}</button></div>`
+      :`<button class="btn btn-primary" id="btnBaToPlan" style="margin-top:12px;white-space:normal;text-align:left;max-width:100%;">${gicon('plan',0,'width:13px;height:13px')} ${L(`Add “${actName}” to plan`,`เพิ่ม “${actName}” เข้าแผน`)}</button>`):''}
+  </div>`;
+}
+/* ---------- One-page asset report (print / save as PDF) ---------- */
+function assetReportHtml(a){
+  const prof = profileFor(a); const rk = riskOf(a); const F = prof.factors; const d = prof.dga; const cat = hiCat(a.hi);
+  const wsum = F.FF.w+F.OQF.w+F.PCF.w; const fx = ['FF','OQF','PCF'].map(k=>({k, name:L(FACTOR_NAMES_SIMPLE[k][0],FACTOR_NAMES_SIMPLE[k][1]), code:F[k].code, w:F[k].w/wsum*100, pts:F[k].sf/4*F[k].w/wsum*100}));
+  const issues = issuesOf(prof.rows).slice(0,4);
+  const fm = fmeaPriority(FMEA).slice(0,5).map(f=>({f, e:rcmEvaluate(rcmAnsFor(a,f))}));
+  const plan = MAINT_PLAN.slice().sort((x,y)=>(parseD(x.start)||0)-(parseD(y.start)||0)).slice(0,8);
+  const key = BA_ACTIONS[state.baAction] ? state.baAction : defaultBaAction(a); const sim = baSimulate(a, key);
+  const today = new Date();
+  return `<div class="rpage">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #4A5043;padding-bottom:6px;">
+      <div><div style="font-size:8.5px;font-weight:800;letter-spacing:.12em;color:#626a5c;">RCM TRANSFORMER · ${L('ASSET CONDITION & MAINTENANCE REPORT','รายงานสภาพและการบำรุงรักษาหม้อแปลง')}</div>
+      <h1>${a.id} — ${esc(a.loc)}</h1><div style="color:#626a5c;">${a.volt} kV${a.cap?` · ${a.cap} MVA`:''}${a.year?` · ${L('built','ผลิตปี')} ${a.year}`:''} · ${a.svc==='out'?L('Out of service','หยุดใช้งาน'):L('In service','ใช้งานอยู่')}</div></div>
+      <div style="text-align:right;color:#626a5c;">${L('Lab sample','ผลแล็บ')} <b style="color:#1d2118;">${prof.sample.date}</b><br>${L('Issued','ออกรายงาน')} ${fmtD(today)}</div>
+    </div>
+    <div class="rk">
+      <div><span>Health Index</span><b style="color:${a.hi<50?'#c62d23':a.hi<70?'#b07d05':'#178a5e'};">${a.hi}</b>${cat.name}</div>
+      <div><span>${L('Status','สถานะ')}</span><b>${trStatus(a.status)}</b>&nbsp;</div>
+      <div><span>${L('Risk','ความเสี่ยง')}</span><b>${riskName(rk.level)}</b>${rk.rate===null?'—':L(`−${rk.rate.toFixed(1)} HI/yr`,`ลดลง ${rk.rate.toFixed(1)}/ปี`)}</div>
+      <div><span>DGA</span><b>${d.code==='N'?L('Normal','ปกติ'):d.code}</b>${d.code==='N'?'':dgaName(d.code)}</div>
+      <div><span>${L('Asset strategy','กลยุทธ์หม้อแปลง')}</span><b>${strategyOf(a)}</b>&nbsp;</div>
+      <div><span>${L('Next sampling','ตรวจครั้งถัดไป')}</span><b style="font-size:11.5px;">${a.next}</b>&nbsp;</div>
+    </div>
+    <div class="r2">
+      <div><h2>${L('1 · Health Index breakdown','1 · ที่มาของดัชนีสุขภาพ')}</h2>
+        <table><tr><th>${L('Factor','ปัจจัย')}</th><th>${L('Grade','เกรด')}</th><th>${L('Weight','น้ำหนัก')}</th><th>${L('Points','คะแนน')}</th></tr>
+        ${fx.map(x=>`<tr><td>${x.name}</td><td><b>${x.code}</b> ${L(CODE_NAMES[x.code][0],CODE_NAMES[x.code][1])}</td><td>${x.w.toFixed(1)}%</td><td>${x.pts.toFixed(1)}</td></tr>`).join('')}
+        <tr><td colspan="3"><b>HI = Σ (SF ÷ 4 × W)</b></td><td><b>${prof.hi}</b></td></tr></table>
+        <div style="margin-top:5px;"><b>${L('Main issues','ปัญหาหลัก')}:</b> ${issues.length?issues.map(r=>issueLabel(r,d)).join(' · '):L('none significant','ไม่มีนัยสำคัญ')}</div>
+      </div>
+      <div><h2>${L('2 · Dissolved gas analysis','2 · ผลวิเคราะห์ก๊าซ (DGA)')}</h2>
+        <table><tr><th>${L('Gas','ก๊าซ')}</th>${FF_GASES.map(g=>`<th>${g}</th>`).join('')}</tr>
+        <tr><td>ppm</td>${FF_GASES.map(g=>`<td style="${d.lv[g]>1?'color:#c62d23;font-weight:700;':''}">${fmtPpm(prof.sample.gases[g])}</td>`).join('')}</tr>
+        <tr><td>${L('Level','ระดับ')}</td>${FF_GASES.map(g=>`<td>${d.lv[g]}</td>`).join('')}</tr></table>
+        <div class="rbox" style="margin-top:5px;">${d.code==='N'?L('All fault gases within normal limits (grade A).','ก๊าซทุกตัวอยู่ในเกณฑ์ปกติ (เกรด A)'):`<b>${d.code} · ${dgaName(d.code)}</b> — ${L('gas grade','เกรดก๊าซ')} ${d.ff}${d.agree!==null?` · ${L('methods agreeing','วิธีที่ตรงกัน')} ${d.agree}/3`:''}`}</div>
+      </div>
+    </div>
+    <h2>${L('3 · Failure modes & RCM decision (priority: S ≥ 9 first, then RPN)','3 · โหมดความล้มเหลวและการตัดสินใจ RCM (ลำดับ: S ≥ 9 ก่อน แล้วตาม RPN)')}</h2>
+    <table><tr><th>${L('Code','รหัส')}</th><th>${L('Component — failure mode','ชิ้นส่วน — โหมดความล้มเหลว')}</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>${L('RCM decision','ผล RCM')}</th><th>${L('Task · interval','งาน · รอบ')}</th></tr>
+    ${fm.map(({f,e})=>{ const tk=e.decision?rcmTaskFor(f.comp,e.decision):null; return `<tr><td>${f.code}</td><td>${f.comp} — ${f.mode}</td><td>${f.s}${f.s>=9?' ⚑':''}</td><td>${f.o}</td><td>${f.d}</td><td><b>${f.rpn}</b></td><td>${e.decision||L('pending','รอวิเคราะห์')}</td><td>${tk?tk[0]+' · '+tk[1]:'—'}</td></tr>`; }).join('')}</table>
+    <div class="r2">
+      <div><h2>${L('4 · Strategy','4 · กลยุทธ์')}</h2>
+        <div class="rbox"><b>${L('Asset','ระดับหม้อแปลง')}:</b> ${strategyOf(a)} — ${strategyWhy(a, rk).replace(/^(Why|เหตุผล): ?/,'')}<br><b>${L('Tasks (RCM)','ระดับงาน (RCM)')}:</b> ${taskStratSummary(a)}</div>
+      </div>
+      <div><h2>${L('5 · Expected effect of maintenance','5 · ผลที่คาดหวังจากการบำรุงรักษา')}</h2>
+        <div class="rbox">${baTaskName(key, baScenario(a), a)}: HI <b>${sim.before.hi}</b> → <b>${sim.after.hi}</b> · ${L('risk','ความเสี่ยง')} ${riskName(RISK_T10[hiRow(sim.before.hi)][rateCol(rk.rate)])} → ${riskName(RISK_T10[hiRow(sim.after.hi)][rateCol(rk.rate)])}<br><span style="color:#626a5c;">${L('Expected value — confirm with a post-maintenance lab result.','ค่าคาดการณ์ — ต้องยืนยันด้วยผลแล็บหลังบำรุงรักษา')}</span></div>
+      </div>
+    </div>
+    <h2>${L('6 · Maintenance plan & work orders','6 · แผนบำรุงรักษาและใบสั่งงาน')}</h2>
+    <table><tr><th>${L('Task','งาน')}</th><th>${L('Type','ประเภท')}</th><th>${L('Start','เริ่ม')}</th><th>${L('End','สิ้นสุด')}</th><th>${L('Status','สถานะ')}</th><th>WO</th></tr>
+    ${plan.map(tk=>{ const st=planStatus(tk); return `<tr><td>${esc(tk.task)}</td><td>${tk.type}</td><td>${tk.start}</td><td>${tk.end}</td><td style="${st==='Overdue'?'color:#c62d23;font-weight:700;':''}">${st==='Completed'?t('completed'):st==='In Progress'?t('in_progress'):st==='Overdue'?L('Overdue','เลยกำหนด'):t('upcoming')}</td><td>${tk.wo?tk.wo.no+(tk.wo.status==='Closed'?' ✓':''):'—'}</td></tr>`; }).join('')}</table>
+    <div class="rsign"><div>${L('Prepared by','ผู้จัดทำ')}</div><div>${L('Reviewed by','ผู้ตรวจสอบ')}</div><div>${L('Approved by','ผู้อนุมัติ')}</div></div>
+    <div style="margin-top:8px;font-size:8px;color:#8a8f80;">${L('Methods: Health Index & risk — Tamma, Prasojo & Suwarno (2021); gas limits — IEEE C57.104-2019; fault type — Duval, Rogers, IEC 60599; decision logic — SAE JA1011.','วิธีการ: HI และความเสี่ยง — Tamma, Prasojo & Suwarno (2021); เกณฑ์ก๊าซ — IEEE C57.104-2019; ชนิดความผิดปกติ — Duval, Rogers, IEC 60599; ตรรกะการตัดสินใจ — SAE JA1011')}${isDemoAsset(a)?L(' · Sample data for demonstration.',' · ข้อมูลตัวอย่างเพื่อการสาธิต'):''}</div>
+  </div>`;
+}
+function openAssetReport(a){
+  closeAssetReport();
+  const root = document.createElement('div'); root.id='reportRoot';
+  root.innerHTML = `<div class="rtool"><button class="btn btn-primary" id="rPrint">${L('Print / Save as PDF','พิมพ์ / บันทึกเป็น PDF')}</button><button class="btn btn-outline" id="rClose" style="background:var(--card);">${L('Close','ปิด')}</button></div>${assetReportHtml(a)}`;
+  document.body.appendChild(root); document.body.classList.add('printing-report');
+  document.getElementById('rClose').addEventListener('click', closeAssetReport);
+  document.getElementById('rPrint').addEventListener('click', ()=>{ try{ window.print(); }catch(e){ toast(L('Printing is blocked here — open the site in a browser tab.','เบราว์เซอร์นี้ไม่อนุญาตให้พิมพ์ — เปิดเว็บในแท็บปกติ')); } });
+}
+function closeAssetReport(){ const r=document.getElementById('reportRoot'); if(r) r.remove(); document.body.classList.remove('printing-report'); }
 function historyRows(a){
   const rows = [];
   const lab = labFor(a); lab.forEach((smp,i)=>{ const as=assessSample(smp, lab[i+1], a); const d=as.dga; const st=statusOf(as);
     rows.push({date:smp.date, _d:parseD(smp.date), act:L('Oil sampling & lab tests','เก็บตัวอย่างน้ำมันและทดสอบ'), res:`HI ${as.hi} (${hiCat(as.hi).code}) · FF ${d.ff} · DGA ${d.code}`, style:`color:${statusColor(st)};font-weight:700;`, by:'Lab'}); });
-  getMaintFor(a).filter(tk=>planStatus(tk)==='Completed').forEach(tk=>rows.push({date:tk.end, _d:parseD(tk.end), act:tk.task, res:t('completed'), by:L('Field team','ทีมภาคสนาม')}));
+  getMaintFor(a).filter(tk=>planStatus(tk)==='Completed').forEach(tk=>{ if(tk.wo&&tk.wo.status==='Closed') rows.push({date:tk.wo.closed, _d:parseD(tk.wo.closed), act:`${esc(tk.task)} · <span class="pill pill-closed">${tk.wo.no}</span>`, res:tk.wo.findings?esc(tk.wo.findings):t('completed'), by:esc(tk.wo.assignee||L('Field team','ทีมภาคสนาม'))}); else rows.push({date:(tk.done&&tk.done.date)||tk.end, _d:parseD((tk.done&&tk.done.date)||tk.end), act:tk.task, res:t('completed'), by:L('Field team','ทีมภาคสนาม')}); });
   return rows.sort((x,y)=>(y._d||0)-(x._d||0));
 }
 function detailHistoryTab(a){
@@ -2152,7 +2466,7 @@ function attachDetailEvents(){
   document.querySelectorAll('[data-dtab]').forEach(el=> el.addEventListener('click',()=>{ state.detailTab = el.dataset.dtab; render(); }));
   const back = document.getElementById('backToAssets'); if(back) back.addEventListener('click',()=>{ state.page='assets'; render(); window.scrollTo(0,0); });
   const assetSel = document.getElementById('detailAssetSelect'); if(assetSel) assetSel.addEventListener('change',(e)=>{ state.assetId = e.target.value; render(); window.scrollTo(0,0); });
-  const curF = ()=> FMEA.find(x=>x.code===state.rcmFm) || FMEA.slice().sort((x,y)=>y.rpn-x.rpn)[0];
+  const curF = ()=> FMEA.find(x=>x.code===state.rcmFm) || fmeaPriority(FMEA)[0];
   const rcmSel = document.getElementById('rcmFmSelect'); if(rcmSel) rcmSel.addEventListener('change',(e)=>{ state.rcmFm = e.target.value; render(); });
   document.querySelectorAll('[data-rcm-pick]').forEach(el=> el.addEventListener('click',()=>{ state.rcmFm = el.dataset.rcmPick; render(); }));
   const rcmReset = document.getElementById('btnRcmReset'); if(rcmReset) rcmReset.addEventListener('click',()=>{ const f=curF(); RCM_STORE[currentAsset().id][f.code] = {}; render(); });
@@ -2174,6 +2488,7 @@ function attachDetailEvents(){
   document.querySelectorAll('[data-edit-fmea]').forEach(el=> el.addEventListener('click',()=> openEditFmeaModal(Number(el.dataset.editFmea))));
   const addTask = document.getElementById('btnCreateTask'); if(addTask) addTask.addEventListener('click', openAddTaskModal);
   document.querySelectorAll('[data-plan-view]').forEach(el=> el.addEventListener('click',()=>{ state.planView = el.dataset.planView; render(); }));
+  const arBtn = document.getElementById('btnAssetReport'); if(arBtn) arBtn.addEventListener('click', ()=>openAssetReport(currentAsset()));
   const exportBtn = document.getElementById('btnExportReport');
   if(exportBtn) exportBtn.addEventListener('click', ()=>{
     const a = ASSETS.find(x=>x.id===state.assetId);
@@ -2194,6 +2509,19 @@ function attachDetailEvents(){
   document.querySelectorAll('[data-add-plan-sug]').forEach(el=>el.addEventListener('click',()=>{ const a=currentAsset(); const sg=planSuggestions(a)[Number(el.dataset.addPlanSug)]; if(!sg) return;
     MAINT_PLAN.push({no:1+Math.max(0,...MAINT_PLAN.map(x=>x.no)), task:sg.task, type:sg.type, start:fmtD(sg.date), end:fmtD(sg.date), dur:'1 '+L('day','วัน'), m:MON[sg.date.getMonth()], len:1, notes:sg.why}); render(); toast(L('Added to maintenance plan','เพิ่มเข้าแผนแล้ว'),'success'); }));
   document.querySelectorAll('[data-add-lab]').forEach(el=> el.addEventListener('click', openAddDgaResultModal));
+  document.querySelectorAll('[data-flow-tab]').forEach(el=> el.addEventListener('click',()=>{ state.detailTab = el.dataset.flowTab; if(el.dataset.flowKey) state[el.dataset.flowKey] = el.dataset.flowVal; render();
+    const an = el.dataset.flowAnchor && document.getElementById(el.dataset.flowAnchor); if(an) an.scrollIntoView({behavior:'smooth', block:'start'}); }));
+  document.querySelectorAll('[data-wo-issue]').forEach(el=> el.addEventListener('click',()=>{ const tk=MAINT_PLAN[Number(el.dataset.woIssue)]; if(tk) openIssueWoModal(tk); }));
+  document.querySelectorAll('[data-wo-close]').forEach(el=> el.addEventListener('click',()=>{ const tk=MAINT_PLAN[Number(el.dataset.woClose)]; if(tk&&tk.wo) openCloseWoModal(tk); }));
+  document.querySelectorAll('[data-wo-cancel]').forEach(el=> el.addEventListener('click',()=>{ const tk=MAINT_PLAN[Number(el.dataset.woCancel)]; if(tk&&tk.wo&&confirm(L(`Cancel work order ${tk.wo.no}?`,`ยกเลิกใบสั่งงาน ${tk.wo.no}?`))){ delete tk.wo; render(); toast(L('Work order cancelled','ยกเลิกใบสั่งงานแล้ว')); } }));
+  document.querySelectorAll('[data-ba-act]').forEach(el=> el.addEventListener('click',()=>{ state.baAction = el.dataset.baAct; state.baMode = 'sim'; render(); }));
+  document.querySelectorAll('[data-ba-mode]').forEach(el=> el.addEventListener('click',()=>{ state.baMode = el.dataset.baMode; render(); }));
+  document.querySelectorAll('[data-ba-scen]').forEach(el=> el.addEventListener('click',()=>{ state.baScen = el.dataset.baScen; render(); }));
+  const baPlan = document.getElementById('btnBaToPlan'); if(baPlan) baPlan.addEventListener('click',()=>{ const a=currentAsset(); const key=BA_ACTIONS[state.baAction]?state.baAction:defaultBaAction(a); const name=baTaskName(key, baScenario(a), a);
+    const st=new Date(); st.setDate(st.getDate()+14); const days=BA_ACTIONS[key].days; const en=new Date(st.getTime()+(days-1)*864e5);
+    const exp=baSimulate(a,key);
+    MAINT_PLAN.push({no:1+Math.max(0,...MAINT_PLAN.map(x=>x.no)), task:name, type:'CM', start:fmtD(st), end:fmtD(en), dur:days+' '+L(days>1?'days':'day','วัน'), m:MON[st.getMonth()], len:days<=1?1:days<=4?2:3, notes:L(`Expected HI ${exp.before.hi} → ${exp.after.hi}`,`HI ที่คาดหวัง ${exp.before.hi} → ${exp.after.hi}`)});
+    render(); toast(L('Added to maintenance plan','เพิ่มเข้าแผนบำรุงรักษาแล้ว'),'success'); });
   document.querySelectorAll('[data-create-plan]').forEach(el=> el.addEventListener('click',()=>{ state.detailTab='plan'; render(); }));
   document.querySelectorAll('.dl-doc').forEach(el=> el.addEventListener('click',()=>{
     const csvType = el.dataset.csv;
@@ -2202,7 +2530,7 @@ function attachDetailEvents(){
     if(csvType==='hi') content = toCSV([['Factor / parameter','Result','Score','Weight'], ...['FF','OQF','PCF'].map(k=>[k,prof.factors[k].code,prof.factors[k].sf,prof.factors[k].w]), ...prof.rows.map(r=>[r.p,r.res,r.score,r.key==='ff'?'':r.weight]), ['Health Index','',prof.hi,'']]);
     if(csvType==='lab'){ const lab=labFor(a); content = toCSV([['Date',...GASES,'BDV kV','Water ppm','Acidity','IFT','Colour','2-FAL ppb','FF','OQF','PCF','HI'], ...lab.map((x,i)=>{ const as=assessSample(x,lab[i+1],a); return [x.date,...GASES.map(g=>x.gases[g]),x.bdv,x.moisture,x.acidity,x.ift,x.colour,x.fal??'',as.factors.FF.code,as.factors.OQF.code,as.factors.PCF.code,as.hi]; })]); }
     if(csvType==='fmea') content = toCSV([['No','Component','Mode','Effect','S','O','D','RPN','Risk'], ...FMEA.map(f=>[f.no,f.comp,f.mode,f.effect,f.s,f.o,f.d,f.rpn,f.risk])]);
-    if(csvType==='plan') content = toCSV([['No','Task','Type','Start','End','Duration'], ...MAINT_PLAN.map(p=>[p.no,p.task,p.type,p.start,p.end,p.dur])]);
+    if(csvType==='plan') content = toCSV([['No','Task','Type','Start','End','Duration','Work order','WO status','Assigned to','Closed','Findings'], ...MAINT_PLAN.map(p=>[p.no,p.task,p.type,p.start,p.end,p.dur,p.wo?p.wo.no:'',p.wo?p.wo.status:'',p.wo?p.wo.assignee:'',p.wo&&p.wo.closed?p.wo.closed:'',p.wo&&p.wo.findings?p.wo.findings:''])]);
     if(csvType==='dga') content = toCSV([['Gas','Result (ppm)','Normal limit'], ...gasRowsOf(prof.sample).map(g=>[g.g,g.v,g.range]), [], ['Max level score','L'+prof.dga.Lm],['Max rate score','R'+prof.dga.Rm],['Duval Triangle zone',prof.dga.zone],['Faults Factor',prof.dga.ff],['IEC 60599',prof.dga.iec],['Rogers case',prof.dga.rogers===null?'ND':prof.dga.rogers],['Diagnosis',prof.code+' '+DGA_NAMES[prof.code][0]]]);
     downloadFile(el.dataset.fname, content, 'text/csv'); toast(t('toast_exported'),'success');
   }));
@@ -2447,16 +2775,16 @@ function reportStats(){
   const plans = ASSETS.flatMap(a=>getMaintFor(a)); const dates = plans.map(p=>parseD(p.start)).filter(Boolean).sort((x,y)=>x-y);
   const fam = {N:0,T:0,D:0,PD:0,DT:0}; ASSETS.forEach(a=>{ const f=famOf(a._as?a._as.dga.code:'N'); if(f in fam) fam[f]++; });
   const highByComp = {}; ASSETS.forEach(a=>getFmeaFor(a).filter(f=>f.risk==='High').forEach(f=>{ highByComp[f.comp]=(highByComp[f.comp]||0)+1; }));
-  const types=['BM','CM','PM','CBM','PdM'], byType = types.map(ty=>{ const ps=plans.filter(p=>p.type===ty).map(planStatus); return {ty, done:ps.filter(x=>x==='Completed').length, prog:ps.filter(x=>x==='In Progress').length, up:ps.filter(x=>x==='Upcoming').length}; });
+  const types=['BM','CM','PM','CBM','PdM'], byType = types.map(ty=>{ const ps=plans.filter(p=>p.type===ty).map(planStatus); return {ty, done:ps.filter(x=>x==='Completed').length, prog:ps.filter(x=>x==='In Progress').length, up:ps.filter(x=>x==='Upcoming').length, over:ps.filter(x=>x==='Overdue').length}; });
   const trend = fleetTrend();
   return {N,healthy,warning,critical,plans,dates,fam,highByComp,byType,trend};
 }
 function taskSummaryHtml(r){
   const names = {BM:L('Breakdown','ซ่อมเมื่อเสีย'),CM:L('Corrective','แก้ไข'),PM:L('Preventive','ป้องกัน'),CBM:L('Condition-based','ตามสภาพ'),PdM:L('Predictive','คาดการณ์')};
   const typeCol = {BM:'#8b9099',CM:'#e0473d',PM:'#5E7A8C',CBM:'#1fa571',PdM:'#8759d6'};
-  const S = [['done','#1fa571',t('completed')],['prog','#5E7A8C',t('in_progress')],['up','#f0b429',t('upcoming')]];
-  const rows = r.byType.map(x=>({...x, n:x.done+x.prog+x.up})).filter(x=>x.n>0);
-  const tot = {done:0,prog:0,up:0}; rows.forEach(x=>S.forEach(([k])=>tot[k]+=x[k])); const all = tot.done+tot.prog+tot.up;
+  const S = [['done','#1fa571',t('completed')],['prog','#5E7A8C',t('in_progress')],['up','#f0b429',t('upcoming')],['over','#c62d23',L('Overdue','เลยกำหนด')]];
+  const rows = r.byType.map(x=>({...x, n:x.done+x.prog+x.up+x.over})).filter(x=>x.n>0);
+  const tot = {done:0,prog:0,up:0,over:0}; rows.forEach(x=>S.forEach(([k])=>tot[k]+=x[k])); const all = tot.done+tot.prog+tot.up+tot.over;
   const max = Math.max(1,...rows.map(x=>x.n));
   const pct = (n)=> all? Math.round(n/all*100):0;
   return `<div class="card"><div class="card-head"><h3>${t('maint_task_summary')}</h3><span class="small-muted">${all} ${L('tasks','งาน')}</span></div>
@@ -2468,7 +2796,7 @@ function taskSummaryHtml(r){
         <div class="tsum-track"><div class="tsum-bar" style="width:${x.n/max*100}%;">${S.map(([k,c,lb])=>x[k]?`<div class="tsum-seg" style="flex:${x[k]};background:${c};" title="${lb}: ${x[k]}">${x[k]}</div>`:'').join('')}</div></div>
         <div class="tsum-total">${x.n}</div>
       </div>`).join('')}</div>
-    <p class="small-muted" style="font-size:11px;margin:10px 0 0;">${L('Status comes from each task’s dates compared with today.','สถานะคิดจากวันที่ของแต่ละงานเทียบกับวันนี้')}</p>
+    <p class="small-muted" style="font-size:11px;margin:10px 0 0;">${L('A task is completed only when its work order is closed. Tasks past their end date without a closed work order are Overdue.','งานจะเสร็จเมื่อปิดใบสั่งงานเท่านั้น งานที่เลยวันสิ้นสุดโดยยังไม่ปิดใบสั่งงานจะเป็น “เลยกำหนด”')}</p>
   </div>`;
 }
 function renderReports(){
@@ -2478,7 +2806,7 @@ function renderReports(){
   const famCol = {N:'#1fa571',T:'#e0473d',D:'#eba020',PD:'#8759d6',DT:'#8b9099'};
   const topComp = Object.entries(r.highByComp).sort((x,y)=>y[1]-x[1])[0];
   const topFault = Object.entries(r.fam).filter(([k])=>k!=='N').sort((x,y)=>y[1]-x[1])[0];
-  const delta = (r.trend[4]!=null && r.trend[0]!=null) ? r.trend[4]-r.trend[0] : 0;
+  const delta = (r.trend[4]!=null && r.trend[0]!=null) ? Math.round((r.trend[4]-r.trend[0])*10)/10 : 0;
   const kts = [
     L(`Average fleet HI is ${r.trend[4]} (${delta>=0?'+':''}${delta} vs 12 months ago)`,`HI เฉลี่ยทั้งฟลีท ${r.trend[4]} (${delta>=0?'+':''}${delta} เทียบกับ 12 เดือนก่อน)`),
     r.critical ? L(`${r.critical} transformer(s) critical: ${ASSETS.filter(a=>a.status==='Critical').map(a=>a.id).join(', ')} — resample within 1 month`,`หม้อแปลงวิกฤต ${r.critical} ตัว: ${ASSETS.filter(a=>a.status==='Critical').map(a=>a.id).join(', ')} — ควรเก็บตัวอย่างซ้ำภายใน 1 เดือน`) : L('No transformer is in the critical range','ไม่มีหม้อแปลงอยู่ในระดับวิกฤต'),
@@ -2613,7 +2941,7 @@ function settingsTabContent(){
     <div class="card"><h3>${t('note1')}</h3><p class="small-muted">${t('note2')}</p></div>
   </div>`; }
   if(state.settingsTab==='fm') return `
-  <div class="card"><div class="card-head"><h3>${t('settings_fm')}</h3><button class="linklike" id="btnManageFm">${t('manage')}</button></div>
+  <div class="card"><div class="card-head"><h3>${t('settings_fm')}</h3><button class="linklike" id="btnManageFm">${L('Edit per transformer in the FMEA tab →','แก้ไขรายหม้อแปลงในแท็บ FMEA →')}</button></div>
     <div class="tbl-wrap"><table><thead><tr><th>${t('code')}</th><th>${t('failure_mode')}</th><th>${t('category')}</th></tr></thead><tbody>
     ${FMEA_TEMPLATE.map(f=>`<tr><td>${f.code}</td><td>${f.comp} — ${f.mode}</td><td>${L(f.cat[0],f.cat[1])}</td></tr>`).join('')}
     </tbody></table></div>
@@ -2635,7 +2963,7 @@ function settingsTabContent(){
     </tbody></table></div>
   </div>`;
   if(state.settingsTab==='sys') return `
-  <div class="grid g2">
+  <div class="grid" style="grid-template-columns:1fr;">
     <div class="card"><h3>${t('data_mgmt')}</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-ghost" style="flex:1;justify-content:center;" data-import-lab="1">${L('Import lab results','นำเข้าผลแล็บ')}</button>
@@ -2649,30 +2977,21 @@ function settingsTabContent(){
       <input type="file" id="restoreFile" accept="application/json,.json" style="display:none;">
       <p class="small-muted" style="font-size:11.5px;margin:10px 0 0;">${L('Data is saved automatically in this browser (localStorage). Use Backup to move it to another computer.','ข้อมูลบันทึกอัตโนมัติในเบราว์เซอร์นี้ (localStorage) ใช้ “สำรองข้อมูล” เพื่อย้ายไปเครื่องอื่น')}</p>
     </div>
-    <div class="card"><h3>${t('appearance')}</h3>
-      <div class="settingsrow"><div class="srlabel">${t('theme')}</div><span class="small-muted">${t('light')}</span></div>
-      <div class="settingsrow"><div class="srlabel">${t('items_per_page')}</div><select class="chip-input"><option>10</option><option>20</option><option>50</option></select></div>
-    </div>
   </div>`;
   // general
   return `
-  <div class="grid g3" style="margin-bottom:16px; align-items:stretch;">
+  <div class="grid g2" style="margin-bottom:16px; align-items:stretch;">
     <div class="card"><div class="card-head"><h3>${t('system_info')}</h3></div>
-      <ul class="hlist"><li><span class="k">${t('system_name')}</span><span class="v">RCM Transformer</span></li><li><span class="k">${t('version')}</span><span class="v">1.0.0</span></li>
+      <ul class="hlist"><li><span class="k">${t('system_name')}</span><span class="v">RCM Transformer</span></li><li><span class="k">${t('version')}</span><span class="v">1.1.0</span></li>
       <li><span class="k">${t('department')}</span><span class="v">${state.lang==='th'?'ฝ่ายบริหารสินทรัพย์':'Asset Management Division'}</span></li>
       <li><span class="k">${t('timezone')}</span><span class="v">(UTC+7) Bangkok</span></li><li><span class="k">${t('date_format')}</span><span class="v">DD/MM/YYYY</span></li>
       <li><span class="k">${t('sys_language')}</span><span class="v">${state.lang==='th'?'ไทย (รองรับ EN)':'English (TH Support)'}</span></li></ul>
     </div>
     <div class="card"><h3>${t('notif_settings')}</h3>
-      <div class="settingsrow"><div class="srlabel">${badge('notification',22)} ${t('email_notif')}</div><div class="toggle on" data-toggle="1"><div class="knob"></div></div></div>
-      <div class="settingsrow"><div class="srlabel">${badge('scheduled',22)} ${t('task_reminder')}</div><div class="toggle on" data-toggle="1"><div class="knob"></div></div></div>
-      <div class="settingsrow"><div class="srlabel">${badge('critical',22)} ${t('high_risk_alert')}</div><div class="toggle on" data-toggle="1"><div class="knob"></div></div></div>
-      <div class="settingsrow"><div class="srlabel">${badge('reports',22)} ${t('monthly_report')}</div><div class="toggle" data-toggle="1"><div class="knob"></div></div></div>
-      <div class="settingsrow"><div class="srlabel">${badge('settings',22)} ${t('sys_update_notif')}</div><div class="toggle on" data-toggle="1"><div class="knob"></div></div></div>
-    </div>
-    <div class="card"><h3>${t('appearance')}</h3>
-      <div class="settingsrow"><div class="srlabel">${t('theme')}</div><span class="small-muted">${t('light')}</span></div>
-      <div class="settingsrow"><div class="srlabel">${t('items_per_page')}</div><select class="chip-input"><option>10</option><option>20</option><option>50</option></select></div>
+      <p class="card-sub">${L('Choose what appears under the bell.','เลือกสิ่งที่จะแสดงในกระดิ่งแจ้งเตือน')}</p>
+      <div class="settingsrow"><div class="srlabel">${badge('critical',22)} ${L('Critical transformers (HI < 50)','หม้อแปลงวิกฤต (HI < 50)')}</div><div class="toggle ${NOTIF.risk?'on':''}" data-notif="risk"><div class="knob"></div></div></div>
+      <div class="settingsrow"><div class="srlabel">${badge('lab',22)} ${L('DGA fault on warning units','ผล DGA ผิดปกติของหม้อแปลงเฝ้าระวัง')}</div><div class="toggle ${NOTIF.dga?'on':''}" data-notif="dga"><div class="knob"></div></div></div>
+      <div class="settingsrow"><div class="srlabel">${badge('scheduled',22)} ${L('Overdue maintenance tasks','งานบำรุงรักษาเลยกำหนด')}</div><div class="toggle ${NOTIF.overdue?'on':''}" data-notif="overdue"><div class="knob"></div></div></div>
     </div>
   </div>`;
 }
@@ -2712,8 +3031,8 @@ function attachSettingsEvents(){
   const ce=document.getElementById('btnCritEdit'); if(ce) ce.addEventListener('click', openCritModal);
   const cr=document.getElementById('btnCritReset'); if(cr) cr.addEventListener('click', ()=>{ if(confirm(L('Restore all criteria to the paper values?','คืนค่าเกณฑ์ทั้งหมดตามงานวิจัย?'))){ CRIT = JSON.parse(JSON.stringify(CRIT_DEFAULT)); render(); toast(t('toast_saved'),'success'); } });
   document.querySelectorAll('[data-stab]').forEach(el=> el.addEventListener('click',()=>{ state.settingsTab = el.dataset.stab; render(); }));
-  document.querySelectorAll('.toggle[data-toggle]').forEach(tgl=> tgl.addEventListener('click',()=>{ tgl.classList.toggle('on'); toast(t('toast_saved')); }));
-  const manageFm = document.getElementById('btnManageFm'); if(manageFm) manageFm.addEventListener('click', ()=>{ state.page='detail'; state.detailTab='fmea'; render(); });
+  document.querySelectorAll('.toggle[data-notif]').forEach(tgl=> tgl.addEventListener('click',()=>{ const k=tgl.dataset.notif; NOTIF[k]=!NOTIF[k]; notifRead=false; render(); toast(t('toast_saved'),'success'); }));
+  const manageFm = document.getElementById('btnManageFm'); if(manageFm) manageFm.addEventListener('click', ()=>{ state.page='detail'; state.detailTab='fmearcm'; state.fmView='fmea'; render(); window.scrollTo(0,0); });
   const addUser = document.getElementById('btnAddUser'); if(addUser) addUser.addEventListener('click', ()=>{
     openModal(t('modal_add_user'), `
       <div class="formrow"><label>${t('field_name')}</label><input name="name" required></div>
@@ -2758,11 +3077,17 @@ function attachTopbarEvents(){
   });
 }
 let notifRead = false;
+function placeDropdown(dd, btnId){
+  const box = dd && dd.firstElementChild; if(!box) return;
+  if(window.innerWidth<=720){ const r=document.getElementById(btnId).getBoundingClientRect();
+    Object.assign(box.style,{position:'fixed', left:'12px', right:'12px', width:'auto', top:(r.bottom+8)+'px', maxHeight:(window.innerHeight-r.bottom-24)+'px', overflowY:'auto'}); }
+}
 function toggleBellDropdown(){
   const dd = document.getElementById('bellDropdown');
   if(dd.innerHTML){ dd.innerHTML=''; return; }
   dd.innerHTML = `<div class="dropdown"><div class="dropdown-head"><span>${t('notifications')}</span><button class="linklike" id="markAllRead">${t('mark_all_read')}</button></div>
   <div class="dropdown-body">${notificationsList().map(n=>`<div class="dropdown-item">${n[state.lang]}<div class="dt">${L('Sample','ตัวอย่าง')} ${n.t}</div></div>`).join('') || `<div class="dropdown-item">${L('No alerts','ไม่มีการแจ้งเตือน')}</div>`}</div></div>`;
+  placeDropdown(dd, 'bellBtn');
   document.getElementById('markAllRead').addEventListener('click', ()=>{ notifRead = true; document.getElementById('bellCount').style.display='none'; dd.innerHTML=''; toast(t('toast_saved')); });
 }
 function toggleUserDropdown(){
@@ -2776,6 +3101,7 @@ function toggleUserDropdown(){
     try{ sessionStorage.removeItem('rcm_logged_in'); }catch(err){}
     showLogin();
   });
+  placeDropdown(dd, 'userMenuBtn');
 }
 function setLang(lang){ state.lang = lang; render(); }
 
