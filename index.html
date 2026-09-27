@@ -302,6 +302,21 @@ select.chip-input{cursor:pointer;}
 .tsum-seg:first-child{border-radius:8px 0 0 8px;} .tsum-seg:last-child{border-radius:0 8px 8px 0;} .tsum-seg:only-child{border-radius:8px;}
 .tsum-total{font-weight:800;text-align:right;}
 @media (max-width:640px){ .tsum-row{grid-template-columns:1fr 34px;} .tsum-lab{grid-column:1/-1;} .tsum-kpis{grid-template-columns:1fr;} }
+.hero{position:relative; overflow:hidden; display:flex; align-items:center; gap:24px; margin-bottom:16px; padding:24px 28px; border-radius:16px; color:#fff;
+  background:linear-gradient(115deg,#565C4E 0%,#656C5C 45%,#7B8371 100%); box-shadow:0 6px 18px rgba(62,68,55,.18);}
+.hero-art{position:absolute; right:0; bottom:0; height:100%; width:auto; pointer-events:none;}
+.hero-body{position:relative; flex:1; min-width:0;}
+.hero-eyebrow{font-size:11px; font-weight:800; letter-spacing:2.5px; text-transform:uppercase; opacity:.75;}
+.hero-title{margin:6px 0 12px; font-size:24px; line-height:1.25; font-weight:800; color:#fff;}
+.hero-steps{display:flex; flex-wrap:wrap; align-items:center; gap:6px;}
+.hero-steps span{background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); border-radius:99px; padding:4px 12px; font-size:12px; font-weight:700;}
+.hero-steps i{font-style:normal; opacity:.6; font-size:12px;}
+.hero-side{position:relative; display:flex; flex-direction:column; align-items:flex-end; gap:8px; text-align:right;}
+.hero-cta{border:none; cursor:pointer; font:inherit; font-size:13px; font-weight:800; color:#3f4538; background:#fff; border-radius:10px; padding:10px 16px; box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.hero-cta:hover{background:#f1f2ec;}
+.hero-ok{font-size:13px; font-weight:800; background:rgba(255,255,255,.16); border-radius:10px; padding:9px 14px;}
+.hero-meta{font-size:11.5px; opacity:.8;}
+@media (max-width:760px){ .hero{flex-direction:column; align-items:flex-start; padding:20px;} .hero-side{align-items:flex-start; text-align:left;} .hero-title{font-size:19px;} .hero-art{opacity:.6;} }
 /* ===== Calmer layout ===== */
 .card.stat .gbadge{display:none;}
 .card.stat{gap:0;}
@@ -1407,12 +1422,37 @@ function attachCategoryOverviewEvents(){
     goToAssetDetail(id, tab);
   }));
 }
+function heroBannerHtml(){
+  const latest = ASSETS.map(a=>parseD(a.last)).filter(Boolean).sort((x,y)=>y-x)[0];
+  const urgent = ASSETS.filter(a=>a.status==='Critical').length;
+  const steps = [L('Monitor','ติดตาม'),L('Analyze','วิเคราะห์'),L('Decide','ตัดสินใจ'),L('Maintain','บำรุงรักษา')];
+  return `<section class="hero">
+    <svg class="hero-art" viewBox="0 0 420 150" aria-hidden="true">
+      <g fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".22">
+        <path d="M250 150 L286 18 L322 150 M262 106 L310 106 M270 74 L302 74 M277 46 L295 46 M262 106 L302 74 M310 106 L270 74 M270 74 L295 46 M302 74 L277 46"/>
+        <path d="M236 30 H336 M246 30 v10 M326 30 v10 M258 18 H314"/>
+        <path d="M360 150 L382 70 L404 150 M368 120 L396 120 M373 98 L391 98 M368 120 L391 98 M396 120 L373 98"/>
+        <path d="M352 64 H412 M358 64 v8 M406 64 v8"/>
+      </g>
+      <g fill="none" stroke="#fff" stroke-width="1" opacity=".18"><path d="M0 44 C 90 70, 170 70, 246 40"/><path d="M0 52 C 90 80, 170 80, 246 48"/><path d="M326 40 C 340 52, 350 60, 358 68"/><path d="M326 48 C 340 58, 350 64, 358 72"/></g>
+    </svg>
+    <div class="hero-body">
+      <div class="hero-eyebrow">RCM Transformer</div>
+      <h1 class="hero-title">${L('Reliable transformers for a sustainable tomorrow','หม้อแปลงที่เชื่อถือได้ เพื่ออนาคตที่ยั่งยืน')}</h1>
+      <div class="hero-steps">${steps.map((x,i)=>`<span>${x}</span>${i<steps.length-1?'<i>→</i>':''}`).join('')}</div>
+    </div>
+    <div class="hero-side">
+      ${urgent?`<button class="hero-cta" data-goto-risk="1">${L(`${urgent} need action now →`,`${urgent} ตัวต้องดำเนินการด่วน →`)}</button>`:`<span class="hero-ok">${L('No critical transformer','ไม่มีหม้อแปลงวิกฤต')}</span>`}
+      <div class="hero-meta">${L('Latest lab result','ผลแล็บล่าสุด')} ${latest?fmtD(latest):'—'}</div>
+    </div>
+  </section>`;
+}
 function renderOverview(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
   const N = ASSETS.length, pct = (n)=>N?Math.round(n/N*100):0, avgHi = N?Math.round(ASSETS.reduce((x,a)=>x+a.hi,0)/N):0;
   const stratCount = {PM:0,CBM:0,'CBM + PdM':0}; ASSETS.forEach(a=>stratCount[strategyOf(a)]++);
   const recent = ASSETS.slice().sort((x,y)=>(parseD(y.last)||0)-(parseD(x.last)||0)).slice(0,5);
-  return `${demoBannerHtml()}
+  return `${heroBannerHtml()}${demoBannerHtml()}
   <div class="grid g4" style="margin-bottom:16px;">
     <div class="card stat">${badge('assets',44)}<div><div class="label">${t('total_assets')}</div><div class="value">${N}</div><div class="small-muted">${L('Avg HI','HI เฉลี่ย')} ${avgHi}</div></div></div>
     <div class="card stat">${badge('normal',44)}<div><div class="label">${t('healthy')}</div><div class="value">${healthy}</div><div class="small-muted">${pct(healthy)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
@@ -1446,6 +1486,7 @@ function initOverviewCharts(){
   mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{data:fleetTrend(),borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#2f7dd1'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
+  document.querySelectorAll('[data-goto-risk]').forEach(b=>b.addEventListener('click',()=>{ state.page='risk'; render(); window.scrollTo(0,0); }));
   document.querySelectorAll('[data-ov-filter]').forEach(el=> el.addEventListener('click',()=>{ state.assetFilterStatus = el.dataset.ovFilter; state.ovPage=1; render(); }));
   const gotoBtns = document.querySelectorAll('[data-goto-assets]'); gotoBtns.forEach(b=>b.addEventListener('click',()=>{ state.page='assets'; render(); window.scrollTo(0,0); }));
   const prevBtn = document.getElementById('ovPagePrev'); if(prevBtn) prevBtn.addEventListener('click', ()=>{ if(state.ovPage>1){ state.ovPage--; render(); } });
