@@ -12,13 +12,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
-  --navy:#37453f; --navy-2:#415249; --navy-3:#4f6157;
-  --accent:#ed9145; --accent-2:#2f7dd1;
+  --willow:#656C5C;
+  --navy:#4A5043; --navy-2:#555C4D; --navy-3:#656C5C;
+  --accent:#C9D1AE; --accent-2:#656C5C;
   --green:#1fa571; --green-bg:#e5f5ee;
   --amber:#eba020; --amber-bg:#fcf1dc;
   --red:#e0473d; --red-bg:#fbe8e6;
-  --blue-bg:#e8f0fb;
-  --bg:#f7f4ee; --card:#ffffff; --border:#e6e0d4; --text:#211e1a; --muted:#5c554a;
+  --blue-bg:#EEF0E8;
+  --bg:#F4F4EF; --card:#ffffff; --border:#E1E3D9; --text:#23261F; --muted:#5E6356;
   --radius:12px;
   font-family:'Inter','Noto Sans Thai',system-ui,sans-serif;
 }
@@ -263,7 +264,7 @@ select.chip-input{cursor:pointer;}
   .card{ border:1px solid #ccc !important; break-inside:avoid; box-shadow:none !important; }
   .main{ display:block !important; }
 }
-.login-overlay{position:fixed; inset:0; background:linear-gradient(120deg,#37453f,#6b7d73); z-index:500; display:flex; align-items:center; justify-content:center; padding:20px;}
+.login-overlay{position:fixed; inset:0; background:linear-gradient(120deg,#4A5043,#7D846F); z-index:500; display:flex; align-items:center; justify-content:center; padding:20px;}
 .login-card{background:var(--card); border-radius:16px; padding:32px 28px; width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,.35);}
 .login-card h2{margin:0 0 4px; font-size:20px;}
 .login-card p{margin:0 0 20px; font-size:12.5px; color:var(--muted);}
@@ -272,7 +273,7 @@ select.chip-input{cursor:pointer;}
 
 /* ===== HI calculation steps ===== */
 .cstep{display:flex; gap:12px; padding:14px 0; border-top:1px solid var(--border);}
-.cnum{width:28px;height:28px;border-radius:50%;background:var(--navy,#1f3b5c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 28px;}
+.cnum{width:28px;height:28px;border-radius:50%;background:var(--willow);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 28px;}
 .ctitle{font-weight:800; margin:3px 0 8px;}
 .bchips{display:flex; flex-wrap:wrap; gap:4px;}
 .bchip{border:1px solid var(--border); border-radius:7px; padding:3px 7px; font-size:11px; color:var(--muted); white-space:nowrap;}
@@ -330,7 +331,7 @@ select.chip-input{cursor:pointer;}
 .tip{display:inline-block; position:relative; vertical-align:middle;}
 .tip>summary{list-style:none; cursor:pointer; color:var(--muted); font-size:12px; font-weight:700; padding:0 2px;}
 .tip>summary::-webkit-details-marker{display:none;}
-.tipbox{position:absolute; z-index:30; top:20px; left:-8px; width:250px; background:#1f2a37; color:#fff; font-size:12px; font-weight:500; line-height:1.5; padding:9px 11px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.2);}
+.tipbox{position:absolute; z-index:30; top:20px; left:-8px; width:250px; background:#3A3F33; color:#fff; font-size:12px; font-weight:500; line-height:1.5; padding:9px 11px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.2);}
 .more{position:relative;}
 .more>summary{list-style:none; cursor:pointer;} .more>summary::-webkit-details-marker{display:none;}
 .morebox{position:absolute; right:0; top:44px; z-index:40; background:var(--card); border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,0,0,.14); padding:6px; min-width:250px;}
@@ -362,11 +363,11 @@ table.rowlink tbody tr{cursor:pointer;} table.rowlink tbody tr:hover{background:
 .rmx .chip:hover{box-shadow:0 2px 6px rgba(0,0,0,.15);}
 /* ===== Glass icon set ===== */
 .gbadge{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;flex:0 0 auto;
-  background:radial-gradient(circle at 32% 26%, #ffffff 0%, #f4f8fc 38%, #dfe8f2 78%, #cfdbe8 100%);
-  box-shadow:0 4px 10px rgba(22,52,92,.16), inset 0 1px 1px rgba(255,255,255,.95), inset 0 -2px 4px rgba(90,120,160,.18);
+  background:radial-gradient(circle at 32% 26%, #ffffff 0%, #F6F7F2 38%, #E3E6DA 78%, #D2D6C7 100%);
+  box-shadow:0 4px 10px rgba(58,63,50,.18), inset 0 1px 1px rgba(255,255,255,.95), inset 0 -2px 4px rgba(101,108,92,.2);
   border:1px solid rgba(255,255,255,.85); position:relative;}
 .gbadge svg{display:block; overflow:visible;}
-.gbadge.gstatus{background:radial-gradient(circle at 32% 26%, #fff 0%, #eef3f8 60%, #dbe5ef 100%);}
+.gbadge.gstatus{background:radial-gradient(circle at 32% 26%, #fff 0%, #F1F2EC 60%, #DCE0D2 100%);}
 .navitem .gbadge{box-shadow:0 2px 6px rgba(0,0,0,.25), inset 0 1px 1px #fff; transition:transform .15s ease;}
 .navitem:hover .gbadge{transform:scale(1.07);}
 .navitem.active .gbadge{box-shadow:0 0 0 2px var(--accent), 0 3px 8px rgba(0,0,0,.3), inset 0 1px 1px #fff;}
@@ -382,7 +383,7 @@ table.rowlink tbody tr{cursor:pointer;} table.rowlink tbody tr:hover{background:
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="rcmNavy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d5a8e"/><stop offset="1" stop-color="#0f2744"/></linearGradient></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="rcmNavy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7C846F"/><stop offset="1" stop-color="#454B3E"/></linearGradient></defs></svg>
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
     <h2 id="loginTitle">Sign in</h2>
@@ -875,7 +876,7 @@ function riskOf(a){
   const r = {hi:a.hi, rate:hr.rate, rateInfo:hr, row, col, level:RISK_T10[row][col], ageing:ageingOf(a)};
   a._risk = r; return r;
 }
-const RISK_COL = {'Very high':['#2b2f36','#ffffff'],'High':['#fbe3e1','#c62d23'],'Medium':['#fdf1d6','#b07d05'],'Low':['#e3f5ec','#178a5e']};
+const RISK_COL = {'Very high':['#3A3F33','#ffffff'],'High':['#fbe3e1','#c62d23'],'Medium':['#fdf1d6','#b07d05'],'Low':['#e3f5ec','#178a5e']};
 function riskName(l){ return ({'Very high':L('Very high','สูงมาก'),'High':L('High','สูง'),'Medium':L('Medium','ปานกลาง'),'Low':L('Low','ต่ำ')})[l]; }
 function riskPill(l){ const c=RISK_COL[l]; return `<span class="pill" style="background:${c[0]};color:${c[1]};">${riskName(l)}</span>`; }
 function riskAction(r){ return ({'Very high':L('Immediate action: detailed diagnosis and replacement / refurbishment decision','ดำเนินการทันที: ตรวจวินิจฉัยเชิงลึกและตัดสินใจเปลี่ยน/ปรับปรุง'),'High':L('Plan intervention soon; shorten test interval','วางแผนแก้ไขโดยเร็ว; ลดรอบการทดสอบ'),'Medium':L('Increase monitoring frequency','เพิ่มความถี่การติดตาม'),'Low':L('Routine maintenance','บำรุงรักษาตามรอบ')})[r.level]; }
@@ -1135,7 +1136,7 @@ function genMaintForAsset(asset){
 let MAINT_STORE = {};
 function getMaintFor(asset){ if(!MAINT_STORE[asset.id]) MAINT_STORE[asset.id] = asset.id==='TR-014' ? MAINT_TR014.map(m=>({...m})) : genMaintForAsset(asset); return MAINT_STORE[asset.id]; }
 let MAINT_PLAN = MAINT_TR014;
-const TYPE_COLOR = {BM:'#8b9099',CM:'#e0473d',PM:'#2f7dd1',CBM:'#1fa571',PdM:'#8759d6'};
+const TYPE_COLOR = {BM:'#8b9099',CM:'#e0473d',PM:'#5E7A8C',CBM:'#1fa571',PdM:'#8759d6'};
 let USERS = [
  {name:'Panissara P.', role:'Admin', email:'panissara.p@rcmtransformer.app', status:'Active'},
  {name:'Maintenance Team', role:'Operator', email:'maint.team@rcmtransformer.app', status:'Active'},
@@ -1482,8 +1483,8 @@ function initOverviewCharts(){
   const gridColor = cssv('--border');
   if(document.getElementById('ovDonut')) mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
   const sc={PM:0,CBM:0,'CBM + PdM':0}; ASSETS.forEach(a=>sc[strategyOf(a)]++);
-  if(document.getElementById('ovStrategy')) mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','CBM + PdM'],datasets:[{data:[sc.PM,sc.CBM,sc['CBM + PdM']],backgroundColor:['#2f7dd1','#1fa571','#8759d6'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{data:fleetTrend(),borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#2f7dd1'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
+  if(document.getElementById('ovStrategy')) mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','CBM + PdM'],datasets:[{data:[sc.PM,sc.CBM,sc['CBM + PdM']],backgroundColor:['#5E7A8C','#1fa571','#8759d6'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
+  mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{data:fleetTrend(),borderColor:'#656C5C',backgroundColor:'#656C5C22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#5E7A8C'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
   document.querySelectorAll('[data-goto-risk]').forEach(b=>b.addEventListener('click',()=>{ state.page='risk'; render(); window.scrollTo(0,0); }));
@@ -2140,7 +2141,7 @@ function initDetailCharts(a){
   if(document.getElementById('hiGauge')){ const gaugeColor = trendCol; mkChart('hiGauge',{type:'doughnut',data:{datasets:[{data:[a.hi,100-a.hi],backgroundColor:[gaugeColor, gridColor],borderWidth:0,circumference:180,rotation:270}]},options:{...commonOpts(),cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}}); }
   if(document.getElementById('hiRadar')){ const F = profileFor(a).factors; const keys=['FF','OQF','PCF'];
     mkChart('hiRadar',{type:'bar',data:{labels:keys.map(k=>L(FACTOR_NAMES[k][0],FACTOR_NAMES[k][1])),datasets:[{data:keys.map(k=>F[k].sf),backgroundColor:keys.map(k=>({A:'#1fa571',B:'#5cbf8f',C:'#eba020',D:'#e0473d',E:'#8a1c14'})[F[k].code])}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{min:0,max:4,ticks:{stepSize:1},grid:{color:gridColor}},y:{grid:{display:false},ticks:{font:{size:10.5}}}}}}); }
-  if(document.getElementById('dgaHist')){ const labs = labFor(a).slice().reverse(); const cols={H2:'#2f7dd1',CH4:'#1fa571',C2H6:'#8759d6',C2H4:'#eba020',C2H2:'#e0473d',CO:'#8b9099'};
+  if(document.getElementById('dgaHist')){ const labs = labFor(a).slice().reverse(); const cols={H2:'#5E7A8C',CH4:'#1fa571',C2H6:'#8759d6',C2H4:'#eba020',C2H2:'#e0473d',CO:'#8b9099'};
     mkChart('dgaHist',{type:'line',data:{labels:labs.map(x=>shortDate(x.date)),datasets:Object.keys(cols).map(g=>({label:g,data:labs.map(x=>x.gases[g]),borderColor:cols[g],backgroundColor:cols[g],pointRadius:2.5,tension:.3}))},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}}},scales:{y:{type:'logarithmic',title:{display:true,text:'ppm (log)'},grid:{color:gridColor}},x:{grid:{display:false}}}}}); }
   if(document.getElementById('fmeaDonut')){ const high = FMEA.filter(f=>f.risk==='High').length, med=FMEA.filter(f=>f.risk==='Medium').length, low=FMEA.length-high-med;
     mkChart('fmeaDonut',{type:'doughnut',data:{labels:['High','Medium','Low'],datasets:[{data:[high,med,low],backgroundColor:['#e0473d','#eba020','#1fa571'],borderWidth:0}]},options:{...commonOpts(),cutout:'70%',plugins:{legend:{display:false}}}}); }
@@ -2452,8 +2453,8 @@ function reportStats(){
 }
 function taskSummaryHtml(r){
   const names = {BM:L('Breakdown','ซ่อมเมื่อเสีย'),CM:L('Corrective','แก้ไข'),PM:L('Preventive','ป้องกัน'),CBM:L('Condition-based','ตามสภาพ'),PdM:L('Predictive','คาดการณ์')};
-  const typeCol = {BM:'#8b9099',CM:'#e0473d',PM:'#2f7dd1',CBM:'#1fa571',PdM:'#8759d6'};
-  const S = [['done','#1fa571',t('completed')],['prog','#2f7dd1',t('in_progress')],['up','#f0b429',t('upcoming')]];
+  const typeCol = {BM:'#8b9099',CM:'#e0473d',PM:'#5E7A8C',CBM:'#1fa571',PdM:'#8759d6'};
+  const S = [['done','#1fa571',t('completed')],['prog','#5E7A8C',t('in_progress')],['up','#f0b429',t('upcoming')]];
   const rows = r.byType.map(x=>({...x, n:x.done+x.prog+x.up})).filter(x=>x.n>0);
   const tot = {done:0,prog:0,up:0}; rows.forEach(x=>S.forEach(([k])=>tot[k]+=x[k])); const all = tot.done+tot.prog+tot.up;
   const max = Math.max(1,...rows.map(x=>x.n));
@@ -2539,7 +2540,7 @@ function initReportsCharts(){
   const gridColor = cssv('--border'); const r = reportStats();
   mkChart('repDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[r.healthy,r.warning,r.critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
   mkChart('repDgaDonut',{type:'doughnut',data:{labels:Object.keys(r.fam),datasets:[{data:Object.values(r.fam),backgroundColor:['#1fa571','#e0473d','#eba020','#8759d6','#8b9099'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('repTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{label:'Avg HI',data:r.trend,borderColor:'#2f7dd1',backgroundColor:'#2f7dd122',fill:true,tension:.35,pointRadius:3}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('repTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{label:'Avg HI',data:r.trend,borderColor:'#656C5C',backgroundColor:'#656C5C22',fill:true,tension:.35,pointRadius:3}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
   const comps = Object.entries(r.highByComp).sort((x,y)=>y[1]-x[1]);
   mkChart('repFmeaBar',{type:'bar',data:{labels:comps.map(c=>c[0]),datasets:[{data:comps.map(c=>c[1]),backgroundColor:'#e0473d'}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor},ticks:{precision:0}},y:{grid:{display:false}}}}});
 }
