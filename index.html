@@ -1364,7 +1364,45 @@ function openModal(title, bodyHtml, onSubmit){
   document.getElementById('modalForm').addEventListener('submit', (e)=>{ e.preventDefault(); const fd=new FormData(e.target); const data={}; fd.forEach((v,k)=>data[k]=v); const result=onSubmit(data); if(result!==false) closeModal(); });
 }
 function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
-function openExportChoiceModal(onCsv){
+/* ---------- Direct PDF download (html2pdf.js, loaded on first use) ---------- */
+let _h2pLoad = null;
+function loadHtml2Pdf(){
+  if(window.html2pdf) return Promise.resolve(window.html2pdf);
+  if(_h2pLoad) return _h2pLoad;
+  _h2pLoad = new Promise((res, rej)=>{ const sc=document.createElement('script');
+    sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    sc.onload=()=> window.html2pdf ? res(window.html2pdf) : rej(new Error('html2pdf missing'));
+    sc.onerror=()=>{ _h2pLoad=null; rej(new Error('load failed')); }; document.head.appendChild(sc); });
+  return _h2pLoad;
+}
+function pdfDate(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+async function savePdf(el, filename, opt={}){
+  if(!el) return false;
+  toast(L('Creating PDF…','กำลังสร้างไฟล์ PDF…'));
+  let h2p; try{ h2p = await loadHtml2Pdf(); }catch(e){ toast(L('The PDF tool could not load — check the internet connection and try again.','โหลดเครื่องมือสร้าง PDF ไม่ได้ — ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่')); return false; }
+  const o = {
+    margin: opt.margin || [8,8,10,8], filename,
+    image: {type:'jpeg', quality:0.95},
+    html2canvas: { scale:2, useCORS:true, backgroundColor:'#ffffff', windowWidth: opt.windowWidth || 1280,
+      ignoreElements: (n)=> !!(n.classList && (n.classList.contains('no-pdf') || n.classList.contains('toast-wrap') || (opt.skipButtons && (n.tagName==='BUTTON' || n.classList.contains('btn') || n.classList.contains('seg') || n.tagName==='SELECT')))),
+      onclone: (doc)=>{ if(opt.onclone) opt.onclone(doc); } },
+    jsPDF: {unit:'mm', format:'a4', orientation: opt.orientation || 'portrait'},
+    pagebreak: {mode:['css','legacy'], avoid: opt.avoid || ['tr','.stat','.kpi','.rbox','.hlist li']}
+  };
+  try{ await h2p().set(o).from(el).save(); toast(L('PDF downloaded','ดาวน์โหลด PDF แล้ว'),'success'); return true; }
+  catch(e){ console.error('pdf', e); toast(L('Could not create the PDF — try again.','สร้าง PDF ไม่สำเร็จ — ลองใหม่อีกครั้ง')); return false; }
+}
+/* one-page asset report straight to a .pdf file */
+async function downloadAssetReportPdf(a, btn){
+  if(btn){ btn.disabled=true; btn.dataset.label=btn.innerHTML; btn.innerHTML=L('Creating PDF…','กำลังสร้าง PDF…'); }
+  let host = document.querySelector('#reportRoot .rpage'), tmp=null;
+  if(!host){ tmp=document.createElement('div'); tmp.style.cssText='position:fixed;left:-10000px;top:0;width:794px;'; tmp.innerHTML=assetReportHtml(a); document.body.appendChild(tmp); host=tmp.querySelector('.rpage'); }
+  await savePdf(host, `${a.id}_Asset_Report_${pdfDate()}.pdf`, {margin:[0,0,0,0], windowWidth:1280,
+    onclone:(doc)=> doc.querySelectorAll('.rpage').forEach(r=>{ r.style.width='210mm'; r.style.maxWidth='none'; r.style.minHeight='0'; r.style.boxShadow='none'; r.style.margin='0'; }) });
+  if(tmp) tmp.remove();
+  if(btn){ btn.disabled=false; btn.innerHTML=btn.dataset.label; }
+}
+function openExportChoiceModal(onCsv, onPdf){
   const root = document.getElementById('modalRoot');
   root.innerHTML = `<div class="modal-overlay" id="modalOverlay"><div class="modal" style="max-width:340px;text-align:center;">
     <h3>${t('export_format')}</h3>
@@ -1377,7 +1415,7 @@ function openExportChoiceModal(onCsv){
   document.getElementById('modalCancel3').addEventListener('click', closeModal);
   document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='modalOverlay') closeModal(); });
   document.getElementById('expCsv').addEventListener('click', ()=>{ closeModal(); onCsv(); });
-  document.getElementById('expPdf').addEventListener('click', ()=>{ closeModal(); toast(state.lang==='th'?'กำลังเปิดหน้าต่างพิมพ์เป็น PDF...':'Opening print dialog for PDF...'); setTimeout(()=>window.print(), 300); });
+  document.getElementById('expPdf').addEventListener('click', ()=>{ closeModal(); if(onPdf) onPdf(); else savePdf(document.getElementById('content'), `RCM_Report_${pdfDate()}.pdf`, {skipButtons:true}); });
 }
 
 function downloadFile(filename, content, mime){
@@ -2108,7 +2146,7 @@ function detailRcmTab(a){
       <div class="card">
         <div class="card-head"><h3>${L('RCM analysis — SAE JA1011','การวิเคราะห์ RCM — SAE JA1011')}</h3>
           <div class="filter-row"><select class="chip-input" id="rcmFmSelect">${FMEA.map(x=>`<option value="${x.code}" ${x.code===f.code?'selected':''}>${x.code} — ${x.comp}: ${x.mode} (RPN ${x.rpn})</option>`).join('')}</select>
-          <button class="btn btn-outline" id="btnRcmReset">${t('reset')}</button><button class="btn btn-outline" id="btnRcmPrint">${t('print')}</button></div></div>
+          <button class="btn btn-outline" id="btnRcmReset">${t('reset')}</button><button class="btn btn-outline" id="btnRcmPrint">PDF</button></div></div>
         <div style="font-weight:800;font-size:12.5px;margin:6px 0;">${L('Q1–4 · Information','ข้อ 1–4 · ข้อมูล')}</div>
         <ul class="hlist">
           <li><span class="k">1. ${L('Function','หน้าที่')}</span><span class="v" style="white-space:normal;text-align:right;max-width:62%;">${L(lib.fn[0],lib.fn[1])}</span></li>
@@ -2411,9 +2449,10 @@ function assetReportHtml(a){
 function openAssetReport(a){
   closeAssetReport();
   const root = document.createElement('div'); root.id='reportRoot';
-  root.innerHTML = `<div class="rtool"><button class="btn btn-primary" id="rPrint">${L('Print / Save as PDF','พิมพ์ / บันทึกเป็น PDF')}</button><button class="btn btn-outline" id="rClose" style="background:var(--card);">${L('Close','ปิด')}</button></div>${assetReportHtml(a)}`;
+  root.innerHTML = `<div class="rtool"><button class="btn btn-primary" id="rPdf">${L('Download PDF','ดาวน์โหลด PDF')}</button><button class="btn btn-outline" id="rPrint" style="background:var(--card);">${L('Print','พิมพ์')}</button><button class="btn btn-outline" id="rClose" style="background:var(--card);">${L('Close','ปิด')}</button></div>${assetReportHtml(a)}`;
   document.body.appendChild(root); document.body.classList.add('printing-report');
   document.getElementById('rClose').addEventListener('click', closeAssetReport);
+  document.getElementById('rPdf').addEventListener('click', (e)=>downloadAssetReportPdf(a, e.currentTarget));
   document.getElementById('rPrint').addEventListener('click', ()=>{ try{ window.print(); }catch(e){ toast(L('Printing is blocked here — open the site in a browser tab.','เบราว์เซอร์นี้ไม่อนุญาตให้พิมพ์ — เปิดเว็บในแท็บปกติ')); } });
 }
 function closeAssetReport(){ const r=document.getElementById('reportRoot'); if(r) r.remove(); document.body.classList.remove('printing-report'); }
@@ -2470,7 +2509,7 @@ function attachDetailEvents(){
   const rcmSel = document.getElementById('rcmFmSelect'); if(rcmSel) rcmSel.addEventListener('change',(e)=>{ state.rcmFm = e.target.value; render(); });
   document.querySelectorAll('[data-rcm-pick]').forEach(el=> el.addEventListener('click',()=>{ state.rcmFm = el.dataset.rcmPick; render(); }));
   const rcmReset = document.getElementById('btnRcmReset'); if(rcmReset) rcmReset.addEventListener('click',()=>{ const f=curF(); RCM_STORE[currentAsset().id][f.code] = {}; render(); });
-  const rcmPrint = document.getElementById('btnRcmPrint'); if(rcmPrint) rcmPrint.addEventListener('click', ()=>window.print());
+  const rcmPrint = document.getElementById('btnRcmPrint'); if(rcmPrint) rcmPrint.addEventListener('click', ()=>{ const a=currentAsset(), f=curF(); savePdf(document.getElementById('detailBody'), `${a.id}_RCM_${f?f.code:'analysis'}_${pdfDate()}.pdf`, {skipButtons:true, orientation:'landscape'}); });
   document.querySelectorAll('[data-rcm-k]').forEach(el=> el.addEventListener('click',()=>{ rcmAnsFor(currentAsset(), curF())[el.dataset.rcmK] = el.dataset.rcmV; render(); }));
   document.querySelectorAll('[data-rcm-undo]').forEach(el=> el.addEventListener('click',()=>{
     const ans = rcmAnsFor(currentAsset(), curF()); const order=['H','S','O','T1','T2','T3']; const i=order.indexOf(el.dataset.rcmUndo);
@@ -2498,7 +2537,7 @@ function attachDetailEvents(){
         ['Factor','Code','Score factor','Weight'], ...['FF','OQF','PCF'].map(k=>[k,prof.factors[k].code,prof.factors[k].sf,prof.factors[k].w]), [],
         ['Parameter','Result','Score','Weight'], ...prof.rows.map(r=>[r.p,r.res,r.score,r.key==='ff'?'':r.weight]), [],
         ['HI decreasing rate (/yr)', riskOf(a).rate===null?'':riskOf(a).rate.toFixed(2)], ['Risk (Table 10)', riskOf(a).level]];
-      downloadFile(`${a.id}_report.csv`, toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); });
+      downloadFile(`${a.id}_report.csv`, toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); }, ()=>downloadAssetReportPdf(a));
   });
   attachCritButtons();
   document.querySelectorAll('[data-cond]').forEach(el=>el.addEventListener('click',()=>{ state.condView=el.dataset.cond; render(); }));
@@ -2875,10 +2914,10 @@ function initReportsCharts(){
 function fleetRows(){ return [['ID','Location','Last sample','Health Index','Status','DGA code','Main issue','Strategy','Next sampling','PoF class','CoF class','Risk score','Risk level'], ...ASSETS.map(a=>{ const r=riskOf(a); return [a.id,a.loc,a.last,a.hi,a.status,a._as?a._as.dga.code:'',mainIssueOf(a),strategyOf(a),a.next,r.pofClass,r.cofClass,r.score,r.level]; })]; }
 function attachReportsEvents(){
   const gen = document.getElementById('btnGenerateReport'); if(gen) gen.addEventListener('click', ()=>{
-    openExportChoiceModal(()=>{ downloadFile('Asset_Summary_Report.csv', toCSV(fleetRows()), 'text/csv'); toast(t('toast_generated'),'success'); });
+    openExportChoiceModal(()=>{ downloadFile('Asset_Summary_Report.csv', toCSV(fleetRows()), 'text/csv'); toast(t('toast_generated'),'success'); }, ()=>savePdf(document.getElementById('content'), `RCM_Fleet_Report_${pdfDate()}.pdf`, {skipButtons:true}));
   });
   const exp = document.getElementById('btnExportAll'); if(exp) exp.addEventListener('click', ()=>{
-    openExportChoiceModal(()=>{ downloadFile('RCM_Transformer_Export.csv', toCSV(fleetRows()), 'text/csv'); toast(t('toast_exported'),'success'); });
+    openExportChoiceModal(()=>{ downloadFile('RCM_Transformer_Export.csv', toCSV(fleetRows()), 'text/csv'); toast(t('toast_exported'),'success'); }, ()=>savePdf(document.getElementById('content'), `RCM_Fleet_Report_${pdfDate()}.pdf`, {skipButtons:true}));
   });
 }
 
