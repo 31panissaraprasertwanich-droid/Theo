@@ -440,6 +440,30 @@ table.rowlink tbody tr{cursor:pointer;} table.rowlink tbody tr:hover{background:
   body.printing-report .rpage{box-shadow:none; margin:0; width:auto; min-height:0; padding:0;}
   @page{size:A4; margin:10mm;}
 }
+/* v6: lighter theme */
+:root{ --bg:#F8F9F5; --border:#E5E8DE; --accent-2:#68734F; --navy-3:#6F785F; --blue-bg:#F1F4EA; }
+.sidebar{background:#ffffff; color:var(--text); border-right:1px solid var(--border);}
+.brand{border-bottom:1px solid var(--border);}
+.brand-mark{border:1px solid var(--border);}
+.brand-text .name{color:var(--text);} .brand-text .sub{color:var(--muted);}
+.navitem{color:#4C5245;}
+.navitem:hover{background:#F2F4EC; color:var(--text);}
+.navitem.active{background:#ECF1E0; color:#2F3429; border-left:3px solid var(--accent-2); font-weight:700;}
+.navitem .gbadge{box-shadow:0 1px 4px rgba(0,0,0,.12), inset 0 1px 1px #fff;}
+.navitem.active .gbadge{box-shadow:0 0 0 2px #C9D1AE, 0 2px 6px rgba(0,0,0,.12), inset 0 1px 1px #fff;}
+.sidebar-footer{border-top:1px solid var(--border); color:var(--muted);}
+.hero{color:#2F3429; background:linear-gradient(115deg,#E9EFDA 0%,#F3F6EA 55%,#FBFCF8 100%); border:1px solid var(--border); box-shadow:0 4px 14px rgba(62,68,55,.06);}
+.hero-title{color:#2F3429;}
+.hero-eyebrow{color:#68734F; opacity:1;}
+.hero-steps span{background:#fff; border:1px solid #D6DCC6; color:#4A5043;}
+.hero-steps i{color:#68734F; opacity:.8;}
+.hero-cta{background:#5F6A4E; color:#fff; box-shadow:0 2px 8px rgba(62,68,55,.18);} .hero-cta:hover{background:#4F5941;}
+.hero-ok{background:#E3F2EA; color:#178a5e;}
+.hero-meta{color:var(--muted); opacity:1;}
+.hero-art g{stroke:#68734F;}
+.login-overlay{background:linear-gradient(120deg,#E6ECD6 0%,#F8F9F4 100%);}
+.login-card{border:1px solid var(--border); box-shadow:0 20px 50px rgba(62,68,55,.16);}
+@media (max-width:1180px){ .sidebar{box-shadow:0 0 40px rgba(0,0,0,.18);} }
 </style>
 </head>
 <body>
@@ -936,7 +960,7 @@ function riskOf(a){
   const r = {hi:a.hi, rate:hr.rate, rateInfo:hr, row, col, level:RISK_T10[row][col], ageing:ageingOf(a)};
   a._risk = r; return r;
 }
-const RISK_COL = {'Very high':['#3A3F33','#ffffff'],'High':['#fbe3e1','#c62d23'],'Medium':['#fdf1d6','#b07d05'],'Low':['#e3f5ec','#178a5e']};
+const RISK_COL = {'Very high':['#B3261E','#ffffff'],'High':['#fbe3e1','#c62d23'],'Medium':['#fdf1d6','#b07d05'],'Low':['#e3f5ec','#178a5e']};
 function riskName(l){ return ({'Very high':L('Very high','สูงมาก'),'High':L('High','สูง'),'Medium':L('Medium','ปานกลาง'),'Low':L('Low','ต่ำ')})[l]; }
 function riskPill(l){ const c=RISK_COL[l]; return `<span class="pill" style="background:${c[0]};color:${c[1]};">${riskName(l)}</span>`; }
 function riskAction(r){ return ({'Very high':L('Immediate action: detailed diagnosis and replacement / refurbishment decision','ดำเนินการทันที: ตรวจวินิจฉัยเชิงลึกและตัดสินใจเปลี่ยน/ปรับปรุง'),'High':L('Plan intervention soon; shorten test interval','วางแผนแก้ไขโดยเร็ว; ลดรอบการทดสอบ'),'Medium':L('Increase monitoring frequency','เพิ่มความถี่การติดตาม'),'Low':L('Routine maintenance','บำรุงรักษาตามรอบ')})[r.level]; }
