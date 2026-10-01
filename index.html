@@ -706,26 +706,10 @@ function translateDiag(s){ const r = DIAG_TR[s]; return r ? r[state.lang==='th'?
 
 /* ============ DATA ============ */
 const ASSETS = [
- {id:'TR-001',loc:'Ploenchit SS',cap:50,volt:'115/24',hi:92,status:'Healthy',last:'12 Sep 2026',next:'12 Mar 2027',mfr:'Toshiba',year:2016,type:'ONAN/ONAF',load:54,topOil:52,amb:31},
- {id:'TR-002',loc:'Chidlom SS',cap:50,volt:'115/24',hi:88,status:'Healthy',last:'10 Sep 2026',next:'10 Mar 2027',mfr:'Hitachi',year:2015,type:'ONAN/ONAF',load:58,topOil:54,amb:31},
- {id:'TR-003',loc:'Lumpini SS',cap:60,volt:'115/24',hi:62,status:'Warning',last:'8 Sep 2026',next:'8 Mar 2027',mfr:'ABB',year:2009,type:'ONAN/ONAF',load:71,topOil:63,amb:32},
- {id:'TR-004',loc:'Rama 9 SS',cap:50,volt:'115/24',hi:89,status:'Healthy',last:'6 Sep 2026',next:'6 Mar 2027',mfr:'Siemens',year:2017,type:'ONAN/ONAF',load:49,topOil:50,amb:31},
- {id:'TR-005',loc:'Asoke SS',cap:60,volt:'115/24',hi:90,status:'Healthy',last:'5 Sep 2026',next:'5 Mar 2027',mfr:'Toshiba',year:2018,type:'ONAN/ONAF',load:52,topOil:51,amb:31},
- {id:'TR-006',loc:'Sukhumvit SS',cap:50,volt:'115/24',hi:58,status:'Warning',last:'3 Sep 2026',next:'3 Mar 2027',mfr:'Hyundai',year:2008,type:'ONAN/ONAF',load:68,topOil:61,amb:32},
- {id:'TR-007',loc:'On Nut SS',cap:50,volt:'115/24',hi:78,status:'Healthy',last:'1 Sep 2026',next:'1 Jan 2027',mfr:'ABB',year:2013,type:'ONAN/ONAF',load:60,topOil:55,amb:32},
- {id:'TR-008',loc:'Phra Khanong SS',cap:50,volt:'115/24',hi:47,status:'Warning',last:'28 Aug 2026',next:'28 Feb 2027',mfr:'Mitsubishi',year:2007,type:'ONAN/ONAF',load:74,topOil:65,amb:32},
- {id:'TR-009',loc:'Samrong SS',cap:60,volt:'115/24',hi:81,status:'Healthy',last:'25 Aug 2026',next:'25 Feb 2027',mfr:'Siemens',year:2014,type:'ONAN/ONAF',load:56,topOil:53,amb:31},
- {id:'TR-010',loc:'Bang Kapi SS',cap:60,volt:'115/24',hi:74,status:'Healthy',last:'22 Aug 2026',next:'22 Feb 2027',mfr:'Hitachi',year:2012,type:'ONAN/ONAF',load:63,topOil:57,amb:32},
- {id:'TR-011',loc:'Ratchada SS',cap:50,volt:'115/24',hi:86,status:'Healthy',last:'20 Aug 2026',next:'20 Feb 2027',mfr:'Toshiba',year:2016,type:'ONAN/ONAF',load:55,topOil:52,amb:31},
- {id:'TR-012',loc:'Ladprao SS',cap:60,volt:'115/24',hi:92,status:'Healthy',last:'18 Aug 2026',next:'18 Feb 2027',mfr:'ABB',year:2019,type:'ONAN/ONAF',load:48,topOil:49,amb:31},
- {id:'TR-013',loc:'Bang Sue SS',cap:50,volt:'115/24',hi:83,status:'Healthy',last:'15 Aug 2026',next:'15 Feb 2027',mfr:'Siemens',year:2015,type:'ONAN/ONAF',load:57,topOil:53,amb:31},
- {id:'TR-014',loc:'Bang Na SS',cap:50,volt:'115/24',hi:34,status:'Critical',last:'18 Sep 2026',next:'18 Oct 2026',mfr:'Mitsubishi',year:2010,type:'ONAN/ONAF',load:62,topOil:68,amb:32},
- {id:'TR-015',loc:'Din Daeng SS',cap:60,volt:'115/24',hi:85,status:'Healthy',last:'10 Aug 2026',next:'10 Feb 2027',mfr:'Hitachi',year:2017,type:'ONAN/ONAF',load:51,topOil:50,amb:31},
- {id:'TR-016',loc:'Suan Luang SS',cap:50,volt:'115/24',hi:87,status:'Healthy',last:'8 Aug 2026',next:'8 Feb 2027',mfr:'Toshiba',year:2018,type:'ONAN/ONAF',load:50,topOil:50,amb:31},
- {id:'TR-017',loc:'Bang Khae SS',cap:60,volt:'115/24',hi:90,status:'Healthy',last:'5 Aug 2026',next:'5 Feb 2027',mfr:'ABB',year:2019,type:'ONAN/ONAF',load:47,topOil:48,amb:31},
- {id:'TR-018',loc:'Thonburi SS',cap:50,volt:'115/24',hi:55,status:'Warning',last:'2 Aug 2026',next:'2 Feb 2027',mfr:'Hyundai',year:2009,type:'ONAN/ONAF',load:76,topOil:66,amb:32},
- {id:'TR-019',loc:'Bangkok Noi SS',cap:60,volt:'115/24',hi:51,status:'Warning',last:'30 Jul 2026',next:'30 Jan 2027',mfr:'Mitsubishi',year:2008,type:'ONAN/ONAF',load:70,topOil:64,amb:32},
- {id:'TR-020',loc:'Yannawa SS',cap:50,volt:'115/24',hi:28,status:'Critical',last:'28 Jul 2026',next:'28 Aug 2026',mfr:'Hyundai',year:2007,type:'ONAN/ONAF',load:66,topOil:69,amb:32},
+ {id:'TR-009',loc:'Lat Krabang IE SS',cap:60,volt:'115/24',hi:81,status:'Healthy',last:'25 Aug 2026',next:'25 Feb 2027',mfr:'Siemens',year:2014,type:'ONAN/ONAF',load:56,topOil:53,amb:31},
+ {id:'TR-012',loc:'Chalong Krung SS',cap:60,volt:'115/24',hi:92,status:'Healthy',last:'18 Aug 2026',next:'18 Feb 2027',mfr:'ABB',year:2019,type:'ONAN/ONAF',load:48,topOil:49,amb:31},
+ {id:'TR-014',loc:'Lat Krabang IE SS',cap:50,volt:'115/24',hi:34,status:'Critical',last:'18 Sep 2026',next:'18 Oct 2026',mfr:'Mitsubishi',year:2010,type:'ONAN/ONAF',load:62,topOil:68,amb:32},
+ {id:'TR-020',loc:'Chalong Krung SS',cap:50,volt:'115/24',hi:28,status:'Critical',last:'28 Jul 2026',next:'28 Aug 2026',mfr:'Hyundai',year:2007,type:'ONAN/ONAF',load:66,topOil:69,amb:32},
 ];
 function assetSeed(id){ let h=0; for(let i=0;i<id.length;i++) h=(h*31+id.charCodeAt(i))>>>0; return h; }
 function seededFrac(seed,salt){ const x=Math.sin(seed*0.0013+salt*7.13)*10000; return x-Math.floor(x); }
@@ -1055,7 +1039,7 @@ function markPastDone(list){ const today=new Date(); today.setHours(0,0,0,0); (l
 const STORE_KEY = 'rcm_transformer_data_v3';
 let NOTIF = {risk:true, dga:true, overdue:true};
 let NET = null;   /* substations, transformer connection and reliability settings */
-function snapshotData(){ return {v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, planV:2, net:NET}; }
+function snapshotData(){ return {v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, planV:2, net:NET, focusV:2}; }
 function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
 function applyData(d){
   if(!d || d.v!==3 || !Array.isArray(d.assets)) return false;
@@ -1064,6 +1048,13 @@ function applyData(d){
   if(d.notif) NOTIF = Object.assign({risk:true,dga:true,overdue:true}, d.notif);
   if(d.planV!==2) Object.values(MAINT_STORE).forEach(markPastDone);
   NET = d.net || null;
+  if(d.focusV!==2){ /* focus on 2 substations: keep only their 4 transformers */
+    const keep = ['TR-014','TR-009','TR-020','TR-012'];
+    const kept = ASSETS.filter(a=>keep.includes(a.id));
+    if(kept.length){ ASSETS.splice(0, ASSETS.length, ...kept);
+      [LAB, FMEA_STORE, MAINT_STORE, RCM_STORE].forEach(st=> Object.keys(st).forEach(k=>{ if(!keep.includes(k)) delete st[k]; }));
+      NET = null; }
+  }
   return true;
 }
 function loadData(){ try{ const raw=localStorage.getItem(STORE_KEY); return raw ? applyData(JSON.parse(raw)) : false; }catch(e){ return false; } }
@@ -1637,8 +1628,8 @@ function heroBannerHtml(){
 const NET_ZERO_K = 0.693;   /* zero-failure median estimate: λ ≈ 0.693 ÷ T (χ² 50 %) */
 function netDefault(){
   return {t:1, stations:[
-    {id:'SS-1', name:'Bang Na SS', kv:'115/24 kV', peak:45, k:0, trs:['TR-014','TR-009']},
-    {id:'SS-2', name:'Yannawa SS', kv:'115/24 kV', peak:75, k:0, trs:['TR-020','TR-012']} ]};
+    {id:'SS-1', name:'Lat Krabang IE SS', kv:'115/24 kV', peak:45, k:0, trs:['TR-014','TR-009']},
+    {id:'SS-2', name:'Chalong Krung SS', kv:'115/24 kV', peak:75, k:0, trs:['TR-020','TR-012']} ]};
 }
 function ensureNet(){
   if(NET && Array.isArray(NET.stations)) return NET;
