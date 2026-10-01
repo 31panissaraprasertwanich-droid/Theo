@@ -555,7 +555,7 @@ const UI = {
  guide_tip4:['Data shown here is illustrative and regenerated per transformer for this demo — it is not live telemetry.','ข้อมูลที่แสดงเป็นข้อมูลตัวอย่างที่สร้างขึ้นต่อหม้อแปลงแต่ละเครื่องสำหรับสาธิตเท่านั้น ไม่ใช่ข้อมูลเรียลไทม์จริง'],
  nav_overview:['Overview','ภาพรวม'], nav_assets:['Transformer Assets','สินทรัพย์หม้อแปลง'], nav_healthindex:['Health Index','ดัชนีสุขภาพ'],
  nav_dga:['DGA Analysis','วิเคราะห์ DGA'], nav_fmea:['FMEA & RPN','FMEA & RPN'], nav_rcm:['RCM Decision','การตัดสินใจ RCM'],
- nav_plan:['Maintenance Plan','แผนบำรุงรักษา'], nav_reports:['Reports','รายงาน'], nav_settings:['Settings','ตั้งค่า'],
+ nav_plan:['Maintenance Plan','แผนบำรุงรักษา'], nav_reports:['Reports','รายงาน'], nav_settings:['Settings','ตั้งค่า'], nav_reliability:['Reliability','ความน่าเชื่อถือ'],
  brand_sub:['Reliability Centered Maintenance','การบำรุงรักษาเชิงความน่าเชื่อถือ'],
  footer_tag:['Reliable Grid<br>Sustainable Tomorrow','โครงข่ายเชื่อถือได้<br>เพื่ออนาคตยั่งยืน'],
  search_ph:['Search asset ID or location...','ค้นหารหัสสินทรัพย์หรือสถานที่...'],
@@ -573,6 +573,7 @@ const UI = {
  ov_fmea_desc:['Each transformer\'s single highest-risk failure mode. Click a row to see its full FMEA table.','โหมดความล้มเหลวที่มีความเสี่ยงสูงสุดของแต่ละหม้อแปลง กดแถวเพื่อดูตาราง FMEA เต็มของเครื่องนั้น'],
  ov_rcm_desc:['The top risk for each transformer and the maintenance strategy RCM recommends for it. Click a row to open its decision tree.','ความเสี่ยงสูงสุดของแต่ละหม้อแปลงและกลยุทธ์บำรุงรักษาที่ RCM แนะนำ กดแถวเพื่อเปิดแผนผังการตัดสินใจของเครื่องนั้น'],
  sub_reports:['Turn data into actionable maintenance decisions','เปลี่ยนข้อมูลเป็นการตัดสินใจบำรุงรักษา'],
+ sub_reliability:['System reliability R(t) and importance — which transformer to focus on first','ความน่าเชื่อถือของระบบ R(t) และความสำคัญ — ควรโฟกัสหม้อแปลงตัวไหนก่อน'],
  sub_settings:['Configure system parameters, criteria, and user management','ตั้งค่าพารามิเตอร์ระบบ เกณฑ์ และผู้ใช้งาน'],
  hero_title:['Reliable Transformers<br>for a Sustainable Tomorrow','หม้อแปลงที่เชื่อถือได้<br>เพื่ออนาคตที่ยั่งยืน'],
  total_assets:['Total Assets','สินทรัพย์ทั้งหมด'], healthy:['Healthy','ปกติ'], warning:['Warning','เฝ้าระวัง'], critical:['Critical','วิกฤต'],
@@ -1254,7 +1255,7 @@ let state = {page:'overview', assetId:'TR-014', detailTab:'overview', rcmMode:'W
 let chartRegistry = {};
 
 const NAV = [
- {id:'overview', key:'nav_overview', badge:'home'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'},
+ {id:'overview', key:'nav_overview', badge:'home'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'}, {id:'reliability', key:'nav_reliability', badge:'reliability'},
  {id:'reports', key:'nav_reports', badge:'reports'}, {id:'settings', key:'nav_settings', badge:'settings'},
 ];
 const ICONS = {
@@ -1275,6 +1276,7 @@ function icon(name,extra){return `<svg viewBox="0 0 24 24" fill="none" stroke="c
 /* glyphs are drawn on a 24×24 grid; F = navy gradient fill, W = white cut-out, S = navy stroke */
 const GF='fill="url(#rcmNavy)"', GW='fill="#fff"', GS='fill="none" stroke="url(#rcmNavy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 const GLASS = {
+ reliability:`<path ${GF} d="M13.6 1.8 4.2 13.4a.8.8 0 0 0 .6 1.3h5.6l-1.6 7.1a.5.5 0 0 0 .9.4l9.6-12a.8.8 0 0 0-.6-1.3h-5.7l1.6-6.7a.5.5 0 0 0-.9-.4z"/>`,
  home:`<path ${GF} d="M12 2.8 1.9 11.6a1 1 0 0 0 1.3 1.5l1.3-1.1V20a1.2 1.2 0 0 0 1.2 1.2h3.9v-6h4.8v6h3.9A1.2 1.2 0 0 0 19.5 20v-8l1.3 1.1a1 1 0 0 0 1.3-1.5z"/>`,
  assets:`<rect ${GF} x="6.1" y="2.6" width="2" height="5" rx=".7"/><rect ${GF} x="11" y="2.6" width="2" height="5" rx=".7"/><rect ${GF} x="15.9" y="2.6" width="2" height="5" rx=".7"/><rect ${GF} x="3.5" y="7" width="17" height="12.5" rx="1.8"/><path d="M7 9.6v7.3M10 9.6v7.3M13 9.6v7.3M16.1 9.6v7.3" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/><rect ${GF} x="5" y="19" width="2.6" height="2.4" rx=".5"/><rect ${GF} x="16.4" y="19" width="2.6" height="2.4" rx=".5"/>`,
  details:`<path ${GS} d="M13.5 21H6.2A1.7 1.7 0 0 1 4.5 19.3V4.7A1.7 1.7 0 0 1 6.2 3h7.3l5 5v3"/><path ${GS} d="M13.3 3v5h5M8 9h3M8 12.5h4"/><circle ${GS} cx="15.5" cy="16" r="3.4"/><path ${GS} d="m18 18.5 2.6 2.6"/>`,
@@ -1682,7 +1684,7 @@ function netStationSvg(c){
       <text x="${tx}" y="${busY+76}" font-size="13" font-weight="800" fill="${col}">R ${f4(u.R)}</text>
       <text x="${tx}" y="${busY+93}" font-size="11" fill="#5E6356">λ ${f4(u.lam)}/${L('yr','ปี')}</text>
       <text x="${tx}" y="${busY+109}" font-size="11" fill="#5E6356">HI ${u.a.hi} · ${u.a.cap||'?'} MVA</text></g>`; }).join('');
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.st.name)} single-line diagram">
+  return `<svg viewBox="0 0 ${W} ${H}" style="max-width:${W}px;margin:0 auto;" role="img" aria-label="${esc(c.st.name)} single-line diagram">
     <line x1="14" y1="${busY}" x2="${W-14}" y2="${busY}" stroke="#23261F" stroke-width="4"/>
     <text x="16" y="${busY-9}" font-size="11" font-weight="800" fill="#4A5043">${esc((c.st.kv||'115/24 kV').split('/')[0].replace(/kV/i,'').trim())} kV</text>
     <line x1="14" y1="${lvY}" x2="${W-14}" y2="${lvY}" stroke="#23261F" stroke-width="4"/>
@@ -1699,11 +1701,19 @@ function netRedundancyText(c){
   if(c.k===n) return L(`${c.k}-out-of-${n}: all units needed for ${c.st.peak} MVA (no N-1, series)`,`${c.k}-out-of-${n}: ต้องใช้ทุกตัวจึงรับโหลด ${c.st.peak} MVA ได้ (ไม่ผ่าน N-1 · อนุกรม)`);
   return L(`${c.k}-out-of-${n}: ${c.k} units needed for ${c.st.peak} MVA`,`${c.k}-out-of-${n}: ต้องใช้ ${c.k} ตัวเพื่อรับโหลด ${c.st.peak} MVA`);
 }
+function netSummaryHtml(){
+  const N = netCalc(); const top = N.ranked[0];
+  return `<div class="card" style="margin-bottom:16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;">
+    <div style="display:flex;align-items:center;gap:12px;">${badge('reliability',40)}<div><div class="label" style="font-weight:700;color:var(--muted);font-size:12.5px;">${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub>(${N.t} ${L(N.t>1?'yrs':'yr','ปี')})</div><div style="font-size:24px;font-weight:800;color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</div></div></div>
+    <div style="flex:1;min-width:220px;font-size:13px;">${top?`${L('Focus first','โฟกัสก่อน')}: <b>${top.a.id}</b> (${esc(top.c.st.name)}) · ${L(`${pctR(top.IC)} chance it is the cause if the system fails`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}<div class="small-muted">${N.sts.map(c=>`${esc(c.st.name)} R<sub>SS</sub> ${f4(c.R)}`).join(' · ')}</div>`:`<span class="small-muted">${L('No substation set up yet.','ยังไม่ได้ตั้งค่าสถานี')}</span>`}</div>
+    <button class="btn btn-primary" data-goto-rel="1">${L('Open reliability page →','เปิดหน้าความน่าเชื่อถือ →')}</button></div>`;
+}
 function netHtml(){
   const N = netCalc(); const top = N.ranked[0];
   const stHtml = N.sts.map(c=>`<div class="net-st">
       <div class="hd"><span class="nm">${esc(c.st.name)}</span><span class="small-muted">${esc(c.st.kv||'')} · ${c.units.length} ${L('transformer(s)','หม้อแปลง')}</span>
         <span class="rs" style="color:${rBand(c.R)};border-color:${rBand(c.R)};">R<sub>SS</sub> ${f4(c.R)}</span></div>
+      <div style="margin:2px 0 -4px;"><button class="linklike" data-net-addtr="${c.st.id}" style="font-size:12px;">+ ${L('Add transformer to this substation','เพิ่มหม้อแปลงในสถานีนี้')}</button></div>
       ${netStationSvg(c)}
       <div class="small-muted" style="font-size:11.5px;">${netRedundancyText(c)}${!+c.st.k?` · ${L('auto from MVA','คำนวณอัตโนมัติจาก MVA')}`:''}</div>
     </div>`).join('');
@@ -1722,6 +1732,7 @@ function netHtml(){
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span class="small-muted">${L('Mission time','ช่วงเวลา')} t</span>
       <div class="seg">${[1,3,5].map(v=>`<button class="${+NET.t===v?'on':''}" data-net-t="${v}">${v} ${L(v>1?'yrs':'yr','ปี')}</button>`).join('')}</div>
       <button class="btn btn-outline" data-net-edit="1" style="padding:6px 12px;font-size:12px;">${L('Edit network','แก้ไขเครือข่าย')}</button></div></div>
+    <p class="small-muted" style="margin:-4px 0 12px;font-size:12px;">R(t) = e<sup>−λt</sup>, λ = ${L('failures ÷ total operating time','จำนวนครั้งที่เสีย ÷ เวลาใช้งานรวม')} · ${L('substation = k-out-of-n of its transformers · system = all substations in series · priority = criticality importance','สถานี = k-out-of-n ของหม้อแปลง · ระบบ = ทุกสถานีต่ออนุกรม · ลำดับความสำคัญ = Criticality importance')}</p>
     <div class="net-sys"><span>${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub>(${N.t} ${L(N.t>1?'yrs':'yr','ปี')}) <b class="big" style="color:${rBand(N.Rsys)};">${f4(N.Rsys)}</b></span>
       ${top?`<span>${L('Focus first','โฟกัสก่อน')}: <b>${top.a.id}</b> (${esc(top.c.st.name)}) — ${L(`if the system fails, ${pctR(top.IC)} chance this unit is the cause`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}</span>`:''}</div>
     <div class="net-wrap">${stHtml}</div>
@@ -1759,6 +1770,8 @@ function netSettingsHtml(){
       <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('Count only failures that took the transformer out of service. * zero failures → λ ≈ 0.693 ÷ T.','นับเฉพาะความล้มเหลวที่ทำให้หม้อแปลงหยุดจ่ายไฟ · * ไม่เคยเสีย → λ ≈ 0.693 ÷ T')}</p></div>`;
 }
 function attachNetEvents(){
+  document.querySelectorAll('[data-goto-rel]').forEach(b=> b.addEventListener('click',()=>{ state.page='reliability'; render(); window.scrollTo(0,0); }));
+  document.querySelectorAll('[data-net-addtr]').forEach(b=> b.addEventListener('click',()=> openAddAssetModal(b.dataset.netAddtr)));
   document.querySelectorAll('[data-net-t]').forEach(b=> b.addEventListener('click',()=>{ NET.t = +b.dataset.netT; render(); }));
   document.querySelectorAll('[data-net-edit]').forEach(b=> b.addEventListener('click',()=>{ state.page='settings'; state.settingsTab='net'; render(); window.scrollTo(0,0); }));
   document.querySelectorAll('.net-st svg .tr[data-view]').forEach(g=> g.addEventListener('click',()=> goToAssetDetail(g.dataset.view,'summary')));
@@ -1787,7 +1800,7 @@ function renderOverview(){
     <div class="card stat">${badge('watch',44)}<div><div class="label">${t('warning')}</div><div class="value">${warning}</div><div class="small-muted">${pct(warning)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
     <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">${critical}</div><div class="small-muted">${pct(critical)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
   </div>
-  ${netHtml()}
+  ${netSummaryHtml()}
   <div class="grid" style="grid-template-columns:1fr; gap:16px;">
     <div class="card">
       <div class="card-head"><h3>${t('attention')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
@@ -1863,24 +1876,46 @@ function renderAssetsTableOnly(){
   const c = document.getElementById('content');
   if(state.page==='assets'){ c.innerHTML = renderAssetsPage(); attachAssetsPageEvents(); attachGlobalViewLinks(); attachDataButtons(); document.getElementById('assetSearchInput').focus(); document.getElementById('assetSearchInput').setSelectionRange(state.assetSearch.length,state.assetSearch.length); attachGlobalViewLinks(); }
 }
-function openAddAssetModal(){
-  let n = ASSETS.length+1; while(ASSETS.some(a=>a.id===`TR-${String(n).padStart(3,'0')}`)) n++;
+function idProblem(id, except){
+  if(!id) return L('Enter a transformer code','กรุณากรอกรหัสหม้อแปลง');
+  if(id.length>40) return L('Code is too long (max 40 characters)','รหัสยาวเกินไป (ไม่เกิน 40 ตัวอักษร)');
+  if(/[<>"'`\\/]/.test(id)) return L('Code cannot contain < > " \' ` \\ /','รหัสห้ามมีอักขระ < > " \' ` \\ /');
+  if(ASSETS.some(a=>a!==except && a.id.toLowerCase()===id.toLowerCase())) return L('This code is already used','รหัสนี้ถูกใช้แล้ว');
+  return '';
+}
+function stationOf(id){ ensureNet(); return NET.stations.find(st=>st.trs.includes(id)) || null; }
+function setStation(id, stId){ ensureNet(); NET.stations.forEach(st=>{ st.trs = st.trs.filter(x=>x!==id); }); const st=NET.stations.find(x=>x.id===stId); if(st){ st.trs.push(id); const a=ASSETS.find(x=>x.id===id); if(a) a.loc = st.name; } }
+function renameAsset(a, newId){
+  const old = a.id; if(old===newId) return;
+  labFor(a); getFmeaFor(a); getMaintFor(a);                       /* materialise generated sample data under the old code first */
+  [LAB, FMEA_STORE, MAINT_STORE, RCM_STORE].forEach(st=>{ if(st[old]!==undefined){ st[newId]=st[old]; delete st[old]; } });
+  ensureNet(); NET.stations.forEach(st=>{ st.trs = st.trs.map(x=>x===old?newId:x); });
+  a.id = newId; if(state.assetId===old) state.assetId = newId;
+}
+function stationSelect(cur){ ensureNet(); return `<select name="station"><option value="">${L('— not in a substation —','— ไม่อยู่ในสถานี —')}</option>${NET.stations.map(st=>`<option value="${st.id}" ${cur===st.id?'selected':''}>${esc(st.name)}</option>`).join('')}</select>`; }
+function openAddAssetModal(presetStation){
+  if(typeof presetStation!=='string') presetStation='';
   openModal(t('modal_add_asset'), `
     <div class="grid g2" style="gap:0 12px;">
-    <div class="formrow"><label>${t('asset_id')}</label><input name="id" value="TR-${String(n).padStart(3,'0')}" required></div>
-    <div class="formrow"><label>${t('field_location')}</label><input name="loc" placeholder="e.g. Rangsit SS" required></div>
+    <div class="formrow"><label>${L('Transformer code','รหัสหม้อแปลง')}</label><input name="id" required placeholder="${L('your own code, e.g. LKB-T1 or serial no.','รหัสของคุณเอง เช่น LKB-T1 หรือเลขซีเรียล')}"></div>
+    <div class="formrow"><label>${L('Substation','สถานี')}</label>${stationSelect(presetStation)}</div>
+    <div class="formrow"><label>${t('field_location')} <span class="small-muted">(${L('if not in a substation above','ถ้าไม่ได้เลือกสถานี')})</span></label><input name="loc" placeholder="e.g. Rangsit SS"></div>
     <div class="formrow"><label>${t('field_capacity')}</label><input name="cap" type="number" value="50" required></div>
     <div class="formrow"><label>${t('field_voltage')}</label><input name="volt" value="115/24" required></div>
     <div class="formrow"><label>${t('field_manufacturer')}</label><input name="mfr" placeholder="e.g. ABB" required></div>
     <div class="formrow"><label>${t('field_year')}</label><input name="year" type="number" value="2026" min="1960" max="2030" required></div>
+    <div class="formrow"><label>${L('In service since (year)','เริ่มใช้งาน (ปี)')}</label><input name="inService" type="number" min="1950" max="2100" placeholder="${L('= manufacture year','= ปีที่ผลิต')}"></div>
+    <div class="formrow"><label>${L('Failures so far','จำนวนครั้งที่เคยเสีย')}</label><input name="fails" type="number" min="0" step="1" value="0"></div>
     </div>
     <div class="notebox" style="margin:6px 0 4px;">${gicon('help',16)}<div>${L('Enter the latest oil-test results — the Health Index and DGA diagnosis are calculated from them.','กรอกผลตรวจน้ำมันล่าสุด — ระบบจะคำนวณดัชนีสุขภาพและผล DGA จากค่าที่กรอก')}</div></div>
     ${labFormFields()}
   `, (data)=>{
-    const id = data.id.trim();
-    if(ASSETS.some(a=>a.id===id)){ toast(L('Asset ID already exists','รหัสนี้มีอยู่แล้ว')); return; }
-    ASSETS.push({demo:false, id, loc:data.loc, cap:Number(data.cap), volt:data.volt, hi:0, status:'Healthy', last:'—', next:'—', mfr:data.mfr||'—', year:Number(data.year)||2026, type:'ONAN/ONAF', load:50, topOil:50, amb:31});
+    const id = data.id.trim(); const bad = idProblem(id); if(bad){ toast(bad); return false; }
+    const st = NET && NET.stations.find(x=>x.id===data.station);
+    if(!st && !data.loc.trim()){ toast(L('Choose a substation or enter a location','เลือกสถานีหรือกรอกสถานที่')); return false; }
+    ASSETS.push({demo:false, id, fails:Math.max(0,Math.floor(+data.fails||0)), inService:+data.inService||undefined, loc:st?st.name:data.loc.trim(), cap:Number(data.cap), volt:data.volt, hi:0, status:'Healthy', last:'—', next:'—', mfr:data.mfr||'—', year:Number(data.year)||2026, type:'ONAN/ONAF', load:50, topOil:50, amb:31});
     LAB[id] = [sampleFromForm(data)];
+    if(st) setStation(id, st.id);
     render(); toast(t('toast_added'),'success');
   });
 }
@@ -2915,11 +2950,15 @@ function openEditAssetModal(a){
   const sel=(name,opts,val)=>`<select name="${name}">${opts.map(o=>`<option value="${o[0]}" ${String(val)===String(o[0])?'selected':''}>${o[1]}</option>`).join('')}</select>`;
   openModal(L('Edit transformer','แก้ไขข้อมูลหม้อแปลง')+' — '+a.id, `
     <div class="grid g2" style="gap:0 12px;">
+      <div class="formrow"><label>${L('Transformer code','รหัสหม้อแปลง')}</label><input name="id" value="${esc(a.id)}" required></div>
+      <div class="formrow"><label>${L('Substation','สถานี')}</label>${stationSelect((stationOf(a.id)||{}).id||'')}</div>
       <div class="formrow"><label>${t('field_location')}</label><input name="loc" value="${esc(a.loc||'')}" required></div>
       <div class="formrow"><label>${t('field_manufacturer')}</label><input name="mfr" value="${esc(a.mfr||'')}"></div>
       <div class="formrow"><label>${t('field_capacity')}</label><input name="cap" type="number" min="0" step="any" value="${a.cap??''}"></div>
       <div class="formrow"><label>${t('field_voltage')}</label><input name="volt" value="${esc(a.volt||'')}"></div>
       <div class="formrow"><label>${t('field_year')} <span class="small-muted">(${L('used for age','ใช้คิดอายุ')})</span></label><input name="year" type="number" min="1950" max="2100" value="${a.year??''}"></div>
+      <div class="formrow"><label>${L('In service since (year)','เริ่มใช้งาน (ปี)')}</label><input name="inService" type="number" min="1950" max="2100" value="${a.inService??''}" placeholder="${L('= manufacture year','= ปีที่ผลิต')}"></div>
+      <div class="formrow"><label>${L('Failures so far','จำนวนครั้งที่เคยเสีย')}</label><input name="fails" type="number" min="0" step="1" value="${+a.fails||0}"></div>
     </div>
     <div style="font-weight:800;font-size:12.5px;margin:10px 0 4px;">${t('operating_status')}</div>
     <div class="grid g2" style="gap:0 12px;">
@@ -2931,7 +2970,10 @@ function openEditAssetModal(a){
       <div class="formrow"><label>${t('cooling_system')}</label>${sel('cooling',[['Normal',t('normal')],['Fault',L('Fault','ผิดปกติ')]],a.cooling||'Normal')}</div>
     </div>
     <div class="formrow"><label>${t('alarms')}</label><input name="alarms" value="${esc(a.alarms||'')}" placeholder="${L('e.g. Buchholz alarm','เช่น Buchholz alarm')}"></div>`,
-  (d)=>{ Object.assign(a,{loc:d.loc, mfr:d.mfr, cap:Number(d.cap)||0, volt:d.volt, year:d.year===''?null:Number(d.year), svc:d.svc, load:d.load===''?null:Number(d.load), topOil:d.topOil===''?null:Number(d.topOil), amb:d.amb===''?null:Number(d.amb), oilLevel:d.oilLevel, cooling:d.cooling, alarms:d.alarms, opDate:fmtD(new Date())});
+  (d)=>{ const nid=(d.id||'').trim(); const bad=idProblem(nid, a); if(bad){ toast(bad); return false; }
+    renameAsset(a, nid);
+    Object.assign(a,{fails:Math.max(0,Math.floor(+d.fails||0)), inService:+d.inService||undefined, loc:d.loc, mfr:d.mfr, cap:Number(d.cap)||0, volt:d.volt, year:d.year===''?null:Number(d.year), svc:d.svc, load:d.load===''?null:Number(d.load), topOil:d.topOil===''?null:Number(d.topOil), amb:d.amb===''?null:Number(d.amb), oilLevel:d.oilLevel, cooling:d.cooling, alarms:d.alarms, opDate:fmtD(new Date())});
+    const cur=(stationOf(a.id)||{}).id||''; if(d.station!==cur){ if(d.station) setStation(a.id, d.station); else setStation(a.id, null); }
     render(); toast(t('toast_saved'),'success'); });
 }
 function deleteAsset(a){
@@ -3378,6 +3420,7 @@ function pageMeta(){
     detail:[state.assetId, t('sub_detail')],
     reports:[t('nav_reports'), t('sub_reports')],
     risk:[t('nav_risk'), t('sub_risk')],
+    reliability:[t('nav_reliability'), t('sub_reliability')],
     settings:[t('nav_settings'), t('sub_settings')],
     'healthindex-overview':[t('nav_healthindex'), t('sub_fleet_overview')],
     'fmea-overview':[t('nav_fmea'), t('sub_fleet_overview')],
@@ -3401,6 +3444,7 @@ function render(){
   else if(state.page==='assets'){ content.innerHTML = renderAssetsPage(); attachGlobalViewLinks(); attachAssetsPageEvents(); attachDataButtons(); }
   else if(state.page==='detail'){ syncAssetData(); content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(currentAsset()); }
   else if(state.page==='risk'){ content.innerHTML = renderRiskPage(); attachGlobalViewLinks(); initRiskCharts(); }
+  else if(state.page==='reliability'){ content.innerHTML = netHtml(); attachGlobalViewLinks(); }
   else if(state.page==='reports'){ content.innerHTML = renderReports(); initReportsCharts(); attachReportsEvents(); }
   else if(state.page==='settings'){ content.innerHTML = renderSettings(); attachSettingsEvents(); }
   else if(state.page==='healthindex-overview'){ content.innerHTML = renderCategoryOverview('healthindex'); attachCategoryOverviewEvents(); }
