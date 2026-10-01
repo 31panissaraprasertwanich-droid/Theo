@@ -481,6 +481,21 @@ table.rowlink tbody tr{cursor:pointer;} table.rowlink tbody tr:hover{background:
 .net-edit input,.net-edit select{width:100%;} .net-edit input[type=checkbox]{width:auto; flex:0 0 auto; margin:0;}
 .net-trlist{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:12.5px;}
 .net-trlist label{display:flex; align-items:center; gap:5px; white-space:nowrap;}
+/* v8: readable step-by-step reliability calculation */
+.calc-step{border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-top:14px; background:#fff;}
+.calc-step .sh{display:flex; align-items:center; gap:10px; margin-bottom:4px;}
+.calc-step .sn{flex:0 0 28px; height:28px; border-radius:50%; background:var(--accent-2); color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:14px;}
+.calc-step h4{margin:0; font-size:15px;}
+.calc-step .why{font-size:12.5px; color:var(--muted); margin:0 0 10px 38px;}
+.calc-step .fx{display:inline-block; background:var(--blue-bg); border-radius:8px; padding:4px 10px; font-weight:700; font-size:13px; margin:0 0 10px 38px;}
+.calc-step td .cv{font-weight:800; font-size:14px;}
+.calc-step td .cf{font-size:11px; color:var(--muted); white-space:nowrap;}
+.calc-res{display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin-left:38px; font-size:14px;}
+.calc-res .eq{font-weight:800; font-size:24px;}
+.st-code{display:inline-block; background:var(--accent-2); color:#fff; font-size:11px; font-weight:800; border-radius:6px; padding:1px 7px; letter-spacing:.04em;}
+.icbar{height:8px; background:var(--border); border-radius:4px; overflow:hidden; min-width:80px;}
+.icbar i{display:block; height:100%; background:#c62d23;}
+@media (max-width:720px){ .calc-step .why,.calc-step .fx,.calc-res{margin-left:0;} }
 </style>
 </head>
 <body>
@@ -1255,7 +1270,7 @@ let state = {page:'overview', assetId:'TR-014', detailTab:'overview', rcmMode:'W
 let chartRegistry = {};
 
 const NAV = [
- {id:'overview', key:'nav_overview', badge:'home'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'}, {id:'reliability', key:'nav_reliability', badge:'reliability'},
+ {id:'overview', key:'nav_overview', badge:'home'}, {id:'reliability', key:'nav_reliability', badge:'reliability'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'},
  {id:'reports', key:'nav_reports', badge:'reports'}, {id:'settings', key:'nav_settings', badge:'settings'},
 ];
 const ICONS = {
@@ -1630,11 +1645,11 @@ function heroBannerHtml(){
 const NET_ZERO_K = 0.693;   /* zero-failure median estimate: λ ≈ 0.693 ÷ T (χ² 50 %) */
 function netDefault(){
   return {t:1, stations:[
-    {id:'SS-1', name:'Lat Krabang IE SS', kv:'115/24 kV', peak:45, k:0, trs:['TR-014','TR-009']},
-    {id:'SS-2', name:'Chalong Krung SS', kv:'115/24 kV', peak:75, k:0, trs:['TR-020','TR-012']} ]};
+    {id:'LKB', name:'Lat Krabang IE SS', kv:'115/24 kV', peak:45, k:0, trs:['TR-014','TR-009']},
+    {id:'CLK', name:'Chalong Krung SS', kv:'115/24 kV', peak:75, k:0, trs:['TR-020','TR-012']} ]};
 }
 function ensureNet(){
-  if(NET && Array.isArray(NET.stations)) return NET;
+  if(NET && Array.isArray(NET.stations)){ NET.stations.forEach(st=>{ if(st.id==='SS-1' && /^Lat Krabang/.test(st.name)) st.id='LKB'; else if(st.id==='SS-2' && /^Chalong Krung/.test(st.name)) st.id='CLK'; }); return NET; }
   NET = netDefault();
   const seed = {'TR-014':2, 'TR-009':0, 'TR-020':3, 'TR-012':0};   /* sample failure history */
   NET.stations.forEach(st=> st.trs.forEach(id=>{ const a=ASSETS.find(x=>x.id===id); if(a){ a.loc = st.name; if(a.fails==null) a.fails = seed[id]||0; } }));
@@ -1709,47 +1724,100 @@ function netSummaryHtml(){
     <button class="btn btn-primary" data-goto-rel="1">${L('Open reliability page →','เปิดหน้าความน่าเชื่อถือ →')}</button></div>`;
 }
 function netHtml(){
-  const N = netCalc(); const top = N.ranked[0];
+  const N = netCalc(); const top = N.ranked[0]; const tt = N.t; const yr = L(tt>1?'yrs':'yr','ปี');
+  const conn = (c)=> c.units.length<=1 ? L('single unit','ตัวเดียว') : c.k===1 ? L(`parallel (1-out-of-${c.units.length})`,`ขนาน (1-out-of-${c.units.length})`) : c.k===c.units.length ? L(`series (${c.k}-out-of-${c.units.length})`,`อนุกรม (${c.k}-out-of-${c.units.length})`) : `${c.k}-out-of-${c.units.length}`;
   const stHtml = N.sts.map(c=>`<div class="net-st">
-      <div class="hd"><span class="nm">${esc(c.st.name)}</span><span class="small-muted">${esc(c.st.kv||'')} · ${c.units.length} ${L('transformer(s)','หม้อแปลง')}</span>
+      <div class="hd"><span class="st-code">${esc(c.st.id)}</span><span class="nm">${esc(c.st.name)}</span><span class="small-muted">${esc(c.st.kv||'')} · ${c.units.length} ${L('transformer(s)','หม้อแปลง')}</span>
         <span class="rs" style="color:${rBand(c.R)};border-color:${rBand(c.R)};">R<sub>SS</sub> ${f4(c.R)}</span></div>
-      <div style="margin:2px 0 -4px;"><button class="linklike" data-net-addtr="${c.st.id}" style="font-size:12px;">+ ${L('Add transformer to this substation','เพิ่มหม้อแปลงในสถานีนี้')}</button></div>
+      <div style="margin:2px 0 -4px;"><button class="linklike" data-net-addtr="${esc(c.st.id)}" style="font-size:12px;">+ ${L('Add transformer to this substation','เพิ่มหม้อแปลงในสถานีนี้')}</button></div>
       ${netStationSvg(c)}
       <div class="small-muted" style="font-size:11.5px;">${netRedundancyText(c)}${!+c.st.k?` · ${L('auto from MVA','คำนวณอัตโนมัติจาก MVA')}`:''}</div>
     </div>`).join('');
-  const rows = N.ranked.map(u=>`<tr data-view="${u.a.id}" class="${u.rank===1?'net-top':''}" style="cursor:pointer;"><td><b>${u.rank}</b></td><td><b>${u.a.id}</b></td><td>${esc(u.c.st.name)}</td>
-      <td>${u.r}${u.zero?'*':''}</td><td>${u.T.toFixed(1)}</td><td>${f4(u.lam)}</td><td style="color:${rBand(u.R)};font-weight:800;">${f4(u.R)}</td><td>${f4(u.IB)}</td><td><b>${pctR(u.IC)}</b></td>
+  const maxIC = Math.max(0.0001, ...N.ranked.map(u=>u.IC));
+  const rank = N.ranked.map(u=>`<tr data-view="${esc(u.a.id)}" style="cursor:pointer;"><td><b>${u.rank}</b></td><td><b>${esc(u.a.id)}</b></td><td><span class="st-code">${esc(u.c.st.id)}</span> ${esc(u.c.st.name)}</td>
+      <td style="color:${rBand(u.R)};font-weight:800;">${f4(u.R)}</td>
+      <td><div style="display:flex;align-items:center;gap:8px;"><div class="icbar" style="flex:1;"><i style="width:${u.IC/maxIC*100}%;"></i></div><b style="min-width:52px;text-align:right;">${pctR(u.IC)}</b></div></td>
       <td style="color:${hiColor(u.a.hi)};font-weight:800;">${u.a.hi}</td>
       <td>${u.rank===1?`<span class="pill pill-critical">${L('Focus first','โฟกัสก่อน')}</span>`:u.IC>=0.15?`<span class="pill pill-warning">${L('Plan','วางแผน')}</span>`:`<span class="pill pill-healthy">${L('Monitor','ติดตาม')}</span>`}</td></tr>`).join('');
-  const calc = N.sts.map(c=>`<div><b>${esc(c.st.name)}</b><ul>
-      ${c.units.map(u=>`<li><b>${u.a.id}</b>: λ = ${u.zero?`0.693 ÷ ${u.T.toFixed(2)}`:`${u.r} ÷ ${u.T.toFixed(2)}`} = <code>${f4(u.lam)}</code> /${L('yr','ปี')} → R(${N.t}) = e<sup>−${f4(u.lam)}×${N.t}</sup> = <code>${f4(u.R)}</code></li>`).join('')}
-      <li>${c.units.length<=1?`R<sub>SS</sub> = <code>${f4(c.R)}</code>`:c.k===1?`${L('Parallel','ขนาน')}: R<sub>SS</sub> = 1 − ${c.units.map(u=>`(1 − ${f4(u.R)})`).join(' × ')} = <code>${f4(c.R)}</code>`:c.k===c.units.length?`${L('Series','อนุกรม')}: R<sub>SS</sub> = ${c.units.map(u=>f4(u.R)).join(' × ')} = <code>${f4(c.R)}</code>`:`${c.k}-out-of-${c.units.length}: R<sub>SS</sub> = <code>${f4(c.R)}</code>`}</li></ul></div>`).join('')
-    + `<div><b>${L('System (all substations must supply)','ระบบ (ทุกสถานีต้องจ่ายไฟได้)')}</b>: R<sub>sys</sub> = ${N.sts.map(c=>f4(c.R)).join(' × ')} = <code>${f4(N.Rsys)}</code></div>
-      <div style="margin-top:8px;"><b>${L('Importance','ความสำคัญ')}</b>: I<sub>B</sub> = R<sub>sys</sub>(R<sub>i</sub>=1) − R<sub>sys</sub>(R<sub>i</sub>=0) · I<sub>C</sub> = I<sub>B</sub> × (1 − R<sub>i</sub>) ÷ (1 − R<sub>sys</sub>)<ul>
-      ${N.ranked.map(u=>`<li><b>${u.a.id}</b>: I<sub>B</sub> = ${f4(u.Rup)} − ${f4(u.Rdn)} = <code>${f4(u.IB)}</code> · I<sub>C</sub> = ${f4(u.IB)} × ${f4(1-u.R)} ÷ ${f4(1-N.Rsys)} = <code>${pctR(u.IC)}</code></li>`).join('')}</ul></div>`;
+  const units = N.sts.flatMap(c=>c.units);
+  const step = (n, title, why, body)=>`<div class="calc-step"><div class="sh"><span class="sn">${n}</span><h4>${title}</h4></div><p class="why">${why}</p>${body}</div>`;
+  const s1 = step(1, L('Reliability of each transformer','ความน่าเชื่อถือของหม้อแปลงแต่ละตัว'),
+      L(`How likely each unit is to run ${tt} ${yr} without failing.`,`โอกาสที่หม้อแปลงแต่ละตัวจะใช้งานได้ตลอด ${tt} ${yr} โดยไม่เสีย`),
+      `<div class="fx">λ = r ÷ T &nbsp;→&nbsp; R(t) = e<sup>−λ·t</sup></div>
+      <div class="tbl-wrap"><table><thead><tr><th>${L('Transformer','หม้อแปลง')}</th><th>${L('Substation','สถานี')}</th><th>${L('Failures','ครั้งที่เสีย')} <span style="text-transform:none">r</span></th><th>${L('In service','ใช้งานมา')} <span style="text-transform:none">T</span> (${L('yr','ปี')})</th><th style="text-transform:none">λ = r ÷ T</th><th style="text-transform:none">R(${tt}) = e<sup>−λt</sup></th></tr></thead><tbody>
+      ${units.map(u=>`<tr><td><b>${esc(u.a.id)}</b></td><td><span class="st-code">${esc(u.c.st.id)}</span></td><td>${u.r}${u.zero?'*':''}</td><td>${u.T.toFixed(2)}</td>
+        <td><div class="cv">${f4(u.lam)}</div><div class="cf">${u.zero?'0.693':u.r} ÷ ${u.T.toFixed(2)}</div></td>
+        <td><div class="cv" style="color:${rBand(u.R)};">${f4(u.R)}</div><div class="cf">e<sup>−${f4(u.lam)}×${tt}</sup></div></td></tr>`).join('')}
+      </tbody></table></div>
+      <p class="small-muted" style="font-size:11px;margin:6px 0 0;">* ${L('No failure recorded yet: 0.693 is used instead of 0 (median estimate) so R is not 100 %.','ยังไม่เคยเสีย: ใช้ 0.693 แทน 0 (ค่าประมาณกลาง) เพื่อไม่ให้ R เป็น 100%')}</p>`);
+  const s2 = step(2, L('Reliability of each substation','ความน่าเชื่อถือของแต่ละสถานี'),
+      L('Combine the transformers by how they are connected: parallel = they back each other up, series = all are needed.','รวมหม้อแปลงตามการต่อ: ขนาน = สำรองกันได้ · อนุกรม = ต้องใช้ทุกตัว'),
+      `<div class="tbl-wrap"><table><thead><tr><th>${L('Substation','สถานี')}</th><th>${L('Connection','การต่อ')}</th><th>${L('Formula','สูตร')}</th><th>${L('With numbers','แทนค่า')}</th><th style="text-transform:none">R<sub>SS</sub></th></tr></thead><tbody>
+      ${N.sts.map(c=>{ const R=c.units.map(u=>f4(u.R)); let fx='—', num='—';
+        if(c.units.length===1){ fx='R<sub>1</sub>'; num=R[0]; }
+        else if(c.k===1){ fx='1 − ' + c.units.map((_,i)=>`(1 − R<sub>${i+1}</sub>)`).join(' × '); num='1 − ' + R.map(r=>`(1 − ${r})`).join(' × '); }
+        else if(c.k===c.units.length){ fx=c.units.map((_,i)=>`R<sub>${i+1}</sub>`).join(' × '); num=R.join(' × '); }
+        else { fx=L(`sum of states with ≥ ${c.k} units working`,`รวมทุกกรณีที่มีหม้อแปลงทำงาน ≥ ${c.k} ตัว`); num=R.join(', '); }
+        return `<tr><td><span class="st-code">${esc(c.st.id)}</span> <b>${esc(c.st.name)}</b><div class="cf small-muted">${c.units.map((u,i)=>`R<sub>${i+1}</sub> = ${esc(u.a.id)}`).join(' · ')}</div></td><td>${conn(c)}</td><td>${fx}</td><td style="white-space:nowrap;">${num}</td><td><div class="cv" style="color:${rBand(c.R)};">${f4(c.R)}</div></td></tr>`; }).join('')}
+      </tbody></table></div>`);
+  const s3 = step(3, L('Reliability of the whole system','ความน่าเชื่อถือของทั้งระบบ'),
+      L('Every substation must be able to supply its load, so the substations are multiplied (series).','ทุกสถานีต้องจ่ายไฟได้ จึงนำค่าของแต่ละสถานีมาคูณกัน (อนุกรม)'),
+      `<div class="calc-res"><span>R<sub>sys</sub> = ${N.sts.map(c=>`R<sub>${esc(c.st.id)}</sub>`).join(' × ')}</span><span>= ${N.sts.map(c=>f4(c.R)).join(' × ')}</span><span>=</span><span class="eq" style="color:${rBand(N.Rsys)};">${f4(N.Rsys)}</span><span class="small-muted">(${L(`${pctR(N.Rsys)} chance the whole system runs ${tt} ${yr} without a supply loss`,`โอกาส ${pctR(N.Rsys)} ที่ระบบจะจ่ายไฟได้ตลอด ${tt} ${yr}`)})</span></div>`);
+  const s4 = step(4, L('Importance — which transformer to focus on','ความสำคัญ — ควรโฟกัสตัวไหน'),
+      L('I_B: how much the system depends on this unit (system R if it never fails − if it has failed). I_C: if the system fails, the chance that this unit is the cause = I_B × (1 − R) ÷ (1 − R_sys).','I<sub>B</sub>: ระบบพึ่งพาหม้อแปลงตัวนี้มากแค่ไหน (R ระบบเมื่อตัวนี้ไม่เสีย − เมื่อตัวนี้เสีย) · I<sub>C</sub>: ถ้าระบบล้มเหลว มีโอกาสเท่าไรที่สาเหตุมาจากตัวนี้ = I<sub>B</sub> × (1 − R) ÷ (1 − R<sub>sys</sub>)'),
+      `<div class="tbl-wrap"><table><thead><tr><th>#</th><th>${L('Transformer','หม้อแปลง')}</th><th style="text-transform:none">R<sub>sys</sub> ${L('if it never fails','ถ้าตัวนี้ไม่เสีย')}</th><th style="text-transform:none">R<sub>sys</sub> ${L('if it fails','ถ้าตัวนี้เสีย')}</th><th style="text-transform:none">I<sub>B</sub> (${L('difference','ผลต่าง')})</th><th style="text-transform:none">${L('Chance it fails','โอกาสเสีย')} 1 − R</th><th style="text-transform:none">I<sub>C</sub></th></tr></thead><tbody>
+      ${N.ranked.map(u=>`<tr><td><b>${u.rank}</b></td><td><b>${esc(u.a.id)}</b></td><td>${f4(u.Rup)}</td><td>${f4(u.Rdn)}</td><td><div class="cv">${f4(u.IB)}</div><div class="cf">${f4(u.Rup)} − ${f4(u.Rdn)}</div></td><td>${f4(1-u.R)}</td>
+        <td><div class="cv" style="color:${u.rank===1?'#c62d23':'inherit'};">${pctR(u.IC)}</div><div class="cf">${f4(u.IB)} × ${f4(1-u.R)} ÷ ${f4(1-N.Rsys)}</div></td></tr>`).join('')}
+      </tbody></table></div>`);
   return `<div class="card" style="margin-bottom:16px;">
     <div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('System reliability — which transformer to focus on first','ความน่าเชื่อถือของระบบ — ควรโฟกัสหม้อแปลงตัวไหนก่อน')}</h3>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span class="small-muted">${L('Mission time','ช่วงเวลา')} t</span>
       <div class="seg">${[1,3,5].map(v=>`<button class="${+NET.t===v?'on':''}" data-net-t="${v}">${v} ${L(v>1?'yrs':'yr','ปี')}</button>`).join('')}</div>
+      <button class="btn btn-primary" data-net-addst="1" style="padding:6px 12px;font-size:12px;">+ ${L('Add substation','เพิ่มสถานี')}</button>
       <button class="btn btn-outline" data-net-edit="1" style="padding:6px 12px;font-size:12px;">${L('Edit network','แก้ไขเครือข่าย')}</button></div></div>
-    <p class="small-muted" style="margin:-4px 0 12px;font-size:12px;">R(t) = e<sup>−λt</sup>, λ = ${L('failures ÷ total operating time','จำนวนครั้งที่เสีย ÷ เวลาใช้งานรวม')} · ${L('substation = k-out-of-n of its transformers · system = all substations in series · priority = criticality importance','สถานี = k-out-of-n ของหม้อแปลง · ระบบ = ทุกสถานีต่ออนุกรม · ลำดับความสำคัญ = Criticality importance')}</p>
-    <div class="net-sys"><span>${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub>(${N.t} ${L(N.t>1?'yrs':'yr','ปี')}) <b class="big" style="color:${rBand(N.Rsys)};">${f4(N.Rsys)}</b></span>
-      ${top?`<span>${L('Focus first','โฟกัสก่อน')}: <b>${top.a.id}</b> (${esc(top.c.st.name)}) — ${L(`if the system fails, ${pctR(top.IC)} chance this unit is the cause`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}</span>`:''}</div>
-    <div class="net-wrap">${stHtml}</div>
+    <div class="net-sys"><span>${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub>(${tt} ${yr}) <b class="big" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</b></span>
+      ${top?`<span>${L('Focus first','โฟกัสก่อน')}: <b>${esc(top.a.id)}</b> (${esc(top.c.st.name)}) — ${L(`if the system fails, ${pctR(top.IC)} chance this unit is the cause`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}</span>`:''}</div>
+    <div class="net-wrap">${stHtml || `<p class="small-muted">${L('No substation yet — press “+ Add substation”.','ยังไม่มีสถานี — กด “+ เพิ่มสถานี”')}</p>`}</div>
     <div class="net-legend"><span><i style="background:#1fa571"></i>R ≥ 0.95</span><span><i style="background:#d99012"></i>0.85–0.95</span><span><i style="background:#c62d23"></i>&lt; 0.85</span><span>□ ${L('circuit breaker','เซอร์กิตเบรกเกอร์')}</span><span>${L('#n = priority rank · click a transformer to open it','#n = ลำดับความสำคัญ · กดที่หม้อแปลงเพื่อเปิดดู')}</span></div>
-    <div class="tbl-wrap" style="margin-top:12px;"><table class="rowlink"><thead><tr><th>#</th><th>${t('asset')}</th><th>${L('Substation','สถานี')}</th><th>${L('Failures','ครั้งที่เสีย')} <span style="text-transform:none;">r</span></th><th>${L('Op. time T (yr)','เวลาใช้งาน T (ปี)')}</th><th style="text-transform:none;">λ (/${L('yr','ปี')})</th><th>R(${N.t})</th><th>I<sub>B</sub></th><th>${L('Criticality I<sub>C</sub>','ความสำคัญ I<sub>C</sub>')}</th><th>HI</th><th></th></tr></thead><tbody>${rows||`<tr><td colspan="11" class="small-muted">${L('No transformer in the network yet — add one under Settings → Network & reliability.','ยังไม่มีหม้อแปลงในเครือข่าย — เพิ่มได้ที่ ตั้งค่า → เครือข่ายและความน่าเชื่อถือ')}</td></tr>`}</tbody></table></div>
-    <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('λ = number of failures ÷ total operating time. * No failure recorded yet: λ ≈ 0.693 ÷ T (median estimate) so R is not shown as 100 %. Ranked by criticality importance — a healthy unit with no backup can rank above a poorer unit that has one. Use together with HI and risk.','λ = จำนวนครั้งที่เสีย ÷ เวลาใช้งานรวม · * ยังไม่เคยเสีย: ใช้ λ ≈ 0.693 ÷ T (ค่าประมาณกลาง) เพื่อไม่ให้ R เป็น 100% · จัดลำดับด้วย Criticality importance — หม้อแปลงที่สภาพดีแต่ไม่มีตัวสำรอง อาจสำคัญกว่าตัวที่สภาพแย่กว่าแต่มีตัวสำรอง · ใช้ร่วมกับ HI และความเสี่ยง')}</p>
-    <details style="margin-top:10px;"><summary style="cursor:pointer;font-weight:800;font-size:13px;">${L('Show the reliability calculation','ดูวิธีคำนวณความน่าเชื่อถือ')}</summary><div class="net-calc" style="margin-top:8px;">${calc}</div></details>
-  </div>`;
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-head"><h3>${L('Priority ranking','ลำดับความสำคัญ')}</h3><span class="small-muted">${L('by criticality importance I_C','เรียงตาม Criticality importance (I<sub>C</sub>)')}</span></div>
+    <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>#</th><th>${L('Transformer','หม้อแปลง')}</th><th>${L('Substation','สถานี')}</th><th>R(${tt})</th><th style="min-width:200px;">${L('Chance it causes a system failure','โอกาสเป็นสาเหตุที่ระบบล้มเหลว')} (I<sub>C</sub>)</th><th>HI</th><th></th></tr></thead><tbody>${rank||`<tr><td colspan="7" class="small-muted">—</td></tr>`}</tbody></table></div>
+    <p class="small-muted" style="font-size:11.5px;margin:8px 0 0;">${L('A healthy unit with no backup can rank above a poorer unit that has one. Use together with HI and risk.','หม้อแปลงที่สภาพดีแต่ไม่มีตัวสำรอง อาจสำคัญกว่าตัวที่สภาพแย่กว่าแต่มีตัวสำรอง · ใช้ร่วมกับ HI และความเสี่ยง')}</p>
+  </div>
+  ${N.sts.length?`<div class="card"><div class="card-head"><h3>${L('How it is calculated — step by step','วิธีคำนวณ — ทีละขั้น')}</h3><span class="small-muted">t = ${tt} ${yr}</span></div>${s1}${s2}${s3}${s4}</div>`:''}`;
 }
 /* ---------- settings: network editor ---------- */
+function stCodeProblem(code, except){
+  if(!code) return L('Enter a substation code','กรุณากรอกรหัสสถานี');
+  if(code.length>20) return L('Code is too long (max 20 characters)','รหัสยาวเกินไป (ไม่เกิน 20 ตัวอักษร)');
+  if(/[<>"'`\\/\s]/.test(code)) return L('Code cannot contain spaces or < > " \' ` \\ /','รหัสห้ามมีช่องว่างหรืออักขระ < > " \' ` \\ /');
+  if(NET.stations.some(st=>st!==except && st.id.toLowerCase()===code.toLowerCase())) return L('This substation code is already used','รหัสสถานีนี้ถูกใช้แล้ว');
+  return '';
+}
+function openAddStationModal(){
+  ensureNet();
+  openModal(L('Add substation','เพิ่มสถานี'), `
+    <div class="grid g2" style="gap:0 12px;">
+      <div class="formrow"><label>${L('Substation code','รหัสสถานี')}</label><input name="code" required placeholder="${L('your own code, e.g. LKB','รหัสของคุณเอง เช่น LKB')}"></div>
+      <div class="formrow"><label>${L('Substation name','ชื่อสถานี')}</label><input name="name" required placeholder="${L('e.g. Lat Krabang IE SS','เช่น สถานีนิคมลาดกระบัง')}"></div>
+      <div class="formrow"><label>${L('Voltage','แรงดัน')}</label><input name="kv" value="115/24 kV"></div>
+      <div class="formrow"><label>${L('Peak load (MVA)','โหลดสูงสุด (MVA)')}</label><input name="peak" type="number" min="0" step="any" value="0"></div>
+    </div>
+    <p class="small-muted" style="font-size:11.5px;margin:4px 0 0;">${L('After saving, add transformers with “+ Add transformer to this substation”.','บันทึกแล้วเพิ่มหม้อแปลงได้จากปุ่ม “+ เพิ่มหม้อแปลงในสถานีนี้”')}</p>`,
+  (d)=>{ const code=(d.code||'').trim(), name=(d.name||'').trim(); const bad=stCodeProblem(code); if(bad){ toast(bad); return false; }
+    if(!name){ toast(L('Enter a substation name','กรุณากรอกชื่อสถานี')); return false; }
+    NET.stations.push({id:code, name, kv:(d.kv||'').trim()||'115/24 kV', peak:Math.max(0,+d.peak||0), k:0, trs:[]});
+    render(); toast(t('toast_added'),'success'); });
+}
 function netSettingsHtml(){
   const N = netCalc();
   const inNet = new Set(NET.stations.flatMap(s=>s.trs));
   const stCards = NET.stations.map((st,si)=>{ const c=N.sts[si];
     return `<div class="card net-edit" style="margin-bottom:12px;">
-      <div class="card-head"><h3>${esc(st.name)}</h3><button class="linklike" data-net-del="${si}" style="color:var(--red);">${L('Remove substation','ลบสถานี')}</button></div>
-      <div class="grid" style="grid-template-columns:2fr 1fr 1fr 1.4fr; gap:10px;">
+      <div class="card-head"><h3><span class="st-code">${esc(st.id)}</span> ${esc(st.name)}</h3><button class="linklike" data-net-del="${si}" style="color:var(--red);">${L('Remove substation','ลบสถานี')}</button></div>
+      <div class="grid" style="grid-template-columns:0.8fr 2fr 1fr 1fr 1.4fr; gap:10px;">
+        <div class="formrow"><label>${L('Code','รหัสสถานี')}</label><input data-net-code="${si}" value="${esc(st.id)}"></div>
         <div class="formrow"><label>${L('Name','ชื่อสถานี')}</label><input data-net-f="name" data-si="${si}" value="${esc(st.name)}"></div>
         <div class="formrow"><label>${L('Voltage','แรงดัน')}</label><input data-net-f="kv" data-si="${si}" value="${esc(st.kv||'')}"></div>
         <div class="formrow"><label>${L('Peak load (MVA)','โหลดสูงสุด (MVA)')}</label><input type="number" min="0" step="1" data-net-f="peak" data-si="${si}" value="${+st.peak||0}"></div>
@@ -1786,7 +1854,9 @@ function attachNetEvents(){
   document.querySelectorAll('[data-net-a]').forEach(inp=> inp.addEventListener('change',()=>{ const a=ASSETS.find(x=>x.id===inp.dataset.id); if(!a) return;
     const v = Math.max(0, Math.floor(+inp.value||0)); a[inp.dataset.netA] = v || (inp.dataset.netA==='fails'?0:undefined); render(); toast(t('toast_saved'),'success'); }));
   document.querySelectorAll('[data-net-del]').forEach(b=> b.addEventListener('click',()=>{ const st=NET.stations[+b.dataset.netDel]; if(confirm(L(`Remove ${st.name} from the network? The transformers themselves are kept.`,`ลบ ${st.name} ออกจากเครือข่าย? ข้อมูลหม้อแปลงยังอยู่`))){ NET.stations.splice(+b.dataset.netDel,1); render(); } }));
-  const add=document.getElementById('btnNetAdd'); if(add) add.addEventListener('click',()=>{ const n=NET.stations.length+1; NET.stations.push({id:'SS-'+Date.now(), name:L(`New substation ${n}`,`สถานีใหม่ ${n}`), kv:'115/24 kV', peak:0, k:0, trs:[]}); render(); });
+  const add=document.getElementById('btnNetAdd'); if(add) add.addEventListener('click', openAddStationModal);
+  document.querySelectorAll('[data-net-addst]').forEach(b=> b.addEventListener('click', openAddStationModal));
+  document.querySelectorAll('[data-net-code]').forEach(inp=> inp.addEventListener('change',()=>{ const st=NET.stations[+inp.dataset.netCode]; const code=inp.value.trim(); const bad=stCodeProblem(code, st); if(bad){ toast(bad); inp.value=st.id; return; } st.id=code; render(); toast(t('toast_saved'),'success'); }));
 }
 function renderOverview(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
