@@ -496,6 +496,28 @@ table.rowlink tbody tr{cursor:pointer;} table.rowlink tbody tr:hover{background:
 .icbar{height:8px; background:var(--border); border-radius:4px; overflow:hidden; min-width:80px;}
 .icbar i{display:block; height:100%; background:#c62d23;}
 @media (max-width:720px){ .calc-step .why,.calc-step .fx,.calc-res{margin-left:0;} }
+/* v9 */
+.refnote{font-size:11px; color:var(--muted); margin:10px 0 0; line-height:1.55;}
+.refnote b{color:var(--text);}
+.hero2{display:flex; flex-wrap:wrap; gap:16px 24px; align-items:stretch; margin-bottom:16px; padding:20px 24px; border-radius:16px; position:relative; overflow:hidden;
+  background:linear-gradient(115deg,#E9EFDA 0%,#F3F6EA 55%,#FBFCF8 100%); border:1px solid var(--border);}
+.hero2 .hb{flex:1 1 380px; position:relative; min-width:0;}
+.hero2 .eb{font-size:11px; font-weight:800; letter-spacing:2px; color:#68734F; text-transform:uppercase;}
+.hero2 h1{margin:4px 0 2px; font-size:24px; line-height:1.25; color:#2F3429;}
+.hero2 .meta{font-size:12.5px; color:var(--muted);}
+.hero2 .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+.hero2 .chip{display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #D6DCC6; border-radius:10px; padding:7px 11px; cursor:pointer; font:inherit; font-size:12.5px; color:var(--text);}
+.hero2 .chip:hover{border-color:var(--accent-2);}
+.hero2 .side{flex:0 0 auto; display:flex; gap:10px; align-items:stretch; position:relative; flex-wrap:wrap;}
+.hero2 .kpi{background:#fff; border:1px solid var(--border); border-radius:12px; padding:10px 14px; min-width:150px; display:flex; flex-direction:column; justify-content:center;}
+.hero2 .kpi .l{font-size:11.5px; color:var(--muted); font-weight:700;}
+.hero2 .kpi .v{font-size:24px; font-weight:800; line-height:1.15;}
+.hero2 .kpi button{margin-top:4px;}
+.rbd-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:#fcfdf9; padding:8px;}
+.rbd-wrap svg{display:block; margin:0 auto;}
+.rbd-wrap svg .blk{cursor:pointer;}
+.sch-tbl td,.sch-tbl th{white-space:nowrap;}
+@media (max-width:720px){ .hero2{padding:16px;} .hero2 h1{font-size:20px;} .hero2 .side{flex:1 1 100%;} .hero2 .kpi{flex:1 1 140px; min-width:0;} }
 </style>
 </head>
 <body>
@@ -555,13 +577,13 @@ const UI = {
  guide_intro:['A quick tour of what each page in RCM Transformer does, and a few tips to get around faster.','คำแนะนำสั้นๆ ว่าแต่ละหน้าของ RCM Transformer ใช้ทำอะไร พร้อมเคล็ดลับใช้งานให้เร็วขึ้น'],
  guide_intro_short:['How to use this app','วิธีใช้งานแอปนี้'],
  guide_overview_t:['Overview','ภาพรวม'], guide_overview_d:['A snapshot of the whole fleet: how many transformers are healthy/warning/critical, which ones need attention now, and a quick list of all assets.','สรุปภาพรวมทั้งฟลีท: มีหม้อแปลงกี่เครื่องที่ปกติ/เฝ้าระวัง/วิกฤต เครื่องไหนต้องดูแลด่วน และรายการสินทรัพย์ทั้งหมดแบบย่อ'],
- guide_assets_t:['Transformer Assets','สินทรัพย์หม้อแปลง'], guide_assets_d:['The full list of all 20 transformers with search and status filters. Click "View" on any row to open its full detail.','รายการหม้อแปลงทั้ง 20 เครื่อง พร้อมค้นหาและกรองตามสถานะ กด "ดู" ที่แถวไหนก็ได้เพื่อเปิดรายละเอียดเต็ม'],
+ guide_assets_t:['Transformer Assets','สินทรัพย์หม้อแปลง'], guide_assets_d:['The full list of all 20 transformers with search and status filters. Click "View" on any row to open its full detail.','รายการหม้อแปลงทั้งหมด พร้อมค้นหาและกรองตามสถานะ กด "ดู" ที่แถวไหนก็ได้เพื่อเปิดรายละเอียดเต็ม'],
  guide_hi_t:['Health Index','ดัชนีสุขภาพ'], guide_hi_d:['Opens to a fleet-wide ranking first. Pick a transformer to see its full health score breakdown, criteria table, and contributor radar chart.','เปิดมาจะเห็นอันดับสุขภาพของทั้งฟลีทก่อน เลือกหม้อแปลงเพื่อดูรายละเอียดคะแนนสุขภาพ ตารางเกณฑ์ และกราฟปัจจัยต่างๆ'],
  guide_dga_t:['DGA Analysis','วิเคราะห์ DGA'], guide_dga_d:['Dissolved Gas Analysis results for the selected transformer — gas levels and rates, Duval Triangle, Rogers/IEC ratios, historical trend, and a plain-language interpretation.','ผลวิเคราะห์ก๊าซละลายในน้ำมันของหม้อแปลงที่เลือก — ระดับและอัตราก๊าซ, สามเหลี่ยม Duval, อัตราส่วน Rogers/IEC, แนวโน้มย้อนหลัง และคำอธิบายแบบเข้าใจง่าย'],
- guide_fmea_t:['FMEA & RPN','FMEA & RPN'], guide_fmea_d:['Opens to a fleet-wide ranking of each transformer\'s worst failure mode first. Pick one to see its complete Failure Mode & Effects table and risk matrix.','เปิดมาจะเห็นโหมดความล้มเหลวที่แย่ที่สุดของแต่ละหม้อแปลงก่อน เลือกเครื่องเพื่อดูตาราง FMEA และเมทริกซ์ความเสี่ยงแบบเต็ม'],
+ guide_fmea_t:['FMEA & RPN','FMEA & RPN'], guide_fmea_d:['Opens to a fleet-wide ranking of each transformer\'s worst failure mode first. Pick one to see its complete Failure Mode & Effects table and risk matrix.','เปิดมาจะเห็นโหมดความล้มเหลวที่รุนแรงที่สุดของแต่ละหม้อแปลงก่อน เลือกเครื่องเพื่อดูตาราง FMEA และเมทริกซ์ความเสี่ยงแบบเต็ม'],
  guide_rcm_t:['RCM Decision','การตัดสินใจ RCM'], guide_rcm_d:['Opens to a fleet-wide summary of recommended strategies first. Pick a transformer to walk through its interactive decision tree.','เปิดมาจะเห็นสรุปกลยุทธ์ที่แนะนำของทั้งฟลีทก่อน เลือกหม้อแปลงเพื่อเดินตามแผนผังการตัดสินใจแบบโต้ตอบได้'],
  guide_plan_t:['Maintenance Plan','แผนบำรุงรักษา'], guide_plan_d:['The schedule of upcoming maintenance tasks for the selected transformer, with a list or Gantt view and the ability to add new tasks.','ตารางงานบำรุงรักษาที่จะเกิดขึ้นของหม้อแปลงที่เลือก ดูแบบรายการหรือ Gantt และเพิ่มงานใหม่ได้'],
- guide_reports_t:['Reports','รายงาน'], guide_reports_d:['Fleet-wide analytics: health distribution, failure mode trends, maintenance task summary, and a full worst-to-best health ranking.','การวิเคราะห์ภาพรวมทั้งฟลีท: การกระจายสุขภาพ แนวโน้มโหมดความล้มเหลว สรุปงานบำรุงรักษา และอันดับสุขภาพเรียงจากแย่ไปดี'],
+ guide_reports_t:['Reports','รายงาน'], guide_reports_d:['Fleet-wide analytics: health distribution, failure mode trends, maintenance task summary, and a full worst-to-best health ranking.','การวิเคราะห์ภาพรวมทั้งฟลีท: การกระจายสุขภาพ แนวโน้มโหมดความล้มเหลว สรุปงานบำรุงรักษา และอันดับสุขภาพเรียงจากต่ำไปสูง'],
  guide_settings_t:['Settings','ตั้งค่า'], guide_settings_d:['System-wide criteria, the failure mode library, maintenance strategy definitions, user management, and appearance options.','เกณฑ์ของระบบ, คลังโหมดความล้มเหลว, นิยามกลยุทธ์บำรุงรักษา, จัดการผู้ใช้ และตัวเลือกการแสดงผล'],
  guide_tips_title:['Quick Tips','เคล็ดลับใช้งาน'],
  guide_tip1:['Use the "Viewing:" dropdown at the top of any transformer detail page to jump straight to another unit without going back.','ใช้ดรอปดาวน์ "กำลังดู:" ที่หัวหน้ารายละเอียดหม้อแปลง เพื่อสลับไปดูเครื่องอื่นได้ทันทีโดยไม่ต้องย้อนกลับ'],
@@ -570,7 +592,7 @@ const UI = {
  guide_tip4:['Data shown here is illustrative and regenerated per transformer for this demo — it is not live telemetry.','ข้อมูลที่แสดงเป็นข้อมูลตัวอย่างที่สร้างขึ้นต่อหม้อแปลงแต่ละเครื่องสำหรับสาธิตเท่านั้น ไม่ใช่ข้อมูลเรียลไทม์จริง'],
  nav_overview:['Overview','ภาพรวม'], nav_assets:['Transformer Assets','สินทรัพย์หม้อแปลง'], nav_healthindex:['Health Index','ดัชนีสุขภาพ'],
  nav_dga:['DGA Analysis','วิเคราะห์ DGA'], nav_fmea:['FMEA & RPN','FMEA & RPN'], nav_rcm:['RCM Decision','การตัดสินใจ RCM'],
- nav_plan:['Maintenance Plan','แผนบำรุงรักษา'], nav_reports:['Reports','รายงาน'], nav_settings:['Settings','ตั้งค่า'], nav_reliability:['Reliability','ความน่าเชื่อถือ'],
+ nav_plan:['Maintenance Plan','แผนบำรุงรักษา'], nav_reports:['Reports','รายงาน'], nav_settings:['Settings','ตั้งค่า'], nav_reliability:['Reliability','ความน่าเชื่อถือ'], nav_schematic:['Schematic','แผนภาพวงจร'], sub_schematic:['Single-line diagram of each substation and its transformers','แผนภาพเส้นเดี่ยวของแต่ละสถานีและหม้อแปลง'],
  brand_sub:['Reliability Centered Maintenance','การบำรุงรักษาเชิงความน่าเชื่อถือ'],
  footer_tag:['Reliable Grid<br>Sustainable Tomorrow','โครงข่ายเชื่อถือได้<br>เพื่ออนาคตยั่งยืน'],
  search_ph:['Search asset ID or location...','ค้นหารหัสสินทรัพย์หรือสถานที่...'],
@@ -584,7 +606,7 @@ const UI = {
  sub_detail:['Asset detail & analysis','รายละเอียดและการวิเคราะห์สินทรัพย์'],
  sub_fleet_overview:['Fleet-wide summary — pick a transformer to see full details','สรุปภาพรวมทั้งฟลีท — เลือกหม้อแปลงเพื่อดูรายละเอียดเต็ม'],
  fleet_overview:['Fleet Overview','ภาพรวมทั้งฟลีท'], top_risk_item:['Top Risk Item','รายการความเสี่ยงสูงสุด'],
- ov_healthindex_desc:['All 20 transformers, sorted from worst to best Health Index. Click a row to see the full breakdown for that unit.','หม้อแปลงทั้ง 20 เครื่อง เรียงจากดัชนีสุขภาพแย่ที่สุดไปดีที่สุด กดแถวเพื่อดูรายละเอียดเต็มของเครื่องนั้น'],
+ ov_healthindex_desc:['All transformers, sorted from worst to best Health Index. Click a row to see the full breakdown for that unit.','หม้อแปลงทั้งหมด เรียงจากดัชนีสุขภาพต่ำที่สุดไปสูงที่สุด กดแถวเพื่อดูรายละเอียดเต็มของเครื่องนั้น'],
  ov_fmea_desc:['Each transformer\'s single highest-risk failure mode. Click a row to see its full FMEA table.','โหมดความล้มเหลวที่มีความเสี่ยงสูงสุดของแต่ละหม้อแปลง กดแถวเพื่อดูตาราง FMEA เต็มของเครื่องนั้น'],
  ov_rcm_desc:['The top risk for each transformer and the maintenance strategy RCM recommends for it. Click a row to open its decision tree.','ความเสี่ยงสูงสุดของแต่ละหม้อแปลงและกลยุทธ์บำรุงรักษาที่ RCM แนะนำ กดแถวเพื่อเปิดแผนผังการตัดสินใจของเครื่องนั้น'],
  sub_reports:['Turn data into actionable maintenance decisions','เปลี่ยนข้อมูลเป็นการตัดสินใจบำรุงรักษา'],
@@ -604,7 +626,7 @@ const UI = {
  back_to_assets:['← Back to Assets','← กลับไปยังสินทรัพย์'], viewing_asset:['Viewing:','กำลังดู:'], export_report:['Export Report','ส่งออกรายงาน'], more_actions:['More Actions ▾','การกระทำอื่นๆ ▾'],
  health_index:['Health Index','ดัชนีสุขภาพ'], rpn_max:['RPN (Max)','RPN (สูงสุด)'], dga_diagnosis:['DGA Diagnosis','ผลวินิจฉัย DGA'], next_action:['Next Action','การกระทำถัดไป'],
  kpi_hi_tip:['Overall condition score (0–100) combining DGA, oil test, and inspection results. Higher is healthier.','คะแนนสภาพโดยรวม (0–100) รวมผล DGA, ตรวจน้ำมัน และตรวจสอบด้วยสายตา ยิ่งสูงยิ่งสุขภาพดี'],
- kpi_rpn_tip:['Risk Priority Number of the worst failure mode found in FMEA (Severity × Occurrence × Detection). Higher = more urgent.','ค่าความสำคัญความเสี่ยงของโหมดความล้มเหลวที่แย่ที่สุดจาก FMEA (ความรุนแรง × โอกาสเกิด × การตรวจจับ) ยิ่งสูงยิ่งเร่งด่วน'],
+ kpi_rpn_tip:['Risk Priority Number of the worst failure mode found in FMEA (Severity × Occurrence × Detection). Higher = more urgent.','ค่าความสำคัญความเสี่ยงของโหมดความล้มเหลวที่รุนแรงที่สุดจาก FMEA (ความรุนแรง × โอกาสเกิด × การตรวจจับ) ยิ่งสูงยิ่งเร่งด่วน'],
  kpi_dga_tip:['Dissolved Gas Analysis code from the latest oil sample — tells you what type of internal fault (if any) the gases suggest.','รหัสผลตรวจก๊าซละลายในน้ำมัน (DGA) จากตัวอย่างล่าสุด บอกประเภทข้อบกพร่องภายในที่ก๊าซบ่งชี้'],
  kpi_next_tip:['The next maintenance action recommended for this transformer.','การกระทำบำรุงรักษาถัดไปที่แนะนำสำหรับหม้อแปลงนี้'],
  tab_overview:['Overview','ภาพรวม'], tab_healthindex:['Health Index','ดัชนีสุขภาพ'], tab_dga:['DGA Analysis','วิเคราะห์ DGA'],
@@ -620,7 +642,7 @@ const UI = {
  act_oil_sampling:['Oil Sampling every 30 days','เก็บตัวอย่างน้ำมันทุก 30 วัน'], act_monitor_dga:['Monitor DGA Trend','ติดตามแนวโน้ม DGA'],
  act_inspect_cooling:['Inspect Cooling System','ตรวจสอบระบบระบายความร้อน'], act_check_leak:['Check for Oil Leak','ตรวจสอบการรั่วไหลของน้ำมัน'], act_review_load:['Review Load Condition','ทบทวนสภาพโหลด'],
  overall_hi:['Overall Health Index','ดัชนีสุขภาพโดยรวม'], hi_classification:['Health Index Classification','การจัดระดับดัชนีสุขภาพ'],
- good:['Good','ดี'], moderate:['Moderate','ปานกลาง'], poor:['Poor','แย่'], very_critical:['Very Critical','วิกฤตมาก'],
+ good:['Good','ดี'], moderate:['Moderate','ปานกลาง'], poor:['Poor','ต่ำ'], very_critical:['Very Critical','วิกฤตมาก'],
  hi_assessment:['Health Index Assessment','การประเมินดัชนีสุขภาพ'], edit_criteria:['Edit Criteria','แก้ไขเกณฑ์'],
  parameter:['Parameter','พารามิเตอร์'], score:['Score','คะแนน'], weight:['Weight','น้ำหนัก'], wscore:['W.Score','คะแนนถ่วงน้ำหนัก'], remark:['Remark','หมายเหตุ'], total:['Total','รวม'],
  hi_contributors:['Health Index Contributors','ปัจจัยดัชนีสุขภาพ'],
@@ -671,7 +693,7 @@ const UI = {
  dga_fault_dist:['DGA Fault Type Distribution','การกระจายประเภทข้อบกพร่อง DGA'], maint_task_summary:['Maintenance Task Summary','สรุปงานบำรุงรักษา'],
  maint_task_summary_desc:['How many maintenance tasks are Planned, Completed, Pending or Overdue, broken down by strategy type (BM/CM/PM/CBM/PdM).','จำนวนงานบำรุงรักษาที่วางแผนไว้ เสร็จแล้ว รอดำเนินการ หรือเลยกำหนด แยกตามประเภทกลยุทธ์ (BM/CM/PM/CBM/PdM)'],
  as_of:['As of','ข้อมูล ณ'],
- health_ranking_desc:['All 20 transformers ranked from worst to best health index, right now.','อันดับหม้อแปลงทั้ง 20 เครื่อง เรียงจากดัชนีสุขภาพแย่ที่สุดไปดีที่สุด ณ ขณะนี้'],
+ health_ranking_desc:['All transformers ranked from worst to best health index, right now.','อันดับหม้อแปลงทั้งหมด เรียงจากดัชนีสุขภาพต่ำที่สุดไปสูงที่สุด ณ ขณะนี้'],
  health_ranking:['Transformer Health Ranking','อันดับสุขภาพหม้อแปลง'], rank:['Rank','อันดับ'], id:['ID','รหัส'], key_takeaways:['Key Takeaways','สรุปประเด็นสำคัญ'],
  kt1:['Overall fleet health improved 12% vs last year','สุขภาพโดยรวมของฟลีทดีขึ้น 12% เทียบกับปีก่อน'], kt2:['Maintenance cost reduced 33% after RCM','ต้นทุนบำรุงรักษาลดลง 33% หลังใช้ RCM'],
  kt3:['Thermal faults remain top failure mode (28%)','ข้อบกพร่องทางความร้อนยังคงเป็นสาเหตุหลัก (28%)'], kt4:['Continue CBM for high-risk transformers','ดำเนินการ CBM ต่อสำหรับหม้อแปลงความเสี่ยงสูง'],
@@ -703,7 +725,7 @@ const UI = {
  field_task_name:['Task Name','ชื่องาน'], field_task_type:['Type','ประเภท'], field_task_interval:['Interval','ความถี่'],
  field_start_date:['Start Date','วันที่เริ่ม'], field_task_duration:['Duration (days)','ระยะเวลา (วัน)'], field_task_details:['Task Details','รายละเอียดงาน'], field_task_details_ph:['e.g. Check bushing gasket and top oil level','เช่น ตรวจปะเก็นบุชชิ่งและระดับน้ำมันด้านบน'],
  note1:['How status is decided','วิธีกำหนดสถานะ'],
- note2:['HI ≥ 70 (Very good / Good) = Healthy, 50–70 (Caution) = Warning, < 50 (Poor / Very poor) = Critical. The risk level combines the HI value with its yearly decreasing rate (Table 10 of the paper).','HI ≥ 70 (ดีมาก/ดี) = ปกติ, 50–70 (ต้องระวัง) = เฝ้าระวัง, < 50 (แย่/แย่มาก) = วิกฤต ระดับความเสี่ยงพิจารณาร่วมกันระหว่างค่า HI และอัตราการลดลงต่อปี (ตาราง 10 ในงานวิจัย)'],
+ note2:['HI ≥ 70 (Very good / Good) = Healthy, 50–70 (Caution) = Warning, < 50 (Poor / Very poor) = Critical. The risk level combines the HI value with its yearly decreasing rate (Table 10 of the paper).','HI ≥ 70 (ดีมาก/ดี) = ปกติ, 50–70 (ต้องระวัง) = เฝ้าระวัง, < 50 (ต่ำ/ต่ำมาก) = วิกฤต ระดับความเสี่ยงพิจารณาร่วมกันระหว่างค่า HI และอัตราการลดลงต่อปี (ตาราง 10 ในงานวิจัย)'],
 };
 function t(key){ const row = UI[key]; if(!row) return key; return row[state.lang==='th'?1:0]; }
 
@@ -878,7 +900,7 @@ const PC_PARAMS = [
 
 const FACTOR_NAMES = {FF:['Faults Factor','ปัจจัยความผิดปกติ (Faults)'], OQF:['Oil Quality Factor','ปัจจัยคุณภาพน้ำมัน'], PCF:['Paper Condition Factor','ปัจจัยสภาพกระดาษฉนวน']};
 const CODE_SF = {A:4,B:3,C:2,D:1,E:0};
-const CODE_NAMES = {A:['Normal','ปกติ'],B:['Acceptable','ยอมรับได้'],C:['Need caution','ต้องระวัง'],D:['Poor','แย่'],E:['Very poor','แย่มาก']};
+const CODE_NAMES = {A:['Normal','ปกติ'],B:['Acceptable','ยอมรับได้'],C:['Need caution','ต้องระวัง'],D:['Poor','ต่ำ'],E:['Very poor','ต่ำมาก']};
 function factorCode(v){ return v<1.2?'A' : v<1.5?'B' : v<2?'C' : v<=3?'D' : 'E'; }
 function paramStatus(score){ return score<=1?'Healthy' : score===2?'Warning' : 'Critical'; }
 function codeStatus(c){ return (c==='A'||c==='B')?'Healthy' : c==='C'?'Warning' : 'Critical'; }
@@ -905,7 +927,7 @@ function assessSample(s, prev, a){
   return {rows, factors, dga:d, rates, hiExact:exact, hi:Math.round(exact*10)/10};
 }
 /* paper Table 8 */
-const HI_CATS = [[85,'VG',['Very good','ดีมาก']],[70,'G',['Good','ดี']],[50,'C',['Caution','ต้องระวัง']],[30,'P',['Poor','แย่']],[0,'VP',['Very poor','แย่มาก']]];
+const HI_CATS = [[85,'VG',['Very good','ดีมาก']],[70,'G',['Good','ดี']],[50,'C',['Caution','ต้องระวัง']],[30,'P',['Poor','ต่ำ']],[0,'VP',['Very poor','ต่ำมาก']]];
 function hiCat(hi){ const c=HI_CATS.find(x=>hi>=x[0]); return {code:c[1], name:L(c[2][0],c[2][1])}; }
 function statusFromHi(hi){ return hi<50?'Critical' : hi<70?'Warning' : 'Healthy'; }
 function statusOf(as){ return statusFromHi(as.hi); }
@@ -1035,7 +1057,12 @@ function profileFor(a, sampleIdx){
     riskLevel:{en:risk[0],th:risk[1]}, strategy: status==='Critical'?'CBM + PdM':status==='Warning'?'CBM':'PM',
     nextAction:{en:nxt[0],th:nxt[1]}, interp:{en:interpTxt, th:interpTxt}, actions: recommendedActions(as.rows, d) };
 }
-function shortDate(s){ const d=parseD(s); return d?`${MON[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`:s; }
+const MON_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function beLabel(d){ const y=d.getFullYear()+543; return state.lang==='th' ? `${MON_TH[d.getMonth()]} ${String(y).slice(2)}` : `${MON[d.getMonth()]} ${y}`; }   /* chart labels use the Buddhist Era (พ.ศ.) */
+function refNote(en, th){ return `<p class="refnote">* <b>${L('Reference','อ้างอิง')}:</b> ${L(en, th)}</p>`; }
+function shortDate(s){ const d=parseD(s); return d?beLabel(d):s; }
+function fleetLabelsBE(){ const ref = ASSETS.map(a=>parseD(a.last)).filter(Boolean).sort((x,y)=>y-x)[0] || new Date();
+  return Array.from({length:N_DEMO},(_,i)=>{ const d=new Date(ref.getFullYear(), ref.getMonth()-(N_DEMO-1-i)*DEMO_STEP_MONTHS, 1); return beLabel(d); }); }
 const FLEET_LABELS = Array.from({length:N_DEMO},(_,i)=>{ const m=(N_DEMO-1-i)*DEMO_STEP_MONTHS; return m===0?['Latest','ล่าสุด']:[`${m/12} yr ago`,`${m/12} ปีก่อน`]; });
 function fleetTrend(){ const vals=[]; for(let k=N_DEMO-1;k>=0;k--){ const his=ASSETS.map(a=>{ const lab=labFor(a); return lab[k]?assessSample(lab[k],lab[k+1],a).hi:null; }).filter(x=>x!==null); vals.push(his.length?Math.round(his.reduce((x,y)=>x+y,0)/his.length*10)/10:null); } return vals; }
 function gasRowsOf(s){
@@ -1270,7 +1297,7 @@ let state = {page:'overview', assetId:'TR-014', detailTab:'overview', rcmMode:'W
 let chartRegistry = {};
 
 const NAV = [
- {id:'overview', key:'nav_overview', badge:'home'}, {id:'reliability', key:'nav_reliability', badge:'reliability'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'},
+ {id:'overview', key:'nav_overview', badge:'home'}, {id:'reliability', key:'nav_reliability', badge:'reliability'}, {id:'schematic', key:'nav_schematic', badge:'schematic'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'},
  {id:'reports', key:'nav_reports', badge:'reports'}, {id:'settings', key:'nav_settings', badge:'settings'},
 ];
 const ICONS = {
@@ -1291,6 +1318,7 @@ function icon(name,extra){return `<svg viewBox="0 0 24 24" fill="none" stroke="c
 /* glyphs are drawn on a 24×24 grid; F = navy gradient fill, W = white cut-out, S = navy stroke */
 const GF='fill="url(#rcmNavy)"', GW='fill="#fff"', GS='fill="none" stroke="url(#rcmNavy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 const GLASS = {
+ schematic:`<path ${GF} d="M3 4.2h18v2.2H3zM3 17.6h18v2.2H3zM7 6.4h1.8v3H7zM15.2 6.4H17v3h-1.8zM7 14.6h1.8v3H7zM15.2 14.6H17v3h-1.8z"/><circle ${GF} cx="7.9" cy="12" r="2.6"/><circle ${GF} cx="16.1" cy="12" r="2.6"/>`,
  reliability:`<path ${GF} d="M13.6 1.8 4.2 13.4a.8.8 0 0 0 .6 1.3h5.6l-1.6 7.1a.5.5 0 0 0 .9.4l9.6-12a.8.8 0 0 0-.6-1.3h-5.7l1.6-6.7a.5.5 0 0 0-.9-.4z"/>`,
  home:`<path ${GF} d="M12 2.8 1.9 11.6a1 1 0 0 0 1.3 1.5l1.3-1.1V20a1.2 1.2 0 0 0 1.2 1.2h3.9v-6h4.8v6h3.9A1.2 1.2 0 0 0 19.5 20v-8l1.3 1.1a1 1 0 0 0 1.3-1.5z"/>`,
  assets:`<rect ${GF} x="6.1" y="2.6" width="2" height="5" rx=".7"/><rect ${GF} x="11" y="2.6" width="2" height="5" rx=".7"/><rect ${GF} x="15.9" y="2.6" width="2" height="5" rx=".7"/><rect ${GF} x="3.5" y="7" width="17" height="12.5" rx="1.8"/><path d="M7 9.6v7.3M10 9.6v7.3M13 9.6v7.3M16.1 9.6v7.3" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/><rect ${GF} x="5" y="19" width="2.6" height="2.4" rx=".5"/><rect ${GF} x="16.4" y="19" width="2.6" height="2.4" rx=".5"/>`,
@@ -1614,25 +1642,20 @@ function attachCategoryOverviewEvents(){
 function heroBannerHtml(){
   const latest = ASSETS.map(a=>parseD(a.last)).filter(Boolean).sort((x,y)=>y-x)[0];
   const urgent = ASSETS.filter(a=>a.status==='Critical').length;
-  const steps = [L('Monitor','ติดตาม'),L('Analyze','วิเคราะห์'),L('Decide','ตัดสินใจ'),L('Maintain','บำรุงรักษา')];
-  return `<section class="hero">
-    <svg class="hero-art" viewBox="0 0 420 150" aria-hidden="true">
-      <g fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".22">
-        <path d="M250 150 L286 18 L322 150 M262 106 L310 106 M270 74 L302 74 M277 46 L295 46 M262 106 L302 74 M310 106 L270 74 M270 74 L295 46 M302 74 L277 46"/>
-        <path d="M236 30 H336 M246 30 v10 M326 30 v10 M258 18 H314"/>
-        <path d="M360 150 L382 70 L404 150 M368 120 L396 120 M373 98 L391 98 M368 120 L391 98 M396 120 L373 98"/>
-        <path d="M352 64 H412 M358 64 v8 M406 64 v8"/>
-      </g>
-      <g fill="none" stroke="#fff" stroke-width="1" opacity=".18"><path d="M0 44 C 90 70, 170 70, 246 40"/><path d="M0 52 C 90 80, 170 80, 246 48"/><path d="M326 40 C 340 52, 350 60, 358 68"/><path d="M326 48 C 340 58, 350 64, 358 72"/></g>
-    </svg>
-    <div class="hero-body">
-      <div class="hero-eyebrow">RCM Transformer</div>
-      <h1 class="hero-title">${L('Reliable transformers for a sustainable tomorrow','หม้อแปลงที่เชื่อถือได้ เพื่ออนาคตที่ยั่งยืน')}</h1>
-      <div class="hero-steps">${steps.map((x,i)=>`<span>${x}</span>${i<steps.length-1?'<i>→</i>':''}`).join('')}</div>
+  const N = netCalc();
+  return `<section class="hero2">
+    <svg class="hero-art" viewBox="0 0 420 150" aria-hidden="true" style="opacity:.55;"><g fill="none" stroke="#68734F" stroke-width="1.4" stroke-linecap="round" opacity=".22">
+      <path d="M250 150 L286 18 L322 150 M262 106 L310 106 M270 74 L302 74 M277 46 L295 46 M262 106 L302 74 M310 106 L270 74 M270 74 L295 46 M302 74 L277 46"/><path d="M236 30 H336 M246 30 v10 M326 30 v10 M258 18 H314"/>
+      <path d="M360 150 L382 70 L404 150 M368 120 L396 120 M373 98 L391 98 M368 120 L391 98 M396 120 L373 98"/><path d="M352 64 H412 M358 64 v8 M406 64 v8"/></g></svg>
+    <div class="hb">
+      <div class="eb">RCM Transformer · ${L('Reliability Centered Maintenance','การบำรุงรักษาเชิงความน่าเชื่อถือ')}</div>
+      <h1>${esc(netArea())}</h1>
+      <div class="meta">${N.sts.length} ${L('substation(s)','สถานี')} · ${ASSETS.length} ${L('transformer(s)','หม้อแปลง')} · ${L('latest lab result','ผลแล็บล่าสุด')} ${latest?fmtD(latest):'—'}</div>
+      <div class="chips">${N.sts.map(c=>`<button class="chip" data-goto-sch="${esc(c.st.id)}"><span class="st-code">${esc(c.st.id)}</span><span><b>${esc(c.st.name)}</b> · ${c.units.length} ${L('units','ตัว')}</span><span style="font-weight:800;color:${rBand(c.R)};">R<sub>SS</sub> ${f4(c.R)}</span></button>`).join('')}</div>
     </div>
-    <div class="hero-side">
-      ${urgent?`<button class="hero-cta" data-goto-risk="1">${L(`${urgent} need action now →`,`${urgent} ตัวต้องดำเนินการด่วน →`)}</button>`:`<span class="hero-ok">${L('No critical transformer','ไม่มีหม้อแปลงวิกฤต')}</span>`}
-      <div class="hero-meta">${L('Latest lab result','ผลแล็บล่าสุด')} ${latest?fmtD(latest):'—'}</div>
+    <div class="side">
+      <div class="kpi"><div class="l">${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub> (${N.t} ${L(N.t>1?'yrs':'yr','ปี')})</div><div class="v" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</div>${N.ranked[0]?`<div style="font-size:11.5px;margin-top:2px;">${L('Focus first','โฟกัสก่อน')}: <b>${esc(N.ranked[0].a.id)}</b> (${pctR(N.ranked[0].IC)})</div>`:''}<button class="linklike" data-goto-rel="1" style="font-size:12px;text-align:left;">${L('How it is calculated →','ดูวิธีคำนวณ →')}</button></div>
+      <div class="kpi"><div class="l">${L('Critical transformers','หม้อแปลงวิกฤต')}</div><div class="v" style="color:${urgent?'#c62d23':'#1fa571'};">${urgent}</div>${urgent?`<button class="linklike" data-goto-risk="1" style="font-size:12px;text-align:left;">${L('See priority →','ดูลำดับความสำคัญ →')}</button>`:`<span class="small-muted" style="font-size:12px;">${L('none','ไม่มี')}</span>`}</div>
     </div>
   </section>`;
 }
@@ -1648,6 +1671,7 @@ function netDefault(){
     {id:'LKB', name:'Lat Krabang IE SS', kv:'115/24 kV', peak:45, k:0, trs:['TR-014','TR-009']},
     {id:'CLK', name:'Chalong Krung SS', kv:'115/24 kV', peak:75, k:0, trs:['TR-020','TR-012']} ]};
 }
+function netArea(){ ensureNet(); return (NET.area||'').trim() || L('Lat Krabang Industrial Estate area','พื้นที่นิคมอุตสาหกรรมลาดกระบัง'); }
 function ensureNet(){
   if(NET && Array.isArray(NET.stations)){ NET.stations.forEach(st=>{ if(st.id==='SS-1' && /^Lat Krabang/.test(st.name)) st.id='LKB'; else if(st.id==='SS-2' && /^Chalong Krung/.test(st.name)) st.id='CLK'; }); return NET; }
   NET = netDefault();
@@ -1682,10 +1706,11 @@ function netCalc(){
 const f4 = (v)=> (Math.round(v*10000)/10000).toFixed(4);
 const pctR = (v)=> (v*100).toFixed(1)+'%';
 function rBand(R){ return R>=0.95 ? '#1fa571' : R>=0.85 ? '#d99012' : '#c62d23'; }
-function netStationSvg(c){
+function netStationSvg(c, mode){
+  const sld = mode==='sld'; const stCol = (a)=> a.status==='Critical' ? '#c62d23' : a.status==='Warning' ? '#d99012' : '#1fa571';
   const n = Math.max(1, c.units.length); const slot = 200; const W = Math.max(400, 20 + n*slot), H = 250;
   const busY = 34, lvY = 196; const x0 = (W - n*slot)/2;
-  const items = c.units.map((u,i)=>{ const x = x0 + i*slot + 62, col = rBand(u.R), top = u.rank===1, tx = x + 27;
+  const items = c.units.map((u,i)=>{ const x = x0 + i*slot + 62, col = sld ? stCol(u.a) : rBand(u.R), top = !sld && u.rank===1, tx = x + 27;
     return `<g class="tr" data-view="${u.a.id}"><title>${u.a.id} — R(${NET.t}y) ${f4(u.R)}</title>
       <rect x="${x-50}" y="${busY+40}" width="${slot-12}" height="80" fill="transparent"/>
       <line x1="${x}" y1="${busY}" x2="${x}" y2="${lvY}" stroke="#7c8370" stroke-width="2"/>
@@ -1693,12 +1718,12 @@ function netStationSvg(c){
       <rect x="${x-7}" y="${lvY-34}" width="14" height="14" fill="#fff" stroke="#4A5043" stroke-width="2"/>
       <circle cx="${x}" cy="${busY+66}" r="17" fill="#fff" stroke="${col}" stroke-width="2.6"/>
       <circle cx="${x}" cy="${busY+90}" r="17" fill="#fff" fill-opacity=".85" stroke="${col}" stroke-width="2.6"/>
-      ${top?`<circle cx="${x-34}" cy="${busY+66}" r="13" fill="#c62d23"/><text x="${x-34}" y="${busY+70}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">#1</text>`
+      ${sld?'':top?`<circle cx="${x-34}" cy="${busY+66}" r="13" fill="#c62d23"/><text x="${x-34}" y="${busY+70}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">#1</text>`
            :`<circle cx="${x-34}" cy="${busY+66}" r="12" fill="#fff" stroke="#9aa08f"/><text x="${x-34}" y="${busY+70}" text-anchor="middle" font-size="10.5" font-weight="800" fill="#4A5043">#${u.rank}</text>`}
       <text x="${tx}" y="${busY+58}" font-size="13.5" font-weight="800" fill="#23261F">${u.a.id}</text>
-      <text x="${tx}" y="${busY+76}" font-size="13" font-weight="800" fill="${col}">R ${f4(u.R)}</text>
-      <text x="${tx}" y="${busY+93}" font-size="11" fill="#5E6356">λ ${f4(u.lam)}/${L('yr','ปี')}</text>
-      <text x="${tx}" y="${busY+109}" font-size="11" fill="#5E6356">HI ${u.a.hi} · ${u.a.cap||'?'} MVA</text></g>`; }).join('');
+      <text x="${tx}" y="${busY+76}" font-size="13" font-weight="800" fill="${col}">${sld?`HI ${u.a.hi} · ${trStatus(u.a.status)}`:`R ${f4(u.R)}`}</text>
+      <text x="${tx}" y="${busY+93}" font-size="11" fill="#5E6356">${sld?`${esc(u.a.volt||'')} kV`:`λ ${f4(u.lam)}/${L('yr','ปี')}`}</text>
+      <text x="${tx}" y="${busY+109}" font-size="11" fill="#5E6356">${sld?`${u.a.cap||'?'} MVA · ${esc(u.a.mfr||'')}`:`HI ${u.a.hi} · ${u.a.cap||'?'} MVA`}</text></g>`; }).join('');
   return `<svg viewBox="0 0 ${W} ${H}" style="max-width:${W}px;margin:0 auto;" role="img" aria-label="${esc(c.st.name)} single-line diagram">
     <line x1="14" y1="${busY}" x2="${W-14}" y2="${busY}" stroke="#23261F" stroke-width="4"/>
     <text x="16" y="${busY-9}" font-size="11" font-weight="800" fill="#4A5043">${esc((c.st.kv||'115/24 kV').split('/')[0].replace(/kV/i,'').trim())} kV</text>
@@ -1723,16 +1748,59 @@ function netSummaryHtml(){
     <div style="flex:1;min-width:220px;font-size:13px;">${top?`${L('Focus first','โฟกัสก่อน')}: <b>${top.a.id}</b> (${esc(top.c.st.name)}) · ${L(`${pctR(top.IC)} chance it is the cause if the system fails`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}<div class="small-muted">${N.sts.map(c=>`${esc(c.st.name)} R<sub>SS</sub> ${f4(c.R)}`).join(' · ')}</div>`:`<span class="small-muted">${L('No substation set up yet.','ยังไม่ได้ตั้งค่าสถานี')}</span>`}</div>
     <button class="btn btn-primary" data-goto-rel="1">${L('Open reliability page →','เปิดหน้าความน่าเชื่อถือ →')}</button></div>`;
 }
+function rbdSvg(N){
+  const BW=118, BH=48, VG=64, PAD=22, WIRE=26;
+  const groups = N.sts.map(c=>{ const n=c.units.length; const par = n>1 && c.k<n;
+    const w = !n ? 140 : par ? (PAD*2 + WIRE*2 + BW) : (PAD*2 + n*BW + (n-1)*WIRE);
+    const h = (par ? n*VG : VG) + 44; return {c, n, par, w, h}; });
+  const H = Math.max(150, ...groups.map(g=>g.h)) + 24, mid = H/2 + 10;
+  let x = 16; const parts = [];
+  const blk = (u, bx, by)=>{ const col=rBand(u.R); return `<g class="blk" data-view="${esc(u.a.id)}"><rect x="${bx}" y="${by-BH/2}" width="${BW}" height="${BH}" rx="7" fill="#fff" stroke="${col}" stroke-width="2.4"/>
+      <text x="${bx+BW/2}" y="${by-4}" text-anchor="middle" font-size="12.5" font-weight="800" fill="#23261F">${esc(u.a.id)}</text>
+      <text x="${bx+BW/2}" y="${by+13}" text-anchor="middle" font-size="12" font-weight="800" fill="${col}">R = ${f4(u.R)}</text></g>`; };
+  parts.push(`<rect x="${x}" y="${mid-14}" width="64" height="28" rx="6" fill="#4A5043"/><text x="${x+32}" y="${mid+4}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${L('Source','แหล่งจ่าย')}</text>`); x += 64;
+  groups.forEach(g=>{
+    parts.push(`<line x1="${x}" y1="${mid}" x2="${x+WIRE}" y2="${mid}" stroke="#4A5043" stroke-width="2"/>`); x += WIRE;
+    const gx = x, top = mid - g.h/2 + 6;
+    parts.push(`<rect x="${gx}" y="${top}" width="${g.w}" height="${g.h}" rx="10" fill="none" stroke="#9aa08f" stroke-dasharray="5 4"/>
+      <text x="${gx+10}" y="${top+16}" font-size="11.5" font-weight="800" fill="#4A5043">${esc(g.c.st.id)} · ${g.par ? (g.c.k===1 ? `${L('parallel','ขนาน')} (1-out-of-${g.n})` : `${g.c.k}-out-of-${g.n}`) : g.n>1 ? `${L('series','อนุกรม')} (${g.n}-out-of-${g.n})` : ''}</text>
+      <text x="${gx+g.w-10}" y="${top+16}" text-anchor="end" font-size="11.5" font-weight="800" fill="${rBand(g.c.R)}">R<tspan font-size="8" dy="2">SS</tspan><tspan dy="-2"> = ${f4(g.c.R)}</tspan></text>`);
+    if(!g.n){ parts.push(`<line x1="${gx}" y1="${mid}" x2="${gx+g.w}" y2="${mid}" stroke="#4A5043" stroke-width="2" stroke-dasharray="3 3"/>`); }
+    else if(g.par){ const xl = gx+PAD, xr = gx+g.w-PAD; const ys = g.c.units.map((_,i)=> mid + 8 + (i-(g.n-1)/2)*VG);
+      parts.push(`<line x1="${gx}" y1="${mid}" x2="${xl}" y2="${mid}" stroke="#4A5043" stroke-width="2"/><line x1="${xr}" y1="${mid}" x2="${gx+g.w}" y2="${mid}" stroke="#4A5043" stroke-width="2"/>
+        <line x1="${xl}" y1="${Math.min(...ys,mid)}" x2="${xl}" y2="${Math.max(...ys,mid)}" stroke="#4A5043" stroke-width="2"/><line x1="${xr}" y1="${Math.min(...ys,mid)}" x2="${xr}" y2="${Math.max(...ys,mid)}" stroke="#4A5043" stroke-width="2"/>`);
+      g.c.units.forEach((u,i)=>{ const y=ys[i]; parts.push(`<line x1="${xl}" y1="${y}" x2="${xl+WIRE}" y2="${y}" stroke="#4A5043" stroke-width="2"/><line x1="${xl+WIRE+BW}" y1="${y}" x2="${xr}" y2="${y}" stroke="#4A5043" stroke-width="2"/>${blk(u, xl+WIRE, y)}`); }); }
+    else { let bx = gx+PAD; parts.push(`<line x1="${gx}" y1="${mid}" x2="${bx}" y2="${mid}" stroke="#4A5043" stroke-width="2"/>`);
+      g.c.units.forEach((u,i)=>{ parts.push(blk(u, bx, mid+8)); bx += BW; if(i<g.n-1){ parts.push(`<line x1="${bx}" y1="${mid+8}" x2="${bx+WIRE}" y2="${mid+8}" stroke="#4A5043" stroke-width="2"/>`); bx += WIRE; } });
+      parts.push(`<line x1="${bx}" y1="${mid}" x2="${gx+g.w}" y2="${mid}" stroke="#4A5043" stroke-width="2"/>`); }
+    x = gx + g.w;
+  });
+  parts.push(`<line x1="${x}" y1="${mid}" x2="${x+WIRE}" y2="${mid}" stroke="#4A5043" stroke-width="2"/>`); x += WIRE;
+  parts.push(`<rect x="${x}" y="${mid-14}" width="56" height="28" rx="6" fill="#4A5043"/><text x="${x+28}" y="${mid+4}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${L('Load','โหลด')}</text>`); x += 56 + 16;
+  return `<svg viewBox="0 0 ${x} ${H}" width="${x}" style="max-width:none;" role="img" aria-label="Reliability block diagram">${parts.join('')}</svg>`;
+}
+function schematicHtml(){
+  const N = netCalc(); const sel = state.schSt || 'all';
+  const sts = N.sts.filter(c=> sel==='all' || c.st.id===sel);
+  const tabs = `<div class="seg" style="flex-wrap:wrap;"><button class="${sel==='all'?'on':''}" data-sch-st="all">${L('All substations','ทุกสถานี')}</button>${N.sts.map(c=>`<button class="${sel===c.st.id?'on':''}" data-sch-st="${esc(c.st.id)}">${esc(c.st.id)}</button>`).join('')}</div>`;
+  const cards = sts.map(c=>`<div class="card" style="margin-bottom:16px;">
+      <div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3><span class="st-code">${esc(c.st.id)}</span> ${esc(c.st.name)}</h3>
+        <span class="small-muted">${esc(c.st.kv||'')} · ${L('peak load','โหลดสูงสุด')} ${+c.st.peak||0} MVA · ${c.units.length} ${L('transformer(s)','หม้อแปลง')}</span>
+        <button class="btn btn-outline" data-net-addtr="${esc(c.st.id)}" style="padding:6px 12px;font-size:12px;">+ ${L('Add transformer','เพิ่มหม้อแปลง')}</button></div>
+      <div class="net-st" style="border:none;background:none;padding:0;">${netStationSvg(c,'sld')}</div>
+      <div class="small-muted" style="font-size:11.5px;margin-bottom:8px;">${netRedundancyText(c)}</div>
+      <div class="tbl-wrap"><table class="rowlink sch-tbl"><thead><tr><th>${L('Transformer','หม้อแปลง')}</th><th>MVA</th><th>${L('Voltage','แรงดัน')}</th><th>${L('Manufacturer','ผู้ผลิต')}</th><th>${L('Year','ปีผลิต')}</th><th>HI</th><th>${t('status')}</th><th>${L('Load','โหลด')} %</th></tr></thead><tbody>
+      ${c.units.map(u=>`<tr data-view="${esc(u.a.id)}" style="cursor:pointer;"><td><b>${esc(u.a.id)}</b></td><td>${u.a.cap||'—'}</td><td>${esc(u.a.volt||'—')} kV</td><td>${esc(u.a.mfr||'—')}</td><td>${u.a.year||'—'}</td><td style="color:${hiColor(u.a.hi)};font-weight:800;">${u.a.hi}</td><td><span class="pill ${statusPillClass(u.a.status)}">${trStatus(u.a.status)}</span></td><td>${u.a.load??'—'}</td></tr>`).join('') || `<tr><td colspan="8" class="small-muted">${L('No transformer yet','ยังไม่มีหม้อแปลง')}</td></tr>`}
+      </tbody></table></div></div>`).join('');
+  return `<div class="card" style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+      ${tabs}<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" data-net-addst="1" style="padding:6px 12px;font-size:12px;">+ ${L('Add substation','เพิ่มสถานี')}</button><button class="btn btn-outline" data-goto-rel="1" style="padding:6px 12px;font-size:12px;">${L('Reliability (R) →','ความน่าเชื่อถือ (R) →')}</button></div></div>
+    ${cards || `<div class="card small-muted">${L('No substation yet — press “+ Add substation”.','ยังไม่มีสถานี — กด “+ เพิ่มสถานี”')}</div>`}
+    <div class="net-legend"><span><i style="background:#1fa571"></i>${t('healthy')}</span><span><i style="background:#d99012"></i>${t('warning')}</span><span><i style="background:#c62d23"></i>${t('critical')}</span><span>□ ${L('circuit breaker','เซอร์กิตเบรกเกอร์')}</span><span>${L('Simplified single-line diagram. Click a transformer to open it.','แผนภาพเส้นเดี่ยวอย่างง่าย · กดที่หม้อแปลงเพื่อเปิดดู')}</span></div>`;
+}
 function netHtml(){
   const N = netCalc(); const top = N.ranked[0]; const tt = N.t; const yr = L(tt>1?'yrs':'yr','ปี');
   const conn = (c)=> c.units.length<=1 ? L('single unit','ตัวเดียว') : c.k===1 ? L(`parallel (1-out-of-${c.units.length})`,`ขนาน (1-out-of-${c.units.length})`) : c.k===c.units.length ? L(`series (${c.k}-out-of-${c.units.length})`,`อนุกรม (${c.k}-out-of-${c.units.length})`) : `${c.k}-out-of-${c.units.length}`;
-  const stHtml = N.sts.map(c=>`<div class="net-st">
-      <div class="hd"><span class="st-code">${esc(c.st.id)}</span><span class="nm">${esc(c.st.name)}</span><span class="small-muted">${esc(c.st.kv||'')} · ${c.units.length} ${L('transformer(s)','หม้อแปลง')}</span>
-        <span class="rs" style="color:${rBand(c.R)};border-color:${rBand(c.R)};">R<sub>SS</sub> ${f4(c.R)}</span></div>
-      <div style="margin:2px 0 -4px;"><button class="linklike" data-net-addtr="${esc(c.st.id)}" style="font-size:12px;">+ ${L('Add transformer to this substation','เพิ่มหม้อแปลงในสถานีนี้')}</button></div>
-      ${netStationSvg(c)}
-      <div class="small-muted" style="font-size:11.5px;">${netRedundancyText(c)}${!+c.st.k?` · ${L('auto from MVA','คำนวณอัตโนมัติจาก MVA')}`:''}</div>
-    </div>`).join('');
+  const stHtml = N.sts.length ? `<div class="rbd-wrap">${rbdSvg(N)}</div>` : '';
   const maxIC = Math.max(0.0001, ...N.ranked.map(u=>u.IC));
   const rank = N.ranked.map(u=>`<tr data-view="${esc(u.a.id)}" style="cursor:pointer;"><td><b>${u.rank}</b></td><td><b>${esc(u.a.id)}</b></td><td><span class="st-code">${esc(u.c.st.id)}</span> ${esc(u.c.st.name)}</td>
       <td style="color:${rBand(u.R)};font-weight:800;">${f4(u.R)}</td>
@@ -1749,7 +1817,7 @@ function netHtml(){
         <td><div class="cv">${f4(u.lam)}</div><div class="cf">${u.zero?'0.693':u.r} ÷ ${u.T.toFixed(2)}</div></td>
         <td><div class="cv" style="color:${rBand(u.R)};">${f4(u.R)}</div><div class="cf">e<sup>−${f4(u.lam)}×${tt}</sup></div></td></tr>`).join('')}
       </tbody></table></div>
-      <p class="small-muted" style="font-size:11px;margin:6px 0 0;">* ${L('No failure recorded yet: 0.693 is used instead of 0 (median estimate) so R is not 100 %.','ยังไม่เคยเสีย: ใช้ 0.693 แทน 0 (ค่าประมาณกลาง) เพื่อไม่ให้ R เป็น 100%')}</p>`);
+      <p class="small-muted" style="font-size:11px;margin:6px 0 0;">* ${L('No failure recorded yet: 0.693 is used instead of 0 (median estimate, χ²<sub>0.50,2</sub> ÷ 2) so R is not 100 %.','ยังไม่เคยเสีย: ใช้ 0.693 แทน 0 (ค่าประมาณกลาง χ²<sub>0.50,2</sub> ÷ 2) เพื่อไม่ให้ R เป็น 100%')}</p>${refNote('Constant failure rate λ = r ÷ T and R(t) = e<sup>−λt</sup> (exponential model): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley.','อัตราการเสียคงที่ λ = r ÷ T และ R(t) = e<sup>−λt</sup> (แบบเอกซ์โพเนนเชียล): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley')}`);
   const s2 = step(2, L('Reliability of each substation','ความน่าเชื่อถือของแต่ละสถานี'),
       L('Combine the transformers by how they are connected: parallel = they back each other up, series = all are needed.','รวมหม้อแปลงตามการต่อ: ขนาน = สำรองกันได้ · อนุกรม = ต้องใช้ทุกตัว'),
       `<div class="tbl-wrap"><table><thead><tr><th>${L('Substation','สถานี')}</th><th>${L('Connection','การต่อ')}</th><th>${L('Formula','สูตร')}</th><th>${L('With numbers','แทนค่า')}</th><th style="text-transform:none">R<sub>SS</sub></th></tr></thead><tbody>
@@ -1759,7 +1827,7 @@ function netHtml(){
         else if(c.k===c.units.length){ fx=c.units.map((_,i)=>`R<sub>${i+1}</sub>`).join(' × '); num=R.join(' × '); }
         else { fx=L(`sum of states with ≥ ${c.k} units working`,`รวมทุกกรณีที่มีหม้อแปลงทำงาน ≥ ${c.k} ตัว`); num=R.join(', '); }
         return `<tr><td><span class="st-code">${esc(c.st.id)}</span> <b>${esc(c.st.name)}</b><div class="cf small-muted">${c.units.map((u,i)=>`R<sub>${i+1}</sub> = ${esc(u.a.id)}`).join(' · ')}</div></td><td>${conn(c)}</td><td>${fx}</td><td style="white-space:nowrap;">${num}</td><td><div class="cv" style="color:${rBand(c.R)};">${f4(c.R)}</div></td></tr>`; }).join('')}
-      </tbody></table></div>`);
+      </tbody></table></div>${refNote('Series, parallel and k-out-of-n structures: Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley. k = units needed to carry the peak load (N-1 criterion).','โครงสร้างอนุกรม ขนาน และ k-out-of-n: Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley · k = จำนวนหม้อแปลงที่ต้องใช้รับโหลดสูงสุด (เกณฑ์ N-1)')}`);
   const s3 = step(3, L('Reliability of the whole system','ความน่าเชื่อถือของทั้งระบบ'),
       L('Every substation must be able to supply its load, so the substations are multiplied (series).','ทุกสถานีต้องจ่ายไฟได้ จึงนำค่าของแต่ละสถานีมาคูณกัน (อนุกรม)'),
       `<div class="calc-res"><span>R<sub>sys</sub> = ${N.sts.map(c=>`R<sub>${esc(c.st.id)}</sub>`).join(' × ')}</span><span>= ${N.sts.map(c=>f4(c.R)).join(' × ')}</span><span>=</span><span class="eq" style="color:${rBand(N.Rsys)};">${f4(N.Rsys)}</span><span class="small-muted">(${L(`${pctR(N.Rsys)} chance the whole system runs ${tt} ${yr} without a supply loss`,`โอกาส ${pctR(N.Rsys)} ที่ระบบจะจ่ายไฟได้ตลอด ${tt} ${yr}`)})</span></div>`);
@@ -1768,7 +1836,7 @@ function netHtml(){
       `<div class="tbl-wrap"><table><thead><tr><th>#</th><th>${L('Transformer','หม้อแปลง')}</th><th style="text-transform:none">R<sub>sys</sub> ${L('if it never fails','ถ้าตัวนี้ไม่เสีย')}</th><th style="text-transform:none">R<sub>sys</sub> ${L('if it fails','ถ้าตัวนี้เสีย')}</th><th style="text-transform:none">I<sub>B</sub> (${L('difference','ผลต่าง')})</th><th style="text-transform:none">${L('Chance it fails','โอกาสเสีย')} 1 − R</th><th style="text-transform:none">I<sub>C</sub></th></tr></thead><tbody>
       ${N.ranked.map(u=>`<tr><td><b>${u.rank}</b></td><td><b>${esc(u.a.id)}</b></td><td>${f4(u.Rup)}</td><td>${f4(u.Rdn)}</td><td><div class="cv">${f4(u.IB)}</div><div class="cf">${f4(u.Rup)} − ${f4(u.Rdn)}</div></td><td>${f4(1-u.R)}</td>
         <td><div class="cv" style="color:${u.rank===1?'#c62d23':'inherit'};">${pctR(u.IC)}</div><div class="cf">${f4(u.IB)} × ${f4(1-u.R)} ÷ ${f4(1-N.Rsys)}</div></td></tr>`).join('')}
-      </tbody></table></div>`);
+      </tbody></table></div>${refNote('Birnbaum importance I<sub>B</sub>: Birnbaum (1969), <i>Multivariate Analysis II</i>, Academic Press · criticality importance I<sub>C</sub>: Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., ch. 5.','Birnbaum importance I<sub>B</sub>: Birnbaum (1969), <i>Multivariate Analysis II</i>, Academic Press · Criticality importance I<sub>C</sub>: Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., บทที่ 5')}`);
   return `<div class="card" style="margin-bottom:16px;">
     <div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('System reliability — which transformer to focus on first','ความน่าเชื่อถือของระบบ — ควรโฟกัสหม้อแปลงตัวไหนก่อน')}</h3>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span class="small-muted">${L('Mission time','ช่วงเวลา')} t</span>
@@ -1777,13 +1845,13 @@ function netHtml(){
       <button class="btn btn-outline" data-net-edit="1" style="padding:6px 12px;font-size:12px;">${L('Edit network','แก้ไขเครือข่าย')}</button></div></div>
     <div class="net-sys"><span>${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub>(${tt} ${yr}) <b class="big" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</b></span>
       ${top?`<span>${L('Focus first','โฟกัสก่อน')}: <b>${esc(top.a.id)}</b> (${esc(top.c.st.name)}) — ${L(`if the system fails, ${pctR(top.IC)} chance this unit is the cause`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}</span>`:''}</div>
-    <div class="net-wrap">${stHtml || `<p class="small-muted">${L('No substation yet — press “+ Add substation”.','ยังไม่มีสถานี — กด “+ เพิ่มสถานี”')}</p>`}</div>
-    <div class="net-legend"><span><i style="background:#1fa571"></i>R ≥ 0.95</span><span><i style="background:#d99012"></i>0.85–0.95</span><span><i style="background:#c62d23"></i>&lt; 0.85</span><span>□ ${L('circuit breaker','เซอร์กิตเบรกเกอร์')}</span><span>${L('#n = priority rank · click a transformer to open it','#n = ลำดับความสำคัญ · กดที่หม้อแปลงเพื่อเปิดดู')}</span></div>
+    <div style="margin:4px 0 10px;">${stHtml || `<p class="small-muted">${L('No substation yet — press “+ Add substation”.','ยังไม่มีสถานี — กด “+ เพิ่มสถานี”')}</p>`}</div>
+    <div class="net-legend"><span><i style="background:#1fa571"></i>R ≥ 0.95</span><span><i style="background:#d99012"></i>0.85–0.95</span><span><i style="background:#c62d23"></i>&lt; 0.85</span><span>${L('Reliability block diagram: blocks side by side = series (all needed) · stacked = parallel (back each other up). Click a block to open the transformer.','แผนภาพบล็อกความน่าเชื่อถือ (RBD): บล็อกเรียงต่อกัน = อนุกรม (ต้องใช้ทุกตัว) · บล็อกซ้อนกัน = ขนาน (สำรองกันได้) · กดที่บล็อกเพื่อเปิดหม้อแปลง')}</span><button class="linklike" data-goto-sch="1" style="font-size:11.5px;">${L('See the single-line diagram →','ดูแผนภาพวงจร →')}</button></div>
   </div>
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head"><h3>${L('Priority ranking','ลำดับความสำคัญ')}</h3><span class="small-muted">${L('by criticality importance I_C','เรียงตาม Criticality importance (I<sub>C</sub>)')}</span></div>
     <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>#</th><th>${L('Transformer','หม้อแปลง')}</th><th>${L('Substation','สถานี')}</th><th>R(${tt})</th><th style="min-width:200px;">${L('Chance it causes a system failure','โอกาสเป็นสาเหตุที่ระบบล้มเหลว')} (I<sub>C</sub>)</th><th>HI</th><th></th></tr></thead><tbody>${rank||`<tr><td colspan="7" class="small-muted">—</td></tr>`}</tbody></table></div>
-    <p class="small-muted" style="font-size:11.5px;margin:8px 0 0;">${L('A healthy unit with no backup can rank above a poorer unit that has one. Use together with HI and risk.','หม้อแปลงที่สภาพดีแต่ไม่มีตัวสำรอง อาจสำคัญกว่าตัวที่สภาพแย่กว่าแต่มีตัวสำรอง · ใช้ร่วมกับ HI และความเสี่ยง')}</p>
+    <p class="small-muted" style="font-size:11.5px;margin:8px 0 0;">${L('A healthy unit with no backup can rank above a poorer unit that has one. Use together with HI and risk.','หม้อแปลงที่สภาพดีแต่ไม่มีตัวสำรอง อาจสำคัญกว่าตัวที่สภาพต่ำกว่าแต่มีตัวสำรอง · ใช้ร่วมกับ HI และความเสี่ยง')}</p>
   </div>
   ${N.sts.length?`<div class="card"><div class="card-head"><h3>${L('How it is calculated — step by step','วิธีคำนวณ — ทีละขั้น')}</h3><span class="small-muted">t = ${tt} ${yr}</span></div>${s1}${s2}${s3}${s4}</div>`:''}`;
 }
@@ -1829,6 +1897,7 @@ function netSettingsHtml(){
     </div>`; }).join('');
   const units = N.sts.flatMap(c=>c.units);
   return `<div class="card" style="margin-bottom:12px;"><div class="card-head"><h3>${L('Network & reliability','เครือข่ายและความน่าเชื่อถือ')}</h3><button class="btn btn-primary" id="btnNetAdd" style="padding:7px 12px;font-size:12px;">+ ${L('Add substation','เพิ่มสถานี')}</button></div>
+    <div class="formrow" style="max-width:520px;"><label>${L('Area name (shown on the Overview banner)','ชื่อพื้นที่ (แสดงบนแบนเนอร์หน้าแรก)')}</label><input id="netArea" value="${esc(NET.area||'')}" placeholder="${esc(netArea())}"></div>
     <p class="small-muted" style="margin:0;">${L('Substations and their transformers are drawn on the Overview. k = how many transformers must be in service to carry the peak load: Auto picks it from the MVA ratings (k = 1 means the units back each other up).','สถานีและหม้อแปลงจะแสดงเป็นแผนภาพที่หน้าแรก · k = จำนวนหม้อแปลงที่ต้องใช้งานเพื่อรับโหลดสูงสุด · อัตโนมัติจะคำนวณจากพิกัด MVA (k = 1 คือสำรองกันได้)')}</p></div>
     ${stCards}
     <div class="card"><div class="card-head"><h3>${L('Failure history','ประวัติการเสีย')}</h3><span class="small-muted">λ = r ÷ T</span></div>
@@ -1838,6 +1907,11 @@ function netSettingsHtml(){
       <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('Count only failures that took the transformer out of service. * zero failures → λ ≈ 0.693 ÷ T.','นับเฉพาะความล้มเหลวที่ทำให้หม้อแปลงหยุดจ่ายไฟ · * ไม่เคยเสีย → λ ≈ 0.693 ÷ T')}</p></div>`;
 }
 function attachNetEvents(){
+  const ar=document.getElementById('netArea'); if(ar) ar.addEventListener('change',()=>{ NET.area = ar.value.trim(); render(); toast(t('toast_saved'),'success'); });
+  document.querySelectorAll('[data-sch-st]').forEach(b=> b.addEventListener('click',()=>{ state.schSt = b.dataset.schSt; render(); }));
+  document.querySelectorAll('[data-goto-sch]').forEach(b=> b.addEventListener('click',()=>{ state.page='schematic'; if(b.dataset.gotoSch!=='1') state.schSt=b.dataset.gotoSch; render(); window.scrollTo(0,0); }));
+  document.querySelectorAll('.rbd-wrap svg .blk[data-view]').forEach(g=> g.addEventListener('click',()=> goToAssetDetail(g.dataset.view,'summary')));
+  const rs=document.getElementById('repScope'); if(rs) rs.addEventListener('change',()=>{ state.repScope = rs.value; render(); });
   document.querySelectorAll('[data-goto-rel]').forEach(b=> b.addEventListener('click',()=>{ state.page='reliability'; render(); window.scrollTo(0,0); }));
   document.querySelectorAll('[data-net-addtr]').forEach(b=> b.addEventListener('click',()=> openAddAssetModal(b.dataset.netAddtr)));
   document.querySelectorAll('[data-net-t]').forEach(b=> b.addEventListener('click',()=>{ NET.t = +b.dataset.netT; render(); }));
@@ -1870,15 +1944,14 @@ function renderOverview(){
     <div class="card stat">${badge('watch',44)}<div><div class="label">${t('warning')}</div><div class="value">${warning}</div><div class="small-muted">${pct(warning)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
     <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">${critical}</div><div class="small-muted">${pct(critical)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
   </div>
-  ${netSummaryHtml()}
   <div class="grid" style="grid-template-columns:1fr; gap:16px;">
     <div class="card">
       <div class="card-head"><h3>${t('attention')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
-      <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${t('asset')}</th><th>HI</th><th>${L('Risk','ความเสี่ยง')}</th><th>DGA</th><th>${L('Strategy','กลยุทธ์')}</th><th>${L('Action','ต้องทำ')}</th></tr></thead><tbody>
-      ${attentionList().map(a=>`<tr data-view="${a.id}"><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)};font-weight:800;">${a.hi}</td><td>${riskPill(riskOf(a).level)}</td><td>${a._as&&a._as.dga.code!=='N'?`<b>${a._as.dga.code}</b><div class="small-muted" style="white-space:normal;">${dgaName(a._as.dga.code)}</div>`:'—'}</td><td>${strategyOf(a)}</td><td class="small-muted" style="white-space:normal;">${profileFor(a).nextAction[state.lang]}</td></tr>`).join('') || `<tr><td colspan="6" class="small-muted">${L('No transformer needs attention','ไม่มีหม้อแปลงที่ต้องดูแล')}</td></tr>`}
+      <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${t('asset')}</th><th>HI</th><th>${L('Risk','ความเสี่ยง')}</th><th>DGA</th><th>${L('Task strategy (RCM)','กลยุทธ์ระดับงาน')}</th><th>${L('Action','ต้องทำ')}</th></tr></thead><tbody>
+      ${attentionList().map(a=>`<tr data-view="${a.id}"><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)};font-weight:800;">${a.hi}</td><td>${riskPill(riskOf(a).level)}</td><td>${a._as&&a._as.dga.code!=='N'?`<b>${a._as.dga.code}</b><div class="small-muted" style="white-space:normal;">${dgaName(a._as.dga.code)}</div>`:'—'}</td><td style="white-space:normal;">${taskStratSummary(a)}</td><td class="small-muted" style="white-space:normal;">${profileFor(a).nextAction[state.lang]}</td></tr>`).join('') || `<tr><td colspan="6" class="small-muted">${L('No transformer needs attention','ไม่มีหม้อแปลงที่ต้องดูแล')}</td></tr>`}
       </tbody></table></div>
     </div>
-    <div class="card"><div class="card-head"><h3>${t('hi_trend_fleet')}</h3></div>${chartBox('ovTrend2',180)}</div>
+    <div class="card"><div class="card-head"><h3>${t('hi_trend_fleet')}</h3></div>${chartBox('ovTrend2',180)}<p class="refnote" style="margin-top:6px;">${L('How the trend is used: the slope of the straight line through all HI points = HI decreasing rate (points/year). It goes into the Risk matrix together with today’s HI, and is compared with normal ageing for the unit’s age.','การใช้แนวโน้ม: ความชันของเส้นตรงที่ลากผ่านค่า HI ทุกจุด = อัตรา HI ลดลง (คะแนน/ปี) นำไปหาระดับความเสี่ยงใน Risk matrix ร่วมกับค่า HI ปัจจุบัน และใช้เทียบกับการเสื่อมตามอายุปกติ')} ${L('Years are shown in B.E.','ปีแสดงเป็น พ.ศ.')}</p>${refNote('Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327 (risk from HI and its decreasing rate).','Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327 (ความเสี่ยงจาก HI และอัตราการลดลง)')}</div>
   </div>`;
 }
 function updateClock(){
@@ -1895,7 +1968,7 @@ function initOverviewCharts(){
   if(document.getElementById('ovDonut')) mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
   const sc={PM:0,CBM:0,'CBM + PdM':0}; ASSETS.forEach(a=>sc[strategyOf(a)]++);
   if(document.getElementById('ovStrategy')) mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','CBM + PdM'],datasets:[{data:[sc.PM,sc.CBM,sc['CBM + PdM']],backgroundColor:['#5E7A8C','#1fa571','#8759d6'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{data:fleetTrend(),borderColor:'#656C5C',backgroundColor:'#656C5C22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#5E7A8C'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
+  mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{data:fleetTrend(),borderColor:'#656C5C',backgroundColor:'#656C5C22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#5E7A8C'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
   document.querySelectorAll('[data-goto-risk]').forEach(b=>b.addEventListener('click',()=>{ state.page='risk'; render(); window.scrollTo(0,0); }));
@@ -2035,15 +2108,12 @@ function detailSummaryTab(a){
         ${ag?`<li><span>${L('Condition vs age','สภาพเทียบอายุ')}</span><b style="color:${ag.accelerated?'var(--red)':'inherit'};">${ag.accelerated?L(`like ${ag.apparent.toFixed(0)} yr (actual ${ag.age})`,`เหมือน ${ag.apparent.toFixed(0)} ปี (จริง ${ag.age})`):L('normal','ปกติ')}</b></li>`:''}
         <li><span>DGA</span><b>${prof.code==='N'?L('normal','ปกติ'):`${prof.code} · ${prof.type[state.lang]}`}</b></li>
       </ul>
-      <div class="sum-why"><div class="sum-h">${L('Maintenance strategy — two levels','กลยุทธ์การบำรุงรักษา — 2 ระดับ')}</div>
-        <div class="strat-two"><div><div class="lab">${L('Asset strategy','ระดับหม้อแปลง')}</div><div class="val">${strategyOf(a)}</div><div class="small-muted" style="font-size:11px;">${L('How closely the whole unit is watched — from HI & risk','ความถี่ในการเฝ้าระวังทั้งตัว — จาก HI และความเสี่ยง')}</div></div>
-        <div><div class="lab">${L('Task strategies (RCM)','ระดับงาน (RCM)')}</div><div class="val" style="font-size:13px;">${taskStratSummary(a)}</div><div class="small-muted" style="font-size:11px;">${L('The job for each failure mode — from the RCM decision logic','งานของแต่ละโหมดความล้มเหลว — จากตรรกะ RCM')}</div></div></div>
-        <div class="small-muted" style="margin-top:6px;">${strategyWhy(a, rk)} ${L('The two work together: the asset strategy sets the monitoring level, the task strategies say what to do on each component.','ทั้งสองทำงานร่วมกัน: ระดับหม้อแปลงกำหนดความเข้มของการเฝ้าระวัง ส่วนระดับงานบอกว่าต้องทำอะไรกับแต่ละชิ้นส่วน')}</div></div>
+      <div class="sum-why"><div class="sum-h">${L('Task strategies (RCM)','กลยุทธ์ระดับงาน (RCM)')}: ${taskStratSummary(a)}</div><div class="small-muted">${L('One maintenance strategy per failure mode, from the RCM decision logic (SAE JA1011).','กลยุทธ์ของแต่ละโหมดความล้มเหลว ได้จากตรรกะการตัดสินใจ RCM (SAE JA1011)')} <button class="linklike" data-dtab="fmearcm" style="font-size:12px;">${L('Open RCM decision →','เปิดการตัดสินใจ RCM →')}</button></div></div>
       <div class="sum-todo"><div class="sum-h">${L('What to do','สิ่งที่ต้องทำ')}</div>
         <ol>${[prof.nextAction[state.lang], ...prof.actions.filter(x=>!/routine|ตามรอบปกติ|Resample|เก็บน้ำมันตรวจ DGA ซ้ำ/.test(x))].slice(0,3).map(x=>`<li>${x}</li>`).join('')}</ol>
         <button class="linklike" data-dtab="plan">${L('Open maintenance plan →','ไปที่แผนบำรุงรักษา →')}</button></div>
     </div>
-    <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3><button class="linklike" data-dtab="condition">${L('How is it scored? →','ดูที่มาของคะแนน →')}</button></div>${chartBox('detTrend',230)}</div>
+    <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3><button class="linklike" data-dtab="condition">${L('How is it scored? →','ดูที่มาของคะแนน →')}</button></div>${chartBox('detTrend',230)}<p class="refnote" style="margin-top:6px;">${L('How the trend is used: the slope of the straight line through all HI points = HI decreasing rate (points/year). It goes into the Risk matrix together with today’s HI, and is compared with normal ageing for the unit’s age.','การใช้แนวโน้ม: ความชันของเส้นตรงที่ลากผ่านค่า HI ทุกจุด = อัตรา HI ลดลง (คะแนน/ปี) นำไปหาระดับความเสี่ยงใน Risk matrix ร่วมกับค่า HI ปัจจุบัน และใช้เทียบกับการเสื่อมตามอายุปกติ')} ${L('Years are shown in B.E.','ปีแสดงเป็น พ.ศ.')}</p>${refNote('Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327 (risk from HI and its decreasing rate).','Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327 (ความเสี่ยงจาก HI และอัตราการลดลง)')}</div>
   </div>
   <div class="card opstrip">
     <span class="op-svc" style="color:${a.svc==='out'?'var(--red)':'var(--green)'};">● ${a.svc==='out'?L('Out of service','หยุดใช้งาน'):t('in_service')}</span>
@@ -2052,7 +2122,7 @@ function detailSummaryTab(a){
   </div>
   <div style="margin-top:16px;">${beforeAfterHtml(a)}</div>`;
 }
-function taskStratSummary(a){ const c={}; let pend=0; FMEA.forEach(f=>{ const e=rcmEvaluate(rcmAnsFor(a,f)); if(e.decision) c[e.decision]=(c[e.decision]||0)+1; else pend++; });
+function taskStratSummary(a){ const c={}; let pend=0; (a.id===state.assetId && state.page==='detail' ? FMEA : getFmeaFor(a)).forEach(f=>{ const e=rcmEvaluate(rcmAnsFor(a,f)); if(e.decision) c[e.decision]=(c[e.decision]||0)+1; else pend++; });
   const parts = ['CBM','PM','FFT','RTD','BM'].filter(k=>c[k]).map(k=>`${c[k]} ${k}`); if(pend) parts.push(`${pend} ${L('pending','รอวิเคราะห์')}`);
   return parts.join(' · ') || '—'; }
 function strategyWhy(a, rk){
@@ -2227,7 +2297,7 @@ function detailHealthIndexTab(a){
   const fg = a.status==='Critical'?'var(--red)':a.status==='Warning'?'var(--amber)':'var(--green)';
   const bg = a.status==='Critical'?'var(--red-bg)':a.status==='Warning'?'var(--amber-bg)':'var(--green-bg)';
   const gradeCol = (c)=>({A:'var(--green)',B:'var(--green)',C:'var(--amber)',D:'var(--red)',E:'var(--red)'})[c];
-  const word = (sc)=> sc==null?['—','var(--muted)'] : sc<=1?[L('Good','ดี'),'var(--green)'] : sc===2?[L('Fair','พอใช้'),'var(--amber)'] : sc===3?[L('Poor','แย่'),'var(--red)'] : [L('Very poor','แย่มาก'),'var(--red)'];
+  const word = (sc)=> sc==null?['—','var(--muted)'] : sc<=1?[L('Good','ดี'),'var(--green)'] : sc===2?[L('Fair','พอใช้'),'var(--amber)'] : sc===3?[L('Poor','ต่ำ'),'var(--red)'] : [L('Very poor','ต่ำมาก'),'var(--red)'];
   const line = (label,val,w)=>`<li><span class="k">${label}<div class="small-muted" style="font-weight:600;">${val}</div></span><span class="v" style="color:${w[1]};">${w[0]}</span></li>`;
   const topGas = FF_GASES.slice().sort((x,y)=>d.lv[y]-d.lv[x])[0];
   const lvWord = [null,L('Normal','ปกติ'),L('Slightly high','สูงเล็กน้อย'),L('High','สูง'),L('Very high','สูงมาก')][d.Lm];
@@ -2249,7 +2319,8 @@ function detailHealthIndexTab(a){
   </div>
   <details class="card" style="margin-bottom:16px;"><summary style="cursor:pointer;font-weight:800;">${L('Show the detailed calculation','ดูวิธีคำนวณแบบละเอียด')}</summary>
     ${hiCalcDetail(prof)}
-  </details>`;
+  </details>
+  ${refNote('Health Index — weights, scoring tables and grade bands: Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327 (AHP weights, Tables 2–9). Gas levels: IEEE Std C57.104-2019.','ดัชนีสุขภาพ — น้ำหนัก ตารางคะแนน และช่วงเกรด: Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327 (น้ำหนัก AHP, Table 2–9) · ระดับก๊าซ: IEEE Std C57.104-2019')}`;
 }
 function rateExplain(a, hr){
   const h = hiHistory(a); const t0 = parseD(h[0].date);
@@ -2295,10 +2366,10 @@ function hiCalcDetail(prof){
     ? `${gasTbl}<div class="cresult">${L('Every gas is below its normal limit (all level scores = 1) → the gas grade is A straight away.','ก๊าซทุกตัวต่ำกว่าเกณฑ์ปกติ (คะแนนระดับเป็น 1 ทั้งหมด) → ได้เกรด A ทันที')}</div>`
     : `${gasTbl}
        <ul class="csub">
-        <li>${L(`Take the <b>worst</b> level score = <b>${d.Lm}</b> and the worst trend score = <b>${d.Rm}</b>${d.hasRate?'':' (no earlier sample, so trend counts as 1)'} → gas condition <b>${d.gc}</b> (paper Table 2)`,`ใช้คะแนน<b>แย่ที่สุด</b>: ระดับ = <b>${d.Lm}</b> และแนวโน้ม = <b>${d.Rm}</b>${d.hasRate?'':' (ไม่มีผลครั้งก่อน จึงถือแนวโน้มเป็น 1)'} → สภาพก๊าซ <b>${d.gc}</b> (ตาราง 2)`)}</li>
+        <li>${L(`Take the <b>worst</b> level score = <b>${d.Lm}</b> and the worst trend score = <b>${d.Rm}</b>${d.hasRate?'':' (no earlier sample, so trend counts as 1)'} → gas condition <b>${d.gc}</b> (paper Table 2)`,`ใช้คะแนน<b>ด้อยที่สุด</b>: ระดับ = <b>${d.Lm}</b> และแนวโน้ม = <b>${d.Rm}</b>${d.hasRate?'':' (ไม่มีผลครั้งก่อน จึงถือแนวโน้มเป็น 1)'} → สภาพก๊าซ <b>${d.gc}</b> (ตาราง 2)`)}</li>
         <li>${L(`Fault type from the gas pattern (paper rule, Duval Pentagon: <b>${d.pzone}</b>) → type condition <b>${d.dc}</b>`,`ชนิดความผิดปกติจากสัดส่วนก๊าซ (กฎตามงานวิจัย ห้าเหลี่ยม Duval: <b>${d.pzone}</b>) → ระดับชนิด <b>${d.dc}</b>`)}</li>
         <li>${L('Read the grade where the two meet:','อ่านเกรดจากช่องที่ทั้งสองค่าตัดกัน:')}</li>
-       </ul>${t3}${d.falseFlag?`<p class="small-muted" style="font-size:11px;">${L('The two results do not fit together (✕ in the table), so the worse of the two was used.','ผลทั้งสองไม่เข้ากัน (ช่อง ✕) จึงใช้ค่าที่แย่กว่า')}</p>`:''}`;
+       </ul>${t3}${d.falseFlag?`<p class="small-muted" style="font-size:11px;">${L('The two results do not fit together (✕ in the table), so the worse of the two was used.','ผลทั้งสองไม่เข้ากัน (ช่อง ✕) จึงใช้ค่าที่ด้อยกว่า')}</p>`:''}`;
 
   /* --- final --- */
   const wsum = F.FF.w+F.OQF.w+F.PCF.w; const parts = ['FF','OQF','PCF'].map(k=>({k, sf:F[k].sf, w:F[k].w/wsum, pts:F[k].sf/4*F[k].w/wsum*100}));
@@ -2306,7 +2377,7 @@ function hiCalcDetail(prof){
   const bar = `<div class="hibar">${parts.map(p=>`<div class="hiseg" style="flex:${p.w};"><div class="hifill" style="width:${p.sf/4*100}%;background:${gcol[F[p.k].code]};"></div><span>${names[p.k]} ${p.pts.toFixed(1)} / ${(p.w*100).toFixed(1)}</span></div>`).join('')}</div>`;
 
   return `<div class="cwrap">
-    <p class="small-muted" style="margin:10px 0 14px;">${L('Each test result gets a score from 1 (best) to 4 or 5 (worst). Results are grouped into three parts, each part gets a grade A–E, and the grades are turned into a 0–100 Health Index.','ผลตรวจแต่ละค่าจะได้คะแนน 1 (ดีที่สุด) ถึง 4 หรือ 5 (แย่ที่สุด) แล้วรวมเป็น 3 กลุ่ม แต่ละกลุ่มได้เกรด A–E จากนั้นแปลงเกรดเป็นดัชนีสุขภาพ 0–100')}</p>
+    <p class="small-muted" style="margin:10px 0 14px;">${L('Each test result gets a score from 1 (best) to 4 or 5 (worst). Results are grouped into three parts, each part gets a grade A–E, and the grades are turned into a 0–100 Health Index.','ผลตรวจแต่ละค่าจะได้คะแนน 1 (ดีที่สุด) ถึง 4 หรือ 5 (ด้อยที่สุด) แล้วรวมเป็น 3 กลุ่ม แต่ละกลุ่มได้เกรด A–E จากนั้นแปลงเกรดเป็นดัชนีสุขภาพ 0–100')}</p>
     ${step(1, L('Gas / fault condition','ก๊าซและความผิดปกติ'), ffBody + factorOut('FF'))}
     ${step(2, L('Oil quality — score each test, then take the weighted average','คุณภาพน้ำมัน — ให้คะแนนแต่ละค่า แล้วหาค่าเฉลี่ยถ่วงน้ำหนัก'), paramTable(F.OQF.rows, OQ_PARAMS) + avgLine('OQF') + gradeScale(F.OQF.val) + factorOut('OQF'))}
     ${step(3, L('Paper insulation — same method','ฉนวนกระดาษ — วิธีเดียวกัน'), paramTable(F.PCF.rows, PC_PARAMS) + avgLine('PCF') + gradeScale(F.PCF.val) + factorOut('PCF'))}
@@ -2367,9 +2438,9 @@ function dgaSubTabContent(a){
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" data-create-plan="1">${gicon('plan',0,'width:13px;height:13px')} ${t('create_maint_plan')}</button></div></div>`;
 
   const interpLine = `<div class="notebox" style="margin-top:16px;">${gicon('help',16)}<div>${prof.interp[state.lang]}</div></div>`;
-  if(state.dgaSubTab==='ratio') return `<div class="grid g2" style="align-items:stretch;">${rogersBlock}${iecBlock}</div>`;
-  if(state.dgaSubTab==='trend') return trendBlock;
-  return `<div class="grid g2" style="align-items:stretch;">${gasResultsBlock}${duvalBlock}</div>${interpLine}`;
+  if(state.dgaSubTab==='ratio') return `<div class="grid g2" style="align-items:stretch;">${rogersBlock}${iecBlock}</div>${refNote('Rogers ratio: Rogers (1978), <i>IEEE Trans. Electrical Insulation</i> EI-13(5) · IEC ratio codes: IEC 60599:2015.','วิธีอัตราส่วน Rogers: Rogers (1978), <i>IEEE Trans. Electrical Insulation</i> EI-13(5) · รหัสอัตราส่วน IEC: IEC 60599:2015')}`;
+  if(state.dgaSubTab==='trend') return trendBlock + refNote('Gas rate of change (ppm/year) and limits: IEEE Std C57.104-2019.','อัตราการเปลี่ยนแปลงของก๊าซ (ppm/ปี) และเกณฑ์: IEEE Std C57.104-2019');
+  return `<div class="grid g2" style="align-items:stretch;">${gasResultsBlock}${duvalBlock}</div>${interpLine}${refNote('Normal gas ranges: IEEE Std C57.104-2019 · Duval Triangle: Duval (2002), <i>IEEE Electrical Insulation Magazine</i> 18(3); IEC 60599:2015.','ช่วงก๊าซปกติ: IEEE Std C57.104-2019 · สามเหลี่ยม Duval: Duval (2002), <i>IEEE Electrical Insulation Magazine</i> 18(3); IEC 60599:2015')}`;
 }
 function detailFmeaTab(a){
   const high = FMEA.filter(f=>f.risk==='High').length, med = FMEA.filter(f=>f.risk==='Medium').length, low = FMEA.length-high-med;
@@ -2403,7 +2474,8 @@ function detailFmeaTab(a){
       </div>
       <div class="notebox">${gicon('help',16)}<div>${fmeaTakeaway(a)}</div></div>
     </div>
-  </div>`;
+  </div>
+  ${refNote('FMEA and RPN = S × O × D: IEC 60812:2018. Priority S ≥ 9 first: AIAG &amp; VDA FMEA Handbook (2019).','FMEA และ RPN = S × O × D: IEC 60812:2018 · ลำดับ S ≥ 9 ก่อน: AIAG &amp; VDA FMEA Handbook (2019)')}`;
 }
 function fmeaTakeaway(a){
   const top2 = FMEA.slice().sort((x,y)=>y.rpn-x.rpn).slice(0,2).map(f=>f.comp);
@@ -2493,7 +2565,8 @@ function detailRcmTab(a){
       <div class="tbl-wrap"><table><thead><tr><th>${t('code')}</th><th>${t('failure_mode')}</th><th>${L('Consequence','ผลที่ตามมา')}</th><th>${L('Decision','ผลตัดสินใจ')}</th><th>${t('task')}</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="small-muted" style="font-size:11px;margin:10px 0 0;">CBM = ${L('on-condition','ตามสภาพ')} · PM = ${L('scheduled','ตามรอบ')} · FFT = ${L('failure-finding','ตรวจหาความล้มเหลวซ่อนเร้น')} · RTD = ${L('redesign','ออกแบบใหม่')} · BM = ${L('run to failure','ใช้จนเสีย')}</p>
     </div>
-  </div>`;
+  </div>
+  ${refNote('RCM decision logic (7 questions): SAE JA1011:2009; Moubray (1997), <i>Reliability-Centred Maintenance</i>, 2nd ed.','ตรรกะการตัดสินใจ RCM (7 คำถาม): SAE JA1011:2009; Moubray (1997), <i>Reliability-Centred Maintenance</i>, 2nd ed.')}`;
 }
 function detailPlanTab(a){
   const st = MAINT_PLAN.map(planStatus); const total = MAINT_PLAN.length;
@@ -2541,7 +2614,7 @@ function ganttHtml(plan, st){
   const lines = months.map(m=>`<div class="gmon" style="left:${pos(m)}%;"></div>`).join('');
   const tpos = (today>=r0 && today<r1) ? pos(today) : null;
   return `<div class="gantt">
-    <div class="timeline-row"><div></div><div class="gh">${months.map((m,i)=>`<div>${MON[m.getMonth()]}${(i===0||m.getMonth()===0)?' '+String(m.getFullYear()).slice(2):''}</div>`).join('')}</div></div>
+    <div class="timeline-row"><div></div><div class="gh">${months.map((m,i)=>`<div>${(i===0||m.getMonth()===0)?beLabel(m):(state.lang==='th'?MON_TH[m.getMonth()]:MON[m.getMonth()])}</div>`).join('')}</div></div>
     ${plan.map((tk,i)=>{ const a=parseD(tk.start), b=parseD(tk.end)||a; if(!a) return ''; const l=pos(a), w=Math.max(0.6, pos(new Date(b.getTime()+864e5))-l);
       return `<div class="timeline-row"><div class="small-muted" style="white-space:normal;">${esc(tk.task)}</div><div class="timeline-track">${lines}<div class="gbar ${st[i]==='Overdue'?'over':''}" style="left:${l}%; width:${w}%; background:${TYPE_COLOR[tk.type]||'#8b9099'}; opacity:${st[i]==='Completed'?.45:1};" title="${esc(tk.task)} · ${tk.start} → ${tk.end}"></div>${tpos===null?'':`<div class="today-line" style="left:${tpos}%;"></div>`}</div></div>`; }).join('')}
     <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('Range follows the task dates. Faded = completed, red outline = overdue, vertical line = today.','ช่วงเดือนคำนวณจากวันที่ของงาน · สีจาง = เสร็จแล้ว · ขอบแดง = เลยกำหนด · เส้นตั้ง = วันนี้')}</p>
@@ -2583,12 +2656,9 @@ function rcmFlowHtml(a){
     {k:'fmea', n:'FMEA / RPN', v:topF?`RPN ${topF.rpn}`:'—', s:topF?`${topF.code} · ${topF.comp}`:L('no failure modes','ยังไม่มีโหมด'), tab:'fmearcm', key:'fmView', val:'fmea'},
     {k:'dga', n:'DGA', v:prof.code==='N'?L('Normal','ปกติ'):prof.code, s:prof.type[state.lang], c:prof.code==='N'?'var(--green)':'var(--red)', tab:'condition', key:'condView', val:'dga'},
     {k:'dec', n:L('Decision logic','ตรรกะตัดสินใจ'), v:topEv&&topEv.decision?topEv.decision:L('Pending','รอวิเคราะห์'), s:`${done}/${FMEA.length} ${L('modes analysed','โหมดวิเคราะห์แล้ว')}`, tab:'fmearcm', key:'fmView', val:'rcm'},
-    {k:'strat', n:L('Asset strategy','กลยุทธ์หม้อแปลง'), v:strategyOf(a), s:L(`${riskName(rk.level)} risk`,`ความเสี่ยง${riskName(rk.level)}`), tab:'summary'},
-    {k:'plan', n:L('Plan','แผนงาน'), v:`${plan.length} ${L('tasks','งาน')}`, s:overdueN?`${overdueN} ${L('overdue','เลยกำหนด')}`:`${openTasks} ${L('not done','ยังไม่เสร็จ')}`, c:overdueN?'var(--red)':'', tab:'plan'},
-    {k:'wo', n:L('Work orders','ใบสั่งงาน'), v:`${wos.length} WO`, s:`${woOpen} ${L('open','เปิดอยู่')}`, tab:'plan', anchor:'woSection'},
-    {k:'hist', n:L('History','ประวัติ'), v:`${historyRows(a).length}`, s:L('records','รายการ'), tab:'history'},
+    {k:'strat', n:L('Task strategy (RCM)','กลยุทธ์ระดับงาน'), v:taskStratSummary(a), s:L(`${riskName(rk.level)} risk`,`ความเสี่ยง${riskName(rk.level)}`), tab:'summary'},
   ];
-  return `<nav class="rcmflow" aria-label="RCM workflow">${steps.map((x,i)=>`${i?'<span class="farr" aria-hidden="true">→</span>':''}<button class="fstep ${cur===x.k||(cur==='plan'&&x.k==='wo')?'on':''}" data-flow-tab="${x.tab}"${x.key?` data-flow-key="${x.key}" data-flow-val="${x.val}"`:''}${x.anchor?` data-flow-anchor="${x.anchor}"`:''}><span class="fnum">${i+1} · ${x.n}</span><span class="fval" style="${x.c?`color:${x.c};`:''}">${esc(x.v)}</span><span class="fsub">${esc(x.s)}</span></button>`).join('')}</nav>`;
+  return `<nav class="rcmflow" aria-label="RCM workflow">${steps.map((x,i)=>`${i?'<span class="farr" aria-hidden="true">→</span>':''}<button class="fstep ${cur===x.k||false?'on':''}" data-flow-tab="${x.tab}"${x.key?` data-flow-key="${x.key}" data-flow-val="${x.val}"`:''}${x.anchor?` data-flow-anchor="${x.anchor}"`:''}><span class="fnum">${i+1} · ${x.n}</span><span class="fval" style="${x.c?`color:${x.c};`:''}">${esc(x.v)}</span><span class="fsub">${esc(x.s)}</span></button>`).join('')}</nav>`;
 }
 
 /* ---------- RCM decision: plain-language reasons ---------- */
@@ -2693,7 +2763,7 @@ function beforeAfterHtml(a){
   const rate = riskOf(a).rate;
   const lvl = (hi)=>RISK_T10[hiRow(hi)][rateCol(rate)];
   const side = (label, as, date)=>{ const st=statusFromHi(as.hi); return `<div class="ba-side"><div class="small-muted" style="font-weight:700;">${label}</div><div class="ba-num" style="color:${hiColor(as.hi)};">${as.hi}</div><div class="small-muted">Health Index · ${hiCat(as.hi).name}${date?` · ${date}`:''}</div>
-      <div style="margin-top:9px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">${riskPill(lvl(as.hi))}<span class="pill ${statusPillClass(st)}">${trStatus(st)}</span><span class="pill pill-info">${stratForStatus(st)}</span></div></div>`; };
+      <div style="margin-top:9px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">${riskPill(lvl(as.hi))}<span class="pill ${statusPillClass(st)}">${trStatus(st)}</span></div></div>`; };
   const dHi = Math.round((r.after.hi - r.before.hi)*10)/10;
   const changed = r.after.rows.map((ra,i)=>({ra, rb:r.before.rows[i]})).filter(x=>x.rb && x.ra.key!=='age' && (x.ra.score!==x.rb.score || x.ra.res!==x.rb.res));
   const segBtns = Object.keys(BA_ACTIONS).map(k=>`<button class="${mode==='sim'&&k===key?'on':''}" data-ba-act="${k}">${L(BA_ACTIONS[k].name[0],BA_ACTIONS[k].name[1])}</button>`).join('') + (hasMeas?`<button class="${mode==='measured'?'on':''}" data-ba-mode="measured">${L('Measured','ผลจริง')} (${meas.done.tk.wo.no})</button>`:'');
@@ -2741,7 +2811,7 @@ function assetReportHtml(a){
       <div><span>${L('Status','สถานะ')}</span><b>${trStatus(a.status)}</b>&nbsp;</div>
       <div><span>${L('Risk','ความเสี่ยง')}</span><b>${riskName(rk.level)}</b>${rk.rate===null?'—':L(`−${rk.rate.toFixed(1)} HI/yr`,`ลดลง ${rk.rate.toFixed(1)}/ปี`)}</div>
       <div><span>DGA</span><b>${d.code==='N'?L('Normal','ปกติ'):d.code}</b>${d.code==='N'?'':dgaName(d.code)}</div>
-      <div><span>${L('Asset strategy','กลยุทธ์หม้อแปลง')}</span><b>${strategyOf(a)}</b>&nbsp;</div>
+      <div><span>${L('Task strategy','กลยุทธ์ระดับงาน')}</span><b style="font-size:11.5px;">${taskStratSummary(a)}</b>&nbsp;</div>
       <div><span>${L('Next sampling','ตรวจครั้งถัดไป')}</span><b style="font-size:11.5px;">${a.next}</b>&nbsp;</div>
     </div>
     <div class="r2">
@@ -2763,7 +2833,7 @@ function assetReportHtml(a){
     ${fm.map(({f,e})=>{ const tk=e.decision?rcmTaskFor(f.comp,e.decision):null; return `<tr><td>${f.code}</td><td>${f.comp} — ${f.mode}</td><td>${f.s}${f.s>=9?' ⚑':''}</td><td>${f.o}</td><td>${f.d}</td><td><b>${f.rpn}</b></td><td>${e.decision||L('pending','รอวิเคราะห์')}</td><td>${tk?tk[0]+' · '+tk[1]:'—'}</td></tr>`; }).join('')}</table>
     <div class="r2">
       <div><h2>${L('4 · Strategy','4 · กลยุทธ์')}</h2>
-        <div class="rbox"><b>${L('Asset','ระดับหม้อแปลง')}:</b> ${strategyOf(a)} — ${strategyWhy(a, rk).replace(/^(Why|เหตุผล): ?/,'')}<br><b>${L('Tasks (RCM)','ระดับงาน (RCM)')}:</b> ${taskStratSummary(a)}</div>
+        <div class="rbox"><b>${L('Tasks (RCM)','ระดับงาน (RCM)')}:</b> ${taskStratSummary(a)}</div>
       </div>
       <div><h2>${L('5 · Expected effect of maintenance','5 · ผลที่คาดหวังจากการบำรุงรักษา')}</h2>
         <div class="rbox">${baTaskName(key, baScenario(a), a)}: HI <b>${sim.before.hi}</b> → <b>${sim.after.hi}</b> · ${L('risk','ความเสี่ยง')} ${riskName(RISK_T10[hiRow(sim.before.hi)][rateCol(rk.rate)])} → ${riskName(RISK_T10[hiRow(sim.after.hi)][rateCol(rk.rate)])}<br><span style="color:#626a5c;">${L('Expected value — confirm with a post-maintenance lab result.','ค่าคาดการณ์ — ต้องยืนยันด้วยผลแล็บหลังบำรุงรักษา')}</span></div>
@@ -3120,7 +3190,8 @@ function renderRiskPage(){
       <td class="small-muted" style="white-space:normal;min-width:170px;">${riskAction(o.r)}</td></tr>`; }).join('')}
     </tbody></table></div>
     <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('HI decreasing rate = slope of the linear regression of HI over all samples. * less than 3 years of history (the paper requires ≥ 3 years) — indicative only.','อัตราการลดลงของ HI = ความชันของเส้นถดถอยเชิงเส้นของ HI จากทุกตัวอย่าง * ข้อมูลย้อนหลังน้อยกว่า 3 ปี (งานวิจัยกำหนด ≥ 3 ปี) — ใช้เป็นค่าประมาณ')}</p>
-  </div>`;
+  </div>
+  ${refNote('Risk matrix (HI value × HI decreasing rate) — Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327, Table 10. Normal ageing line HI = −1.8074 × age + 104.51 — same paper.','Risk matrix (ค่า HI × อัตรา HI ลดลง) — Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327, Table 10 · เส้นการเสื่อมตามอายุ HI = −1.8074 × อายุ + 104.51 — งานวิจัยเดียวกัน')}`;
 }
 function initRiskCharts(){
   const gridColor = cssv('--border'); const pts = ASSETS.map(a=>({a, ag:ageingOf(a)})).filter(o=>o.ag);
@@ -3175,7 +3246,22 @@ function taskSummaryHtml(r){
     <p class="small-muted" style="font-size:11px;margin:10px 0 0;">${L('A task is completed only when its work order is closed. Tasks past their end date without a closed work order are Overdue.','งานจะเสร็จเมื่อปิดใบสั่งงานเท่านั้น งานที่เลยวันสิ้นสุดโดยยังไม่ปิดใบสั่งงานจะเป็น “เลยกำหนด”')}</p>
   </div>`;
 }
+function reportScopeAssets(){ const sc = state.repScope || 'all'; if(sc==='all') return ASSETS.slice();
+  if(sc.startsWith('st:')){ const st = (NET&&NET.stations||[]).find(x=>x.id===sc.slice(3)); return st ? ASSETS.filter(a=>st.trs.includes(a.id)) : ASSETS.slice(); }
+  if(sc.startsWith('tr:')){ const a = ASSETS.find(x=>x.id===sc.slice(3)); return a ? [a] : ASSETS.slice(); } return ASSETS.slice(); }
+function withReportScope(fn){ const all = ASSETS.slice(); const sel = reportScopeAssets(); if(sel.length===all.length) return fn();
+  ASSETS.splice(0, ASSETS.length, ...sel); try{ return fn(); } finally { ASSETS.splice(0, ASSETS.length, ...all); } }
 function renderReports(){
+  ensureNet(); const sc = state.repScope || 'all';
+  const bar = `<div class="card" style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;"><b style="font-size:13px;">${L('Show report for','แสดงรายงานของ')}</b>
+    <select id="repScope" class="chip-input" style="min-width:240px;"><option value="all" ${sc==='all'?'selected':''}>${L('All transformers','หม้อแปลงทั้งหมด')}</option>
+      <optgroup label="${L('Substation','สถานี')}">${NET.stations.map(st=>`<option value="st:${esc(st.id)}" ${sc==='st:'+st.id?'selected':''}>${esc(st.id)} — ${esc(st.name)}</option>`).join('')}</optgroup>
+      <optgroup label="${L('Transformer','หม้อแปลง')}">${ASSETS.map(a=>`<option value="tr:${esc(a.id)}" ${sc==='tr:'+a.id?'selected':''}>${esc(a.id)} — ${esc(a.loc||'')}</option>`).join('')}</optgroup></select>
+    <span class="small-muted">${L('Charts use B.E. years.','กราฟแสดงปีเป็น พ.ศ.')}</span></div>`;
+  return bar + withReportScope(renderReportsInner);
+}
+function initReportsCharts(){ return withReportScope(initReportsChartsInner); }
+function renderReportsInner(){
   const r = reportStats(); const pct=(n)=>r.N?Math.round(n/r.N*100):0;
   const worst = ASSETS.slice().sort((x,y)=>x.hi-y.hi)[0];
   const famNames = {N:L('Within normal limits','อยู่ในเกณฑ์ปกติ'),T:L('Thermal (T1–T3)','ความร้อน (T1–T3)'),D:L('Discharge (D1–D2)','ดิสชาร์จ (D1–D2)'),PD:'PD',DT:L('Mixed (DT)','ผสม (DT)')};
@@ -3240,11 +3326,11 @@ function renderReports(){
     </div>
   </div>`;
 }
-function initReportsCharts(){
+function initReportsChartsInner(){
   const gridColor = cssv('--border'); const r = reportStats();
   mkChart('repDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[r.healthy,r.warning,r.critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
   mkChart('repDgaDonut',{type:'doughnut',data:{labels:Object.keys(r.fam),datasets:[{data:Object.values(r.fam),backgroundColor:['#1fa571','#e0473d','#eba020','#8759d6','#8b9099'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('repTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:FLEET_LABELS.map(x=>L(x[0],x[1])),datasets:[{label:'Avg HI',data:r.trend,borderColor:'#656C5C',backgroundColor:'#656C5C22',fill:true,tension:.35,pointRadius:3}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('repTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{label:'Avg HI',data:r.trend,borderColor:'#656C5C',backgroundColor:'#656C5C22',fill:true,tension:.35,pointRadius:3}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
   const comps = Object.entries(r.highByComp).sort((x,y)=>y[1]-x[1]);
   mkChart('repFmeaBar',{type:'bar',data:{labels:comps.map(c=>c[0]),datasets:[{data:comps.map(c=>c[1]),backgroundColor:'#e0473d'}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor},ticks:{precision:0}},y:{grid:{display:false}}}}});
 }
@@ -3491,6 +3577,7 @@ function pageMeta(){
     reports:[t('nav_reports'), t('sub_reports')],
     risk:[t('nav_risk'), t('sub_risk')],
     reliability:[t('nav_reliability'), t('sub_reliability')],
+    schematic:[t('nav_schematic'), t('sub_schematic')],
     settings:[t('nav_settings'), t('sub_settings')],
     'healthindex-overview':[t('nav_healthindex'), t('sub_fleet_overview')],
     'fmea-overview':[t('nav_fmea'), t('sub_fleet_overview')],
@@ -3515,6 +3602,7 @@ function render(){
   else if(state.page==='detail'){ syncAssetData(); content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(currentAsset()); }
   else if(state.page==='risk'){ content.innerHTML = renderRiskPage(); attachGlobalViewLinks(); initRiskCharts(); }
   else if(state.page==='reliability'){ content.innerHTML = netHtml(); attachGlobalViewLinks(); }
+  else if(state.page==='schematic'){ content.innerHTML = schematicHtml(); }
   else if(state.page==='reports'){ content.innerHTML = renderReports(); initReportsCharts(); attachReportsEvents(); }
   else if(state.page==='settings'){ content.innerHTML = renderSettings(); attachSettingsEvents(); }
   else if(state.page==='healthindex-overview'){ content.innerHTML = renderCategoryOverview('healthindex'); attachCategoryOverviewEvents(); }
