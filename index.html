@@ -464,6 +464,23 @@ table.rowlink tbody tr{cursor:pointer;} table.rowlink tbody tr:hover{background:
 .login-overlay{background:linear-gradient(120deg,#E6ECD6 0%,#F8F9F4 100%);}
 .login-card{border:1px solid var(--border); box-shadow:0 20px 50px rgba(62,68,55,.16);}
 @media (max-width:1180px){ .sidebar{box-shadow:0 0 40px rgba(0,0,0,.18);} }
+/* v7: system reliability / single-line diagram */
+.net-wrap{display:flex; flex-wrap:wrap; gap:16px; margin:4px 0 14px;}
+.net-st{flex:1 1 340px; border:1px solid var(--border); border-radius:12px; padding:12px 14px 8px; background:#fcfdf9;}
+.net-st .hd{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px;}
+.net-st .hd .nm{font-weight:800; font-size:14.5px;}
+.net-st .rs{margin-left:auto; font-weight:800; font-size:13px; border:1.5px solid; border-radius:8px; padding:2px 8px; white-space:nowrap;}
+.net-st svg{width:100%; height:auto; display:block;}
+.net-st svg .tr{cursor:pointer;} .net-st svg .tr:hover circle{stroke-width:3.2;}
+.net-sys{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; background:var(--blue-bg); border-radius:10px; padding:10px 14px; margin-bottom:12px; font-size:13px;}
+.net-sys b.big{font-size:20px;}
+.net-legend{display:flex; flex-wrap:wrap; gap:12px; font-size:11px; color:var(--muted); margin-top:4px;}
+.net-legend i{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; vertical-align:-1px;}
+.net-calc{font-size:12.5px; line-height:1.7;} .net-calc code{background:var(--blue-bg); padding:0 4px; border-radius:4px; font-weight:700;}
+.net-calc ul{margin:4px 0 10px; padding-left:18px;}
+.net-edit input,.net-edit select{width:100%;} .net-edit input[type=checkbox]{width:auto; flex:0 0 auto; margin:0;}
+.net-trlist{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:12.5px;}
+.net-trlist label{display:flex; align-items:center; gap:5px; white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -646,7 +663,7 @@ const UI = {
  generate_report:['Generate Report','สร้างรายงาน'], schedule_report:['Schedule Report','ตั้งเวลารายงาน'], export:['Export','ส่งออก'], frequency:['Frequency','ความถี่'],
  export_format:['Choose export format','เลือกรูปแบบไฟล์ที่ส่งออก'],
  settings_general:['General','ทั่วไป'], settings_hi:['Health Index Criteria','เกณฑ์ดัชนีสุขภาพ'], settings_fm:['Failure Mode Library','คลังโหมดความล้มเหลว'],
- settings_maint:['Maintenance Settings','ตั้งค่าบำรุงรักษา'], settings_users:['User Management','จัดการผู้ใช้'], settings_sys:['System & Data','ระบบและข้อมูล'],
+ settings_maint:['Maintenance Settings','ตั้งค่าบำรุงรักษา'], settings_users:['User Management','จัดการผู้ใช้'], settings_sys:['System & Data','ระบบและข้อมูล'], settings_net:['Network & reliability','เครือข่ายและความน่าเชื่อถือ'],
  system_info:['System Info','ข้อมูลระบบ'], edit:['Edit','แก้ไข'], system_name:['System Name','ชื่อระบบ'], version:['Version','เวอร์ชัน'],
  department:['Department','แผนก'], timezone:['Time Zone','เขตเวลา'], date_format:['Date Format','รูปแบบวันที่'], sys_language:['System Language','ภาษาระบบ'],
  hi_criteria_settings:['Health Index Criteria Settings','ตั้งค่าเกณฑ์ดัชนีสุขภาพ'], risk_thresholds:['Risk Level Thresholds','เกณฑ์ระดับความเสี่ยง'], level:['Level','ระดับ'],
@@ -1037,7 +1054,8 @@ function markPastDone(list){ const today=new Date(); today.setHours(0,0,0,0); (l
 /* ---------- Persistence (browser localStorage) ---------- */
 const STORE_KEY = 'rcm_transformer_data_v3';
 let NOTIF = {risk:true, dga:true, overdue:true};
-function snapshotData(){ return {v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, planV:2}; }
+let NET = null;   /* substations, transformer connection and reliability settings */
+function snapshotData(){ return {v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, planV:2, net:NET}; }
 function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
 function applyData(d){
   if(!d || d.v!==3 || !Array.isArray(d.assets)) return false;
@@ -1045,6 +1063,7 @@ function applyData(d){
   if(d.crit) CRIT = Object.assign(JSON.parse(JSON.stringify(CRIT_DEFAULT)), d.crit);
   if(d.notif) NOTIF = Object.assign({risk:true,dga:true,overdue:true}, d.notif);
   if(d.planV!==2) Object.values(MAINT_STORE).forEach(markPastDone);
+  NET = d.net || null;
   return true;
 }
 function loadData(){ try{ const raw=localStorage.getItem(STORE_KEY); return raw ? applyData(JSON.parse(raw)) : false; }catch(e){ return false; } }
@@ -1609,6 +1628,162 @@ function heroBannerHtml(){
     </div>
   </section>`;
 }
+/* =====================================================================
+   SYSTEM RELIABILITY (single-line diagram + importance ranking)
+   λ = failures ÷ total operating time;  R(t) = e^(−λt)
+   substation = k-out-of-n of its transformers (k = units needed to carry peak load)
+   system = all substations in series;  priority = criticality importance
+   ===================================================================== */
+const NET_ZERO_K = 0.693;   /* zero-failure median estimate: λ ≈ 0.693 ÷ T (χ² 50 %) */
+function netDefault(){
+  return {t:1, stations:[
+    {id:'SS-1', name:'Bang Na SS', kv:'115/24 kV', peak:45, k:0, trs:['TR-014','TR-009']},
+    {id:'SS-2', name:'Yannawa SS', kv:'115/24 kV', peak:75, k:0, trs:['TR-020','TR-012']} ]};
+}
+function ensureNet(){
+  if(NET && Array.isArray(NET.stations)) return NET;
+  NET = netDefault();
+  const seed = {'TR-014':2, 'TR-009':0, 'TR-020':3, 'TR-012':0};   /* sample failure history */
+  NET.stations.forEach(st=> st.trs.forEach(id=>{ const a=ASSETS.find(x=>x.id===id); if(a){ a.loc = st.name; if(a.fails==null) a.fails = seed[id]||0; } }));
+  return NET;
+}
+function opYears(a){ const y = +(a.inService || a.year); if(!y) return 0; return Math.max(0.1, (Date.now() - new Date(y, 6, 1).getTime()) / (365.25*864e5)); }
+function trRel(a, t){
+  const r = Math.max(0, Math.floor(+a.fails || 0)), T = opYears(a);
+  const lam = T>0 ? (r>0 ? r/T : NET_ZERO_K/T) : 0;
+  return {a, r, T, lam, zero:r===0, R: Math.exp(-lam*t)};
+}
+function koutofn(rs, k){ const n=rs.length; let tot=0; for(let m=0;m<(1<<n);m++){ let up=0, pr=1; for(let i=0;i<n;i++){ if((m>>i)&1){ up++; pr*=rs[i]; } else pr*=1-rs[i]; } if(up>=k) tot+=pr; } return tot; }
+function autoK(units, peak){ if(!units.length) return 1; const caps = units.map(u=>+u.a.cap||0).sort((x,y)=>x-y); let sum=0; for(let k=1;k<=caps.length;k++){ sum+=caps[k-1]; if(sum >= (+peak||0)) return k; } return caps.length; }
+function netCalc(){
+  ensureNet(); const t = +NET.t || 1;
+  const sts = NET.stations.map(st=>{
+    const units = st.trs.map(id=>ASSETS.find(a=>a.id===id)).filter(Boolean).map(a=>trRel(a,t));
+    const kAuto = autoK(units, st.peak); const k = Math.max(1, Math.min(units.length||1, +st.k || kAuto));
+    const R = units.length ? koutofn(units.map(u=>u.R), k) : 0;
+    return {st, units, k, kAuto, R};
+  });
+  const Rsys = sts.reduce((x,c)=>x*c.R, 1);
+  sts.forEach((c,ci)=>{ const other = sts.reduce((x,d,di)=> di===ci ? x : x*d.R, 1);
+    c.units.forEach((u,i)=>{ const up=c.units.map(v=>v.R), dn=up.slice(); up[i]=1; dn[i]=0;
+      u.Rup = other*koutofn(up,c.k); u.Rdn = other*koutofn(dn,c.k); u.IB = u.Rup - u.Rdn; u.IC = Rsys<1 ? u.IB*(1-u.R)/(1-Rsys) : 0; u.c = c; }); });
+  const ranked = sts.flatMap(c=>c.units).sort((x,y)=>y.IC-x.IC || y.IB-x.IB);
+  ranked.forEach((u,i)=>u.rank=i+1);
+  return {t, sts, Rsys, ranked};
+}
+const f4 = (v)=> (Math.round(v*10000)/10000).toFixed(4);
+const pctR = (v)=> (v*100).toFixed(1)+'%';
+function rBand(R){ return R>=0.95 ? '#1fa571' : R>=0.85 ? '#d99012' : '#c62d23'; }
+function netStationSvg(c){
+  const n = Math.max(1, c.units.length); const slot = 200; const W = Math.max(400, 20 + n*slot), H = 250;
+  const busY = 34, lvY = 196; const x0 = (W - n*slot)/2;
+  const items = c.units.map((u,i)=>{ const x = x0 + i*slot + 62, col = rBand(u.R), top = u.rank===1, tx = x + 27;
+    return `<g class="tr" data-view="${u.a.id}"><title>${u.a.id} — R(${NET.t}y) ${f4(u.R)}</title>
+      <rect x="${x-50}" y="${busY+40}" width="${slot-12}" height="80" fill="transparent"/>
+      <line x1="${x}" y1="${busY}" x2="${x}" y2="${lvY}" stroke="#7c8370" stroke-width="2"/>
+      <rect x="${x-7}" y="${busY+16}" width="14" height="14" fill="#fff" stroke="#4A5043" stroke-width="2"/>
+      <rect x="${x-7}" y="${lvY-34}" width="14" height="14" fill="#fff" stroke="#4A5043" stroke-width="2"/>
+      <circle cx="${x}" cy="${busY+66}" r="17" fill="#fff" stroke="${col}" stroke-width="2.6"/>
+      <circle cx="${x}" cy="${busY+90}" r="17" fill="#fff" fill-opacity=".85" stroke="${col}" stroke-width="2.6"/>
+      ${top?`<circle cx="${x-34}" cy="${busY+66}" r="13" fill="#c62d23"/><text x="${x-34}" y="${busY+70}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">#1</text>`
+           :`<circle cx="${x-34}" cy="${busY+66}" r="12" fill="#fff" stroke="#9aa08f"/><text x="${x-34}" y="${busY+70}" text-anchor="middle" font-size="10.5" font-weight="800" fill="#4A5043">#${u.rank}</text>`}
+      <text x="${tx}" y="${busY+58}" font-size="13.5" font-weight="800" fill="#23261F">${u.a.id}</text>
+      <text x="${tx}" y="${busY+76}" font-size="13" font-weight="800" fill="${col}">R ${f4(u.R)}</text>
+      <text x="${tx}" y="${busY+93}" font-size="11" fill="#5E6356">λ ${f4(u.lam)}/${L('yr','ปี')}</text>
+      <text x="${tx}" y="${busY+109}" font-size="11" fill="#5E6356">HI ${u.a.hi} · ${u.a.cap||'?'} MVA</text></g>`; }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.st.name)} single-line diagram">
+    <line x1="14" y1="${busY}" x2="${W-14}" y2="${busY}" stroke="#23261F" stroke-width="4"/>
+    <text x="16" y="${busY-9}" font-size="11" font-weight="800" fill="#4A5043">${esc((c.st.kv||'115/24 kV').split('/')[0].replace(/kV/i,'').trim())} kV</text>
+    <line x1="14" y1="${lvY}" x2="${W-14}" y2="${lvY}" stroke="#23261F" stroke-width="4"/>
+    <text x="16" y="${lvY+18}" font-size="11" font-weight="800" fill="#4A5043">${esc(((c.st.kv||'').split('/')[1]||'24 kV').replace(/kV/i,'').trim())} kV</text>
+    ${items}
+    <line x1="${W/2}" y1="${lvY}" x2="${W/2}" y2="${lvY+30}" stroke="#7c8370" stroke-width="2"/><path d="M${W/2-6} ${lvY+24} L${W/2} ${lvY+34} L${W/2+6} ${lvY+24}" fill="#7c8370"/>
+    <text x="${W/2+10}" y="${lvY+32}" font-size="11" fill="#5E6356">${L('Load','โหลด')} ${+c.st.peak||0} MVA</text>
+  </svg>`;
+}
+function netRedundancyText(c){
+  const n=c.units.length; if(!n) return L('No transformer assigned','ยังไม่มีหม้อแปลง');
+  if(n===1) return L('Single transformer — no backup','หม้อแปลงตัวเดียว — ไม่มีตัวสำรอง');
+  if(c.k===1) return L(`${c.k}-out-of-${n}: any one unit carries the ${c.st.peak} MVA load (N-1 ✓, parallel)`,`${c.k}-out-of-${n}: ตัวเดียวรับโหลด ${c.st.peak} MVA ได้ (N-1 ✓ ต่อขนาน)`);
+  if(c.k===n) return L(`${c.k}-out-of-${n}: all units needed for ${c.st.peak} MVA (no N-1, series)`,`${c.k}-out-of-${n}: ต้องใช้ทุกตัวจึงรับโหลด ${c.st.peak} MVA ได้ (ไม่ผ่าน N-1 · อนุกรม)`);
+  return L(`${c.k}-out-of-${n}: ${c.k} units needed for ${c.st.peak} MVA`,`${c.k}-out-of-${n}: ต้องใช้ ${c.k} ตัวเพื่อรับโหลด ${c.st.peak} MVA`);
+}
+function netHtml(){
+  const N = netCalc(); const top = N.ranked[0];
+  const stHtml = N.sts.map(c=>`<div class="net-st">
+      <div class="hd"><span class="nm">${esc(c.st.name)}</span><span class="small-muted">${esc(c.st.kv||'')} · ${c.units.length} ${L('transformer(s)','หม้อแปลง')}</span>
+        <span class="rs" style="color:${rBand(c.R)};border-color:${rBand(c.R)};">R<sub>SS</sub> ${f4(c.R)}</span></div>
+      ${netStationSvg(c)}
+      <div class="small-muted" style="font-size:11.5px;">${netRedundancyText(c)}${!+c.st.k?` · ${L('auto from MVA','คำนวณอัตโนมัติจาก MVA')}`:''}</div>
+    </div>`).join('');
+  const rows = N.ranked.map(u=>`<tr data-view="${u.a.id}" class="${u.rank===1?'net-top':''}" style="cursor:pointer;"><td><b>${u.rank}</b></td><td><b>${u.a.id}</b></td><td>${esc(u.c.st.name)}</td>
+      <td>${u.r}${u.zero?'*':''}</td><td>${u.T.toFixed(1)}</td><td>${f4(u.lam)}</td><td style="color:${rBand(u.R)};font-weight:800;">${f4(u.R)}</td><td>${f4(u.IB)}</td><td><b>${pctR(u.IC)}</b></td>
+      <td style="color:${hiColor(u.a.hi)};font-weight:800;">${u.a.hi}</td>
+      <td>${u.rank===1?`<span class="pill pill-critical">${L('Focus first','โฟกัสก่อน')}</span>`:u.IC>=0.15?`<span class="pill pill-warning">${L('Plan','วางแผน')}</span>`:`<span class="pill pill-healthy">${L('Monitor','ติดตาม')}</span>`}</td></tr>`).join('');
+  const calc = N.sts.map(c=>`<div><b>${esc(c.st.name)}</b><ul>
+      ${c.units.map(u=>`<li><b>${u.a.id}</b>: λ = ${u.zero?`0.693 ÷ ${u.T.toFixed(2)}`:`${u.r} ÷ ${u.T.toFixed(2)}`} = <code>${f4(u.lam)}</code> /${L('yr','ปี')} → R(${N.t}) = e<sup>−${f4(u.lam)}×${N.t}</sup> = <code>${f4(u.R)}</code></li>`).join('')}
+      <li>${c.units.length<=1?`R<sub>SS</sub> = <code>${f4(c.R)}</code>`:c.k===1?`${L('Parallel','ขนาน')}: R<sub>SS</sub> = 1 − ${c.units.map(u=>`(1 − ${f4(u.R)})`).join(' × ')} = <code>${f4(c.R)}</code>`:c.k===c.units.length?`${L('Series','อนุกรม')}: R<sub>SS</sub> = ${c.units.map(u=>f4(u.R)).join(' × ')} = <code>${f4(c.R)}</code>`:`${c.k}-out-of-${c.units.length}: R<sub>SS</sub> = <code>${f4(c.R)}</code>`}</li></ul></div>`).join('')
+    + `<div><b>${L('System (all substations must supply)','ระบบ (ทุกสถานีต้องจ่ายไฟได้)')}</b>: R<sub>sys</sub> = ${N.sts.map(c=>f4(c.R)).join(' × ')} = <code>${f4(N.Rsys)}</code></div>
+      <div style="margin-top:8px;"><b>${L('Importance','ความสำคัญ')}</b>: I<sub>B</sub> = R<sub>sys</sub>(R<sub>i</sub>=1) − R<sub>sys</sub>(R<sub>i</sub>=0) · I<sub>C</sub> = I<sub>B</sub> × (1 − R<sub>i</sub>) ÷ (1 − R<sub>sys</sub>)<ul>
+      ${N.ranked.map(u=>`<li><b>${u.a.id}</b>: I<sub>B</sub> = ${f4(u.Rup)} − ${f4(u.Rdn)} = <code>${f4(u.IB)}</code> · I<sub>C</sub> = ${f4(u.IB)} × ${f4(1-u.R)} ÷ ${f4(1-N.Rsys)} = <code>${pctR(u.IC)}</code></li>`).join('')}</ul></div>`;
+  return `<div class="card" style="margin-bottom:16px;">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('System reliability — which transformer to focus on first','ความน่าเชื่อถือของระบบ — ควรโฟกัสหม้อแปลงตัวไหนก่อน')}</h3>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span class="small-muted">${L('Mission time','ช่วงเวลา')} t</span>
+      <div class="seg">${[1,3,5].map(v=>`<button class="${+NET.t===v?'on':''}" data-net-t="${v}">${v} ${L(v>1?'yrs':'yr','ปี')}</button>`).join('')}</div>
+      <button class="btn btn-outline" data-net-edit="1" style="padding:6px 12px;font-size:12px;">${L('Edit network','แก้ไขเครือข่าย')}</button></div></div>
+    <div class="net-sys"><span>${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub>(${N.t} ${L(N.t>1?'yrs':'yr','ปี')}) <b class="big" style="color:${rBand(N.Rsys)};">${f4(N.Rsys)}</b></span>
+      ${top?`<span>${L('Focus first','โฟกัสก่อน')}: <b>${top.a.id}</b> (${esc(top.c.st.name)}) — ${L(`if the system fails, ${pctR(top.IC)} chance this unit is the cause`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}</span>`:''}</div>
+    <div class="net-wrap">${stHtml}</div>
+    <div class="net-legend"><span><i style="background:#1fa571"></i>R ≥ 0.95</span><span><i style="background:#d99012"></i>0.85–0.95</span><span><i style="background:#c62d23"></i>&lt; 0.85</span><span>□ ${L('circuit breaker','เซอร์กิตเบรกเกอร์')}</span><span>${L('#n = priority rank · click a transformer to open it','#n = ลำดับความสำคัญ · กดที่หม้อแปลงเพื่อเปิดดู')}</span></div>
+    <div class="tbl-wrap" style="margin-top:12px;"><table class="rowlink"><thead><tr><th>#</th><th>${t('asset')}</th><th>${L('Substation','สถานี')}</th><th>${L('Failures','ครั้งที่เสีย')} <span style="text-transform:none;">r</span></th><th>${L('Op. time T (yr)','เวลาใช้งาน T (ปี)')}</th><th style="text-transform:none;">λ (/${L('yr','ปี')})</th><th>R(${N.t})</th><th>I<sub>B</sub></th><th>${L('Criticality I<sub>C</sub>','ความสำคัญ I<sub>C</sub>')}</th><th>HI</th><th></th></tr></thead><tbody>${rows||`<tr><td colspan="11" class="small-muted">${L('No transformer in the network yet — add one under Settings → Network & reliability.','ยังไม่มีหม้อแปลงในเครือข่าย — เพิ่มได้ที่ ตั้งค่า → เครือข่ายและความน่าเชื่อถือ')}</td></tr>`}</tbody></table></div>
+    <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('λ = number of failures ÷ total operating time. * No failure recorded yet: λ ≈ 0.693 ÷ T (median estimate) so R is not shown as 100 %. Ranked by criticality importance — a healthy unit with no backup can rank above a poorer unit that has one. Use together with HI and risk.','λ = จำนวนครั้งที่เสีย ÷ เวลาใช้งานรวม · * ยังไม่เคยเสีย: ใช้ λ ≈ 0.693 ÷ T (ค่าประมาณกลาง) เพื่อไม่ให้ R เป็น 100% · จัดลำดับด้วย Criticality importance — หม้อแปลงที่สภาพดีแต่ไม่มีตัวสำรอง อาจสำคัญกว่าตัวที่สภาพแย่กว่าแต่มีตัวสำรอง · ใช้ร่วมกับ HI และความเสี่ยง')}</p>
+    <details style="margin-top:10px;"><summary style="cursor:pointer;font-weight:800;font-size:13px;">${L('Show the reliability calculation','ดูวิธีคำนวณความน่าเชื่อถือ')}</summary><div class="net-calc" style="margin-top:8px;">${calc}</div></details>
+  </div>`;
+}
+/* ---------- settings: network editor ---------- */
+function netSettingsHtml(){
+  const N = netCalc();
+  const inNet = new Set(NET.stations.flatMap(s=>s.trs));
+  const stCards = NET.stations.map((st,si)=>{ const c=N.sts[si];
+    return `<div class="card net-edit" style="margin-bottom:12px;">
+      <div class="card-head"><h3>${esc(st.name)}</h3><button class="linklike" data-net-del="${si}" style="color:var(--red);">${L('Remove substation','ลบสถานี')}</button></div>
+      <div class="grid" style="grid-template-columns:2fr 1fr 1fr 1.4fr; gap:10px;">
+        <div class="formrow"><label>${L('Name','ชื่อสถานี')}</label><input data-net-f="name" data-si="${si}" value="${esc(st.name)}"></div>
+        <div class="formrow"><label>${L('Voltage','แรงดัน')}</label><input data-net-f="kv" data-si="${si}" value="${esc(st.kv||'')}"></div>
+        <div class="formrow"><label>${L('Peak load (MVA)','โหลดสูงสุด (MVA)')}</label><input type="number" min="0" step="1" data-net-f="peak" data-si="${si}" value="${+st.peak||0}"></div>
+        <div class="formrow"><label>${L('Units needed (k)','จำนวนที่ต้องใช้ (k)')}</label><select data-net-f="k" data-si="${si}"><option value="0" ${!+st.k?'selected':''}>${L('Auto','อัตโนมัติ')} (k=${c.kAuto})</option>${c.units.map((_,i)=>`<option value="${i+1}" ${+st.k===i+1?'selected':''}>${i+1}</option>`).join('')}</select></div>
+      </div>
+      <div class="formrow"><label>${L('Transformers in this substation','หม้อแปลงในสถานีนี้')}</label><div class="net-trlist">
+        ${ASSETS.filter(a=>st.trs.includes(a.id) || !inNet.has(a.id)).map(a=>`<label><input type="checkbox" data-net-tr="${a.id}" data-si="${si}" ${st.trs.includes(a.id)?'checked':''}> ${a.id} <span class="small-muted">${a.cap||'?'} MVA</span></label>`).join('')}
+      </div></div>
+    </div>`; }).join('');
+  const units = N.sts.flatMap(c=>c.units);
+  return `<div class="card" style="margin-bottom:12px;"><div class="card-head"><h3>${L('Network & reliability','เครือข่ายและความน่าเชื่อถือ')}</h3><button class="btn btn-primary" id="btnNetAdd" style="padding:7px 12px;font-size:12px;">+ ${L('Add substation','เพิ่มสถานี')}</button></div>
+    <p class="small-muted" style="margin:0;">${L('Substations and their transformers are drawn on the Overview. k = how many transformers must be in service to carry the peak load: Auto picks it from the MVA ratings (k = 1 means the units back each other up).','สถานีและหม้อแปลงจะแสดงเป็นแผนภาพที่หน้าแรก · k = จำนวนหม้อแปลงที่ต้องใช้งานเพื่อรับโหลดสูงสุด · อัตโนมัติจะคำนวณจากพิกัด MVA (k = 1 คือสำรองกันได้)')}</p></div>
+    ${stCards}
+    <div class="card"><div class="card-head"><h3>${L('Failure history','ประวัติการเสีย')}</h3><span class="small-muted">λ = r ÷ T</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>${t('asset')}</th><th>${L('In service since (year)','เริ่มใช้งาน (ปี)')}</th><th>${L('Failures','ครั้งที่เสีย')} <span style="text-transform:none;">r</span></th><th>T (${L('yr','ปี')})</th><th style="text-transform:none;">λ (/${L('yr','ปี')})</th></tr></thead><tbody>
+      ${units.map(u=>`<tr><td><b>${u.a.id}</b></td><td><input type="number" min="1950" max="2100" style="width:96px;" data-net-a="inService" data-id="${u.a.id}" value="${u.a.inService||u.a.year||''}"></td><td><input type="number" min="0" step="1" style="width:80px;" data-net-a="fails" data-id="${u.a.id}" value="${+u.a.fails||0}"></td><td>${u.T.toFixed(1)}</td><td>${f4(u.lam)}${u.zero?'*':''}</td></tr>`).join('') || `<tr><td colspan="5" class="small-muted">—</td></tr>`}
+      </tbody></table></div>
+      <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('Count only failures that took the transformer out of service. * zero failures → λ ≈ 0.693 ÷ T.','นับเฉพาะความล้มเหลวที่ทำให้หม้อแปลงหยุดจ่ายไฟ · * ไม่เคยเสีย → λ ≈ 0.693 ÷ T')}</p></div>`;
+}
+function attachNetEvents(){
+  document.querySelectorAll('[data-net-t]').forEach(b=> b.addEventListener('click',()=>{ NET.t = +b.dataset.netT; render(); }));
+  document.querySelectorAll('[data-net-edit]').forEach(b=> b.addEventListener('click',()=>{ state.page='settings'; state.settingsTab='net'; render(); window.scrollTo(0,0); }));
+  document.querySelectorAll('.net-st svg .tr[data-view]').forEach(g=> g.addEventListener('click',()=> goToAssetDetail(g.dataset.view,'summary')));
+  document.querySelectorAll('[data-net-f]').forEach(inp=> inp.addEventListener('change',()=>{ const st=NET.stations[+inp.dataset.si]; const f=inp.dataset.netF;
+    st[f] = (f==='peak'||f==='k') ? Math.max(0, +inp.value||0) : inp.value.trim();
+    if(f==='name') st.trs.forEach(id=>{ const a=ASSETS.find(x=>x.id===id); if(a) a.loc = st.name; });
+    render(); toast(t('toast_saved'),'success'); }));
+  document.querySelectorAll('[data-net-tr]').forEach(cb=> cb.addEventListener('change',()=>{ const st=NET.stations[+cb.dataset.si]; const id=cb.dataset.netTr;
+    if(cb.checked){ if(!st.trs.includes(id)) st.trs.push(id); const a=ASSETS.find(x=>x.id===id); if(a){ a.loc = st.name; if(a.fails==null) a.fails=0; } }
+    else st.trs = st.trs.filter(x=>x!==id);
+    if(+st.k > st.trs.length) st.k = 0; render(); }));
+  document.querySelectorAll('[data-net-a]').forEach(inp=> inp.addEventListener('change',()=>{ const a=ASSETS.find(x=>x.id===inp.dataset.id); if(!a) return;
+    const v = Math.max(0, Math.floor(+inp.value||0)); a[inp.dataset.netA] = v || (inp.dataset.netA==='fails'?0:undefined); render(); toast(t('toast_saved'),'success'); }));
+  document.querySelectorAll('[data-net-del]').forEach(b=> b.addEventListener('click',()=>{ const st=NET.stations[+b.dataset.netDel]; if(confirm(L(`Remove ${st.name} from the network? The transformers themselves are kept.`,`ลบ ${st.name} ออกจากเครือข่าย? ข้อมูลหม้อแปลงยังอยู่`))){ NET.stations.splice(+b.dataset.netDel,1); render(); } }));
+  const add=document.getElementById('btnNetAdd'); if(add) add.addEventListener('click',()=>{ const n=NET.stations.length+1; NET.stations.push({id:'SS-'+Date.now(), name:L(`New substation ${n}`,`สถานีใหม่ ${n}`), kv:'115/24 kV', peak:0, k:0, trs:[]}); render(); });
+}
 function renderOverview(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
   const N = ASSETS.length, pct = (n)=>N?Math.round(n/N*100):0, avgHi = N?Math.round(ASSETS.reduce((x,a)=>x+a.hi,0)/N):0;
@@ -1621,6 +1796,7 @@ function renderOverview(){
     <div class="card stat">${badge('watch',44)}<div><div class="label">${t('warning')}</div><div class="value">${warning}</div><div class="small-muted">${pct(warning)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
     <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">${critical}</div><div class="small-muted">${pct(critical)}% ${L('of fleet','ของทั้งหมด')}</div></div></div>
   </div>
+  ${netHtml()}
   <div class="grid" style="grid-template-columns:1fr; gap:16px;">
     <div class="card">
       <div class="card-head"><h3>${t('attention')}</h3><button class="linklike" data-goto-assets="1">${t('view_all')}</button></div>
@@ -2980,7 +3156,7 @@ function attachReportsEvents(){
 }
 
 /* ============ SETTINGS PAGE ============ */
-const SETTINGS_TABS = [['general','settings_general'],['hi','settings_hi'],['fm','settings_fm'],['maint','settings_maint'],['sys','settings_sys']];
+const SETTINGS_TABS = [['general','settings_general'],['net','settings_net'],['hi','settings_hi'],['fm','settings_fm'],['maint','settings_maint'],['sys','settings_sys']];
 /* ============ GUIDE / HELP PAGE ============ */
 function renderGuide(){
   const items = [
@@ -3018,6 +3194,7 @@ function renderSettings(){
   <div id="settingsBody">${settingsTabContent()}</div>`;
 }
 function settingsTabContent(){
+  if(state.settingsTab==='net') return netSettingsHtml();
   if(state.settingsTab==='hi'){ const pr=(p)=>`<tr><td style="padding-left:22px;">${L(p.name[0],p.name[1])}</td><td>${p.w}</td><td class="small-muted">${p.lim}</td></tr>`;
     return `
   <div class="card">
@@ -3219,7 +3396,7 @@ function pageMeta(){
   return titles[state.page] || ['RCM Transformer',''];
 }
 function render(){
-  recomputeAll(); saveData();
+  ensureNet(); recomputeAll(); saveData();
   const nb = document.getElementById('bellCount'); if(nb){ const n = notificationsList().length; nb.textContent = n; if(!notifRead) nb.style.display = n ? '' : 'none'; }
   renderNav();
   document.getElementById('langEn').classList.toggle('active', state.lang==='en');
@@ -3239,6 +3416,7 @@ function render(){
   else if(state.page==='fmea-overview'){ content.innerHTML = renderCategoryOverview('fmea'); attachCategoryOverviewEvents(); }
   else if(state.page==='rcm-overview'){ content.innerHTML = renderCategoryOverview('rcm'); attachCategoryOverviewEvents(); }
   else if(state.page==='guide'){ content.innerHTML = renderGuide(); }
+  attachNetEvents();
 }
 function openSidebar(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarBackdrop').classList.add('show'); }
 function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarBackdrop').classList.remove('show'); }
