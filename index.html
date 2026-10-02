@@ -148,6 +148,23 @@ tr:last-child td{border-bottom:none;}
 .calc-fold[open] > summary{margin-bottom:14px;}
 .calc-fold[open] > summary h3::before{transform:rotate(90deg);}
 .calc-fold-hint{color:var(--accent-2); font-weight:700;}
+.strat-pill{white-space:nowrap;} .strat-pill.big{font-size:14px; padding:6px 14px;}
+.rcm-sum{display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:12px;}
+.rcm-ws tr.sel td{background:var(--blue-bg);}
+.strat-legend{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin-top:12px;}
+.strat-legend > div{border:1px solid var(--border); border-radius:10px; padding:7px 10px; font-size:12px;}
+.strat-legend span{display:block; color:var(--muted); font-size:11px; margin-top:2px;}
+details.tip-more > summary{cursor:pointer; font-size:12.5px; font-weight:700; color:var(--accent-2); margin:6px 0;}
+@media (max-width:760px){ .strat-legend{grid-template-columns:repeat(2,minmax(0,1fr));} .rcm-detail{grid-template-columns:1fr !important;} }
+/* phones: the RCM worksheet becomes stacked cards so the strategy is visible without scrolling sideways */
+@media (max-width:760px){
+  .rcm-ws{min-width:0 !important; width:100%;} .rcm-ws, .rcm-ws tbody{display:block;} .rcm-ws thead{display:none;}
+  .rcm-ws tr{display:grid; grid-template-columns:auto minmax(0,1fr); gap:6px 10px; padding:10px 6px; border-bottom:1px solid var(--border);}
+  .rcm-ws td{border:none !important; padding:0 !important; min-width:0 !important;}
+  .rcm-ws td:nth-child(3){display:none;}
+  .rcm-ws tr.sel{background:var(--blue-bg); border-radius:10px;} .rcm-ws tr.sel td{background:transparent;}
+  .rcm-ws td:nth-child(4), .rcm-ws td:nth-child(5), .rcm-ws td:nth-child(6){grid-column:2; text-align:left !important;}
+}
 .tbl-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;}
 .pill{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;}
 .pill-healthy{background:var(--green-bg); color:var(--green);}
@@ -575,6 +592,21 @@ tbody tr:last-child td{border-bottom:none;}
 .st-code{background:var(--navy-2);}
 .refnote{font-size:11px; color:#7A858E;}
 /* ---- overview ---- */
+.ov-banner{position:relative; overflow:hidden; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px 24px; margin:0 0 16px; padding:20px 24px; border-radius:16px; color:#fff;
+  background:linear-gradient(120deg,#1d3550 0%,#2B4C6F 55%,#3e6990 100%); box-shadow:0 6px 18px rgba(29,53,80,.18);}
+.ovb-art{position:absolute; right:0; bottom:0; width:420px; max-width:70%; height:auto; opacity:.13; pointer-events:none;}
+.ovb-main{position:relative; min-width:0; flex:1 1 320px;}
+.ovb-eyebrow{font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; opacity:.7;}
+.ovb-title{margin:3px 0 4px; font-size:22px; font-weight:700; line-height:1.25; color:#fff;}
+.ovb-meta{font-size:13px; opacity:.82;}
+.ovb-side{position:relative; display:flex; flex-wrap:wrap; align-items:center; gap:10px;}
+.ovb-status{display:flex; align-items:center; gap:10px; text-align:left; font:inherit; font-size:12.5px; line-height:1.45; color:#fff; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:12px; padding:9px 14px;}
+button.ovb-status{cursor:pointer;} button.ovb-status:hover{background:rgba(255,255,255,.2);}
+.ovb-status .dot{width:10px; height:10px; border-radius:50%; flex:0 0 auto; background:#4fd99a; box-shadow:0 0 0 4px rgba(79,217,154,.25);}
+.ovb-status.bad .dot{background:#ff6b6b; box-shadow:0 0 0 4px rgba(255,107,107,.28);}
+.btn.ovb-btn{background:#fff; color:#1d3550; border:none; font-weight:700; padding:9px 14px;}
+.btn.ovb-btn:hover{background:#eef3f8;}
+@media (max-width:760px){ .ov-banner{padding:16px;} .ovb-title{font-size:19px;} .ovb-side{flex:1 1 100%;} .ovb-status{flex:1 1 auto;} }
 .ov-head{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px 24px; margin:2px 0 18px;}
 .ov-title{margin:0; font-size:26px; font-weight:700; line-height:1.2; color:var(--text);}
 .ov-meta{margin:4px 0 0; color:var(--muted); font-size:13.5px;}
@@ -1324,6 +1356,52 @@ function rcmTaskFor(comp, decision){ if(decision==='BM') return [L('Repair when 
 /* RCM on-condition task → CBM, or PdM when the HI trend (oil / DGA) is long enough to forecast */
 function rcmPlanType(a, comp, decision){ const d=RCM_DEC[decision]; if(!d||!d.plan) return null;
   if(d.plan==='CBM' && ['Winding','Oil'].includes(comp) && hiRateOf(a).enough) return 'PdM'; return d.plan; }
+/* ---- the maintenance strategy to actually do for each failure mode (user's strategy table) ---- */
+const STRAT_INFO = {
+  BM:{en:'Breakdown',th:'ซ่อมเมื่อเสีย', cond:['Run to failure','ใช้งานจนเสีย'], col:'#6b7480'},
+  CM:{en:'Corrective',th:'แก้ไข', cond:['Fix when an abnormality is found','แก้ไขเมื่อพบความผิดปกติ'], col:'#d0392f'},
+  PM:{en:'Preventive',th:'ป้องกัน', cond:['Time-based','ตามรอบเวลา'], col:'#3f6a8a'},
+  CBM:{en:'Condition-based',th:'ตามสภาพ', cond:['When a condition limit is reached','เมื่อถึงเกณฑ์สภาพ'], col:'#178a5e'},
+  PdM:{en:'Predictive',th:'คาดการณ์', cond:['Trend analysis and forecasting','วิเคราะห์แนวโน้มและพยากรณ์'], col:'#7346c4'},
+};
+function rcmStrategy(a, f, ev){
+  if(!ev || !ev.decision) return null; const d = ev.decision;
+  if(d==='RD') return {types:[], redesign:true, d};
+  if(d==='COMB') return {types:[rcmPlanType(a,f.comp,'CBM'),'PM'], d};
+  return {types:[rcmPlanType(a,f.comp,d)], fft:d==='FFT', d};
+}
+function stratPill(code, extra, big){ const s=STRAT_INFO[code]; if(!s) return ''; return `<span class="pill strat-pill${big?' big':''}" style="background:${s.col}1a;color:${s.col};border:1px solid ${s.col}55;">${code} · ${L(s.en,s.th)}${extra||''}</span>`; }
+function rcmStrategyHtml(st, big){
+  if(!st) return `<span class="small-muted">${L('Not analysed yet','ยังไม่วิเคราะห์')}</span>`;
+  if(st.redesign) return `<span class="pill strat-pill${big?' big':''}" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red);">${L('Redesign — not maintenance','ออกแบบใหม่ — ไม่ใช่งานบำรุงรักษา')}</span>`;
+  return st.types.map(c=>stratPill(c, st.fft?' (FFT)':'', big)).join(' + ');
+}
+function rcmStrategyReason(st){
+  if(!st) return '';
+  const R = {
+    CBM: ['An on-condition task can detect the failure early enough → act when a condition limit is reached.','มีงานตามสภาพที่ตรวจพบได้ทันก่อนเสีย → ลงมือเมื่อสภาพถึงเกณฑ์'],
+    PdM: ['An on-condition task works, and there are ≥ 3 years of oil-test HI history, so the trend can forecast when to act.','มีงานตามสภาพที่ได้ผล และมีประวัติ HI จากผลน้ำมัน ≥ 3 ปี จึงใช้แนวโน้มพยากรณ์เวลาที่ควรลงมือได้'],
+    PM: ['No on-condition task works, but a time-based restoration / replacement does.','ไม่มีงานตามสภาพที่ได้ผล แต่การซ่อม/เปลี่ยนตามรอบเวลาได้ผล'],
+    FFT: ['The failure is hidden, so a periodic functional test is scheduled to find it (time-based → PM).','ความล้มเหลวซ่อนเร้น จึงตั้งรอบทดสอบการทำงานเพื่อค้นหา (ทำตามรอบเวลา → PM)'],
+    COMB: ['Safety consequence and no single task is enough → do the on-condition and the time-based task together.','กระทบความปลอดภัยและงานเดียวไม่พอ → ทำงานตามสภาพและงานตามรอบร่วมกัน'],
+    BM: ['No safety consequence and no task is worth doing → run to failure and repair when it fails.','ไม่กระทบความปลอดภัยและไม่มีงานที่คุ้มค่า → ใช้งานจนเสียแล้วซ่อม'],
+    RD: ['Safety consequence and no maintenance task can make it tolerable → the design must change.','กระทบความปลอดภัยและไม่มีงานบำรุงรักษาใดลดความเสี่ยงได้พอ → ต้องเปลี่ยนแบบ'],
+  };
+  const k = st.d==='CBM' && st.types[0]==='PdM' ? 'PdM' : st.d; const r = R[k]; return r ? L(r[0], r[1]) : '';
+}
+function rcmInPlan(a, f){ return getMaintFor(a).some(p=>p.task.endsWith(`(${f.code})`) && planStatus(p)!=='Completed'); }
+function rcmAddToPlan(a, f){
+  const ev=rcmEvaluate(rcmAnsFor(a,f)); if(!ev.decision) return false; const dec=RCM_DEC[ev.decision]; if(!dec.plan) return false;
+  const plan=getMaintFor(a); const st=new Date(); st.setDate(st.getDate()+14);
+  const lib=rcmLib(f.comp).tasks, g=RCM_GENERIC.tasks;
+  const items = ev.decision==='COMB' ? [[lib.CBM||g.CBM, rcmPlanType(a,f.comp,'CBM')], [lib.PM||g.PM, 'PM']] : [[rcmTaskFor(f.comp, ev.decision), rcmPlanType(a,f.comp,ev.decision)]];
+  items.forEach(([task,type])=> plan.push({no:1+Math.max(0,...plan.map(x=>x.no)), task:`${task[0]} (${f.code})`, type, sub:dec.sub||'', start:fmtD(st), end:fmtD(st), dur:'1 '+L('day','วัน'), m:MON[st.getMonth()], len:1, notes:`RCM ${ev.decision} · ${L('interval','รอบ')} ${task[1]}${type==='PdM'?' · '+L('timing from HI trend forecast','กำหนดเวลาจากการพยากรณ์แนวโน้ม HI'):''}`}));
+  return true;
+}
+function stratLegendHtml(){
+  return `<div class="strat-legend">${['BM','CM','PM','CBM','PdM'].map(k=>{ const s=STRAT_INFO[k]; return `<div><b style="color:${s.col};">${k}</b> ${L(s.en,s.th)}<span>${L(s.cond[0],s.cond[1])}</span></div>`; }).join('')}</div>
+  <p class="small-muted" style="font-size:11px;margin:6px 0 0;">${L('CM is not chosen by RCM — it is raised when a CBM / PdM / PM inspection finds an abnormality. FFT = failure-finding test for a hidden function (scheduled as PM).','CM ไม่ได้มาจากการเลือกของ RCM แต่เกิดเมื่องานตรวจ CBM / PdM / PM พบความผิดปกติ · FFT = การทดสอบหาความล้มเหลวของฟังก์ชันที่ซ่อนอยู่ (ทำตามรอบ จึงเป็น PM)')}</p>`;
+}
 
 let DGA_SAMPLES = [];
 function currentDgaGases(){ return DGA_SAMPLES[state.dgaSampleIdx] ? DGA_SAMPLES[state.dgaSampleIdx].gases : (DGA_SAMPLES[0]?DGA_SAMPLES[0].gases:[]); }
@@ -2073,11 +2151,22 @@ function renderOverview(){
   const demo = ASSETS.filter(isDemoAsset).length;
   const stCol = (a)=> a.status==='Critical' ? 'var(--red)' : a.status==='Warning' ? 'var(--amber)' : 'var(--green)';
   const att = attentionList();
-  return `<div class="ov-head">
-    <div><h1 class="ov-title">${esc(netArea())}</h1>
-      <p class="ov-meta">${L(`${NC.sts.length} substations, ${N} transformers. Latest lab result ${latest?fmtD(latest):'—'}.`,`${NC.sts.length} สถานี ${N} หม้อแปลง ผลแล็บล่าสุด ${latest?fmtD(latest):'—'}`)}</p></div>
-    <button class="btn btn-outline" data-import-lab="1" style="padding:7px 12px;font-size:12.5px;">${L('Import lab results','นำเข้าผลแล็บ')}</button>
-  </div>
+  const rl = riskList(); const act = rl.filter(o=>['High','Very high'].includes(o.r.level)); const first = act[0];
+  return `<section class="ov-banner">
+    <svg class="ovb-art" viewBox="0 0 420 150" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round">
+      <path d="M250 150 L286 18 L322 150 M262 106 L310 106 M270 74 L302 74 M277 46 L295 46 M262 106 L302 74 M310 106 L270 74 M270 74 L295 46 M302 74 L277 46"/><path d="M236 30 H336 M246 30 v10 M326 30 v10 M258 18 H314"/>
+      <path d="M360 150 L382 70 L404 150 M368 120 L396 120 M373 98 L391 98 M368 120 L391 98 M396 120 L373 98"/><path d="M352 64 H412 M358 64 v8 M406 64 v8"/><path d="M0 40 C120 60 200 20 286 22 S380 66 420 66" opacity=".6"/></g></svg>
+    <div class="ovb-main">
+      <div class="ovb-eyebrow">${L('Fleet overview','ภาพรวมระบบ')}</div>
+      <h1 class="ovb-title">${esc(netArea())}</h1>
+      <div class="ovb-meta">${NC.sts.length} ${L('substations','สถานี')} · ${N} ${L('transformers','หม้อแปลง')} · ${L('latest lab result','ผลแล็บล่าสุด')} ${latest?fmtD(latest):'—'}</div>
+    </div>
+    <div class="ovb-side">
+      ${first ? `<button class="ovb-status bad" data-view="${esc(first.a.id)}"><span class="dot"></span><span><b>${L(`${act.length} transformer${act.length>1?'s':''} need action`,`ต้องจัดการ ${act.length} ตัว`)}</b><br>${L('Start with','เริ่มที่')} ${esc(first.a.id)} · ${riskName(first.r.level)} →</span></button>`
+        : `<div class="ovb-status ok"><span class="dot"></span><span><b>${L('No high-risk transformer','ไม่มีหม้อแปลงความเสี่ยงสูง')}</b><br>${L('Continue routine monitoring','ติดตามตามรอบปกติ')}</span></div>`}
+      <button class="btn ovb-btn" data-import-lab="1">${gicon('upload',0,'width:13px;height:13px')} ${L('Import lab results','นำเข้าผลแล็บ')}</button>
+    </div>
+  </section>
   <div class="card kstrip">
     <div class="k"><span>${L('Transformers','หม้อแปลงทั้งหมด')}</span><b>${N}</b><em>${L('average HI','HI เฉลี่ย')} ${avgHi}</em></div>
     <div class="k"><span>${t('healthy')}</span><b style="color:var(--green);">${healthy}</b></div>
@@ -2276,8 +2365,8 @@ function detailSummaryTab(a){
   </div>
   <div style="margin-top:16px;">${beforeAfterHtml(a)}</div>`;
 }
-function taskStratSummary(a){ const c={}; let pend=0; (a.id===state.assetId && state.page==='detail' ? FMEA : getFmeaFor(a)).forEach(f=>{ const e=rcmEvaluate(rcmAnsFor(a,f)); if(e.decision) c[e.decision]=(c[e.decision]||0)+1; else pend++; });
-  const parts = ['CBM','COMB','PM','FFT','RD','BM'].filter(k=>c[k]).map(k=>`${c[k]} ${k}`); if(pend) parts.push(`${pend} ${L('pending','รอวิเคราะห์')}`);
+function taskStratSummary(a){ const c={}; let pend=0, rd=0; (a.id===state.assetId && state.page==='detail' ? FMEA : getFmeaFor(a)).forEach(f=>{ const s=rcmStrategy(a,f,rcmEvaluate(rcmAnsFor(a,f))); if(!s) pend++; else if(s.redesign) rd++; else s.types.forEach(k=>c[k]=(c[k]||0)+1); });
+  const parts = ['PdM','CBM','PM','BM'].filter(k=>c[k]).map(k=>`${k} ${c[k]}`); if(rd) parts.push(`${L('Redesign','ออกแบบใหม่')} ${rd}`); if(pend) parts.push(`${pend} ${L('pending','รอวิเคราะห์')}`);
   return parts.join(' · ') || '—'; }
 function detailConditionTab(a){
   const v = state.condView==='dga' ? 'dga' : 'healthindex';
@@ -2667,54 +2756,74 @@ function openAddFmeaModal(){
 function detailRcmTab(a){
   if(!FMEA.length) return `<div class="card">${L('Add failure modes in the FMEA tab first.','เพิ่มโหมดความล้มเหลวในแท็บ FMEA ก่อน')}</div>`;
   const f = FMEA.find(x=>x.code===state.rcmFm) || fmeaPriority(FMEA)[0];
-  const lib = rcmLib(f.comp); const ans = rcmAnsFor(a,f); const ev = rcmEvaluate(ans);
+  const lib = rcmLib(f.comp); const ans = rcmAnsFor(a,f); const ev = rcmEvaluate(ans); const st = rcmStrategy(a,f,ev);
   const yn = (k,v)=>`<button class="dnode ${v==='yes'?'yes':'no'}" data-rcm-k="${k}" data-rcm-v="${v}" style="cursor:pointer;border:none;font-family:inherit;min-width:80px;">${v==='yes'?t('yes'):t('no')}</button>`;
   let tree = ev.path.map(p=>`<div class="small-muted" style="text-align:center;max-width:460px;">${L(RCM_Q[p.qKey][0],RCM_Q[p.qKey][1])} → <b>${p.v==='yes'?t('yes'):t('no')}</b> <button class="linklike" data-rcm-undo="${p.k}">↺ ${t('change')}</button></div>`).join('');
-  let result = '';
-  if(ev.next){ tree += `<div class="dnode q" style="max-width:460px;">${L(RCM_Q[ev.qKey][0],RCM_Q[ev.qKey][1])}</div><div class="dbranch">${yn(ev.next,'yes')}${yn(ev.next,'no')}</div>`; }
-  else {
-    const dec = RCM_DEC[ev.decision]; const task = rcmTaskFor(f.comp, ev.decision);
-    tree += `<div class="dnode result" style="background:${dec.col[0]};color:${dec.col[1]};">${L(dec.name[0],dec.name[1])}</div>`;
-    result = `<div class="card" style="margin-top:16px;"><h3>${L('Q6–7 · Task strategy for','ข้อ 6–7 · กลยุทธ์ระดับงานของ')} ${f.code}</h3>
-      <ul class="hlist"><li><span class="k">${L('Consequence category','ประเภทผลที่ตามมา')}</span><span class="v">${L(RCM_CONS[ev.cons][0],RCM_CONS[ev.cons][1])}</span></li>
-      <li><span class="k">${t('task')}</span><span class="v" style="white-space:normal;text-align:right;">${task[0]}</span></li>
-      <li><span class="k">${t('interval')}</span><span class="v">${task[1]}</span></li>
-      <li><span class="k">${L('Maintenance type','ประเภทงานบำรุงรักษา')}</span><span class="v">${ev.decision==='COMB' ? rcmPlanType(a,f.comp,'CBM')+' + PM' : (rcmPlanType(a,f.comp,ev.decision)||L('— (engineering change)','— (งานปรับปรุงแบบ)'))}${dec.sub?' · '+dec.sub:''}</span></li></ul>
-      <div style="font-weight:800;font-size:12.5px;margin:12px 0 0;">${L(`Why ${ev.decision}?`,`ทำไมจึงเลือก ${ev.decision}?`)}</div>
-      <ul class="why-list">${rcmWhyList(a, f, ev)}</ul>
-      ${ev.decision==='BM'?`<p class="small-muted" style="font-size:11.5px;margin:8px 0 0;">${L('BM — run to failure: the failure has no safety consequence and no proactive task is worth doing, so the unit is repaired when it fails. Redesign may still be considered if it is economical.','BM — ใช้งานจนเสีย: ไม่มีผลต่อความปลอดภัยและไม่มีงานเชิงป้องกันที่คุ้มค่า จึงซ่อมเมื่อเสีย อาจพิจารณาออกแบบใหม่หากคุ้มทุน')}</p>`
-        : ev.decision==='RD'?`<div class="notebox" style="margin-top:10px;background:var(--red-bg);">${L('<b>Redesign is not a maintenance task.</b> No maintenance task can make this failure tolerable, and it affects safety or the environment, so the design must change (an engineering modification, done once). It is not added to the maintenance plan as CM.','<b>การออกแบบใหม่ไม่ใช่งานบำรุงรักษา</b> ไม่มีงานบำรุงรักษาใดลดความเสี่ยงของความล้มเหลวนี้ได้ และกระทบความปลอดภัยหรือสิ่งแวดล้อม จึงต้องเปลี่ยนแบบ (งานปรับปรุงทางวิศวกรรม ทำครั้งเดียว) ไม่ได้เพิ่มเข้าแผนบำรุงรักษาเป็นงาน CM')}</div>`
-        : `<button class="btn btn-primary" id="btnRcmToPlan" style="width:100%;justify-content:center;margin-top:12px;">${gicon('plan',0,'width:13px;height:13px')} ${L('Add task to maintenance plan','เพิ่มงานนี้เข้าแผนบำรุงรักษา')}</button>`}
+  if(ev.next) tree += `<div class="dnode q" style="max-width:460px;">${L(RCM_Q[ev.qKey][0],RCM_Q[ev.qKey][1])}</div><div class="dbranch">${yn(ev.next,'yes')}${yn(ev.next,'no')}</div>`;
+  else { const dec = RCM_DEC[ev.decision]; tree += `<div class="dnode result" style="background:${dec.col[0]};color:${dec.col[1]};">${L(dec.name[0],dec.name[1])}</div><div style="font-size:12.5px;text-align:center;">↓ ${L('Strategy to do','กลยุทธ์ที่ควรทำ')}: ${rcmStrategyHtml(st)}</div>`; }
+
+  /* worksheet: one row per failure mode, with the strategy to do */
+  const counts = {}; let pend = 0, rd = 0;
+  const rows = FMEA.map(x=>{ const e=rcmEvaluate(rcmAnsFor(a,x)); const s=rcmStrategy(a,x,e); const tk=e.decision?rcmTaskFor(x.comp,e.decision):null;
+    if(!s) pend++; else if(s.redesign) rd++; else s.types.forEach(c=>counts[c]=(counts[c]||0)+1);
+    const inPlan = s && !s.redesign && rcmInPlan(a,x);
+    const act = !s ? `<button class="btn btn-outline" data-rcm-pick="${x.code}" style="padding:4px 10px;font-size:11.5px;">${L('Analyse','วิเคราะห์')}</button>`
+      : s.redesign ? `<span class="small-muted" style="font-size:11.5px;">${L('Engineering change','งานปรับปรุงแบบ')}</span>`
+      : (s.types[0]==='BM' ? `<span class="small-muted" style="font-size:11.5px;">${L('No planned task','ไม่มีงานตามแผน')}</span>`
+      : inPlan ? `<span class="pill pill-healthy">✓ ${L('In plan','อยู่ในแผนแล้ว')}</span>`
+      : `<button class="btn btn-primary" data-rcm-add="${x.code}" style="padding:4px 10px;font-size:11.5px;">+ ${L('Add to plan','เพิ่มเข้าแผน')}</button>`);
+    return `<tr data-rcm-pick="${x.code}" class="${x.code===f.code?'sel':''}" style="cursor:pointer;">
+      <td><span class="pill pill-info">${x.code}</span></td>
+      <td><b>${x.comp}</b><div class="small-muted">${x.mode} · RPN ${x.rpn}</div></td>
+      <td class="small-muted">${e.cons?L(RCM_CONS[e.cons][0],RCM_CONS[e.cons][1]):'—'}</td>
+      <td>${rcmStrategyHtml(s)}</td>
+      <td style="white-space:normal;min-width:180px;">${tk?`${tk[0]}<div class="small-muted">${L('every','ทุก')} ${tk[1]}</div>`:'—'}</td>
+      <td style="text-align:right;">${act}</td></tr>`; }).join('');
+  const summary = ['PdM','CBM','PM','BM'].filter(k=>counts[k]).map(k=>`${stratPill(k)} <b>× ${counts[k]}</b>`).join('<span style="width:10px;display:inline-block"></span>')
+    + (rd?` <span class="pill" style="background:var(--red-bg);color:var(--red);">${L('Redesign','ออกแบบใหม่')} × ${rd}</span>`:'')
+    + (pend?` <span class="small-muted">· ${pend} ${L('not analysed','ยังไม่วิเคราะห์')}</span>`:'');
+
+  /* result for the selected failure mode */
+  const task = ev.decision ? rcmTaskFor(f.comp, ev.decision) : null;
+  const result = !ev.decision ? `<div class="card rcm-result"><h3>${L('Strategy for','กลยุทธ์ของ')} ${f.code}</h3><p class="small-muted" style="margin:0;">${L('Answer the questions on the left to get the strategy.','ตอบคำถามด้านซ้ายให้ครบเพื่อดูกลยุทธ์')}</p></div>`
+  : `<div class="card rcm-result">
+      <div class="small-muted" style="font-weight:700;">${L('Strategy to do for','กลยุทธ์ที่ควรทำสำหรับ')} ${f.code} · ${f.comp} — ${f.mode}</div>
+      <div style="margin:10px 0 8px;">${rcmStrategyHtml(st, true)}</div>
+      <p style="margin:0 0 12px;font-size:13px;">${rcmStrategyReason(st)}</p>
+      <ul class="hlist">
+        <li><span class="k">${t('task')}</span><span class="v" style="white-space:normal;text-align:right;">${task[0]}</span></li>
+        <li><span class="k">${t('interval')}</span><span class="v">${task[1]}</span></li>
+        <li><span class="k">${L('Consequence','ผลที่ตามมา')}</span><span class="v">${L(RCM_CONS[ev.cons][0],RCM_CONS[ev.cons][1])}</span></li></ul>
+      <details class="tip-more"><summary>${L('Why? (decision path)','ทำไม? (เส้นทางการตัดสินใจ)')}</summary><ul class="why-list">${rcmWhyList(a, f, ev)}</ul></details>
+      ${st.redesign ? `<div class="notebox" style="margin-top:10px;background:var(--red-bg);">${L('Redesign is an engineering change done once, not a maintenance task, so it is not added to the maintenance plan.','การออกแบบใหม่เป็นงานปรับปรุงทางวิศวกรรมที่ทำครั้งเดียว ไม่ใช่งานบำรุงรักษา จึงไม่เพิ่มเข้าแผนบำรุงรักษา')}</div>`
+        : st.types[0]==='BM' ? `<div class="notebox" style="margin-top:10px;">${L('BM: no scheduled task — repair when it fails. Redesign may still be considered if it is economical.','BM: ไม่มีงานตามแผน — ซ่อมเมื่อเสีย อาจพิจารณาออกแบบใหม่หากคุ้มทุน')}</div>`
+        : rcmInPlan(a,f) ? `<div class="notebox" style="margin-top:10px;">✓ ${L('Already in the maintenance plan.','อยู่ในแผนบำรุงรักษาแล้ว')}</div>`
+        : `<button class="btn btn-primary" id="btnRcmToPlan" style="width:100%;justify-content:center;margin-top:12px;">${gicon('plan',0,'width:13px;height:13px')} ${L('Add to maintenance plan','เพิ่มเข้าแผนบำรุงรักษา')}</button>`}
     </div>`;
-  }
-  const rows = FMEA.map(x=>{ const e=rcmEvaluate(rcmAnsFor(a,x)); const d=e.decision?RCM_DEC[e.decision]:null; const tk=e.decision?rcmTaskFor(x.comp,e.decision):null;
-    return `<tr data-rcm-pick="${x.code}" style="cursor:pointer;${x.code===f.code?'background:var(--blue-bg);':''}"><td><span class="pill pill-info">${x.code}</span></td><td><b>${x.comp}</b><div class="small-muted">${x.mode}</div></td>
-      <td>${e.cons?L(RCM_CONS[e.cons][0],RCM_CONS[e.cons][1]):'—'}</td>
-      <td>${d?`<span class="pill" style="background:${d.col[0]};color:${d.col[1]};">${e.decision}</span>`:`<span class="small-muted">${L('Not analysed','ยังไม่วิเคราะห์')}</span>`}</td>
-      <td class="small-muted" style="white-space:normal;min-width:150px;">${tk?tk[0]+' · '+tk[1]:'—'}</td></tr>`; }).join('');
+
   return `
-  <div class="grid" style="grid-template-columns:1fr 1fr; align-items:start;">
-    <div>
-      <div class="card">
-        <div class="card-head"><h3>${L('RCM analysis — SAE JA1011','การวิเคราะห์ RCM — SAE JA1011')}</h3>
-          <div class="filter-row"><select class="chip-input" id="rcmFmSelect">${FMEA.map(x=>`<option value="${x.code}" ${x.code===f.code?'selected':''}>${x.code} — ${x.comp}: ${x.mode} (RPN ${x.rpn})</option>`).join('')}</select>
-          <button class="btn btn-outline" id="btnRcmReset">${t('reset')}</button><button class="btn btn-outline" id="btnRcmPrint">PDF</button></div></div>
-        <div style="font-weight:800;font-size:12.5px;margin:6px 0;">${L('Q1–4 · Information','ข้อ 1–4 · ข้อมูล')}</div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px;"><div><h3>${L('Maintenance strategy for each failure mode','กลยุทธ์บำรุงรักษาของแต่ละโหมดความล้มเหลว')} — ${a.id}</h3>
+      <p class="card-sub" style="margin:2px 0 0;">${L('Result of the RCM analysis (SAE JA1011). Click a row to see or change how it was decided.','ผลจากการวิเคราะห์ RCM (SAE JA1011) กดแถวเพื่อดูหรือแก้ไขวิธีตัดสินใจ')}</p></div>
+      <div class="rcm-sum">${summary}</div></div>
+    <div class="tbl-wrap"><table class="rcm-ws"><thead><tr><th>${t('code')}</th><th>${t('failure_mode')}</th><th>${L('Consequence','ผลที่ตามมา')}</th><th>${L('Strategy to do','กลยุทธ์ที่ควรทำ')}</th><th>${L('Task · interval','งาน · ความถี่')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${stratLegendHtml()}
+  </div>
+  <div class="grid rcm-detail" style="grid-template-columns:1fr 1fr; align-items:start;">
+    <div class="card">
+      <div class="card-head"><h3>${L('How it was decided','วิธีตัดสินใจ')} — ${f.code}</h3>
+        <div class="filter-row"><select class="chip-input" id="rcmFmSelect">${FMEA.map(x=>`<option value="${x.code}" ${x.code===f.code?'selected':''}>${x.code} — ${x.comp}: ${x.mode}</option>`).join('')}</select>
+        <button class="btn btn-outline" id="btnRcmReset">${t('reset')}</button><button class="btn btn-outline" id="btnRcmPrint">PDF</button></div></div>
+      <details class="tip-more" style="margin-bottom:10px;"><summary>${L('Q1–4 · Function, failure and effect','ข้อ 1–4 · หน้าที่ ความล้มเหลว และผลกระทบ')}</summary>
         <ul class="hlist">
           <li><span class="k">1. ${L('Function','หน้าที่')}</span><span class="v" style="white-space:normal;text-align:right;max-width:62%;">${L(lib.fn[0],lib.fn[1])}</span></li>
           <li><span class="k">2. ${L('Functional failure','ความล้มเหลวเชิงหน้าที่')}</span><span class="v" style="white-space:normal;text-align:right;max-width:62%;">${L(lib.ff[0],lib.ff[1])}</span></li>
           <li><span class="k">3. ${t('failure_mode')}</span><span class="v">${f.comp} — ${f.mode}</span></li>
-          <li><span class="k">4. ${t('effect')}</span><span class="v">${f.effect} · S${f.s} O${f.o} D${f.d} = RPN ${f.rpn}</span></li>
-        </ul>
-        <div style="font-weight:800;font-size:12.5px;margin:14px 0 8px;">${L('Q5–7 · Decision logic','ข้อ 5–7 · ตรรกะการตัดสินใจ')}</div>
-        <div class="dtree">${tree}</div>
-      </div>
-      ${result}
+          <li><span class="k">4. ${t('effect')}</span><span class="v">${f.effect} · S${f.s} O${f.o} D${f.d} = RPN ${f.rpn}</span></li></ul></details>
+      <div style="font-weight:800;font-size:12.5px;margin:4px 0 8px;">${L('Q5–7 · Decision logic','ข้อ 5–7 · ตรรกะการตัดสินใจ')}</div>
+      <div class="dtree">${tree}</div>
     </div>
-    <div class="card"><h3>${L('RCM worksheet','แผ่นงาน RCM')} — ${a.id}</h3><p class="card-sub">${L('Every failure mode from the FMEA. Click a row to analyse it.','ทุกโหมดความล้มเหลวจาก FMEA กดแถวเพื่อวิเคราะห์')}</p>
-      <div class="tbl-wrap"><table><thead><tr><th>${t('code')}</th><th>${t('failure_mode')}</th><th>${L('Consequence','ผลที่ตามมา')}</th><th>${L('Decision','ผลตัดสินใจ')}</th><th>${t('task')}</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="small-muted" style="font-size:11px;margin:10px 0 0;">CBM = ${L('on condition (PdM when the HI trend allows a forecast)','ตามสภาพ (เป็น PdM เมื่อมีแนวโน้ม HI พอพยากรณ์)')} · COMB = ${L('combination of tasks','ทำหลายงานร่วมกัน')} · PM = ${L('time-based','ตามรอบเวลา')} · FFT = ${L('failure-finding, scheduled as PM','ตรวจหาความล้มเหลวซ่อนเร้น จัดเป็น PM')} · RD = ${L('redesign — not a maintenance task','ออกแบบใหม่ — ไม่ใช่งานบำรุงรักษา')} · BM = ${L('run to failure, repair when failed','ใช้งานจนเสีย ซ่อมเมื่อเสีย')} · ${L('CM is raised when CBM / PdM / FFT finds a defect','CM เกิดเมื่อ CBM / PdM / FFT ตรวจพบความผิดปกติ')}</p>
-    </div>
+    ${result}
   </div>
   ${refNote('RCM decision logic (7 questions): SAE JA1011:2009; Moubray (1997), <i>Reliability-Centred Maintenance</i>, 2nd ed.','ตรรกะการตัดสินใจ RCM (7 คำถาม): SAE JA1011:2009; Moubray (1997), <i>Reliability-Centred Maintenance</i>, 2nd ed.')}`;
 }
@@ -2805,8 +2914,8 @@ function rcmFlowHtml(a){
     {k:'hi', n:'Health Index', v:`HI ${fmtHi(a.hi)}`, s:trStatus(a.status), c:hiColor(a.hi), tab:'condition', key:'condView', val:'healthindex'},
     {k:'fmea', n:'FMEA / RPN', v:topF?`RPN ${topF.rpn}`:'—', s:topF?`${topF.code} · ${topF.comp}`:L('no failure modes','ยังไม่มีโหมด'), tab:'fmearcm', key:'fmView', val:'fmea'},
     {k:'dga', n:'DGA', v:prof.code==='N'?L('Normal','ปกติ'):prof.code, s:prof.type[state.lang], c:prof.code==='N'?'var(--green)':'var(--red)', tab:'condition', key:'condView', val:'dga'},
-    {k:'dec', n:L('Decision logic','ตรรกะตัดสินใจ'), v:topEv&&topEv.decision?topEv.decision:L('Pending','รอวิเคราะห์'), s:`${done}/${FMEA.length} ${L('modes analysed','โหมดวิเคราะห์แล้ว')}`, tab:'fmearcm', key:'fmView', val:'rcm'},
-    {k:'strat', n:L('Task strategy (RCM)','กลยุทธ์ระดับงาน'), v:taskStratSummary(a), s:L(`${riskName(rk.level)} risk`,`ความเสี่ยง${riskName(rk.level)}`), tab:'summary'},
+    {k:'dec', n:L('RCM decision','การตัดสินใจ RCM'), v:(()=>{ const s=topF&&topEv?rcmStrategy(a,topF,topEv):null; return !s?L('Pending','รอวิเคราะห์'):s.redesign?L('Redesign','ออกแบบใหม่'):s.types.join(' + '); })(), s:`${topF?topF.code+' · ':''}${done}/${FMEA.length} ${L('analysed','วิเคราะห์แล้ว')}`, tab:'fmearcm', key:'fmView', val:'rcm'},
+    {k:'strat', n:L('Maintenance strategy','กลยุทธ์บำรุงรักษา'), v:taskStratSummary(a), s:L('failure modes per strategy','จำนวนโหมดต่อกลยุทธ์'), tab:'fmearcm', key:'fmView', val:'rcm'},
   ];
   return `<nav class="rcmflow" aria-label="RCM workflow">${steps.map((x,i)=>`${i?'<span class="farr" aria-hidden="true">→</span>':''}<button class="fstep ${cur===x.k||false?'on':''}" data-flow-tab="${x.tab}"${x.key?` data-flow-key="${x.key}" data-flow-val="${x.val}"`:''}${x.anchor?` data-flow-anchor="${x.anchor}"`:''}><span class="fnum">${i+1} · ${x.n}</span><span class="fval" style="${x.c?`color:${x.c};`:''}">${esc(x.v)}</span><span class="fsub">${esc(x.s)}</span></button>`).join('')}</nav>`;
 }
@@ -3064,14 +3173,8 @@ function attachDetailEvents(){
   document.querySelectorAll('[data-rcm-undo]').forEach(el=> el.addEventListener('click',()=>{
     const ans = rcmAnsFor(currentAsset(), curF()); const order=['H','S','O','T1','T2','TC','T3']; const i=order.indexOf(el.dataset.rcmUndo);
     order.slice(i).forEach(k=>delete ans[k]); render(); }));
-  const toPlan = document.getElementById('btnRcmToPlan'); if(toPlan) toPlan.addEventListener('click',()=>{
-    const a=currentAsset(), f=curF(); const ev=rcmEvaluate(rcmAnsFor(a,f)); if(!ev.decision) return;
-    const dec=RCM_DEC[ev.decision]; if(!dec.plan) return; // redesign is not a maintenance task
-    const st=new Date(); st.setDate(st.getDate()+14);
-    const lib=rcmLib(f.comp).tasks, g=RCM_GENERIC.tasks;
-    const items = ev.decision==='COMB' ? [[lib.CBM||g.CBM, rcmPlanType(a,f.comp,'CBM')], [lib.PM||g.PM, 'PM']] : [[rcmTaskFor(f.comp, ev.decision), rcmPlanType(a,f.comp,ev.decision)]];
-    items.forEach(([task,type])=> MAINT_PLAN.push({no:1+Math.max(0,...MAINT_PLAN.map(x=>x.no)), task:`${task[0]} (${f.code})`, type, sub:dec.sub||'', start:fmtD(st), end:fmtD(st), dur:'1 '+L('day','วัน'), m:MON[st.getMonth()], len:1, notes:`RCM ${ev.decision} · ${L('interval','รอบ')} ${task[1]}${type==='PdM'?' · '+L('timing from HI trend forecast','กำหนดเวลาจากการพยากรณ์แนวโน้ม HI'):''}`}));
-    render(); toast(L('Added to maintenance plan','เพิ่มเข้าแผนบำรุงรักษาแล้ว'),'success'); });
+  const toPlan = document.getElementById('btnRcmToPlan'); if(toPlan) toPlan.addEventListener('click',()=>{ if(rcmAddToPlan(currentAsset(), curF())){ render(); toast(L('Added to maintenance plan','เพิ่มเข้าแผนบำรุงรักษาแล้ว'),'success'); } });
+  document.querySelectorAll('[data-rcm-add]').forEach(b=> b.addEventListener('click',(ev)=>{ ev.stopPropagation(); const f=FMEA.find(x=>x.code===b.dataset.rcmAdd); if(f && rcmAddToPlan(currentAsset(), f)){ render(); toast(L('Added to maintenance plan','เพิ่มเข้าแผนบำรุงรักษาแล้ว'),'success'); } }));
   document.querySelectorAll('[data-dga-tab]').forEach(el=> el.addEventListener('click',()=>{ state.dgaSubTab = el.dataset.dgaTab; render(); }));
   const dgaSel = document.getElementById('dgaSamplingSelect'); if(dgaSel) dgaSel.addEventListener('change',(e)=>{ state.dgaSampleIdx = Number(e.target.value); render(); });
   const addDga = document.getElementById('btnAddDgaResult'); if(addDga) addDga.addEventListener('click', openAddDgaResultModal);
