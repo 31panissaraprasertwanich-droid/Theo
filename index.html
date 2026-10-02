@@ -1960,6 +1960,58 @@ function netSummaryHtml(){
     <div style="flex:1;min-width:220px;font-size:13px;">${top?`${L('Most critical to supply','สำคัญต่อระบบมากที่สุด')}: <b>${top.a.id}</b> (${esc(top.c.st.name)}) · ${L(`${pctR(top.IC)} chance it is the cause if the system fails`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}<div class="small-muted">${N.sts.map(c=>`${esc(c.st.name)} R<sub>SS</sub> ${f4(c.R)}`).join(' · ')}</div>`:`<span class="small-muted">${L('No substation set up yet.','ยังไม่ได้ตั้งค่าสถานี')}</span>`}</div>
     <button class="btn btn-primary" data-goto-rel="1">${L('Open reliability page →','เปิดหน้าความน่าเชื่อถือ →')}</button></div>`;
 }
+/* ---------- reliability drawn on the real power system (grid → substations → load) ---------- */
+function relRealSvg(N){
+  const HV='#24476b', LV='#0d7a68', MU='#6b7682';
+  const SP=140, GW=150, RW=230, PADX=24;
+  const sts = N.sts.map(c=>({c, n:c.units.length, w:Math.max(270, 50 + Math.max(1,c.units.length)*SP)}));
+  const W = GW + sts.reduce((s,g)=>s+g.w+28,0) + RW, H = 430, yLine=74;
+  const ln=(x1,y1,x2,y2,col,w,da)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w||2}"${da?` stroke-dasharray="${da}"`:''}/>`;
+  const tx=(x,y,s,o)=>`<text x="${x}" y="${y}" font-size="${(o&&o.fs)||11}" ${o&&o.a?`text-anchor="${o.a}"`:''} font-weight="${(o&&o.fw)||600}" fill="${(o&&o.c)||MU}">${s}</text>`;
+  const cb=(x,y,col)=>`<rect x="${x-7}" y="${y-7}" width="14" height="14" rx="1.5" fill="#fff" stroke="${col}" stroke-width="2"/><line x1="${x-4}" y1="${y+4}" x2="${x+4}" y2="${y-4}" stroke="${col}" stroke-width="1.5"/>`;
+  const parts=[];
+  /* grid source: transmission tower */
+  parts.push(`<g stroke="${HV}" stroke-width="1.8" fill="none" stroke-linecap="round"><path d="M38 132 L58 30 L78 132 M45 100 L71 100 M50 72 L66 72 M54 50 L62 50 M45 100 L66 72 M71 100 L50 72 M50 72 L62 50 M66 72 L54 50"/><path d="M30 44 H86 M36 44 v7 M80 44 v7"/></g>
+    ${tx(58,152,L('115 kV grid','ระบบส่ง 115 kV'),{a:'middle',fw:800,c:HV})}${tx(58,166,L('(source)','(แหล่งจ่าย)'),{a:'middle',fs:10})}`);
+  const xEnd = W - RW - 10;
+  parts.push(ln(80,yLine,xEnd,yLine,HV,4)); parts.push(tx(GW,yLine-10,L('115 kV transmission line','สายส่ง 115 kV'),{fs:10.5,fw:700,c:HV}));
+  let x = GW;
+  sts.forEach(g=>{ const c=g.c, sx=x, mid=sx+g.w/2, top=100, bot=392, yHB=150, yT1=196, yT2=220, yLB=266;
+    const kTxt = !g.n ? '' : c.k>=g.n && g.n>1 ? L(`${c.k}-out-of-${g.n}: all ${g.n} units are needed for the peak load (no spare)`,`${c.k}-out-of-${g.n}: ต้องใช้ครบ ${g.n} ตัวจึงรับโหลดสูงสุดได้ (ไม่มีตัวสำรอง)`)
+      : g.n===1 ? L('Single unit: no spare','หม้อแปลงตัวเดียว: ไม่มีตัวสำรอง')
+      : L(`${c.k}-out-of-${g.n}: any ${c.k} unit${c.k>1?'s':''} can carry the peak load (${g.n-c.k} spare)`,`${c.k}-out-of-${g.n}: ใช้ ${c.k} ตัวก็รับโหลดสูงสุดได้ (สำรอง ${g.n-c.k} ตัว)`);
+    parts.push(`<rect x="${sx}" y="${top}" width="${g.w}" height="${bot-top}" rx="12" fill="#fff" stroke="#c3ccd4" stroke-dasharray="5 4"/>
+      ${tx(sx+12,top+18,`<tspan font-weight="800" fill="${HV}">${esc(c.st.id)}</tspan> · ${esc(c.st.name)}`,{fs:11.5,c:'#38434d'})}
+      ${ln(mid,yLine,mid,yHB,HV,2.4)}${cb(mid,yLine+40,HV)}
+      ${ln(sx+22,yHB,sx+g.w-22,yHB,HV,4)}${ln(sx+22,yLB,sx+g.w-22,yLB,LV,4)}
+      ${ln(mid,yLB,mid,yLB+34,LV,2.2)}<path d="M${mid-6} ${yLB+32} L${mid} ${yLB+42} L${mid+6} ${yLB+32}" fill="${LV}"/>
+      ${tx(mid,yLB+58,L(`Load ${+c.st.peak||0} MVA`,`โหลด ${+c.st.peak||0} MVA`),{a:'middle',fs:10.5,fw:700,c:LV})}
+      ${tx(sx+12,bot-34,kTxt,{fs:10,c:'#38434d'})}
+      <rect x="${sx+g.w-118}" y="${bot-24}" width="106" height="20" rx="10" fill="${rBand(c.R)}"/>
+      ${tx(sx+g.w-65,bot-10,`R<tspan font-size="8" dy="2">SS</tspan><tspan dy="-2"> = ${f4(c.R)}</tspan>`,{a:'middle',fs:11,fw:800,c:'#fff'})}`);
+    c.units.forEach((u,j)=>{ const ux = mid + (j-(g.n-1)/2)*SP - 30, col=rBand(u.R), top1=u.rank===1;
+      parts.push(`<g class="blk" data-view="${esc(u.a.id)}" style="cursor:pointer;"><title>${esc(u.a.id)} — R ${f4(u.R)} · λ ${f4(u.lam)}/yr · I_C ${pctR(u.IC)}</title>
+        <rect x="${ux-24}" y="${yT1-30}" width="${SP-10}" height="${yT2-yT1+56}" rx="9" fill="${col}" fill-opacity=".07"/>
+        ${ln(ux,yHB,ux,yT1-16,HV,2.2)}${ln(ux,yT2+16,ux,yLB,LV,2.2)}
+        <circle cx="${ux}" cy="${yT1}" r="16" fill="#fff" stroke="${col}" stroke-width="2.8"/><circle cx="${ux}" cy="${yT2}" r="16" fill="#fff" fill-opacity=".85" stroke="${col}" stroke-width="2.8"/>
+        ${top1?`<circle cx="${ux-20}" cy="${yT1-22}" r="10" fill="#c62d23"/>${tx(ux-20,yT1-18.5,'#1',{a:'middle',fs:9.5,fw:800,c:'#fff'})}`:''}
+        ${tx(ux+22,yT1-8,esc(u.a.id),{fs:12.5,fw:800,c:'#1E2A33'})}
+        ${tx(ux+22,yT1+8,`R = ${f4(u.R)}`,{fs:11.5,fw:800,c:col})}
+        ${tx(ux+22,yT1+22,`λ ${f4(u.lam)}/${L('yr','ปี')}`,{fs:10})}
+        ${tx(ux+22,yT1+35,`I<tspan font-size="8" dy="2">C</tspan><tspan dy="-2"> ${pctR(u.IC)}</tspan>`,{fs:10,fw:700,c:top1?'#c62d23':MU})}</g>`); });
+    if(!g.n) parts.push(tx(mid,yT1+10,L('No transformer','ยังไม่มีหม้อแปลง'),{a:'middle'}));
+    x += g.w + 28; });
+  /* system result */
+  const rx = W - RW + 6, ry = 120;
+  parts.push(`<rect x="${rx}" y="${ry}" width="${RW-24}" height="170" rx="14" fill="#f3f6f9" stroke="#d6dde4"/>
+    ${tx(rx+16,ry+26,L(`System reliability · ${N.t} ${N.t>1?'years':'year'}`,`ความน่าเชื่อถือของระบบ · ${N.t} ปี`),{fs:11,fw:700})}
+    ${tx(rx+16,ry+64,N.sts.length?f4(N.Rsys):'—',{fs:30,fw:800,c:rBand(N.Rsys)})}
+    ${tx(rx+16,ry+88,`R<tspan font-size="8" dy="2">sys</tspan><tspan dy="-2"> = ${N.sts.map(c=>`R<tspan font-size="8" dy="2">${esc(c.st.id)}</tspan><tspan dy="-2"></tspan>`).join(' × ')}</tspan>`,{fs:10.5,c:'#38434d'})}
+    ${tx(rx+16,ry+106,N.sts.map(c=>f4(c.R)).join(' × '),{fs:10.5,c:'#38434d'})}
+    ${tx(rx+16,ry+132,L('Every substation must supply','ทุกสถานีต้องจ่ายไฟได้'),{fs:10})}
+    ${tx(rx+16,ry+146,L('its load → substations in series','จึงคูณกันแบบอนุกรม'),{fs:10})}`);
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" style="max-width:none;" role="img" aria-label="System reliability on the power network" font-family="Inter, 'Noto Sans Thai', sans-serif">${parts.join('')}</svg>`;
+}
 function rbdSvg(N){
   const BW=118, BH=48, VG=64, PAD=22, WIRE=26;
   const groups = N.sts.map(c=>{ const n=c.units.length; const par = n>1 && c.k<n;
@@ -2094,7 +2146,8 @@ function schematicHtml(){
 function netHtml(){
   const N = netCalc(); const top = N.ranked[0]; const tt = N.t; const yr = L(tt>1?'yrs':'yr','ปี');
   const conn = (c)=> c.units.length<=1 ? L('single unit','ตัวเดียว') : c.k===1 ? L(`parallel (1-out-of-${c.units.length})`,`ขนาน (1-out-of-${c.units.length})`) : c.k===c.units.length ? L(`series (${c.k}-out-of-${c.units.length})`,`อนุกรม (${c.k}-out-of-${c.units.length})`) : `${c.k}-out-of-${c.units.length}`;
-  const stHtml = N.sts.length ? `<div class="rbd-wrap">${rbdSvg(N)}</div>` : '';
+  const rv = state.relView==='rbd' ? 'rbd' : 'real';
+  const stHtml = N.sts.length ? `<div class="seg" style="margin-bottom:8px;"><button class="${rv==='real'?'on':''}" data-relview="real">${L('Power system view','แผนภาพระบบไฟฟ้า')}</button><button class="${rv==='rbd'?'on':''}" data-relview="rbd">${L('Block diagram (RBD)','แผนภาพบล็อก (RBD)')}</button></div><div class="rbd-wrap">${rv==='rbd'?rbdSvg(N):relRealSvg(N)}</div>` : '';
   const maxIC = Math.max(0.0001, ...N.ranked.map(u=>u.IC));
   const rank = N.ranked.map(u=>`<tr data-view="${esc(u.a.id)}" style="cursor:pointer;"><td><b>${u.rank}</b></td><td><b>${esc(u.a.id)}</b></td><td><span class="st-code">${esc(u.c.st.id)}</span> ${esc(u.c.st.name)}</td>
       <td style="color:${rBand(u.R)};font-weight:800;">${f4(u.R)}</td>
@@ -2140,7 +2193,7 @@ function netHtml(){
     <div class="net-sys"><span>${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub>(${tt} ${yr}) <b class="big" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</b></span>
       ${top?`<span>${L('Most critical to supply','สำคัญต่อระบบมากที่สุด')}: <b>${esc(top.a.id)}</b> (${esc(top.c.st.name)}) — ${L(`if the system fails, ${pctR(top.IC)} chance this unit is the cause`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}</span>`:''}</div>
     <div style="margin:4px 0 10px;">${stHtml || `<p class="small-muted">${L('No substation yet — press “+ Add substation”.','ยังไม่มีสถานี — กด “+ เพิ่มสถานี”')}</p>`}</div>
-    <div class="net-legend"><span><i style="background:#1fa571"></i>R ≥ 0.95</span><span><i style="background:#d99012"></i>0.85–0.95</span><span><i style="background:#c62d23"></i>&lt; 0.85</span><span>${L('Reliability block diagram: blocks side by side = series (all needed) · stacked = parallel (back each other up). Click a block to open the transformer.','แผนภาพบล็อกความน่าเชื่อถือ (RBD): บล็อกเรียงต่อกัน = อนุกรม (ต้องใช้ทุกตัว) · บล็อกซ้อนกัน = ขนาน (สำรองกันได้) · กดที่บล็อกเพื่อเปิดหม้อแปลง')}</span><button class="linklike" data-goto-sch="1" style="font-size:11.5px;">${L('See the single-line diagram →','ดูแผนภาพวงจร →')}</button></div>
+    <div class="net-legend"><span><i style="background:#1fa571"></i>R ≥ 0.95</span><span><i style="background:#d99012"></i>0.85–0.95</span><span><i style="background:#c62d23"></i>&lt; 0.85</span><span>${state.relView==='rbd' ? L('Reliability block diagram: blocks side by side = series (all needed) · stacked = parallel (back each other up). Click a block to open the transformer.','แผนภาพบล็อกความน่าเชื่อถือ (RBD): บล็อกเรียงต่อกัน = อนุกรม (ต้องใช้ทุกตัว) · บล็อกซ้อนกัน = ขนาน (สำรองกันได้) · กดที่บล็อกเพื่อเปิดหม้อแปลง') : L('Transformers are drawn as they are connected. Colour = R(t) of each unit; #1 = most critical to supply (highest I_C). k-out-of-n = how many units must work to carry the peak load. Click a transformer to open it.','หม้อแปลงวาดตามการต่อจริง · สี = R(t) ของแต่ละตัว · #1 = สำคัญต่อระบบมากที่สุด (I_C สูงสุด) · k-out-of-n = ต้องมีกี่ตัวทำงานจึงรับโหลดสูงสุดได้ · กดที่หม้อแปลงเพื่อเปิดดู')}</span><button class="linklike" data-goto-sch="1" style="font-size:11.5px;">${L('See the single-line diagram →','ดูแผนภาพวงจร →')}</button></div>
   </div>
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head"><h3>${L('Importance ranking','อันดับความสำคัญต่อระบบ')}</h3><span class="small-muted">${L('by criticality importance I_C','เรียงตาม Criticality importance (I<sub>C</sub>)')}</span></div>
@@ -2208,6 +2261,7 @@ function attachNetEvents(){
   document.querySelectorAll('[data-sch-st]').forEach(b=> b.addEventListener('click',()=>{ state.schSt = b.dataset.schSt; render(); }));
   document.querySelectorAll('[data-goto-sch]').forEach(b=> b.addEventListener('click',()=>{ state.page='reliability'; state.relTab='diagram'; if(b.dataset.gotoSch!=='1') state.schSt=b.dataset.gotoSch; render(); window.scrollTo(0,0); }));
   document.querySelectorAll('.rbd-wrap svg .blk[data-view]').forEach(g=> g.addEventListener('click',()=> goToAssetDetail(g.dataset.view,'summary')));
+  document.querySelectorAll('[data-relview]').forEach(b=> b.addEventListener('click',()=>{ state.relView=b.dataset.relview; render(); }));
   const rs=document.getElementById('repScope'); if(rs) rs.addEventListener('change',()=>{ state.repScope = rs.value; render(); });
   document.querySelectorAll('[data-goto-rel]').forEach(b=> b.addEventListener('click',()=>{ state.page='reliability'; state.relTab='system'; render(); window.scrollTo(0,0); }));
   document.querySelectorAll('[data-net-addtr]').forEach(b=> b.addEventListener('click',()=> openAddAssetModal(b.dataset.netAddtr)));
