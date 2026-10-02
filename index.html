@@ -682,14 +682,14 @@ button.ovb-status{cursor:pointer;} button.ovb-status:hover{background:rgba(255,2
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="rcmNavy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6B7782"/><stop offset="1" stop-color="#6B7782"/></linearGradient></defs></svg>
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
-    <h2 id="loginTitle">Sign in</h2>
+    <h2 id="loginTitle">RCM Transformer</h2>
     <p id="loginSub">Access the RCM Transformer dashboard</p>
-    <form id="loginForm">
+    <form id="loginForm" style="display:none;">
       <div class="formrow"><label id="loginUserLabel">Username</label><input name="username" required autocomplete="username"></div>
       <div class="formrow"><label id="loginPassLabel">Password</label><input name="password" type="password" required autocomplete="current-password"></div>
       <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;" id="loginSubmitBtn">Sign in</button>
     </form>
-    <button type="button" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" id="loginDemoBtn">Enter demo (no account needed)</button>
+    <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;" id="loginDemoBtn">Enter demo</button>
     <div class="login-hint" id="loginHint">Demo mode — any username and password will work.</div>
   </div>
 </div>
@@ -756,9 +756,9 @@ const UI = {
  footer_tag:['Reliable Grid<br>Sustainable Tomorrow','โครงข่ายเชื่อถือได้<br>เพื่ออนาคตยั่งยืน'],
  search_ph:['Search transformer ID…','ค้นหารหัสหม้อแปลง…'],
  role:['Maintenance Engineer','วิศวกรบำรุงรักษา'], logout:['Log out','ออกจากระบบ'],
- login_title:['Sign in','เข้าสู่ระบบ'], login_sub:['Access the RCM Transformer dashboard','เข้าใช้งานแดชบอร์ด RCM Transformer'],
+ login_title:['RCM Transformer','RCM Transformer'], login_sub:['Reliability Centered Maintenance for power transformers','ระบบบำรุงรักษาหม้อแปลงไฟฟ้าเชิงความน่าเชื่อถือ'],
  login_user:['Username','ชื่อผู้ใช้'], login_pass:['Password','รหัสผ่าน'], login_submit:['Sign in','เข้าสู่ระบบ'],
- login_hint:['Demo mode — any username and password will work.','โหมดสาธิต — ใส่ชื่อผู้ใช้และรหัสผ่านอะไรก็ได้'], login_demo:['Enter demo (no account needed)','เข้าสู่ระบบแบบสาธิต (ไม่ต้องมีบัญชี)'],
+ login_hint:['Demo with sample data — no account or password needed. Data stays in this browser.','เดโมพร้อมข้อมูลตัวอย่าง ไม่ต้องมีบัญชีหรือรหัสผ่าน ข้อมูลอยู่ในเบราว์เซอร์นี้'], login_demo:['Enter demo','เข้าสู่เดโม'],
  notifications:['Notifications','การแจ้งเตือน'], mark_all_read:['Mark all read','อ่านทั้งหมด'], view_all:['View All →','ดูทั้งหมด →'],
  sub_overview:['Monitor · Analyze · Plan · Maintain','ติดตาม · วิเคราะห์ · วางแผน · บำรุงรักษา'],
  sub_assets:['Manage and monitor all transformer assets','จัดการและติดตามสินทรัพย์หม้อแปลงทั้งหมด'],
@@ -1527,6 +1527,8 @@ function notificationsList(){
   if(NOTIF.dga) ASSETS.filter(a=>a.status==='Warning' && a._as && a._as.dga.code!=='N').forEach(a=>out.push({en:`${a.id} DGA indicates ${a._as.dga.code}`, th:`${a.id} ผล DGA บ่งชี้ ${a._as.dga.code}`, t:a.last}));
   if(NOTIF.overdue) ASSETS.filter(a=>sampleOverdueDays(a)>0).sort((x,y)=>sampleOverdueDays(y)-sampleOverdueDays(x)).forEach(a=>out.push({en:`${a.id}: oil sampling overdue by ${sampleOverdueDays(a)} days (was due ${a.next})`, th:`${a.id}: เลยกำหนดเก็บตัวอย่างน้ำมัน ${sampleOverdueDays(a)} วัน (ครบกำหนด ${a.next})`, t:fmtD(new Date())}));
   if(NOTIF.overdue) ASSETS.forEach(a=>{ const n=(MAINT_STORE[a.id]||[]).filter(tk=>planStatus(tk)==='Overdue').length; if(n) out.push({en:`${a.id}: ${n} maintenance task(s) overdue`, th:`${a.id}: งานบำรุงรักษาเลยกำหนด ${n} งาน`, t:fmtD(new Date())}); });
+  if(ASSETS.some(a=>!isDemoAsset(a))){ let lb=0; try{ lb=+localStorage.getItem('rcm_last_backup')||0; }catch(e){}
+    if(Date.now()-lb > 30*864e5) out.push({en:'No backup in the last 30 days — Settings → System & Data → Backup DB', th:'ยังไม่ได้สำรองข้อมูลเกิน 30 วัน — ตั้งค่า → ระบบและข้อมูล → สำรองฐานข้อมูล', t:fmtD(new Date())}); }
   return out;
 }
 
@@ -1537,6 +1539,7 @@ let chartRegistry = {};
 
 const NAV = [
  {id:'overview', key:'nav_overview', badge:'home'}, {id:'reliability', key:'nav_reliability', badge:'reliability'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'},
+ {id:'fmea', key:'nav_fmea', badge:'fmea'}, {id:'rcm', key:'nav_rcm', badge:'rcm'}, {id:'planall', key:'nav_plan', badge:'plan'},
  {id:'reports', key:'nav_reports', badge:'reports'}, {id:'settings', key:'nav_settings', badge:'settings'},
 ];
 const ICONS = {
@@ -1811,6 +1814,12 @@ const valueLabelPlugin = {
     });
   }
 };
+const hiBandPlugin = { id:'hiBands', beforeDatasetsDraw(ch){ const a=ch.chartArea, y=ch.scales.y; if(!a||!y) return; const c=ch.ctx; c.save();
+  c.fillStyle='rgba(194,57,47,.07)'; c.fillRect(a.left, y.getPixelForValue(50), a.width, y.getPixelForValue(0)-y.getPixelForValue(50));
+  c.fillStyle='rgba(185,127,14,.09)'; c.fillRect(a.left, y.getPixelForValue(70), a.width, y.getPixelForValue(50)-y.getPixelForValue(70)); c.restore(); } };
+function unitTrendSets(){ const pal=['#1fa571','#8759d6','#d99012','#c62d23','#0d7a68','#5E7A8C'];
+  return ASSETS.map((a,i)=>{ const lab=labFor(a), d=[]; for(let k=N_DEMO-1;k>=0;k--) d.push(lab[k]?assessSample(lab[k],lab[k+1],a).hi:null);
+    return {label:a.id, noLabel:true, data:d, borderColor:pal[i%pal.length], backgroundColor:pal[i%pal.length], borderWidth:1.5, pointRadius:2, tension:.3, fill:false, spanGaps:true}; }); }
 function chartBox(id, heightPx){ return `<div class="chart-box" style="height:${heightPx}px;"><canvas id="${id}"></canvas></div>`; }
 const commonOpts = ()=>({ responsive:true, maintainAspectRatio:false });
 
@@ -2369,9 +2378,9 @@ function renderOverview(){
     </section>
   </div>
   <section class="card">
-    <div class="card-head"><h3>${t('hi_trend_fleet')}</h3><span class="small-muted" style="font-size:12px;">${L('years in C.E.','ปี พ.ศ.')}</span></div>
+    <div class="card-head"><h3>${t('hi_trend_fleet')}</h3><span class="small-muted" style="font-size:12px;display:flex;gap:12px;align-items:center;"><label style="display:flex;gap:5px;align-items:center;cursor:pointer;"><input type="checkbox" id="ovTrendUnits" ${state.trendUnits?'checked':''}> ${L('show each transformer','แสดงรายตัว')}</label>${L('years in C.E.','ปี พ.ศ.')}</span></div>
     ${chartBox('ovTrend2',200)}
-    <p class="refnote" style="margin-top:8px;">${L('The slope of this line is the HI decline rate (points per year). Together with today’s HI it sets the risk level in the Risk matrix.','ความชันของเส้นนี้คืออัตรา HI ลดลง (คะแนนต่อปี) ใช้ร่วมกับค่า HI ปัจจุบันเพื่อหาระดับความเสี่ยงใน Risk matrix')}</p>
+    <p class="refnote" style="margin-top:8px;">${L('The slope of this line is the HI decline rate (points per year). Together with today’s HI it sets the risk level in the Risk matrix.','ความชันของเส้นนี้คืออัตรา HI ลดลง (คะแนนต่อปี) ใช้ร่วมกับค่า HI ปัจจุบันเพื่อหาระดับความเสี่ยงใน Risk matrix')} ${L('Shaded bands: red = Critical (HI < 50), amber = Warning (50–70).','แถบสี: แดง = วิกฤต (HI < 50) เหลือง = เฝ้าระวัง (50–70)')}</p>
     ${refNote('Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327.','Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327')}
   </section>
   ${demo?`<p class="ov-demo">${L(`${demo} of these transformers are sample data for demonstration.`,`หม้อแปลง ${demo} ตัวในหน้านี้เป็นข้อมูลตัวอย่างเพื่อการสาธิต`)}</p>`:''}`;
@@ -2388,17 +2397,21 @@ function initOverviewCharts(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
   const gridColor = cssv('--border');
   if(document.getElementById('ovDonut')) mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{data:fleetTrend(),borderColor:'#2B4C6F',backgroundColor:'#2B4C6F22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#5E7A8C'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
+  mkChart('ovTrend2',{type:'line',plugins:[hiBandPlugin,valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{label:L('Fleet average','ค่าเฉลี่ยทั้งกลุ่ม'),data:fleetTrend(),borderColor:'#2B4C6F',backgroundColor:'#2B4C6F22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#5E7A8C'}, ...(state.trendUnits?unitTrendSets():[])]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:!!state.trendUnits,position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
   document.querySelectorAll('[data-goto-risk]').forEach(b=>b.addEventListener('click',()=>{ state.page='risk'; render(); window.scrollTo(0,0); }));
   document.querySelectorAll('[data-ov-filter]').forEach(el=> el.addEventListener('click',()=>{ state.assetFilterStatus = el.dataset.ovFilter; state.ovPage=1; render(); }));
+  const tu = document.getElementById('ovTrendUnits'); if(tu) tu.addEventListener('change',()=>{ state.trendUnits = tu.checked; render(); });
   const gotoBtns = document.querySelectorAll('[data-goto-assets]'); gotoBtns.forEach(b=>b.addEventListener('click',()=>{ state.page='assets'; render(); window.scrollTo(0,0); }));
   const prevBtn = document.getElementById('ovPagePrev'); if(prevBtn) prevBtn.addEventListener('click', ()=>{ if(state.ovPage>1){ state.ovPage--; render(); } });
   const nextBtn = document.getElementById('ovPageNext'); if(nextBtn) nextBtn.addEventListener('click', ()=>{ state.ovPage++; render(); });
 }
 
 /* ============ ASSETS LIST PAGE ============ */
+function assetSortFn(){ const s=state.assetSort; if(!s) return (x,y)=>(RISK_ORDER[riskOf(x).level]-RISK_ORDER[riskOf(y).level]) || (x.hi-y.hi);   /* default: worst first */
+  const val = {id:a=>String(a.id), cap:a=>+a.cap||0, age:a=>{ const g=ageingOf(a); return g?g.age:-1; }, hi:a=>a.hi, risk:a=>-RISK_ORDER[riskOf(a).level], last:a=>+(parseD(a.last)||0), next:a=>+(parseD(a.next)||0)}[s.k];
+  return (x,y)=>{ const p=val(x), q=val(y); return (p<q?-1:p>q?1:0)*s.d; }; }
 function renderAssetsPage(){
   const banner = demoBannerHtml();
   const list = ASSETS.filter(a=>{
@@ -2406,7 +2419,8 @@ function renderAssetsPage(){
     const q = state.assetSearch.trim().toLowerCase();
     const matchSearch = !q || a.id.toLowerCase().includes(q) || a.loc.toLowerCase().includes(q) || a.mfr.toLowerCase().includes(q);
     return matchStatus && matchSearch;
-  }).sort((x,y)=>(RISK_ORDER[riskOf(x).level]-RISK_ORDER[riskOf(y).level]) || (x.hi-y.hi));
+  }).sort(assetSortFn());
+  const sh = (k,lb)=>`<th data-sort="${k}" style="cursor:pointer;" title="${L('Click to sort','กดเพื่อเรียง')}">${lb}${state.assetSort&&state.assetSort.k===k?(state.assetSort.d>0?' ▲':' ▼'):''}</th>`;
   return `${banner}
   <div class="card">
     <div class="card-head"><h3>${t('assets_title')}</h3><div class="filter-row">
@@ -2424,8 +2438,8 @@ function renderAssetsPage(){
       </select>
       <span class="small-muted">${list.length} / ${ASSETS.length}</span>
     </div>
-    <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${t('asset_id')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${L('Risk','ความเสี่ยง')}</th><th>${t('main_issue')}</th><th>${L('Next sampling','ตรวจครั้งถัดไป')}</th><th></th></tr></thead><tbody>
-    ${list.length ? list.map((a,i)=>`<tr data-view="${a.id}"><td><b>${a.id}</b><div class="small-muted">${a.loc}</div></td><td style="font-weight:800;color:${hiColor(a.hi)}">${fmtHi(a.hi)}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${riskPill(riskOf(a).level)}</td><td class="small-muted" style="white-space:normal;min-width:160px;">${mainIssueOf(a)}</td><td>${nextCell(a)}</td><td style="color:var(--muted);">›</td></tr>`).join('') : `<tr><td colspan="7" class="small-muted" style="text-align:center;padding:20px;">${t('toast_no_result')}</td></tr>`}
+    <div class="tbl-wrap"><table class="rowlink"><thead><tr>${sh('id',t('asset_id'))}${sh('cap','MVA')}${sh('age',L('Age (yr)','อายุ (ปี)'))}${sh('hi',t('health_index'))}<th>${t('status')}</th>${sh('risk',L('Risk','ความเสี่ยง'))}<th>${t('main_issue')}</th>${sh('last',L('Last lab','ผลแล็บล่าสุด'))}${sh('next',L('Next sampling','ตรวจครั้งถัดไป'))}<th></th></tr></thead><tbody>
+    ${list.length ? list.map((a,i)=>`<tr data-view="${esc(a.id)}"><td><b>${esc(a.id)}</b><div class="small-muted">${esc(a.loc||'')}</div></td><td>${a.cap||'—'}</td><td>${(ageingOf(a)||{}).age??'—'}</td><td style="font-weight:800;color:${hiColor(a.hi)}">${fmtHi(a.hi)}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${riskPill(riskOf(a).level)}</td><td class="small-muted" style="white-space:normal;min-width:160px;">${mainIssueOf(a)}</td><td>${a.last}</td><td>${nextCell(a)}</td><td style="color:var(--muted);">›</td></tr>`).join('') : `<tr><td colspan="10" class="small-muted" style="text-align:center;padding:20px;">${t('toast_no_result')}</td></tr>`}
     </tbody></table></div>
   </div>`;
 }
@@ -2435,6 +2449,7 @@ function attachAssetsPageEvents(){
   if(search) search.addEventListener('input', (e)=>{ state.assetSearch = e.target.value; renderAssetsTableOnly(); });
   const statusFilter = document.getElementById('assetStatusFilter');
   if(statusFilter) statusFilter.addEventListener('change', (e)=>{ state.assetFilterStatus = e.target.value; render(); });
+  document.querySelectorAll('[data-sort]').forEach(th=> th.addEventListener('click',()=>{ const k=th.dataset.sort; const c=state.assetSort; state.assetSort = (c&&c.k===k) ? {k, d:-c.d} : {k, d:(k==='risk'||k==='id'||k==='next')?1:-1}; if(k==='risk'&&!(c&&c.k===k)) state.assetSort.d=-1; render(); }));
 }
 function renderAssetsTableOnly(){
   const c = document.getElementById('content');
@@ -2723,8 +2738,8 @@ function detailHeader(a){
   return `
   <div class="detail-head">
     <div style="min-width:0;">
-      <div class="detail-title"><h2>${a.id}</h2><span class="pill ${statusPillClass(a.status)}" style="font-size:12px;padding:4px 12px;">${trStatus(a.status)}</span></div>
-      <div class="small-muted" style="margin-top:3px;">${a.loc} · ${a.volt} kV${a.cap?` · ${a.cap} MVA`:''}${a.year?` · ${L('built','ผลิตปี')} ${a.year}`:''}</div>
+      <div class="detail-title"><h2>${esc(a.id)}</h2><span class="pill ${statusPillClass(a.status)}" style="font-size:12px;padding:4px 12px;">${trStatus(a.status)}</span></div>
+      <div class="small-muted" style="margin-top:3px;">${esc(a.loc||'')} · ${esc(a.volt||'')} kV${a.cap?` · ${a.cap} MVA`:''}${a.year?` · ${L('built','ผลิตปี')} ${a.year}`:''}</div>
     </div>
     <div class="kpi-row">
       <div class="kpi"><div><div class="klabel">Health Index</div><div class="kvalue" style="color:${hiColor(a.hi)};">${fmtHi(a.hi)}</div></div></div>
@@ -2763,7 +2778,7 @@ function detailSummaryTab(a){
         <ol>${[prof.nextAction[state.lang], riskFollow(riskOf(a)), ...prof.actions.filter(x=>!/routine|ตามรอบปกติ|Resample|เก็บน้ำมันตรวจ DGA ซ้ำ/.test(x))].slice(0,4).map(x=>`<li>${x}</li>`).join('')}</ol>
         <button class="linklike" data-dtab="plan">${L('Open maintenance plan →','ไปที่แผนบำรุงรักษา →')}</button></div>
     </div>
-    <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3><button class="linklike" data-dtab="condition">${L('How is it scored? →','ดูที่มาของคะแนน →')}</button></div>${chartBox('detTrend',230)}<p class="refnote" style="margin-top:6px;">${L('How the trend is used: the slope of the straight line through all HI points = HI decline rate (points/year). It goes into the Risk matrix together with today’s HI, and is compared with normal ageing for the unit’s age.','การใช้แนวโน้ม: ความชันของเส้นตรงที่ลากผ่านค่า HI ทุกจุด = อัตรา HI ลดลง (คะแนน/ปี) นำไปหาระดับความเสี่ยงใน Risk matrix ร่วมกับค่า HI ปัจจุบัน และใช้เทียบกับการเสื่อมตามอายุปกติ')} ${L('Years are shown in B.E.','ปีแสดงเป็น พ.ศ.')}</p>${refNote('Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327 (risk from HI and its decreasing rate).','Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327 (ความเสี่ยงจาก HI และอัตราการลดลง)')}</div>
+    <div class="card"><div class="card-head"><h3>${t('hi_trend')}</h3><button class="linklike" data-dtab="condition">${L('How is it scored? →','ดูที่มาของคะแนน →')}</button></div>${chartBox('detTrend',230)}<p class="refnote" style="margin-top:6px;">${L('How the trend is used: the slope of the straight line through all HI points = HI decline rate (points/year). It goes into the Risk matrix together with today’s HI, and is compared with normal ageing for the unit’s age.','การใช้แนวโน้ม: ความชันของเส้นตรงที่ลากผ่านค่า HI ทุกจุด = อัตรา HI ลดลง (คะแนน/ปี) นำไปหาระดับความเสี่ยงใน Risk matrix ร่วมกับค่า HI ปัจจุบัน และใช้เทียบกับการเสื่อมตามอายุปกติ')} ${L('Years are shown in C.E.','ปีแสดงเป็น พ.ศ.')}</p>${refNote('Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327 (risk from HI and its decreasing rate).','Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327 (ความเสี่ยงจาก HI และอัตราการลดลง)')}</div>
   </div>
   <div class="card opstrip">
     <span class="op-svc" style="color:${a.svc==='out'?'var(--red)':'var(--green)'};">● ${a.svc==='out'?L('Out of service','หยุดใช้งาน'):t('in_service')}</span>
@@ -2815,7 +2830,7 @@ function renderDetail(){
   return `
   <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:6px;">
     <button class="linklike" id="backToAssets">${t('back_to_assets')}</button>
-    <div class="filter-row"><label class="small-muted" style="font-weight:700;">${t('viewing_asset')}</label><select class="chip-input" id="detailAssetSelect">${ASSETS.map(x=>`<option value="${x.id}" ${x.id===state.assetId?'selected':''}>${x.id} — ${x.loc}</option>`).join('')}</select></div>
+    <div class="filter-row"><label class="small-muted" style="font-weight:700;">${t('viewing_asset')}</label><select class="chip-input" id="detailAssetSelect">${ASSETS.map(x=>`<option value="${esc(x.id)}" ${x.id===state.assetId?'selected':''}>${esc(x.id)} — ${esc(x.loc||'')}</option>`).join('')}</select></div>
   </div>
   <div class="card" style="margin-bottom:12px;">${detailHeader(a)}</div>
   ${rcmFlowHtml(a)}
@@ -3094,7 +3109,7 @@ function detailFmeaTab(a){
   <p class="small-muted" style="margin:0 0 14px;">${t('fmea_sub')} — <b>${a.id}</b></p>
   <div class="grid" style="grid-template-columns:1fr; margin-bottom:16px;">
     <div class="card"><div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('code')}</th><th>${t('asset')}</th><th>${t('component')}</th><th>${t('failure_mode')}</th><th>${t('effect')}</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>${L('RPN level','ระดับ RPN')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
-      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td>${a.id}</td><td><b>${f.comp}</b></td><td>${f.mode}</td><td class="small-muted">${f.effect}</td><td>${f.s}${f.s>=9?'<span class="sflag" title="'+L('Severity 9–10: handle first regardless of RPN','ความรุนแรง 9–10: ต้องจัดการก่อนเสมอไม่ว่า RPN เท่าไร')+'">S≥9</span>':''}</td><td>${f.o}${f.oWhy?` <span class="small-muted" title="${esc(L('From lab result: ','จากผลแล็บ: ')+f.oWhy)}" style="cursor:help;">⟳</span>`:''}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':f.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
+      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td>${esc(a.id)}</td><td><b>${esc(f.comp)}</b></td><td>${esc(f.mode)}</td><td class="small-muted">${esc(f.effect)}</td><td>${f.s}${f.s>=9?'<span class="sflag" title="'+L('Severity 9–10: handle first regardless of RPN','ความรุนแรง 9–10: ต้องจัดการก่อนเสมอไม่ว่า RPN เท่าไร')+'">S≥9</span>':''}</td><td>${f.o}${f.oWhy?` <span class="small-muted" title="${esc(L('From lab result: ','จากผลแล็บ: ')+f.oWhy)}" style="cursor:help;">⟳</span>`:''}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':f.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
       </tbody></table></div>
       <p class="small-muted" style="font-size:11px;margin:8px 0 0;"><span class="sflag" style="margin:0 4px 0 0;">S≥9</span>${L('Severity 9–10 is handled first regardless of RPN (AIAG-VDA approach). Priority order everywhere in the app: S ≥ 9 first, then RPN.','ความรุนแรง 9–10 ต้องจัดการก่อนเสมอไม่ว่า RPN เท่าไร (แนวทาง AIAG-VDA) ลำดับความสำคัญทั้งระบบ: S ≥ 9 ก่อน แล้วจึงเรียงตาม RPN')}</p></div>
 
@@ -3263,7 +3278,7 @@ function detailPlanTab(a){
     </div>
     ${overdue?`<div class="notebox" style="margin-bottom:12px;background:var(--red-bg);">${L(`${overdue} task(s) are past their end date and not closed. A task is completed only when its work order is closed — issue a WO or reschedule.`,`มี ${overdue} งานเลยวันสิ้นสุดแต่ยังไม่ปิด งานจะเสร็จได้เมื่อปิดใบสั่งงานเท่านั้น — ออกใบงานหรือเลื่อนกำหนด`)}</div>`:''}
     <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>${t('task')}</th><th>${t('type')}</th><th>${t('start')}</th><th>${t('end')}</th><th>${t('duration')}</th><th>${t('status')}</th><th>${L('Work order','ใบสั่งงาน')}</th></tr></thead><tbody>
-    ${MAINT_PLAN.map((tk,ti)=>`<tr><td>${tk.no}</td><td><b>${a.id}</b></td><td>${tk.task}${tk.notes?`<div class="small-muted" style="white-space:normal;">${esc(tk.notes)}</div>`:''}</td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}${tk.sub?' · '+tk.sub:''}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${tk.dur}</td><td>${statusPill(st[ti])}</td><td>${woCell(tk, st[ti], ti)}</td></tr>`).join('')}
+    ${MAINT_PLAN.map((tk,ti)=>`<tr><td>${tk.no}</td><td><b>${esc(a.id)}</b></td><td>${esc(tk.task)}${tk.notes?`<div class="small-muted" style="white-space:normal;">${esc(tk.notes)}</div>`:''}</td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}${tk.sub?' · '+tk.sub:''}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${tk.dur}</td><td>${statusPill(st[ti])}</td><td>${woCell(tk, st[ti], ti)}</td></tr>`).join('')}
     </tbody></table></div>
     ${state.planView==='gantt' ? ganttHtml(MAINT_PLAN, st) : ''}
   </div>
@@ -3553,7 +3568,7 @@ function initDetailCharts(a){
   const gridColor = cssv('--border');
   const hh = hiHistory(a); const hLabels = hh.map(h=>shortDate(h.date)), hVals = hh.map(h=>h.hi);
   const trendCol = categoryFor(a)==='critical'?'#e0473d':categoryFor(a)==='warning'?'#eba020':'#1fa571';
-  const trendCfg = ()=>({type:'line',plugins:[valueLabelPlugin],data:{labels:hLabels,datasets:[{data:hVals,borderColor:trendCol,backgroundColor:trendCol+'22',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:trendCol}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
+  const trendCfg = ()=>({type:'line',plugins:[hiBandPlugin,valueLabelPlugin],data:{labels:hLabels,datasets:[{data:hVals,borderColor:trendCol,backgroundColor:trendCol+'22',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:trendCol}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
   if(document.getElementById('detTrend')) mkChart('detTrend', trendCfg());
   if(document.getElementById('hiTrend')){ const cfg = trendCfg(); const hr = hiRateOf(a);
     if(hr.rate!==null){ const t0=parseD(hh[0].date); cfg.data.datasets.push({label:L('Trend line','เส้นแนวโน้ม'),noLabel:true,data:hh.map(p=>Math.round((hr.intercept+hr.slope*((parseD(p.date)-t0)/(365.25*864e5)))*10)/10),borderColor:'#33415c',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false,tension:0}); }
@@ -3798,7 +3813,6 @@ function demoBannerHtml(){
   const n = ASSETS.filter(isDemoAsset).length; if(!n) return '';
   const own = ASSETS.length - n;
   return `<div class="notebox" style="margin-bottom:16px;align-items:center;">${gicon('help',16)}<div style="flex:1;">${L(`<b>${n} transformers are sample data</b> made up for demonstration. Import your real lab results, then remove the samples.<br><span class="small-muted">Your data is saved only in this browser on this device — make a backup in Settings → System &amp; Data.</span>`,`<b>หม้อแปลง ${n} ตัวเป็นข้อมูลตัวอย่าง</b> ที่สร้างขึ้นเพื่อสาธิต นำเข้าผลแล็บจริงแล้วค่อยลบข้อมูลตัวอย่าง<br><span class="small-muted">ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น — สำรองข้อมูลได้ที่ ตั้งค่า → ระบบและข้อมูล</span>`)}</div>
-    <button class="btn btn-outline" data-import-lab="1" style="padding:6px 11px;font-size:12px;">${gicon('upload',0,'width:13px;height:13px')} ${L('Import lab results','นำเข้าผลแล็บ')}</button>
     ${own?`<button class="btn btn-outline" data-del-demo="1" style="padding:6px 11px;font-size:12px;color:var(--red);">${L('Remove samples','ลบข้อมูลตัวอย่าง')}</button>`:''}</div>`;
 }
 function attachDataButtons(){
@@ -3847,10 +3861,10 @@ function renderRiskPage(){
   </div>
   <div class="card"><h3>${L('Priority ranking','ลำดับความสำคัญ')}</h3>
     <p class="card-sub">${L('Sorted by risk level, then by faster HI decrease, then by lower HI.','เรียงตามระดับความเสี่ยง ตามด้วยอัตราการลดลงของ HI ที่เร็วกว่า และ HI ที่ต่ำกว่า')}</p>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>HI</th><th title="${L('Slope of the straight line through all HI results — see Health Index tab','ความชันของเส้นตรงที่ลากผ่าน HI ทุกครั้ง — ดูได้ในแท็บดัชนีสุขภาพ')}">${L('HI drop (pts/yr)','HI ลดลง (คะแนน/ปี)')} ⓘ</th><th>${L('Risk','ความเสี่ยง')}</th><th>${L('Condition vs age','สภาพเทียบอายุ')}</th><th>${L('Action','การดำเนินการ')}</th></tr></thead><tbody>
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>HI</th><th title="${L('Slope of the straight line through all HI results — see Health Index tab','ความชันของเส้นตรงที่ลากผ่าน HI ทุกครั้ง — ดูได้ในแท็บดัชนีสุขภาพ')}">${L('HI drop (pts/yr)','HI ลดลง (คะแนน/ปี)')} ⓘ</th><th>${L('Risk','ความเสี่ยง')}</th><th title="${L('(HI − 30) ÷ yearly HI drop','(HI − 30) ÷ อัตรา HI ลดลงต่อปี')}">${L('Years until HI < 30','ปีที่เหลือก่อน HI < 30')} ⓘ</th><th>${L('Condition vs age','สภาพเทียบอายุ')}</th><th>${L('Action','การดำเนินการ')}</th></tr></thead><tbody>
     ${list.map((o,i)=>{ const ag=o.r.ageing, ri=o.r.rateInfo; return `<tr><td>${i+1}</td><td><button class="viewlink" data-view="${o.a.id}"><b>${o.a.id}</b></button></td>
       <td style="color:${hiColor(o.a.hi)};font-weight:800;">${fmtHi(o.a.hi)} <span class="small-muted">${hiCat(o.a.hi).code}</span></td>
-      <td>${ri.rate===null?'—':ri.rate.toFixed(2)}${ri.enough?'':'<span class="small-muted">*</span>'}</td><td>${riskPill(o.r.level)}</td>
+      <td>${ri.rate===null?'—':ri.rate.toFixed(2)}${ri.enough?'':'<span class="small-muted">*</span>'}</td><td>${riskPill(o.r.level)}</td><td>${o.a.hi<30?`<span style="color:var(--red);font-weight:700;">${L('already below','ต่ำกว่าแล้ว')}</span>`:(ri.rate>0?((o.a.hi-30)/ri.rate).toFixed(1):'—')}</td>
       <td>${ag?`<span style="color:${ag.accelerated?'var(--red)':'var(--green)'};font-weight:700;">${ag.accelerated?L('Faster','เสื่อมเร็ว'):L('Normal','ปกติ')}</span> <span class="small-muted">(${ag.age} ${L('yr','ปี')})</span>`:'—'}</td>
       <td class="small-muted" style="white-space:normal;min-width:190px;"><span style="color:var(--text);">${riskAction(o.r)}</span><div style="font-size:11.5px;margin-top:2px;">${riskFollow(o.r)}${sampleOverdueDays(o.a)?` · <span style="color:var(--red);font-weight:700;">${L(`sampling overdue ${sampleOverdueDays(o.a)} d`,`เลยกำหนดเก็บตัวอย่าง ${sampleOverdueDays(o.a)} วัน`)}</span>`:''}</div></td></tr>`; }).join('')}
     </tbody></table></div>
@@ -3861,11 +3875,11 @@ function renderRiskPage(){
 function initRiskCharts(){
   const gridColor = cssv('--border'); const pts = ASSETS.map(a=>({a, ag:ageingOf(a)})).filter(o=>o.ag);
   const maxAge = Math.max(45, ...pts.map(o=>o.ag.age+3));
-  mkChart('riskAgeScatter',{type:'scatter',data:{datasets:[
-    {label:L('Normal ageing','การเสื่อมตามปกติ'),type:'line',data:[{x:(NORMAL_HI.b-100)/(-NORMAL_HI.a),y:100},{x:maxAge,y:Math.max(0,NORMAL_HI.a*maxAge+NORMAL_HI.b)}],borderColor:'#8b9099',borderDash:[5,5],pointRadius:0,fill:false},
+  mkChart('riskAgeScatter',{type:'scatter',plugins:[{id:'ptIds',afterDatasetsDraw(ch){ const c=ch.ctx; ch.data.datasets.forEach((ds,i)=>{ if(ds.type==='line') return; ch.getDatasetMeta(i).data.forEach((p,j)=>{ const id=ds.data[j]&&ds.data[j].id; if(!id) return; c.save(); c.fillStyle=cssv('--text'); c.font='700 11px Inter, sans-serif'; c.textBaseline='middle'; c.fillText(id, p.x+8, p.y); c.restore(); }); }); }}],data:{datasets:[
+    {label:L('Normal ageing','การเสื่อมตามปกติ'),type:'line',data:[{x:(NORMAL_HI.b-100)/(-NORMAL_HI.a),y:100},{x:maxAge,y:Math.max(0,NORMAL_HI.a*maxAge+NORMAL_HI.b)}],borderColor:'#8b9099',borderDash:[5,5],pointRadius:0,fill:false,pointStyle:'line'},
     {label:L('Normal or better','ปกติหรือดีกว่า'),data:pts.filter(o=>!o.ag.accelerated).map(o=>({x:o.ag.age,y:o.a.hi,id:o.a.id})),backgroundColor:'#1fa571',pointRadius:5},
     {label:L('Accelerated ageing','เสื่อมเร็วกว่าปกติ'),data:pts.filter(o=>o.ag.accelerated).map(o=>({x:o.ag.age,y:o.a.hi,id:o.a.id})),backgroundColor:'#e0473d',pointRadius:5},
-  ]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:(c)=>c.raw.id?`${c.raw.id}: ${L('age','อายุ')} ${c.raw.x}, HI ${c.raw.y}`:''}}},
+  ]},options:{...commonOpts(),plugins:{legend:{position:'bottom',labels:{usePointStyle:true,font:{size:10}}},tooltip:{callbacks:{label:(c)=>c.raw.id?`${c.raw.id}: ${L('age','อายุ')} ${c.raw.x}, HI ${c.raw.y}`:''}}},
     layout:{padding:{top:8,right:10}},
     scales:{x:{type:'linear',min:0,max:maxAge,title:{display:true,text:L('Operating age (years)','อายุใช้งาน (ปี)')},grid:{color:gridColor}},y:{min:0,max:106,afterBuildTicks:(ax)=>{ ax.ticks=[0,20,40,60,80,100].map(v=>({value:v})); },title:{display:true,text:'HI'},grid:{color:gridColor}}}}});
 }
@@ -3879,6 +3893,33 @@ function riskCardHtml(a){
       <ul class="hlist"><li><span class="k">${L('Condition vs age','สภาพเทียบกับอายุ')}</span><span class="v" style="color:${ag&&ag.accelerated?'var(--red)':'var(--green)'};">${!ag?'—':ag.accelerated?L('Ageing faster than normal','เสื่อมเร็วกว่าปกติ'):L('Normal','ปกติ')}</span></li></ul>
     </div>
     <p class="small-muted" style="font-size:11.5px;margin:6px 0 0;">${riskAction(r)}</p></div>`;
+}
+
+/* ============ MAINTENANCE PLAN — all transformers ============ */
+const PM_TARGET = 90, OVERDUE_TARGET = 10;   /* % — same KPI targets as the PM system */
+function renderPlanOverview(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const rows = ASSETS.flatMap(a=>getMaintFor(a).map(tk=>({a, tk, st:planStatus(tk)})));
+  const ord = {Overdue:0,'In Progress':1,Upcoming:2,Completed:3};
+  rows.sort((x,y)=>(ord[x.st]-ord[y.st]) || ((parseD(x.tk.start)||0)-(parseD(y.tk.start)||0)));
+  const n=rows.length, done=rows.filter(r=>r.st==='Completed').length, over=rows.filter(r=>r.st==='Overdue').length;
+  const pmDue = rows.filter(r=>r.tk.type==='PM' && (r.st==='Completed' || (parseD(r.tk.end)||today)<today));
+  const pmRate = pmDue.length ? Math.round(pmDue.filter(r=>r.st==='Completed').length/pmDue.length*100) : null;
+  const overPct = n ? Math.round(over/n*100) : 0;
+  const samp = ASSETS.filter(a=>sampleOverdueDays(a)>0);
+  const stat = (lb,val,sub,col)=>`<div class="card stat"><div><div class="label">${lb}</div><div class="value" style="${col?`color:${col};`:''}">${val}</div><div class="small-muted" style="font-size:11.5px;margin-top:2px;">${sub||'&nbsp;'}</div></div></div>`;
+  return `
+  <div class="grid g4" style="margin-bottom:16px;">
+    ${stat(t('total_tasks'), n, ['BM','CM','PM','CBM','PdM'].map(ty=>[ty,rows.filter(r=>r.tk.type===ty).length]).filter(x=>x[1]).map(x=>`${x[0]} ${x[1]}`).join(' · '))}
+    ${stat(t('completed'), `${done} <span style="font-size:12px;">(${n?Math.round(done/n*100):0}%)</span>`, L('work order closed','ปิดใบสั่งงานแล้ว'))}
+    ${stat(L('PM completion','PM ที่เสร็จตามกำหนด'), pmRate===null?'—':pmRate+'%', L(`of PM tasks due so far · target ≥ ${PM_TARGET}%`,`ของงาน PM ที่ถึงกำหนดแล้ว · เป้าหมาย ≥ ${PM_TARGET}%`), pmRate===null?'':pmRate>=PM_TARGET?'var(--green)':'var(--red)')}
+    ${stat(L('Overdue','เลยกำหนด'), `${over} <span style="font-size:12px;">(${overPct}%)</span>`, L(`target ≤ ${OVERDUE_TARGET}%`,`เป้าหมาย ≤ ${OVERDUE_TARGET}%`), over?(overPct<=OVERDUE_TARGET?'var(--amber)':'var(--red)'):'var(--green)')}
+  </div>
+  ${samp.length?`<div class="notebox" style="margin-bottom:16px;background:var(--red-bg);">${L('Oil sampling overdue','เลยกำหนดเก็บตัวอย่างน้ำมัน')}: ${samp.map(a=>`<button class="linklike" data-goto-detail="${esc(a.id)}|plan" style="color:var(--red);">${esc(a.id)} (${sampleOverdueDays(a)} ${L('d','วัน')})</button>`).join(' · ')}</div>`:''}
+  <div class="card"><div class="card-head"><h3>${t('maint_schedule')} — ${L('all transformers','ทุกหม้อแปลง')}</h3><span class="small-muted">${L('Click a row to open that transformer’s plan, issue or close a work order.','กดแถวเพื่อเปิดแผนของหม้อแปลงนั้น ออกหรือปิดใบสั่งงาน')}</span></div>
+    <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${t('asset')}</th><th>${t('task')}</th><th>${t('type')}</th><th>${t('start')}</th><th>${t('end')}</th><th>${t('status')}</th><th>${L('Work order','ใบสั่งงาน')}</th></tr></thead><tbody>
+    ${rows.map(({a,tk,st})=>`<tr data-goto-detail="${esc(a.id)}|plan"><td><b>${esc(a.id)}</b></td><td style="white-space:normal;min-width:180px;">${esc(tk.task)}</td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}${tk.sub?' · '+tk.sub:''}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${statusPill(st)}</td><td>${tk.wo?`<span class="pill ${tk.wo.status==='Closed'?'pill-closed':'pill-progress'}">${tk.wo.no}</span>`:'<span class="small-muted">—</span>'}</td></tr>`).join('') || `<tr><td colspan="7" class="small-muted">${L('No tasks yet.','ยังไม่มีงาน')}</td></tr>`}
+    </tbody></table></div></div>`;
 }
 
 /* ============ REPORTS PAGE ============ */
@@ -3925,7 +3966,7 @@ function renderReports(){
     <select id="repScope" class="chip-input" style="min-width:240px;"><option value="all" ${sc==='all'?'selected':''}>${L('All transformers','หม้อแปลงทั้งหมด')}</option>
       <optgroup label="${L('Substation','สถานี')}">${NET.stations.map(st=>`<option value="st:${esc(st.id)}" ${sc==='st:'+st.id?'selected':''}>${esc(st.id)} — ${esc(st.name)}</option>`).join('')}</optgroup>
       <optgroup label="${L('Transformer','หม้อแปลง')}">${ASSETS.map(a=>`<option value="tr:${esc(a.id)}" ${sc==='tr:'+a.id?'selected':''}>${esc(a.id)} — ${esc(a.loc||'')}</option>`).join('')}</optgroup></select>
-    <span class="small-muted">${L('Charts use B.E. years.','กราฟแสดงปีเป็น พ.ศ.')}</span></div>`;
+    <span class="small-muted">${L('Charts use C.E. years.','กราฟแสดงปีเป็น พ.ศ.')}</span></div>`;
   return bar + withReportScope(renderReportsInner);
 }
 function initReportsCharts(){ return withReportScope(initReportsChartsInner); }
@@ -3994,7 +4035,7 @@ function initReportsChartsInner(){
   const gridColor = cssv('--border'); const r = reportStats();
   mkChart('repDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[r.healthy,r.warning,r.critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
   mkChart('repDgaDonut',{type:'doughnut',data:{labels:Object.keys(r.fam),datasets:[{data:Object.values(r.fam),backgroundColor:['#1fa571','#e0473d','#eba020','#8759d6','#8b9099'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('repTrend',{type:'line',plugins:[valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{label:'Avg HI',data:r.trend,borderColor:'#2B4C6F',backgroundColor:'#2B4C6F22',fill:true,tension:.35,pointRadius:3}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('repTrend',{type:'line',plugins:[hiBandPlugin,valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{label:'Avg HI',data:r.trend,borderColor:'#2B4C6F',backgroundColor:'#2B4C6F22',fill:true,tension:.35,pointRadius:3}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
   const comps = Object.entries(r.highByComp).sort((x,y)=>y[1]-x[1]);
   mkChart('repFmeaBar',{type:'bar',plugins:[{id:'barVals',afterDatasetsDraw(ch){ const {ctx}=ch; ch.getDatasetMeta(0).data.forEach((b,i)=>{ ctx.save(); ctx.fillStyle=cssv('--text')||'#1f2a37'; ctx.font='700 11px Inter, sans-serif'; ctx.textBaseline='middle'; ctx.fillText(String(ch.data.datasets[0].data[i]), b.x+6, b.y); ctx.restore(); }); }}],data:{labels:comps.map(c=>c[0]),datasets:[{data:comps.map(c=>c[1]),backgroundColor:'#e0473d'}]},options:{...commonOpts(),indexAxis:'y',layout:{padding:{right:22}},plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{precision:0},title:{display:true,text:L('Number of high-risk failure modes','จำนวนรูปแบบความเสียหายเสี่ยงสูง'),font:{size:11}}},y:{grid:{display:false}}}}});
 }
@@ -4044,7 +4085,7 @@ function renderGuide(){
     ['R<sub>SS</sub> · R<sub>sys</sub>', L('Reliability of one substation · of the whole system.','ความน่าเชื่อถือของสถานีหนึ่ง · ของทั้งระบบ')],
     ['k-out-of-n', L('At least k of the n transformers must work to carry the peak load (e.g. 2-out-of-2 = both are needed, no spare).','ต้องมีหม้อแปลงทำงานอย่างน้อย k จาก n ตัวจึงรับโหลดสูงสุดได้ (เช่น 2-out-of-2 = ต้องใช้ทั้งสองตัว ไม่มีตัวสำรอง)')],
     ['I<sub>B</sub> · I<sub>C</sub>', L('Importance: how much the system depends on a unit · if the system fails, the chance this unit is the cause.','ความสำคัญ: ระบบพึ่งพาหม้อแปลงตัวนี้มากแค่ไหน · ถ้าระบบล้มเหลว มีโอกาสเท่าไรที่สาเหตุมาจากตัวนี้')],
-    ['B.E.', L('Buddhist Era year (= A.D. + 543), used on chart axes.','ปีพุทธศักราช (= ค.ศ. + 543) ใช้บนแกนกราฟ')],
+    ['B.E.', L('Buddhist Era year (= A.D. + 543); chart axes use it in Thai mode and C.E. in English mode.','ปีพุทธศักราช (= ค.ศ. + 543) ใช้บนแกนกราฟ')],
   ];
   return `
   <div class="card" style="margin-bottom:16px;">
@@ -4210,7 +4251,7 @@ function attachSettingsEvents(){
   document.querySelectorAll('.sys-btn').forEach(b=> b.addEventListener('click', ()=>{
     const kind = b.dataset.sys;
     if(kind==='export'){ downloadFile('rcm_export.csv', toCSV(fleetRows()), 'text/csv'); toast(t('toast_exported'),'success'); }
-    else if(kind==='backup'){ downloadFile('rcm_backup.json', JSON.stringify(snapshotData(), null, 2), 'application/json'); toast(t('toast_exported'),'success'); }
+    else if(kind==='backup'){ try{ localStorage.setItem('rcm_last_backup', String(Date.now())); }catch(e){} notifRead=false; downloadFile('rcm_backup.json', JSON.stringify(snapshotData(), null, 2), 'application/json'); toast(t('toast_exported'),'success'); }
     else if(kind==='restore'){ document.getElementById('restoreFile').click(); }
     else if(kind==='reset'){ if(confirm(L('Delete all saved changes and restore the demo data?','ลบการเปลี่ยนแปลงทั้งหมดและกลับไปใช้ข้อมูลตัวอย่าง?'))){ try{ localStorage.removeItem(STORE_KEY); }catch(e){} location.reload(); } }
   }));
@@ -4273,7 +4314,7 @@ function toggleUserDropdown(){
   });
   placeDropdown(dd, 'userMenuBtn');
 }
-function setLang(lang){ state.lang = lang; render(); }
+function setLang(lang){ state.lang = lang; try{ localStorage.setItem('rcm_lang', lang); }catch(e){} render(); }
 
 /* ============ ROUTER ============ */
 function pageMeta(){
@@ -4289,6 +4330,7 @@ function pageMeta(){
     'healthindex-overview':[t('nav_healthindex'), t('sub_fleet_overview')],
     'fmea-overview':[t('nav_fmea'), t('sub_fleet_overview')],
     'rcm-overview':[t('nav_rcm'), t('sub_fleet_overview')],
+    planall:[t('nav_plan'), L('All maintenance tasks and work orders','งานบำรุงรักษาและใบสั่งงานทั้งหมด')],
     guide:[t('guide_title'), t('guide_intro_short')],
   };
   return titles[state.page] || ['RCM Transformer',''];
@@ -4297,7 +4339,7 @@ function render(){
   if(state.page==='schematic'){ state.page='reliability'; state.relTab='diagram'; } // old links keep working
   ensureNet(); recomputeAll(); saveData();
   const nb = document.getElementById('bellCount'); if(nb){ const n = notificationsList().length; nb.textContent = n; if(!notifRead) nb.style.display = n ? '' : 'none'; }
-  renderNav();
+  renderNav(); document.documentElement.lang = state.lang;
   document.getElementById('langEn').classList.toggle('active', state.lang==='en');
   document.getElementById('langTh').classList.toggle('active', state.lang==='th');
   const [ttl,sub] = pageMeta();
@@ -4318,6 +4360,7 @@ function render(){
   else if(state.page==='healthindex-overview'){ content.innerHTML = renderCategoryOverview('healthindex'); attachCategoryOverviewEvents(); }
   else if(state.page==='fmea-overview'){ content.innerHTML = renderCategoryOverview('fmea'); attachCategoryOverviewEvents(); }
   else if(state.page==='rcm-overview'){ content.innerHTML = renderCategoryOverview('rcm'); attachCategoryOverviewEvents(); }
+  else if(state.page==='planall'){ content.innerHTML = renderPlanOverview(); attachCategoryOverviewEvents(); }
   else if(state.page==='guide'){ content.innerHTML = renderGuide(); attachGlobalViewLinks(); }
   attachNetEvents();
 }
@@ -4326,6 +4369,7 @@ function closeSidebar(){ document.getElementById('sidebar').classList.remove('op
 document.getElementById('menuBtn').addEventListener('click',()=>{ const sb=document.getElementById('sidebar'); sb.classList.contains('open') ? closeSidebar() : openSidebar(); });
 document.getElementById('sidebarBackdrop').addEventListener('click', closeSidebar);
 
+try{ const sl=localStorage.getItem('rcm_lang'); if(sl==='th'||sl==='en') state.lang=sl; }catch(e){}
 loadData();
 /* ============ LOGIN GATE ============ */
 document.getElementById('loginTitle').textContent = t('login_title');
