@@ -169,6 +169,19 @@ details.tip-more > summary{cursor:pointer; font-size:12.5px; font-weight:700; co
 .sld-wrap svg .tr:hover .trbox{fill-opacity:.14; stroke-opacity:.7;}
 .sld-legend{display:flex; flex-wrap:wrap; gap:8px 16px; font-size:11.5px; color:var(--muted);}
 .sld-lg{display:inline-flex; align-items:center; gap:6px;} .sld-lg i{width:12px; height:12px; border-radius:3px; display:inline-block;}
+.v3d-grid{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); align-items:start;}
+.v3d-bar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px;}
+.v3d-stage{position:relative; height:520px; border-radius:12px; overflow:hidden; background:radial-gradient(ellipse at 50% 35%, #ffffff 0%, #e9eef3 65%, #dfe5eb 100%); border:1px solid var(--border);}
+#v3dCanvas{position:absolute; inset:0;} #v3dCanvas canvas{display:block; touch-action:none; cursor:grab;}
+.v3d-status{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:20px; font-size:13px; color:var(--muted);}
+.v3d-spin{width:28px; height:28px; margin:0 auto 10px; border-radius:50%; border:3px solid #cfd8e0; border-top-color:var(--accent-2); animation:v3dspin 1s linear infinite;}
+@keyframes v3dspin{to{transform:rotate(360deg);}}
+.v3d-err{display:block; margin-top:8px; font-size:11px; color:#a33; background:#fff4f3; padding:6px 8px; border-radius:6px; word-break:break-all;}
+.v3d-parts{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
+.v3d-part{display:inline-flex; align-items:center; gap:6px; font:inherit; font-size:12px; padding:5px 10px; border-radius:20px; border:1px solid var(--border); background:#fff; cursor:pointer; color:var(--text);}
+.v3d-part i{width:10px; height:10px; border-radius:50%;} .v3d-part.on{border-color:var(--accent-2); background:var(--blue-bg); font-weight:700;}
+.v3d-fm{border-top:1px solid var(--border); padding:10px 0 4px; margin-top:8px; font-size:12.5px;}
+@media (max-width:900px){ .v3d-grid{grid-template-columns:1fr !important;} .v3d-stage{height:380px;} }
 .tbl-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;}
 .pill{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;}
 .pill-healthy{background:var(--green-bg); color:var(--green);}
@@ -2449,8 +2462,161 @@ function openAddAssetModal(presetStation){
 /* ============ ASSET DETAIL ============ */
 const DETAIL_TABS = [
  {id:'summary', en:'Summary', th:'สรุป'}, {id:'condition', en:'Condition (HI · DGA)', th:'สภาพ (HI · DGA)'}, {id:'fmearcm', en:'FMEA & RCM', th:'FMEA & RCM'},
- {id:'plan', en:'Maintenance plan', th:'แผนบำรุงรักษา'}, {id:'history', en:'History', th:'ประวัติ'},
+ {id:'model3d', en:'3D model', th:'โมเดล 3D'}, {id:'plan', en:'Maintenance plan', th:'แผนบำรุงรักษา'}, {id:'history', en:'History', th:'ประวัติ'},
 ];
+/* =====================================================================
+   3D model of the transformer (Three.js r147, lazy-loaded) linked to FMEA
+   ===================================================================== */
+const GLB_URL = 'transformer.glb';            /* used when the model is not embedded in this file */
+const THREE_LIBS = ['https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js',
+  'https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js',
+  'https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js'];
+/* model node name → FMEA component */
+const PART_RULES = [
+  ['Winding',            /^(INT_(HV|LV)_Winding|INT_Insulation|INT_Core|V15_(HV|LV)_Winding|V15_Winding|V15_End_Insulation|V16_Radial_Spacer|V16_Internal_Lead|V16_Core_Clamp|INT_Clamp|V18_UPPER_STEEL_CLAMP)/],
+  ['Bushing',            /^(BUSHING_|V16_Bushing_Top_Terminal|V15_Arcing_Horn|V18_(HV|LV)_TERMINAL|V16_Flexible_Connection)/],
+  ['OLTC (Tap Changer)', /^(OLTC_|INT_Tap_Contact|V16_Tap|V16_TapChanger)/],
+  ['Cooling System',     /(RADIATOR|Radiator|RadiatorConnector|(Front|Rear)(Top|Bottom)Header)/],
+  ['Oil',                /^(CONSERVATOR|Conservator|MainConservatorPipe|V15_MainTank_to_Conservator_Pipe|V15_Oil_Level|V16_Conservator|BUCHHOLZ)/],
+  ['Breather',           /^(V15_Breather|V15_Silica_Gel)/],
+  ['Tank',               /^(MAIN_TANK|TOP_COVER|TOP_FLANGE|TankBand|V15_Transformer_Gasket|Pressure|Drain|TOP_AUX)/],
+];
+const XRAY_RE = /^(MAIN_TANK|TOP_COVER|TOP_FLANGE|TankBand|V15_Transformer_Gasket|TOP_AUX|OLTC_MAIN|OLTC_SIDE_COVER|OLTC_UPPER|OLTC_TOP)/;
+const PART_TH = {'Winding':'ขดลวดและแกนเหล็ก','Bushing':'บุชชิ่ง','OLTC (Tap Changer)':'ตัวเปลี่ยนแทป (OLTC)','Cooling System':'ระบบระบายความร้อน','Oil':'น้ำมันและถังพักน้ำมัน','Breather':'เบรทเทอร์ (ซิลิกาเจล)','Tank':'ตัวถัง'};
+const RISK_HEX = {High:0xd0392f, Medium:0xe0a020, Low:0x1fa571};
+const V3D = { st:'idle', err:'', renderer:null, scene:null, camera:null, controls:null, model:null, meshes:[], sel:null, mode:'real', xray:false, assetId:null, raf:0 };
+async function v3dLibs(){
+  if(V3D.lib) return V3D.lib;
+  const B='https://cdn.jsdelivr.net/npm/three@0.160.0';
+  try{
+    const [T, G, O] = await Promise.all([import(B+'/+esm'), import(B+'/examples/jsm/loaders/GLTFLoader.js/+esm'), import(B+'/examples/jsm/controls/OrbitControls.js/+esm')]);
+    if(!T.WebGLRenderer || !G.GLTFLoader || !O.OrbitControls) throw new Error('esm exports');
+    V3D.lib = {THREE:T, GLTFLoader:G.GLTFLoader, OrbitControls:O.OrbitControls, via:'esm r160'};
+  }catch(e1){
+    console.warn('[3D] ES-module load failed, trying classic scripts', e1);
+    for(const u of THREE_LIBS) await loadScriptOnce(u);
+    if(!window.THREE || !THREE.GLTFLoader || !THREE.OrbitControls) throw new Error('three.js not available');
+    V3D.lib = {THREE:window.THREE, GLTFLoader:THREE.GLTFLoader, OrbitControls:THREE.OrbitControls, via:'classic r147'};
+  }
+  return V3D.lib;
+}
+function partOf(name){ for(const [comp,re] of PART_RULES) if(re.test(name)) return comp; return null; }
+function partRisk(a, comp){ const list=(a.id===state.assetId&&FMEA.length?FMEA:getFmeaFor(a)).filter(f=>f.comp===comp); if(!list.length) return null;
+  const top=list.slice().sort((x,y)=>y.rpn-x.rpn)[0]; return {list, top, level: list.some(f=>f.risk==='High')?'High':list.some(f=>f.risk==='Medium')?'Medium':'Low'}; }
+function b64ToBuf(b64){ const s=atob(b64), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u.buffer; }
+async function v3dLoad(){
+  if(V3D.st==='ready' || V3D.st==='loading') return;
+  V3D.st='loading'; V3D.err=''; v3dStatus();
+  try{
+    V3D.stage='three.js'; v3dStatus();
+    const lib = await v3dLibs(); window.THREE = lib.THREE;
+    V3D.stage=L('model file','ไฟล์โมเดล'); v3dStatus();
+    const emb = document.getElementById('rcmGlb'); let buf;
+    if(emb && emb.textContent.trim().length>100) buf = b64ToBuf(emb.textContent.trim());
+    else { const r = await fetch(GLB_URL); if(!r.ok) throw new Error('glb '+r.status); buf = await r.arrayBuffer(); }
+    V3D.stage=L('reading model','อ่านโมเดล'); v3dStatus();
+    const gltf = await new Promise((res,rej)=> new lib.GLTFLoader().parse(buf, '', res, rej));
+    V3D.stage='WebGL'; v3dStatus();
+    const R = new THREE.WebGLRenderer({antialias:true, alpha:true}); R.setPixelRatio(Math.min(2, window.devicePixelRatio||1));
+    if(THREE.SRGBColorSpace) R.outputColorSpace = THREE.SRGBColorSpace; else R.outputEncoding = THREE.sRGBEncoding;
+    R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 1.05;
+    const k = (+THREE.REVISION >= 155) ? Math.PI : 1;   // r155+ uses physical light units
+    const S = new THREE.Scene();
+    S.add(new THREE.HemisphereLight(0xffffff, 0x8a96a3, 0.95*k));
+    const d1 = new THREE.DirectionalLight(0xffffff, 1.1*k); d1.position.set(12,18,10); S.add(d1);
+    const d2 = new THREE.DirectionalLight(0xdfe8f2, 0.55*k); d2.position.set(-14,8,-12); S.add(d2);
+    const model = gltf.scene; S.add(model);
+    V3D.meshes = [];
+    const nameOf = (o)=>{ let n=o, s=[]; while(n && n!==model){ if(n.name) s.push(n.name); n=n.parent; } return s; }; // mesh name, then its node/group names
+    model.traverse(o=>{ if(!o.isMesh) return; const ns=nameOf(o); if(ns.some(n=>/^Floor/.test(n))){ o.visible=false; return; }
+      o.material = o.material.clone(); o.userData.comp = ns.map(partOf).find(Boolean)||null; o.userData.xray = ns.some(n=>XRAY_RE.test(n));
+      o.userData.base = o.material.color ? o.material.color.clone() : null; o.userData.op = o.material.opacity; V3D.meshes.push(o); });
+    const box = new THREE.Box3().setFromObject(model), ctr = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
+    const C = new THREE.PerspectiveCamera(38, 1, 0.1, 500); const dist = Math.max(size.x,size.y,size.z)*1.55;
+    C.position.set(ctr.x+dist*0.78, ctr.y+dist*0.42, ctr.z+dist*0.78);
+    const ctl = new lib.OrbitControls(C, R.domElement); ctl.target.copy(ctr); ctl.enableDamping = true; ctl.minDistance = dist*0.25; ctl.maxDistance = dist*2.4; ctl.maxPolarAngle = Math.PI*0.52; ctl.update();
+    Object.assign(V3D, {renderer:R, scene:S, camera:C, controls:ctl, model, home:{pos:C.position.clone(), tgt:ctr.clone()}, st:'ready'});
+    v3dPicking(); v3dApply(); v3dMount();
+  }catch(e){ console.error('[3D]', V3D.stage, e); V3D.st='error'; V3D.err=`${V3D.stage||''}: ${String(e&&e.message||e)}`.slice(0,220); v3dStatus(); }
+}
+function v3dStatus(){ const el=document.getElementById('v3dStatus'); if(!el) return;
+  el.style.display = V3D.st==='ready' ? 'none' : 'flex';
+  el.innerHTML = V3D.st==='error'
+    ? `<div><b>${L('Could not load the 3D model','โหลดโมเดล 3D ไม่ได้')}</b><div class="small-muted" style="margin-top:4px;">${L('Check the internet connection, and that transformer.glb is in the same folder as this page.','ตรวจการเชื่อมต่ออินเทอร์เน็ต และตรวจว่าไฟล์ transformer.glb อยู่ในโฟลเดอร์เดียวกับหน้านี้')}</div><code class="v3d-err">${esc(V3D.err)}</code><button class="btn btn-outline" id="v3dRetry" style="margin-top:10px;">${L('Try again','ลองอีกครั้ง')}</button></div>`
+    : `<div><div class="v3d-spin"></div>${L('Loading 3D model…','กำลังโหลดโมเดล 3D…')}${V3D.stage?`<div class="small-muted" style="font-size:11px;margin-top:4px;">${esc(V3D.stage)}</div>`:''}</div>`;
+  const rt=document.getElementById('v3dRetry'); if(rt) rt.addEventListener('click',()=>{ V3D.st='idle'; v3dLoad(); });
+}
+function v3dApply(){
+  const a = ASSETS.find(x=>x.id===state.assetId); if(!a || V3D.st!=='ready') return;
+  const risks = {}; PART_RULES.forEach(([c])=>risks[c]=partRisk(a,c));
+  V3D.meshes.forEach(o=>{ const m=o.material, comp=o.userData.comp; if(!m.color) return;
+    m.color.copy(o.userData.base); if(m.emissive) m.emissive.setHex(0x000000);
+    if(V3D.mode==='risk'){ const r=comp&&risks[comp]; if(r) m.color.lerp(new THREE.Color(RISK_HEX[r.level]), 0.7); else m.color.lerp(new THREE.Color(0xc8ced4), 0.6); }
+    if(V3D.sel && comp===V3D.sel && m.emissive) m.emissive.setHex(0x1d4f8a).multiplyScalar(0.55);
+    const see = V3D.xray && o.userData.xray; m.transparent = see || o.userData.op<1; m.opacity = see ? 0.12 : o.userData.op; m.depthWrite = !see; m.needsUpdate = true; });
+}
+function v3dMount(){
+  const host = document.getElementById('v3dCanvas'); if(!host) return; v3dStatus();
+  if(V3D.st!=='ready'){ v3dLoad(); return; }
+  if(V3D.renderer.domElement.parentNode!==host) host.appendChild(V3D.renderer.domElement);
+  if(V3D.assetId!==state.assetId){ V3D.assetId=state.assetId; V3D.sel=null; }
+  v3dApply(); v3dInfo();
+  const fit=()=>{ const w=host.clientWidth||600, h=host.clientHeight||420; V3D.renderer.setSize(w,h,false); V3D.renderer.domElement.style.width='100%'; V3D.renderer.domElement.style.height='100%'; V3D.camera.aspect=w/h; V3D.camera.updateProjectionMatrix(); };
+  fit(); if(window.ResizeObserver){ if(V3D.ro) V3D.ro.disconnect(); V3D.ro=new ResizeObserver(fit); V3D.ro.observe(host); }
+  cancelAnimationFrame(V3D.raf);
+  const loop=()=>{ if(!document.body.contains(V3D.renderer.domElement)){ V3D.raf=0; return; } V3D.controls.update(); V3D.renderer.render(V3D.scene,V3D.camera); V3D.raf=requestAnimationFrame(loop); };
+  loop();
+}
+function v3dPicking(){
+  const el=V3D.renderer.domElement, ray=new THREE.Raycaster(), p=new THREE.Vector2(); let down=null;
+  el.addEventListener('pointerdown',e=>{ down={x:e.clientX,y:e.clientY}; });
+  el.addEventListener('pointerup',e=>{ if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>6) return; const r=el.getBoundingClientRect();
+    p.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1); ray.setFromCamera(p,V3D.camera);
+    const hits=ray.intersectObjects(V3D.meshes.filter(o=>o.visible && !(V3D.xray&&o.userData.xray)), false);
+    const hit=hits.find(h=>h.object.userData.comp); v3dSelect(hit?hit.object.userData.comp:null); });
+}
+function v3dSelect(comp){ V3D.sel=comp; v3dApply(); v3dInfo();
+  document.querySelectorAll('[data-v3d-part]').forEach(b=>b.classList.toggle('on', b.dataset.v3dPart===comp));
+  if(comp && V3D.st==='ready'){ const box=new THREE.Box3(); V3D.meshes.filter(o=>o.userData.comp===comp).forEach(o=>box.expandByObject(o)); if(!box.isEmpty()) V3D.controls.target.copy(box.getCenter(new THREE.Vector3())); } }
+function v3dInfo(){
+  const el=document.getElementById('v3dInfo'); if(!el) return; const a=ASSETS.find(x=>x.id===state.assetId); if(!a) return;
+  if(!V3D.sel){ el.innerHTML=`<div class="small-muted">${L('Click a part of the transformer (or a name below) to see its failure modes and the maintenance strategy.','กดที่ชิ้นส่วนของหม้อแปลง (หรือชื่อด้านล่าง) เพื่อดูโหมดความล้มเหลวและกลยุทธ์บำรุงรักษา')}</div>`; return; }
+  const r=partRisk(a,V3D.sel);
+  el.innerHTML = `<div style="font-weight:800;font-size:15px;">${L(V3D.sel, PART_TH[V3D.sel]||V3D.sel)}</div>
+    ${!r ? `<div class="small-muted" style="margin-top:6px;">${L('No failure mode recorded for this part.','ยังไม่มีโหมดความล้มเหลวของชิ้นส่วนนี้')}</div>`
+    : r.list.slice().sort((x,y)=>y.rpn-x.rpn).map(f=>{ const ev=rcmEvaluate(rcmAnsFor(a,f)), s=rcmStrategy(a,f,ev), tk=ev.decision?rcmTaskFor(f.comp,ev.decision):null;
+      return `<div class="v3d-fm"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;"><b>${f.code} · ${f.mode}</b><span class="pill" style="background:${({High:'var(--red-bg)',Medium:'var(--amber-bg, #fdf1d6)',Low:'var(--green-bg)'})[f.risk]};color:${({High:'var(--red)',Medium:'#b07d05',Low:'var(--green)'})[f.risk]};">RPN ${f.rpn}</span></div>
+        <div class="small-muted" style="margin:2px 0 6px;">${L('Effect','ผลกระทบ')}: ${f.effect}</div>
+        <div>${rcmStrategyHtml(s)}</div>${tk?`<div style="font-size:12px;margin-top:4px;">${tk[0]} · ${L('every','ทุก')} ${tk[1]}</div>`:''}
+        <button class="linklike" data-v3d-rcm="${f.code}" style="font-size:12px;margin-top:6px;">${L('Open RCM decision →','ดูการตัดสินใจ RCM →')}</button></div>`; }).join('')}`;
+  el.querySelectorAll('[data-v3d-rcm]').forEach(b=>b.addEventListener('click',()=>{ state.detailTab='fmearcm'; state.fmView='rcm'; state.rcmFm=b.dataset.v3dRcm; render(); window.scrollTo(0,0); }));
+}
+function detail3dTab(a){
+  const parts = PART_RULES.map(([c])=>{ const r=partRisk(a,c); const col=r?({High:'#d0392f',Medium:'#e0a020',Low:'#1fa571'})[r.level]:'#aab4bd';
+    return `<button class="v3d-part ${V3D.sel===c?'on':''}" data-v3d-part="${esc(c)}"><i style="background:${col}"></i>${L(c, PART_TH[c]||c)}${r?` <span class="small-muted">RPN ${r.top.rpn}</span>`:''}</button>`; }).join('');
+  return `<div class="grid v3d-grid">
+    <div class="card" style="padding:12px;">
+      <div class="v3d-bar">
+        <div class="seg"><button class="${V3D.mode==='real'?'on':''}" data-v3d-mode="real">${L('Real colours','สีจริง')}</button><button class="${V3D.mode==='risk'?'on':''}" data-v3d-mode="risk">${L('Colour by FMEA risk','สีตามความเสี่ยง FMEA')}</button></div>
+        <button class="btn btn-outline ${V3D.xray?'active':''}" id="v3dXray">${V3D.xray?L('X-ray on','มองทะลุ: เปิด'):L('X-ray (see inside)','มองทะลุ (ดูข้างใน)')}</button>
+        <button class="btn btn-outline" id="v3dHome">${L('Reset view','มุมเริ่มต้น')}</button>
+      </div>
+      <div class="v3d-stage"><div id="v3dCanvas"></div><div id="v3dStatus" class="v3d-status"></div></div>
+      <div class="small-muted" style="font-size:11.5px;margin-top:6px;">${L('Drag to rotate · scroll / pinch to zoom · right-drag to pan · click a part for details','ลากเพื่อหมุน · เลื่อนหรือถ่างนิ้วเพื่อซูม · ลากด้วยปุ่มขวาเพื่อเลื่อน · กดที่ชิ้นส่วนเพื่อดูข้อมูล')}</div>
+      <div class="v3d-parts">${parts}</div>
+      <div class="small-muted" style="font-size:10px;margin-top:8px;text-align:right;">3D build 2026-10-02b${V3D.lib?` · ${V3D.lib.via}`:''}</div>
+    </div>
+    <div class="card" id="v3dInfo"></div>
+  </div>
+  ${refNote('3D model of a typical oil-immersed power transformer; parts are linked to this unit\'s FMEA. Illustrative, not the as-built unit.','โมเดล 3D ของหม้อแปลงกำลังชนิดแช่น้ำมันแบบทั่วไป ชิ้นส่วนเชื่อมกับ FMEA ของหม้อแปลงตัวนี้ เป็นภาพประกอบ ไม่ใช่หม้อแปลงตัวจริง')}`;
+}
+function attach3dEvents(){
+  document.querySelectorAll('[data-v3d-mode]').forEach(b=>b.addEventListener('click',()=>{ V3D.mode=b.dataset.v3dMode; document.querySelectorAll('[data-v3d-mode]').forEach(x=>x.classList.toggle('on',x===b)); v3dApply(); }));
+  const xr=document.getElementById('v3dXray'); if(xr) xr.addEventListener('click',()=>{ V3D.xray=!V3D.xray; xr.classList.toggle('active',V3D.xray); xr.textContent=V3D.xray?L('X-ray on','มองทะลุ: เปิด'):L('X-ray (see inside)','มองทะลุ (ดูข้างใน)'); v3dApply(); });
+  const hm=document.getElementById('v3dHome'); if(hm) hm.addEventListener('click',()=>{ if(V3D.st!=='ready') return; V3D.camera.position.copy(V3D.home.pos); V3D.controls.target.copy(V3D.home.tgt); V3D.controls.update(); });
+  document.querySelectorAll('[data-v3d-part]').forEach(b=>b.addEventListener('click',()=>v3dSelect(V3D.sel===b.dataset.v3dPart?null:b.dataset.v3dPart)));
+  v3dInfo(); v3dMount();
+}
 function detailHeader(a){
   const rk = riskOf(a);
   return `
@@ -2543,6 +2709,7 @@ function renderDetail(){
   else if(state.detailTab==='fmearcm') body = detailFmeaRcmTab(a);
   else if(state.detailTab==='plan') body = detailPlanTab(a);
   else if(state.detailTab==='history') body = detailHistoryTab(a);
+  else if(state.detailTab==='model3d') body = detail3dTab(a);
   else { state.detailTab='summary'; body = detailSummaryTab(a); }
   return `
   <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:6px;">
@@ -4034,7 +4201,7 @@ function render(){
   destroyCharts();
   if(state.page==='overview'){ content.innerHTML = renderOverview(); attachGlobalViewLinks(); attachOverviewEvents(); attachDataButtons(); initOverviewCharts(); }
   else if(state.page==='assets'){ content.innerHTML = renderAssetsPage(); attachGlobalViewLinks(); attachAssetsPageEvents(); attachDataButtons(); }
-  else if(state.page==='detail'){ syncAssetData(); content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(currentAsset()); }
+  else if(state.page==='detail'){ syncAssetData(); content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(currentAsset()); if(state.detailTab==='model3d') attach3dEvents(); }
   else if(state.page==='risk'){ content.innerHTML = renderRiskPage(); attachGlobalViewLinks(); initRiskCharts(); }
   else if(state.page==='reliability'){ const dg = state.relTab==='diagram';
     content.innerHTML = `<div class="tabs">${[['system',L('System reliability','ความน่าเชื่อถือของระบบ')],['diagram',L('Single-line diagram','แผนภาพวงจร')]].map(([k,n])=>`<button class="tab ${(dg?'diagram':'system')===k?'active':''}" data-reltab="${k}">${n}</button>`).join('')}</div>` + (dg ? schematicHtml() : netHtml());
