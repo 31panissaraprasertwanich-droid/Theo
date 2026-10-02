@@ -177,6 +177,11 @@ details.tip-more > summary{cursor:pointer; font-size:12.5px; font-weight:700; co
 .v3d-spin{width:28px; height:28px; margin:0 auto 10px; border-radius:50%; border:3px solid #cfd8e0; border-top-color:var(--accent-2); animation:v3dspin 1s linear infinite;}
 @keyframes v3dspin{to{transform:rotate(360deg);}}
 .v3d-err{display:block; margin-top:8px; font-size:11px; color:#a33; background:#fff4f3; padding:6px 8px; border-radius:6px; word-break:break-all;}
+.v3d-exbar input[type=range]{flex:1 1 140px; accent-color:var(--accent-2);}
+.v3d-chk{display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--muted);}
+#v3dLabels{position:absolute; inset:0; pointer-events:none; overflow:hidden;}
+.v3d-tag{position:absolute; transform:translate(-50%,-50%); pointer-events:auto; display:inline-flex; align-items:center; gap:5px; font:inherit; font-size:11px; font-weight:700; white-space:nowrap; padding:3px 9px; border-radius:14px; border:1px solid rgba(36,71,107,.25); background:rgba(255,255,255,.92); color:#1E2A33; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.v3d-tag i{width:8px; height:8px; border-radius:50%;} .v3d-tag.on{background:#24476b; color:#fff; border-color:#24476b;}
 .v3d-parts{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
 .v3d-part{display:inline-flex; align-items:center; gap:6px; font:inherit; font-size:12px; padding:5px 10px; border-radius:20px; border:1px solid var(--border); background:#fff; cursor:pointer; color:var(--text);}
 .v3d-part i{width:10px; height:10px; border-radius:50%;} .v3d-part.on{border-color:var(--accent-2); background:var(--blue-bg); font-weight:700;}
@@ -2529,15 +2534,67 @@ async function v3dLoad(){
     V3D.meshes = [];
     const nameOf = (o)=>{ let n=o, s=[]; while(n && n!==model){ if(n.name) s.push(n.name); n=n.parent; } return s; }; // mesh name, then its node/group names
     model.traverse(o=>{ if(!o.isMesh) return; const ns=nameOf(o); if(ns.some(n=>/^Floor/.test(n))){ o.visible=false; return; }
-      o.material = o.material.clone(); o.userData.comp = ns.map(partOf).find(Boolean)||null; o.userData.xray = ns.some(n=>XRAY_RE.test(n));
+      o.material = o.material.clone(); o.userData.names = ns; o.userData.comp = ns.map(partOf).find(Boolean)||null; o.userData.xray = ns.some(n=>XRAY_RE.test(n));
       o.userData.base = o.material.color ? o.material.color.clone() : null; o.userData.op = o.material.opacity; V3D.meshes.push(o); });
     const box = new THREE.Box3().setFromObject(model), ctr = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
     const C = new THREE.PerspectiveCamera(38, 1, 0.1, 500); const dist = Math.max(size.x,size.y,size.z)*1.55;
     C.position.set(ctr.x+dist*0.78, ctr.y+dist*0.42, ctr.z+dist*0.78);
     const ctl = new lib.OrbitControls(C, R.domElement); ctl.target.copy(ctr); ctl.enableDamping = true; ctl.minDistance = dist*0.25; ctl.maxDistance = dist*2.4; ctl.maxPolarAngle = Math.PI*0.52; ctl.update();
+    ctl.maxDistance = dist*3.6; model.updateMatrixWorld(true);
     Object.assign(V3D, {renderer:R, scene:S, camera:C, controls:ctl, model, home:{pos:C.position.clone(), tgt:ctr.clone()}, st:'ready'});
+    v3dExplodeInit(ctr, size); ctl.addEventListener('start',()=>{ V3D.exFollow=false; });
     v3dPicking(); v3dApply(); v3dMount();
   }catch(e){ console.error('[3D]', V3D.stage, e); V3D.st='error'; V3D.err=`${V3D.stage||''}: ${String(e&&e.message||e)}`.slice(0,220); v3dStatus(); }
+}
+/* ---- exploded view: each part group moves to its own place; 0 = assembled, 1 = fully exploded ---- */
+const EXPLODE_TOP = /^(TOP_COVER|TOP_FLANGE|TOP_AUX|V15_Transformer_Gasket|V18_LIFTING_EYE|Pressure)/;
+const EXPLODE_SIDE = /^(CONTROL_CABINET|CABINET_|V16_Marshalling_Cabinet|V16_Cabinet_Meter|ControlCable|V16_Control_Cable|Ladder)/;
+function v3dExplodeVec(o, center, comp, names){
+  const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
+  const k = V3D.unit;   // model units → keep proportions if the model is rescaled
+  const V = (x,y,z)=> new THREE.Vector3(x*k, y*k, z*k);
+  const has = (re)=> names.some(n=>re.test(n));
+  if(has(EXPLODE_TOP)) return V(0, 6.2, 0);                                  // tank cover lifts above the active part
+  if(comp==='Winding') return V(0, 5.0, 0);                                  // core & windings lifted out of the tank
+  if(comp==='Bushing' || has(/^COLUMN_/)) return V(0, 8.0, 0);               // bushings / turrets on top
+  if(comp==='Oil' || comp==='Breather') return V(0, 3.2, -3.2);              // conservator, Buchholz, breather: up and back
+  if(comp==='Cooling System') return V(0, 0, Math.sign(c.z-center.z||1)*2.6); // radiator banks out to each side
+  if(comp==='OLTC (Tap Changer)') return V(3.0, 0, 0);
+  if(has(EXPLODE_SIDE)) return V(4.6, 0, 0);
+  return V(0,0,0);                                                           // tank body, frame, pipes stay
+}
+function v3dExplodeInit(center, size){
+  V3D.unit = Math.max(size.y, 1) / 9.9; V3D.ex = 0; V3D.exT = 0; V3D.compC = {};
+  const acc = {};
+  V3D.meshes.forEach(o=>{ const names=o.userData.names||[]; o.userData.p0 = o.position.clone();
+    const w = v3dExplodeVec(o, center, o.userData.comp, names);
+    const inv = new THREE.Matrix4().copy(o.parent.matrixWorld).invert();          // world offset → parent space
+    const a = o.getWorldPosition(new THREE.Vector3());
+    o.userData.ex = a.clone().add(w).applyMatrix4(inv).sub(a.clone().applyMatrix4(inv));
+    const comp=o.userData.comp; if(comp){ const c=new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
+      (acc[comp]=acc[comp]||{s:new THREE.Vector3(), w:new THREE.Vector3(), n:0}); acc[comp].s.add(c); acc[comp].w.add(w); acc[comp].n++; } });
+  Object.entries(acc).forEach(([k,v])=> V3D.compC[k] = {c0:v.s.divideScalar(v.n), w:v.w.divideScalar(v.n)});
+}
+function v3dExplodeSet(e){
+  V3D.ex = e; V3D.meshes.forEach(o=>{ if(o.userData.p0) o.position.copy(o.userData.p0).addScaledVector(o.userData.ex, e); });
+  /* keep the whole model in view: target rises and the camera backs off as parts spread */
+  const tgt = V3D.home.tgt.clone().add(new THREE.Vector3(0, 3.6*V3D.unit*e, 0));
+  const dir = V3D.camera.position.clone().sub(V3D.controls.target); const d0 = V3D.home.pos.distanceTo(V3D.home.tgt);
+  if(V3D.exFollow){ dir.setLength(d0*(1+0.55*e)); V3D.controls.target.copy(tgt); V3D.camera.position.copy(tgt).add(dir); }
+  const sl=document.getElementById('v3dExRange'); if(sl && document.activeElement!==sl) sl.value=Math.round(e*100);
+}
+function v3dLabels(){
+  const box=document.getElementById('v3dLabels'); if(!box || V3D.st!=='ready') return;
+  const show = V3D.ex>0.25 || V3D.labelsOn; box.style.display = show?'block':'none'; if(!show) return;
+  const host=document.getElementById('v3dCanvas'); const w=host.clientWidth, h=host.clientHeight; const a=ASSETS.find(x=>x.id===state.assetId);
+  if(!box.dataset.built){ box.innerHTML = PART_RULES.map(([c])=>`<button class="v3d-tag" data-v3d-tag="${esc(c)}"><i></i>${L(c, PART_TH[c]||c)}</button>`).join(''); box.dataset.built='1';
+    box.querySelectorAll('[data-v3d-tag]').forEach(b=>b.addEventListener('click',()=>v3dSelect(V3D.sel===b.dataset.v3dTag?null:b.dataset.v3dTag))); }
+  box.querySelectorAll('[data-v3d-tag]').forEach(b=>{ const c=b.dataset.v3dTag, cc=V3D.compC[c]; if(!cc){ b.style.display='none'; return; }
+    const p = cc.c0.clone().addScaledVector(cc.w, V3D.ex).project(V3D.camera);
+    if(p.z>1){ b.style.display='none'; return; } b.style.display='';
+    b.style.left = ((p.x+1)/2*w)+'px'; b.style.top = ((1-p.y)/2*h)+'px';
+    const r=a&&partRisk(a,c); b.querySelector('i').style.background = r?({High:'#d0392f',Medium:'#e0a020',Low:'#1fa571'})[r.level]:'#aab4bd';
+    b.classList.toggle('on', V3D.sel===c); });
 }
 function v3dStatus(){ const el=document.getElementById('v3dStatus'); if(!el) return;
   el.style.display = V3D.st==='ready' ? 'none' : 'flex';
@@ -2560,11 +2617,13 @@ function v3dMount(){
   if(V3D.st!=='ready'){ v3dLoad(); return; }
   if(V3D.renderer.domElement.parentNode!==host) host.appendChild(V3D.renderer.domElement);
   if(V3D.assetId!==state.assetId){ V3D.assetId=state.assetId; V3D.sel=null; }
-  v3dApply(); v3dInfo();
+  v3dApply(); v3dInfo(); const lb=document.getElementById('v3dLabels'); if(lb) delete lb.dataset.built;
   const fit=()=>{ const w=host.clientWidth||600, h=host.clientHeight||420; V3D.renderer.setSize(w,h,false); V3D.renderer.domElement.style.width='100%'; V3D.renderer.domElement.style.height='100%'; V3D.camera.aspect=w/h; V3D.camera.updateProjectionMatrix(); };
   fit(); if(window.ResizeObserver){ if(V3D.ro) V3D.ro.disconnect(); V3D.ro=new ResizeObserver(fit); V3D.ro.observe(host); }
   cancelAnimationFrame(V3D.raf);
-  const loop=()=>{ if(!document.body.contains(V3D.renderer.domElement)){ V3D.raf=0; return; } V3D.controls.update(); V3D.renderer.render(V3D.scene,V3D.camera); V3D.raf=requestAnimationFrame(loop); };
+  const loop=()=>{ if(!document.body.contains(V3D.renderer.domElement)){ V3D.raf=0; return; }
+    if(Math.abs(V3D.exT-V3D.ex)>0.002) v3dExplodeSet(V3D.ex + (V3D.exT-V3D.ex)*0.12); else if(V3D.ex!==V3D.exT) v3dExplodeSet(V3D.exT);
+    V3D.controls.update(); v3dLabels(); V3D.renderer.render(V3D.scene,V3D.camera); V3D.raf=requestAnimationFrame(loop); };
   loop();
 }
 function v3dPicking(){
@@ -2601,10 +2660,15 @@ function detail3dTab(a){
         <button class="btn btn-outline ${V3D.xray?'active':''}" id="v3dXray">${V3D.xray?L('X-ray on','มองทะลุ: เปิด'):L('X-ray (see inside)','มองทะลุ (ดูข้างใน)')}</button>
         <button class="btn btn-outline" id="v3dHome">${L('Reset view','มุมเริ่มต้น')}</button>
       </div>
-      <div class="v3d-stage"><div id="v3dCanvas"></div><div id="v3dStatus" class="v3d-status"></div></div>
+      <div class="v3d-bar v3d-exbar">
+        <button class="btn ${V3D.exT>0.5?'btn-primary':'btn-outline'}" id="v3dExplode">${V3D.exT>0.5?L('Assemble','ประกอบกลับ'):L('Explode parts','แยกชิ้นส่วน')}</button>
+        <input type="range" id="v3dExRange" min="0" max="100" value="${Math.round((V3D.exT||0)*100)}" aria-label="${L('Explode amount','ระยะแยกชิ้นส่วน')}">
+        <label class="v3d-chk"><input type="checkbox" id="v3dLabelsOn" ${V3D.labelsOn?'checked':''}> ${L('Part labels','ป้ายชื่อชิ้นส่วน')}</label>
+      </div>
+      <div class="v3d-stage"><div id="v3dCanvas"></div><div id="v3dLabels"></div><div id="v3dStatus" class="v3d-status"></div></div>
       <div class="small-muted" style="font-size:11.5px;margin-top:6px;">${L('Drag to rotate · scroll / pinch to zoom · right-drag to pan · click a part for details','ลากเพื่อหมุน · เลื่อนหรือถ่างนิ้วเพื่อซูม · ลากด้วยปุ่มขวาเพื่อเลื่อน · กดที่ชิ้นส่วนเพื่อดูข้อมูล')}</div>
       <div class="v3d-parts">${parts}</div>
-      <div class="small-muted" style="font-size:10px;margin-top:8px;text-align:right;">3D build 2026-10-02b${V3D.lib?` · ${V3D.lib.via}`:''}</div>
+      <div class="small-muted" style="font-size:10px;margin-top:8px;text-align:right;">3D build 2026-10-02c${V3D.lib?` · ${V3D.lib.via}`:''}</div>
     </div>
     <div class="card" id="v3dInfo"></div>
   </div>
@@ -2615,6 +2679,11 @@ function attach3dEvents(){
   const xr=document.getElementById('v3dXray'); if(xr) xr.addEventListener('click',()=>{ V3D.xray=!V3D.xray; xr.classList.toggle('active',V3D.xray); xr.textContent=V3D.xray?L('X-ray on','มองทะลุ: เปิด'):L('X-ray (see inside)','มองทะลุ (ดูข้างใน)'); v3dApply(); });
   const hm=document.getElementById('v3dHome'); if(hm) hm.addEventListener('click',()=>{ if(V3D.st!=='ready') return; V3D.camera.position.copy(V3D.home.pos); V3D.controls.target.copy(V3D.home.tgt); V3D.controls.update(); });
   document.querySelectorAll('[data-v3d-part]').forEach(b=>b.addEventListener('click',()=>v3dSelect(V3D.sel===b.dataset.v3dPart?null:b.dataset.v3dPart)));
+  const exb=document.getElementById('v3dExplode'), exr=document.getElementById('v3dExRange');
+  const exUi=()=>{ const on=V3D.exT>0.5; exb.classList.toggle('btn-primary',on); exb.classList.toggle('btn-outline',!on); exb.textContent = on?L('Assemble','ประกอบกลับ'):L('Explode parts','แยกชิ้นส่วน'); };
+  if(exb) exb.addEventListener('click',()=>{ V3D.exT = V3D.exT>0.5?0:1; V3D.exFollow=true; exr.value=Math.round(V3D.exT*100); exUi(); });
+  if(exr) exr.addEventListener('input',()=>{ V3D.exT = (+exr.value)/100; V3D.exFollow=true; exUi(); });
+  const lbo=document.getElementById('v3dLabelsOn'); if(lbo) lbo.addEventListener('change',()=>{ V3D.labelsOn=lbo.checked; });
   v3dInfo(); v3dMount();
 }
 function detailHeader(a){
