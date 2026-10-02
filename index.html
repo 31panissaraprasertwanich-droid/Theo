@@ -596,7 +596,7 @@ tbody tr:last-child td{border-bottom:none;}
   background:linear-gradient(120deg,#1d3550 0%,#2B4C6F 55%,#3e6990 100%); box-shadow:0 6px 18px rgba(29,53,80,.18);}
 .ovb-art{position:absolute; right:0; bottom:0; width:420px; max-width:70%; height:auto; opacity:.13; pointer-events:none;}
 .ovb-main{position:relative; min-width:0; flex:1 1 320px;}
-.ovb-eyebrow{font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; opacity:.7;}
+.ovb-eyebrow{font-size:12px; font-weight:700; letter-spacing:.5px; opacity:.75;}
 .ovb-title{margin:3px 0 4px; font-size:22px; font-weight:700; line-height:1.25; color:#fff;}
 .ovb-meta{font-size:13px; opacity:.82;}
 .ovb-side{position:relative; display:flex; flex-wrap:wrap; align-items:center; gap:10px;}
@@ -2157,8 +2157,8 @@ function renderOverview(){
       <path d="M250 150 L286 18 L322 150 M262 106 L310 106 M270 74 L302 74 M277 46 L295 46 M262 106 L302 74 M310 106 L270 74 M270 74 L295 46 M302 74 L277 46"/><path d="M236 30 H336 M246 30 v10 M326 30 v10 M258 18 H314"/>
       <path d="M360 150 L382 70 L404 150 M368 120 L396 120 M373 98 L391 98 M368 120 L391 98 M396 120 L373 98"/><path d="M352 64 H412 M358 64 v8 M406 64 v8"/><path d="M0 40 C120 60 200 20 286 22 S380 66 420 66" opacity=".6"/></g></svg>
     <div class="ovb-main">
-      <div class="ovb-eyebrow">${L('Fleet overview','ภาพรวมระบบ')}</div>
-      <h1 class="ovb-title">${esc(netArea())}</h1>
+      <div class="ovb-eyebrow">${esc(netArea())}</div>
+      <h1 class="ovb-title">${L('Reliability Centered Maintenance for Power Transformers (RCM)','ระบบบำรุงรักษาหม้อแปลงไฟฟ้าเชิงความน่าเชื่อถือ (RCM)')}</h1>
       <div class="ovb-meta">${NC.sts.length} ${L('substations','สถานี')} · ${N} ${L('transformers','หม้อแปลง')} · ${L('latest lab result','ผลแล็บล่าสุด')} ${latest?fmtD(latest):'—'}</div>
     </div>
     <div class="ovb-side">
