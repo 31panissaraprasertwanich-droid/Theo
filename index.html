@@ -165,6 +165,10 @@ details.tip-more > summary{cursor:pointer; font-size:12.5px; font-weight:700; co
   .rcm-ws tr.sel{background:var(--blue-bg); border-radius:10px;} .rcm-ws tr.sel td{background:transparent;}
   .rcm-ws td:nth-child(4), .rcm-ws td:nth-child(5), .rcm-ws td:nth-child(6){grid-column:2; text-align:left !important;}
 }
+.sld-wrap{border:1px solid var(--border) !important; border-radius:12px; background:#fbfcfd !important; padding:12px !important; overflow-x:auto; margin-bottom:10px;}
+.sld-wrap svg .tr:hover .trbox{fill-opacity:.14; stroke-opacity:.7;}
+.sld-legend{display:flex; flex-wrap:wrap; gap:8px 16px; font-size:11.5px; color:var(--muted);}
+.sld-lg{display:inline-flex; align-items:center; gap:6px;} .sld-lg i{width:12px; height:12px; border-radius:3px; display:inline-block;}
 .tbl-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;}
 .pill{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;}
 .pill-healthy{background:var(--green-bg); color:var(--green);}
@@ -1987,6 +1991,88 @@ function rbdSvg(N){
   parts.push(`<rect x="${x}" y="${mid-14}" width="56" height="28" rx="6" fill="#2B4C6F"/><text x="${x+28}" y="${mid+4}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${L('Load','โหลด')}</text>`); x += 56 + 16;
   return `<svg viewBox="0 0 ${x} ${H}" width="${x}" style="max-width:none;" role="img" aria-label="Reliability block diagram">${parts.join('')}</svg>`;
 }
+/* ---------- realistic single-line diagram (IEC 60617-style symbols) ---------- */
+function sldRealSvg(c){
+  const HV='#24476b', LV='#0d7a68', GR='#4b5866', MU='#6b7682';
+  const stCol = (a)=> a.status==='Critical' ? '#c62d23' : a.status==='Warning' ? '#d99012' : '#1fa571';
+  const kvHV = esc((c.st.kv||'115/24 kV').split('/')[0].replace(/kV/i,'').trim()) || '115';
+  const kvLV = esc(((c.st.kv||'').split('/')[1]||'24').replace(/kV/i,'').trim()) || '24';
+  const n = Math.max(1, c.units.length), bay = 250, mL = 70, mR = 40;
+  const W = Math.max(620, mL + n*bay + mR), H = 600;
+  const cx = (i)=> mL + i*bay + bay/2 - 20;
+  const yBusHV = 150, yBusLV = 446;
+  const ln = (x1,y1,x2,y2,col,w)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col||GR}" stroke-width="${w||2}"/>`;
+  const tx = (x,y,s,o)=>`<text x="${x}" y="${y}" font-size="${(o&&o.fs)||10}" ${o&&o.a?`text-anchor="${o.a}"`:''} font-weight="${(o&&o.fw)||600}" fill="${(o&&o.c)||MU}">${s}</text>`;
+  const cb = (x,y,col,lab)=>`<rect x="${x-8}" y="${y-8}" width="16" height="16" rx="1.5" fill="#fff" stroke="${col}" stroke-width="2.2"/><line x1="${x-5}" y1="${y+5}" x2="${x+5}" y2="${y-5}" stroke="${col}" stroke-width="1.6"/>${lab?tx(x-13,y+3.5,lab,{a:'end',fs:9}):''}`;
+  const ds = (x,y,col,lab)=>`<circle cx="${x}" cy="${y-9}" r="2.2" fill="${col}"/><line x1="${x}" y1="${y-9}" x2="${x+7}" y2="${y+7}" stroke="${col}" stroke-width="2"/><line x1="${x-5}" y1="${y+9}" x2="${x+5}" y2="${y+9}" stroke="${col}" stroke-width="2"/>${lab?tx(x-13,y+3.5,lab,{a:'end',fs:9}):''}`;
+  const ct = (x,y,col)=>`<circle cx="${x}" cy="${y}" r="5.5" fill="none" stroke="${col}" stroke-width="1.6"/><circle cx="${x}" cy="${y}" r="9" fill="none" stroke="${col}" stroke-width="1" stroke-dasharray="2 2"/>`;
+  const gnd = (x,y,col)=>`${ln(x-9,y,x+9,y,col||GR,2)}${ln(x-6,y+4,x+6,y+4,col||GR,2)}${ln(x-3,y+8,x+3,y+8,col||GR,2)}`;
+  const la = (x,y,col,sd)=>{ sd=sd||1; const X=x+30*sd; return `${ln(x,y,X,y,col,1.6)}${ln(X,y,X,y+8,col,1.6)}<rect x="${X-5}" y="${y+8}" width="10" height="18" fill="#fff" stroke="${col}" stroke-width="1.6"/><path d="M${X} ${y+11} L${X} ${y+21} M${X-3} ${y+18} L${X} ${y+22} L${X+3} ${y+18}" stroke="${col}" stroke-width="1.3" fill="none"/>${ln(X,y+26,X,y+32,col,1.6)}${gnd(X,y+32,col)}${tx(X+10*sd,y+21,'LA',{fs:9,a:sd<0?'end':'start'})}`; };
+  const vt = (x,y,col)=>`${ln(x,y,x,y+14,col,1.6)}<circle cx="${x}" cy="${y+20}" r="6" fill="#fff" stroke="${col}" stroke-width="1.6"/><circle cx="${x}" cy="${y+28}" r="6" fill="#fff" fill-opacity=".8" stroke="${col}" stroke-width="1.6"/>${tx(x+10,y+28,'VT',{fs:9})}`;
+  const arrow = (x,y,col)=>`<path d="M${x-6} ${y} L${x} ${y+10} L${x+6} ${y}" fill="${col}"/>`;
+
+  /* incoming 115 kV lines */
+  const nIn = Math.min(2, n), inX = n===1 ? [cx(0)] : [cx(0), cx(n-1)];
+  const incomers = inX.slice(0,nIn).map((x,i)=>`
+    ${tx(x,14,L(`${kvHV} kV Line ${i+1}`,`สายส่ง ${kvHV} kV เส้นที่ ${i+1}`),{a:'middle',fs:10.5,fw:800,c:HV})}
+    ${tx(x,27,L('from grid','จากระบบส่ง'),{a:'middle',fs:9})}
+    <path d="M${x-6} 32 L${x} 42 L${x+6} 32" fill="${HV}"/>${ln(x,42,x,yBusHV,HV,2.4)}
+    ${ds(x,62,HV,'DS')}${la(x,82,HV)}${cb(x,112,HV,'CB')}${ct(x,132,HV)}`).join('');
+
+  /* transformer bays */
+  const bays = c.units.map((u,i)=>{ const x=cx(i), a=u.a, col=stCol(a), yT1=296, yT2=322, no=i+1;
+    return `
+    ${ln(x,yBusHV,x,yT1-20,HV,2.4)}
+    ${ds(x,yBusHV+22,HV,`DS-${no}`)}${cb(x,yBusHV+52,HV,`CB-${no}H`)}${ct(x,yBusHV+76,HV)}${la(x,yBusHV+92,HV,-1)}
+    <g class="tr" data-view="${esc(a.id)}"><title>${esc(a.id)} — HI ${fmtHi(a.hi)} · ${trStatus(a.status)}</title>
+      <rect class="trbox" x="${x-34}" y="${yT1-26}" width="${bay-40}" height="${yT2-yT1+52}" rx="10" fill="${col}" fill-opacity=".06" stroke="${col}" stroke-opacity=".35" stroke-dasharray="4 3"/>
+      <circle cx="${x}" cy="${yT1}" r="18" fill="#fff" stroke="${HV}" stroke-width="2.6"/>
+      <circle cx="${x}" cy="${yT2}" r="18" fill="#fff" fill-opacity=".85" stroke="${LV}" stroke-width="2.6"/>
+      <path d="M${x} ${yT1-8} L${x} ${yT1} M${x} ${yT1} L${x-6} ${yT1+5} M${x} ${yT1} L${x+6} ${yT1+5}" stroke="${HV}" stroke-width="1.5" fill="none"/>
+      <path d="M${x-7} ${yT2+6} L${x} ${yT2-6} L${x+7} ${yT2+6} Z" stroke="${LV}" stroke-width="1.5" fill="none"/>
+      <text x="${x+30}" y="${yT1-6}" font-size="13.5" font-weight="800" fill="#1E2A33">${esc(a.id)}</text>
+      <rect x="${x+30}" y="${yT1+2}" width="${Math.max(92, 46+String(fmtHi(a.hi)).length*7+trStatus(a.status).length*6.2)}" height="18" rx="9" fill="${col}"/>
+      <text x="${x+38}" y="${yT1+15}" font-size="10.5" font-weight="800" fill="#fff">HI ${fmtHi(a.hi)} · ${trStatus(a.status)}</text>
+      <text x="${x+30}" y="${yT2+10}" font-size="10.5" font-weight="700" fill="#38434d">${kvHV}/${kvLV} kV · ${a.cap||'?'} MVA</text>
+      <text x="${x+30}" y="${yT2+24}" font-size="9.5" fill="${MU}">${esc(a.mfr||'')}${a.year?` · ${a.year}`:''}${a.load!=null?` · ${L('load','โหลด')} ${a.load}%`:''}</text>
+    </g>
+    ${ln(x,yT2+18,x,yBusLV,LV,2.4)}
+    ${ln(x+18,yT2+2,x+18,yT2+2,LV,0)}
+    ${ln(x-18,yT2,x-30,yT2,LV,1.6)}${ln(x-30,yT2,x-30,yT2+12,LV,1.6)}<rect x="${x-35}" y="${yT2+12}" width="10" height="14" fill="#fff" stroke="${LV}" stroke-width="1.5"/>${ln(x-30,yT2+26,x-30,yT2+32,LV,1.6)}${gnd(x-30,yT2+32,LV)}${tx(x-38,yT2+22,'NGR',{a:'end',fs:8.5})}
+    ${ct(x,yT2+44,LV)}${cb(x,yT2+68,LV,`CB-${no}L`)}${ds(x,yT2+96,LV,'')}
+    ${[-1,1].map((s,k)=>{ const fx=x+s*62, fno=i*2+k+1; return `${ln(fx,yBusLV,fx,yBusLV+70,LV,2)}${cb(fx,yBusLV+24,LV,'')}${arrow(fx,yBusLV+70,LV)}${tx(fx,yBusLV+96,`F${fno}`,{a:'middle',fs:10,fw:800,c:LV})}`; }).join('')}`; }).join('');
+
+  /* buses: one HV bus, LV bus split into sections with bus-tie breakers */
+  const secs = c.units.map((u,i)=>[mL + i*bay + 8, mL + (i+1)*bay - 8]);
+  const lvBus = (secs.length?secs:[[mL, W-mR]]).map(([a,b])=>ln(a,yBusLV,b,yBusLV,LV,5)).join('');
+  const ties = secs.slice(0,-1).map(([a,b],i)=>{ const xb=b+8; return `${ln(b,yBusLV,xb-8,yBusLV,LV,2)}<rect x="${xb-8}" y="${yBusLV-8}" width="16" height="16" rx="1.5" fill="#fff" stroke="${LV}" stroke-width="2.2"/><line x1="${xb-5}" y1="${yBusLV+5}" x2="${xb+5}" y2="${yBusLV-5}" stroke="${LV}" stroke-width="1.6"/>${ln(xb+8,yBusLV,secs[i+1][0],yBusLV,LV,2)}${tx(xb,yBusLV-14,L('Bus tie','บัสไท (Bus tie)'),{a:'middle',fs:9})}`; }).join('');
+  const totalF = c.units.length*2;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:${Math.round(W*0.8)}px;height:auto;display:block;" role="img" aria-label="${esc(c.st.name)} single-line diagram" font-family="Inter, 'Noto Sans Thai', sans-serif">
+    ${incomers}
+    ${ln(mL-40,yBusHV,W-mR+10,yBusHV,HV,5)}
+    ${tx(mL-40,yBusHV-10,`${kvHV} kV BUS`,{fs:10.5,fw:800,c:HV})}
+    ${vt(W-mR-6,yBusHV,HV)}
+    ${bays}
+    ${lvBus}${ties}
+    ${tx(mL-40,yBusLV-10,`${kvLV} kV BUS`,{fs:10.5,fw:800,c:LV})}
+    ${tx(mL-40,H-14,L(`${totalF} outgoing ${kvLV} kV feeders · peak load ${+c.st.peak||0} MVA`,`ฟีดเดอร์ขาออก ${kvLV} kV ${totalF} วงจร · โหลดสูงสุด ${+c.st.peak||0} MVA`),{fs:10.5,fw:700,c:'#38434d'})}
+  </svg>`;
+}
+function sldLegendHtml(){
+  const s = (svg,label)=>`<span class="sld-lg"><svg viewBox="0 0 24 24" width="22" height="22">${svg}</svg>${label}</span>`;
+  const G='#4b5866';
+  return `<div class="sld-legend">
+    ${s(`<rect x="5" y="5" width="14" height="14" rx="1.5" fill="#fff" stroke="${G}" stroke-width="2"/><line x1="8" y1="16" x2="16" y2="8" stroke="${G}" stroke-width="1.5"/>`, L('CB — circuit breaker','CB — เซอร์กิตเบรกเกอร์'))}
+    ${s(`<circle cx="12" cy="5" r="2" fill="${G}"/><line x1="12" y1="5" x2="18" y2="19" stroke="${G}" stroke-width="2"/><line x1="7" y1="21" x2="17" y2="21" stroke="${G}" stroke-width="2"/>`, L('DS — disconnecting switch','DS — สวิตช์ตัดตอน'))}
+    ${s(`<circle cx="12" cy="12" r="5" fill="none" stroke="${G}" stroke-width="1.6"/><circle cx="12" cy="12" r="8.5" fill="none" stroke="${G}" stroke-dasharray="2 2"/>`, L('CT — current transformer','CT — หม้อแปลงกระแส'))}
+    ${s(`<circle cx="12" cy="8" r="5.5" fill="#fff" stroke="${G}" stroke-width="1.6"/><circle cx="12" cy="16" r="5.5" fill="#fff" stroke="${G}" stroke-width="1.6"/>`, L('VT — voltage transformer','VT — หม้อแปลงแรงดัน'))}
+    ${s(`<rect x="8" y="3" width="8" height="13" fill="#fff" stroke="${G}" stroke-width="1.6"/><path d="M12 5v8M10 11l2 3 2-3" stroke="${G}" fill="none"/><line x1="5" y1="19" x2="19" y2="19" stroke="${G}" stroke-width="2"/><line x1="8" y1="22" x2="16" y2="22" stroke="${G}" stroke-width="2"/>`, L('LA — surge arrester','LA — กับดักเสิร์จ'))}
+    ${s(`<rect x="8" y="4" width="8" height="12" fill="#fff" stroke="${G}" stroke-width="1.6"/><line x1="5" y1="19" x2="19" y2="19" stroke="${G}" stroke-width="2"/>`, L('NGR — neutral grounding resistor','NGR — ตัวต้านทานต่อลงดินจุดนิวทรัล'))}
+    <span class="sld-lg"><i style="background:#24476b"></i>${L('115 kV side','ด้าน 115 kV')}</span><span class="sld-lg"><i style="background:#0d7a68"></i>${L('24 kV side','ด้าน 24 kV')}</span>
+    <span class="sld-lg"><i style="background:#1fa571"></i>${t('healthy')}</span><span class="sld-lg"><i style="background:#d99012"></i>${t('warning')}</span><span class="sld-lg"><i style="background:#c62d23"></i>${t('critical')}</span>
+  </div>
+  <p class="small-muted" style="font-size:11px;margin:6px 0 0;">${L('Typical arrangement drawn from the network settings (number of transformers, voltage, peak load). Switchgear, feeders and protection are representative, not as-built. Click a transformer to open it.','จัดวางตามรูปแบบทั่วไปจากข้อมูลเครือข่าย (จำนวนหม้อแปลง แรงดัน โหลดสูงสุด) อุปกรณ์ตัดตอน ฟีดเดอร์ และระบบป้องกันเป็นตัวอย่างประกอบ ไม่ใช่แบบติดตั้งจริง · กดที่หม้อแปลงเพื่อเปิดดู')}</p>`;
+}
 function schematicHtml(){
   const N = netCalc(); const sel = state.schSt || 'all';
   const sts = N.sts.filter(c=> sel==='all' || c.st.id===sel);
@@ -1995,7 +2081,7 @@ function schematicHtml(){
       <div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3><span class="st-code">${esc(c.st.id)}</span> ${esc(c.st.name)}</h3>
         <span class="small-muted">${esc(c.st.kv||'')} · ${L('peak load','โหลดสูงสุด')} ${+c.st.peak||0} MVA · ${c.units.length} ${L('transformer(s)','หม้อแปลง')}</span>
         <button class="btn btn-outline" data-net-addtr="${esc(c.st.id)}" style="padding:6px 12px;font-size:12px;">+ ${L('Add transformer','เพิ่มหม้อแปลง')}</button></div>
-      <div class="net-st" style="border:none;background:none;padding:0;">${netStationSvg(c,'sld')}</div>
+      <div class="net-st sld-wrap">${sldRealSvg(c)}</div>
       <div class="small-muted" style="font-size:11.5px;margin-bottom:8px;">${netRedundancyText(c)}</div>
       <div class="tbl-wrap"><table class="rowlink sch-tbl"><thead><tr><th>${L('Transformer','หม้อแปลง')}</th><th>MVA</th><th>${L('Voltage','แรงดัน')}</th><th>${L('Manufacturer','ผู้ผลิต')}</th><th>${L('Year','ปีผลิต')}</th><th>HI</th><th>${t('status')}</th><th>${L('Load','โหลด')} %</th></tr></thead><tbody>
       ${c.units.map(u=>`<tr data-view="${esc(u.a.id)}" style="cursor:pointer;"><td><b>${esc(u.a.id)}</b></td><td>${u.a.cap||'—'}</td><td>${esc(u.a.volt||'—')} kV</td><td>${esc(u.a.mfr||'—')}</td><td>${u.a.year||'—'}</td><td style="color:${hiColor(u.a.hi)};font-weight:800;">${fmtHi(u.a.hi)}</td><td><span class="pill ${statusPillClass(u.a.status)}">${trStatus(u.a.status)}</span></td><td>${u.a.load??'—'}</td></tr>`).join('') || `<tr><td colspan="8" class="small-muted">${L('No transformer yet','ยังไม่มีหม้อแปลง')}</td></tr>`}
@@ -2003,7 +2089,7 @@ function schematicHtml(){
   return `<div class="card" style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
       ${tabs}<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" data-net-addst="1" style="padding:6px 12px;font-size:12px;">+ ${L('Add substation','เพิ่มสถานี')}</button><button class="btn btn-outline" data-goto-rel="1" style="padding:6px 12px;font-size:12px;">${L('Reliability (R) →','ความน่าเชื่อถือ (R) →')}</button></div></div>
     ${cards || `<div class="card small-muted">${L('No substation yet — press “+ Add substation”.','ยังไม่มีสถานี — กด “+ เพิ่มสถานี”')}</div>`}
-    <div class="net-legend"><span><i style="background:#1fa571"></i>${t('healthy')}</span><span><i style="background:#d99012"></i>${t('warning')}</span><span><i style="background:#c62d23"></i>${t('critical')}</span><span>□ ${L('circuit breaker','เซอร์กิตเบรกเกอร์')}</span><span>${L('Simplified single-line diagram. Click a transformer to open it.','แผนภาพเส้นเดี่ยวอย่างง่าย · กดที่หม้อแปลงเพื่อเปิดดู')}</span></div>`;
+    <div class="card">${sldLegendHtml()}</div>`;
 }
 function netHtml(){
   const N = netCalc(); const top = N.ranked[0]; const tt = N.t; const yr = L(tt>1?'yrs':'yr','ปี');
