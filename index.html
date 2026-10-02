@@ -713,7 +713,7 @@ const UI = {
  ov_fmea_desc:['Each transformer\'s single highest-risk failure mode. Click a row to see its full FMEA table.','โหมดความล้มเหลวที่มีความเสี่ยงสูงสุดของแต่ละหม้อแปลง กดแถวเพื่อดูตาราง FMEA เต็มของเครื่องนั้น'],
  ov_rcm_desc:['The top risk for each transformer and the maintenance strategy RCM recommends for it. Click a row to open its decision tree.','ความเสี่ยงสูงสุดของแต่ละหม้อแปลงและกลยุทธ์บำรุงรักษาที่ RCM แนะนำ กดแถวเพื่อเปิดแผนผังการตัดสินใจของเครื่องนั้น'],
  sub_reports:['Turn data into actionable maintenance decisions','เปลี่ยนข้อมูลเป็นการตัดสินใจบำรุงรักษา'],
- sub_reliability:['System reliability R(t) and importance — which unit matters most for supply','ความน่าเชื่อถือของระบบ R(t) และความสำคัญ — หม้อแปลงตัวไหนสำคัญต่อการจ่ายไฟมากที่สุด'],
+ sub_reliability:['System reliability R(t), importance and the single-line diagram','ความน่าเชื่อถือของระบบ R(t) ความสำคัญ และแผนภาพวงจร'],
  sub_settings:['Configure system parameters, criteria, and user management','ตั้งค่าพารามิเตอร์ระบบ เกณฑ์ และผู้ใช้งาน'],
  hero_title:['Reliable Transformers<br>for a Sustainable Tomorrow','หม้อแปลงที่เชื่อถือได้<br>เพื่ออนาคตที่ยั่งยืน'],
  total_assets:['Total Assets','สินทรัพย์ทั้งหมด'], healthy:['Healthy','ปกติ'], warning:['Warning','เฝ้าระวัง'], critical:['Critical','วิกฤต'],
@@ -1126,7 +1126,17 @@ function issuesOf(rows){ const rank = r=> r.key==='ff' ? (CODE_SF[r.score]-10) :
   return rows.filter(r=>r.key!=='age' && r.status!=='Healthy').sort((x,y)=>rank(x)-rank(y)); }
 function issueLabel(r, dga){ if(!r) return L('None significant','ไม่มีนัยสำคัญ'); if(r.key==='ff') return `DGA – ${dgaName(dga.code)}`; return L(r.issue[0],r.issue[1]); }
 function mainIssueOf(a){ if(!a._as) return '—'; return issueLabel(issuesOf(a._as.rows)[0], a._as.dga); }
-function strategyOf(a){ return a.status==='Critical'?'CBM + PdM':a.status==='Warning'?'CBM':'PM'; }
+/* asset strategy = the maintenance types chosen by RCM for its failure modes (not derived from HI status) */
+function strategyOf(a){
+  const fm = (a.id===state.assetId && state.page==='detail' && typeof FMEA!=='undefined' && FMEA.length) ? FMEA : getFmeaFor(a);
+  const types=new Set(); let ffT=false, rd=false;
+  fm.forEach(f=>{ const e=rcmEvaluate(rcmAnsFor(a,f)); if(!e.decision) return;
+    if(e.decision==='RD'){ rd=true; return; }
+    if(e.decision==='FFT') ffT=true;
+    if(e.decision==='COMB'){ types.add(rcmPlanType(a,f.comp,'CBM')); types.add('PM'); return; }
+    types.add(rcmPlanType(a,f.comp,e.decision)); });
+  const order=['CBM','PdM','PM','BM']; const out=order.filter(x=>types.has(x));
+  let s = out.join(' + ') || '—'; if(ffT) s += ' (FFT)'; if(rd) s += L(' + redesign',' + ออกแบบใหม่'); return s; }
 function recommendedActions(rows, dga){
   const acts=[]; const bad=new Set(issuesOf(rows).map(r=>r.key)); const fam=famOf(dga.code);
   if(fam==='T'||fam==='DT') acts.push(dga.paperInvolved ? L('Thermal fault involving paper (CO₂/CO < 3) — check loading, cooling and hot spots; plan internal inspection','ความร้อนที่กระทบกระดาษฉนวน (CO₂/CO < 3) — ตรวจโหลด ระบบระบายความร้อน และจุดร้อน; วางแผนตรวจภายใน')
@@ -1162,7 +1172,7 @@ function profileFor(a, sampleIdx){
     code:d.code, type:{en:DGA_NAMES[d.code][0], th:DGA_NAMES[d.code][1]}, typeRange:'',
     severity:{en:`${d.ff} — ${sev[0]}`, th:`${d.ff} — ${sev[1]}`}, confidence: d.agree===null?'—':`${d.agree}/3`, duval:d.pct,
     mainIssue:{en:issueLabel(iss[0],d), th:issueLabel(iss[0],d)}, secondaryIssue:{en:iss[1]?issueLabel(iss[1],d):'—', th:iss[1]?issueLabel(iss[1],d):'—'},
-    riskLevel:{en:risk[0],th:risk[1]}, strategy: status==='Critical'?'CBM + PdM':status==='Warning'?'CBM':'PM',
+    riskLevel:{en:risk[0],th:risk[1]}, strategy: strategyOf(a),
     nextAction:{en:nxt[0],th:nxt[1]}, interp:{en:interpTxt, th:interpTxt}, actions: recommendedActions(as.rows, d) };
 }
 const MON_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -1240,9 +1250,9 @@ function sampleFromForm(data){
    ===================================================================== */
 const RCM_LIB = {
  'Winding':{fn:['Transform 115/24 kV power at rated load within temperature limits','แปลงแรงดัน 115/24 kV ที่พิกัดโหลดโดยอุณหภูมิไม่เกินขีดจำกัด'], ff:['Cannot carry rated load / insulation breakdown','จ่ายโหลดพิกัดไม่ได้ / ฉนวนเสียหาย'],
-   tasks:{CBM:['DGA + winding-temperature monitoring','3 months'],PM:['Insulation resistance / PI test','1 year'],RTD:['Cooling upgrade / load-management study','—']}},
+   tasks:{CBM:['DGA + winding-temperature monitoring','3 months'],PM:['Insulation resistance / PI test','1 year'],RD:['Cooling upgrade / load-management study','one-off']}},
  'Bushing':{fn:['Insulate and carry the conductor through the tank wall','เป็นฉนวนและนำตัวนำผ่านผนังถัง'], ff:['Loss of insulation → flashover','ฉนวนเสื่อม → เกิดวาบไฟ'],
-   tasks:{CBM:['Tan δ / capacitance test + IR thermography','1 year'],PM:['Gasket replacement','5 years'],RTD:['Replace with RIP bushing','—']}},
+   tasks:{CBM:['Tan δ / capacitance test + IR thermography','1 year'],PM:['Gasket replacement','5 years'],RD:['Replace with RIP bushing','one-off']}},
  'OLTC (Tap Changer)':{fn:['Keep secondary voltage within limits by changing taps on load','รักษาแรงดันด้านทุติยภูมิในเกณฑ์โดยเปลี่ยนแทปขณะมีโหลด'], ff:['Cannot change tap / voltage out of range','เปลี่ยนแทปไม่ได้ / แรงดันเกินเกณฑ์'],
    tasks:{CBM:['Contact resistance + OLTC oil test','6 months'],PM:['OLTC overhaul by operation count','7 years'],FFT:['Tap-change functional test','6 months']}},
  'Cooling System':{fn:['Remove heat so top-oil stays ≤ 95 °C at rated load','ระบายความร้อนให้อุณหภูมิน้ำมันด้านบน ≤ 95 °C ที่พิกัดโหลด'], ff:['Insufficient cooling when fans are called','ระบายความร้อนไม่พอเมื่อพัดลมต้องทำงาน'],
@@ -1255,7 +1265,7 @@ const RCM_LIB = {
    tasks:{CBM:['Visual leak inspection','1 month'],PM:['Re-gasketing','10 years']}},
 };
 const RCM_GENERIC = {fn:['Function to be defined','ยังไม่ได้กำหนดหน้าที่'], ff:['Functional failure to be defined','ยังไม่ได้กำหนดความล้มเหลวเชิงหน้าที่'],
-  tasks:{CBM:['Condition-monitoring task','6 months'],PM:['Scheduled restoration / replacement','1 year'],FFT:['Failure-finding (functional) test','6 months'],RTD:['Redesign / modification','—']}};
+  tasks:{CBM:['Condition-monitoring task','6 months'],PM:['Scheduled restoration / replacement','1 year'],FFT:['Failure-finding (functional) test','6 months'],RD:['Redesign / modification','one-off']}};
 const RCM_DEFAULT_ANS = {
  'FM-01':{H:'yes',S:'yes',T1:'yes'}, 'FM-02':{H:'yes',S:'yes',T1:'yes'}, 'FM-03':{H:'yes',S:'no',O:'yes',T1:'yes'},
  'FM-04':{H:'no',S:'no',T1:'no',T2:'no',T3:'yes'}, 'FM-05':{H:'yes',S:'yes',T1:'yes'}, 'FM-06':{H:'no',S:'no',T1:'no',T2:'yes'}, 'FM-07':{H:'yes',S:'yes',T1:'yes'},
@@ -1273,6 +1283,7 @@ const RCM_Q = {
   O:['Does it affect operational capability (supply interruption / derating)?','กระทบการจ่ายไฟหรือไม่ (ไฟดับ/ต้องลดโหลด)?'],
   T1:['Is an on-condition task (CBM/PdM) technically feasible and worth doing?','งานตามสภาพ (CBM/PdM) ทำได้ในทางเทคนิคและคุ้มค่าหรือไม่?'],
   T2:['Is a scheduled restoration or replacement (time-based PM) feasible and worth doing?','งานซ่อม/เปลี่ยนตามรอบเวลา (PM) ทำได้และคุ้มค่าหรือไม่?'],
+  TC:['Would a combination of tasks (on-condition + scheduled) reduce the risk to a tolerable level?','การทำหลายงานร่วมกัน (ตามสภาพ + ตามรอบ) ลดความเสี่ยงให้อยู่ในระดับที่ยอมรับได้หรือไม่?'],
   T3:['Is a failure-finding task (periodic functional test) feasible and worth doing?','งานตรวจหาความล้มเหลวที่ซ่อนอยู่ (ทดสอบการทำงานเป็นรอบ) ทำได้และคุ้มค่าหรือไม่?'],
 };
 /* walks the SAE decision logic; returns the next unanswered question or the final decision */
@@ -1292,19 +1303,27 @@ function rcmEvaluate(ans){
   if(ans.T1==='yes') return {cons, decision:'CBM', path};
   if((r=ask('T2'))) return r;
   if(ans.T2==='yes') return {cons, decision:'PM', path};
-  if(hidden){ if((r=ask('T3'))) return r; if(ans.T3==='yes') return {cons, decision:'FFT', path}; return {cons, decision: safety?'RTD':'BM', path}; }
-  return {cons, decision: safety?'RTD':'BM', path};
+  if(hidden){ if((r=ask('T3'))) return r; if(ans.T3==='yes') return {cons, decision:'FFT', path}; return {cons, decision: safety?'RD':'BM', path}; }
+  if(safety){ if((r=ask('TC'))) return r; if(ans.TC==='yes') return {cons, decision:'COMB', path}; return {cons, decision:'RD', path}; } // Moubray: safety → combination of tasks, else redesign is compulsory
+  return {cons, decision:'BM', path}; // no task worth doing → run to failure (redesign may be desirable)
 }
 const RCM_CONS = {H:['Hidden','ซ่อนเร้น'],S:['Safety / environmental','ความปลอดภัย/สิ่งแวดล้อม'],O:['Operational','กระทบการจ่ายไฟ'],N:['Non-operational','ไม่กระทบการจ่ายไฟ']};
 const RCM_DEC = {
   CBM:{name:['On-condition task (CBM)','งานตามสภาพ (CBM)'], col:['var(--green-bg)','var(--green)'], plan:'CBM'},
   PM:{name:['Scheduled restoration / replacement (PM)','ซ่อม/เปลี่ยนตามรอบ (PM)'], col:['var(--blue-bg)','var(--accent-2)'], plan:'PM'},
-  FFT:{name:['Failure-finding task','งานตรวจหาความล้มเหลวที่ซ่อนอยู่'], col:['#efe8fa','#6f3fc0'], plan:'PM'},
-  RTD:{name:['Redesign is compulsory','ต้องออกแบบ/ปรับปรุงใหม่ (บังคับ)'], col:['var(--red-bg)','var(--red)'], plan:'CM'},
-  BM:{name:['Run to failure (no scheduled maintenance)','ใช้งานจนเสีย (ไม่มีงานตามแผน)'], col:['#eef0f2','#5d6670'], plan:'BM'},
+  COMB:{name:['Combination of tasks (CBM + PM)','ทำหลายงานร่วมกัน (CBM + PM)'], col:['var(--green-bg)','var(--green)'], plan:'CBM'},
+  FFT:{name:['Failure-finding task (FFT) — scheduled as PM','งานตรวจหาความล้มเหลวซ่อนเร้น (FFT) — จัดเป็นงาน PM'], col:['#efe8fa','#6f3fc0'], plan:'PM', sub:'FFT'},
+  RD:{name:['Redesign is compulsory — not a maintenance task','ต้องออกแบบใหม่ (บังคับ) — ไม่ใช่งานบำรุงรักษา'], col:['var(--red-bg)','var(--red)'], plan:null},
+  BM:{name:['BM — run to failure, repair when failed','BM — ใช้งานจนเสีย แล้วซ่อมเมื่อเสีย'], col:['#eef0f2','#5d6670'], plan:'BM'},
 };
 function rcmLib(comp){ return RCM_LIB[comp] || RCM_GENERIC; }
-function rcmTaskFor(comp, decision){ if(decision==='BM') return [L('Repair when failed','ซ่อมเมื่อเสีย'),'—']; const lib=rcmLib(comp).tasks; return lib[decision] || RCM_GENERIC.tasks[decision]; }
+function rcmTaskFor(comp, decision){ if(decision==='BM') return [L('Repair when failed','ซ่อมเมื่อเสีย'),'—'];
+  const lib=rcmLib(comp).tasks, g=RCM_GENERIC.tasks;
+  if(decision==='COMB'){ const c=lib.CBM||g.CBM, p=lib.PM||g.PM; return [`${c[0]} + ${p[0]}`, `${c[1]} / ${p[1]}`]; }
+  return lib[decision] || g[decision]; }
+/* RCM on-condition task → CBM, or PdM when the HI trend (oil / DGA) is long enough to forecast */
+function rcmPlanType(a, comp, decision){ const d=RCM_DEC[decision]; if(!d||!d.plan) return null;
+  if(d.plan==='CBM' && ['Winding','Oil'].includes(comp) && hiRateOf(a).enough) return 'PdM'; return d.plan; }
 
 let DGA_SAMPLES = [];
 function currentDgaGases(){ return DGA_SAMPLES[state.dgaSampleIdx] ? DGA_SAMPLES[state.dgaSampleIdx].gases : (DGA_SAMPLES[0]?DGA_SAMPLES[0].gases:[]); }
@@ -1405,7 +1424,7 @@ let state = {page:'overview', assetId:'TR-014', detailTab:'overview', rcmMode:'W
 let chartRegistry = {};
 
 const NAV = [
- {id:'overview', key:'nav_overview', badge:'home'}, {id:'reliability', key:'nav_reliability', badge:'reliability'}, {id:'schematic', key:'nav_schematic', badge:'schematic'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'},
+ {id:'overview', key:'nav_overview', badge:'home'}, {id:'reliability', key:'nav_reliability', badge:'reliability'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'},
  {id:'reports', key:'nav_reports', badge:'reports'}, {id:'settings', key:'nav_settings', badge:'settings'},
 ];
 const ICONS = {
@@ -2023,10 +2042,10 @@ function netSettingsHtml(){
 function attachNetEvents(){
   const ar=document.getElementById('netArea'); if(ar) ar.addEventListener('change',()=>{ NET.area = ar.value.trim(); render(); toast(t('toast_saved'),'success'); });
   document.querySelectorAll('[data-sch-st]').forEach(b=> b.addEventListener('click',()=>{ state.schSt = b.dataset.schSt; render(); }));
-  document.querySelectorAll('[data-goto-sch]').forEach(b=> b.addEventListener('click',()=>{ state.page='schematic'; if(b.dataset.gotoSch!=='1') state.schSt=b.dataset.gotoSch; render(); window.scrollTo(0,0); }));
+  document.querySelectorAll('[data-goto-sch]').forEach(b=> b.addEventListener('click',()=>{ state.page='reliability'; state.relTab='diagram'; if(b.dataset.gotoSch!=='1') state.schSt=b.dataset.gotoSch; render(); window.scrollTo(0,0); }));
   document.querySelectorAll('.rbd-wrap svg .blk[data-view]').forEach(g=> g.addEventListener('click',()=> goToAssetDetail(g.dataset.view,'summary')));
   const rs=document.getElementById('repScope'); if(rs) rs.addEventListener('change',()=>{ state.repScope = rs.value; render(); });
-  document.querySelectorAll('[data-goto-rel]').forEach(b=> b.addEventListener('click',()=>{ state.page='reliability'; render(); window.scrollTo(0,0); }));
+  document.querySelectorAll('[data-goto-rel]').forEach(b=> b.addEventListener('click',()=>{ state.page='reliability'; state.relTab='system'; render(); window.scrollTo(0,0); }));
   document.querySelectorAll('[data-net-addtr]').forEach(b=> b.addEventListener('click',()=> openAddAssetModal(b.dataset.netAddtr)));
   document.querySelectorAll('[data-net-t]').forEach(b=> b.addEventListener('click',()=>{ NET.t = +b.dataset.netT; render(); }));
   document.querySelectorAll('[data-net-edit]').forEach(b=> b.addEventListener('click',()=>{ state.page='settings'; state.settingsTab='net'; render(); window.scrollTo(0,0); }));
@@ -2102,8 +2121,6 @@ function initOverviewCharts(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
   const gridColor = cssv('--border');
   if(document.getElementById('ovDonut')) mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  const sc={PM:0,CBM:0,'CBM + PdM':0}; ASSETS.forEach(a=>sc[strategyOf(a)]++);
-  if(document.getElementById('ovStrategy')) mkChart('ovStrategy',{type:'doughnut',data:{labels:['PM','CBM','CBM + PdM'],datasets:[{data:[sc.PM,sc.CBM,sc['CBM + PdM']],backgroundColor:['#5E7A8C','#1fa571','#8759d6'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
   mkChart('ovTrend2',{type:'line',plugins:[valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{data:fleetTrend(),borderColor:'#2B4C6F',backgroundColor:'#2B4C6F22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#5E7A8C'}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
@@ -2260,14 +2277,8 @@ function detailSummaryTab(a){
   <div style="margin-top:16px;">${beforeAfterHtml(a)}</div>`;
 }
 function taskStratSummary(a){ const c={}; let pend=0; (a.id===state.assetId && state.page==='detail' ? FMEA : getFmeaFor(a)).forEach(f=>{ const e=rcmEvaluate(rcmAnsFor(a,f)); if(e.decision) c[e.decision]=(c[e.decision]||0)+1; else pend++; });
-  const parts = ['CBM','PM','FFT','RTD','BM'].filter(k=>c[k]).map(k=>`${c[k]} ${k}`); if(pend) parts.push(`${pend} ${L('pending','รอวิเคราะห์')}`);
+  const parts = ['CBM','COMB','PM','FFT','RD','BM'].filter(k=>c[k]).map(k=>`${c[k]} ${k}`); if(pend) parts.push(`${pend} ${L('pending','รอวิเคราะห์')}`);
   return parts.join(' · ') || '—'; }
-function strategyWhy(a, rk){
-  const r = rk.rate===null?null:rk.rate;
-  if(a.status==='Critical') return L(`Why: HI ${fmtHi(a.hi)} is below 50${r!==null?` and falling ${r.toFixed(1)} points/yr`:''} — condition must be watched closely (CBM) and trends used to decide the intervention time (PdM).`,`เหตุผล: HI ${fmtHi(a.hi)} ต่ำกว่า 50${r!==null?` และลดลงปีละ ${r.toFixed(1)} คะแนน`:''} — ต้องติดตามสภาพใกล้ชิด (CBM) และใช้แนวโน้มกำหนดเวลาแก้ไข (PdM)`);
-  if(a.status==='Warning') return L(`Why: HI ${fmtHi(a.hi)} is in the caution range (50–70) — act on measured condition rather than a fixed calendar (CBM).`,`เหตุผล: HI ${fmtHi(a.hi)} อยู่ในช่วงต้องระวัง (50–70) — ควรบำรุงรักษาตามสภาพที่วัดได้แทนการทำตามรอบเวลา (CBM)`);
-  return L(`Why: HI ${fmtHi(a.hi)} is 70 or above with no significant fault — routine time-based maintenance and sampling are enough (PM).`,`เหตุผล: HI ${fmtHi(a.hi)} ตั้งแต่ 70 ขึ้นไป ไม่พบความผิดปกติสำคัญ — บำรุงรักษาและเก็บตัวอย่างตามรอบเวลาก็เพียงพอ (PM)`);
-}
 function detailConditionTab(a){
   const v = state.condView==='dga' ? 'dga' : 'healthindex';
   return `<div class="seg" style="margin-bottom:16px;"><button class="${v==='healthindex'?'on':''}" data-cond="healthindex">${L('Health Index','ดัชนีสุขภาพ')}</button><button class="${v==='dga'?'on':''}" data-cond="dga">DGA</button></div>
@@ -2667,10 +2678,12 @@ function detailRcmTab(a){
     result = `<div class="card" style="margin-top:16px;"><h3>${L('Q6–7 · Task strategy for','ข้อ 6–7 · กลยุทธ์ระดับงานของ')} ${f.code}</h3>
       <ul class="hlist"><li><span class="k">${L('Consequence category','ประเภทผลที่ตามมา')}</span><span class="v">${L(RCM_CONS[ev.cons][0],RCM_CONS[ev.cons][1])}</span></li>
       <li><span class="k">${t('task')}</span><span class="v" style="white-space:normal;text-align:right;">${task[0]}</span></li>
-      <li><span class="k">${t('interval')}</span><span class="v">${task[1]}</span></li></ul>
+      <li><span class="k">${t('interval')}</span><span class="v">${task[1]}</span></li>
+      <li><span class="k">${L('Maintenance type','ประเภทงานบำรุงรักษา')}</span><span class="v">${ev.decision==='COMB' ? rcmPlanType(a,f.comp,'CBM')+' + PM' : (rcmPlanType(a,f.comp,ev.decision)||L('— (engineering change)','— (งานปรับปรุงแบบ)'))}${dec.sub?' · '+dec.sub:''}</span></li></ul>
       <div style="font-weight:800;font-size:12.5px;margin:12px 0 0;">${L(`Why ${ev.decision}?`,`ทำไมจึงเลือก ${ev.decision}?`)}</div>
       <ul class="why-list">${rcmWhyList(a, f, ev)}</ul>
-      ${ev.decision==='BM'?`<p class="small-muted" style="font-size:11.5px;margin:8px 0 0;">${L('No scheduled task: the failure has no safety consequence and no proactive task is worth doing. Redesign may still be considered if it is economical.','ไม่มีงานตามแผน: ไม่มีผลต่อความปลอดภัยและไม่มีงานเชิงป้องกันที่คุ้มค่า อาจพิจารณาปรับปรุงหากคุ้มทุน')}</p>`
+      ${ev.decision==='BM'?`<p class="small-muted" style="font-size:11.5px;margin:8px 0 0;">${L('BM — run to failure: the failure has no safety consequence and no proactive task is worth doing, so the unit is repaired when it fails. Redesign may still be considered if it is economical.','BM — ใช้งานจนเสีย: ไม่มีผลต่อความปลอดภัยและไม่มีงานเชิงป้องกันที่คุ้มค่า จึงซ่อมเมื่อเสีย อาจพิจารณาออกแบบใหม่หากคุ้มทุน')}</p>`
+        : ev.decision==='RD'?`<div class="notebox" style="margin-top:10px;background:var(--red-bg);">${L('<b>Redesign is not a maintenance task.</b> No maintenance task can make this failure tolerable, and it affects safety or the environment, so the design must change (an engineering modification, done once). It is not added to the maintenance plan as CM.','<b>การออกแบบใหม่ไม่ใช่งานบำรุงรักษา</b> ไม่มีงานบำรุงรักษาใดลดความเสี่ยงของความล้มเหลวนี้ได้ และกระทบความปลอดภัยหรือสิ่งแวดล้อม จึงต้องเปลี่ยนแบบ (งานปรับปรุงทางวิศวกรรม ทำครั้งเดียว) ไม่ได้เพิ่มเข้าแผนบำรุงรักษาเป็นงาน CM')}</div>`
         : `<button class="btn btn-primary" id="btnRcmToPlan" style="width:100%;justify-content:center;margin-top:12px;">${gicon('plan',0,'width:13px;height:13px')} ${L('Add task to maintenance plan','เพิ่มงานนี้เข้าแผนบำรุงรักษา')}</button>`}
     </div>`;
   }
@@ -2700,7 +2713,7 @@ function detailRcmTab(a){
     </div>
     <div class="card"><h3>${L('RCM worksheet','แผ่นงาน RCM')} — ${a.id}</h3><p class="card-sub">${L('Every failure mode from the FMEA. Click a row to analyse it.','ทุกโหมดความล้มเหลวจาก FMEA กดแถวเพื่อวิเคราะห์')}</p>
       <div class="tbl-wrap"><table><thead><tr><th>${t('code')}</th><th>${t('failure_mode')}</th><th>${L('Consequence','ผลที่ตามมา')}</th><th>${L('Decision','ผลตัดสินใจ')}</th><th>${t('task')}</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="small-muted" style="font-size:11px;margin:10px 0 0;">CBM = ${L('on-condition','ตามสภาพ')} · PM = ${L('scheduled','ตามรอบ')} · FFT = ${L('failure-finding','ตรวจหาความล้มเหลวซ่อนเร้น')} · RTD = ${L('redesign','ออกแบบใหม่')} · BM = ${L('run to failure','ใช้จนเสีย')}</p>
+      <p class="small-muted" style="font-size:11px;margin:10px 0 0;">CBM = ${L('on condition (PdM when the HI trend allows a forecast)','ตามสภาพ (เป็น PdM เมื่อมีแนวโน้ม HI พอพยากรณ์)')} · COMB = ${L('combination of tasks','ทำหลายงานร่วมกัน')} · PM = ${L('time-based','ตามรอบเวลา')} · FFT = ${L('failure-finding, scheduled as PM','ตรวจหาความล้มเหลวซ่อนเร้น จัดเป็น PM')} · RD = ${L('redesign — not a maintenance task','ออกแบบใหม่ — ไม่ใช่งานบำรุงรักษา')} · BM = ${L('run to failure, repair when failed','ใช้งานจนเสีย ซ่อมเมื่อเสีย')} · ${L('CM is raised when CBM / PdM / FFT finds a defect','CM เกิดเมื่อ CBM / PdM / FFT ตรวจพบความผิดปกติ')}</p>
     </div>
   </div>
   ${refNote('RCM decision logic (7 questions): SAE JA1011:2009; Moubray (1997), <i>Reliability-Centred Maintenance</i>, 2nd ed.','ตรรกะการตัดสินใจ RCM (7 คำถาม): SAE JA1011:2009; Moubray (1997), <i>Reliability-Centred Maintenance</i>, 2nd ed.')}`;
@@ -2733,7 +2746,7 @@ function detailPlanTab(a){
     </div>
     ${overdue?`<div class="notebox" style="margin-bottom:12px;background:var(--red-bg);">${L(`${overdue} task(s) are past their end date and not closed. A task is completed only when its work order is closed — issue a WO or reschedule.`,`มี ${overdue} งานเลยวันสิ้นสุดแต่ยังไม่ปิด งานจะเสร็จได้เมื่อปิดใบสั่งงานเท่านั้น — ออกใบงานหรือเลื่อนกำหนด`)}</div>`:''}
     <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>${t('task')}</th><th>${t('type')}</th><th>${t('start')}</th><th>${t('end')}</th><th>${t('duration')}</th><th>${t('status')}</th><th>${L('Work order','ใบสั่งงาน')}</th></tr></thead><tbody>
-    ${MAINT_PLAN.map((tk,ti)=>`<tr><td>${tk.no}</td><td><b>${a.id}</b></td><td>${tk.task}${tk.notes?`<div class="small-muted" style="white-space:normal;">${esc(tk.notes)}</div>`:''}</td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${tk.dur}</td><td>${statusPill(st[ti])}</td><td>${woCell(tk, st[ti], ti)}</td></tr>`).join('')}
+    ${MAINT_PLAN.map((tk,ti)=>`<tr><td>${tk.no}</td><td><b>${a.id}</b></td><td>${tk.task}${tk.notes?`<div class="small-muted" style="white-space:normal;">${esc(tk.notes)}</div>`:''}</td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}${tk.sub?' · '+tk.sub:''}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${tk.dur}</td><td>${statusPill(st[ti])}</td><td>${woCell(tk, st[ti], ti)}</td></tr>`).join('')}
     </tbody></table></div>
     ${state.planView==='gantt' ? ganttHtml(MAINT_PLAN, st) : ''}
   </div>
@@ -2805,6 +2818,7 @@ const RCM_WHY = {
   O:{yes:['It affects supply (outage or derating)','กระทบการจ่ายไฟ (ไฟดับหรือต้องลดโหลด)'], no:['No effect on supply','ไม่กระทบการจ่ายไฟ']},
   T1:{yes:['The condition can be monitored early enough (e.g. DGA, oil tests)','ตรวจติดตามสภาพได้ทันก่อนเสีย (เช่น DGA และผลน้ำมัน)'], no:['No effective on-condition task','ไม่มีงานตามสภาพที่ได้ผล']},
   T2:{yes:['A scheduled restoration / replacement is effective','งานซ่อม/เปลี่ยนตามรอบเวลาได้ผล'], no:['A time-based task is not effective','งานตามรอบเวลาไม่ได้ผล']},
+  TC:{yes:['A combination of on-condition and scheduled tasks brings the risk to a tolerable level','การทำงานตามสภาพร่วมกับงานตามรอบลดความเสี่ยงให้อยู่ในระดับที่ยอมรับได้'], no:['Even a combination of tasks cannot make the risk tolerable','แม้ทำหลายงานร่วมกันก็ลดความเสี่ยงให้ยอมรับได้ไม่พอ']},
   T3:{yes:['A periodic functional test can find the hidden failure','ทดสอบการทำงานเป็นรอบหาความล้มเหลวที่ซ่อนอยู่ได้'], no:['No failure-finding task is effective','ไม่มีงานตรวจหาความล้มเหลวที่ได้ผล']},
 };
 function rcmWhyList(a, f, ev){
@@ -2890,7 +2904,6 @@ function baMeasured(a){
   if(ai<0||bi<0) return {done, pending:true};
   return {done, bS:lab[bi], aS:lab[ai], before:assessAt(a,bi), after:assessAt(a,ai)};
 }
-function stratForStatus(st){ return st==='Critical'?'CBM + PdM':st==='Warning'?'CBM':'PM'; }
 function beforeAfterHtml(a){
   if(!labFor(a).length) return '';
   const meas = baMeasured(a); const hasMeas = meas && !meas.pending;
@@ -3049,12 +3062,15 @@ function attachDetailEvents(){
   const rcmPrint = document.getElementById('btnRcmPrint'); if(rcmPrint) rcmPrint.addEventListener('click', ()=>{ const a=currentAsset(), f=curF(); savePdf(document.getElementById('detailBody'), `${a.id}_RCM_${f?f.code:'analysis'}_${pdfDate()}.pdf`, {skipButtons:true, orientation:'landscape', title:`${a.id} · ${L('RCM analysis','การวิเคราะห์ RCM')} · ${f?f.code+' '+f.comp+' — '+f.mode:''}`}); });
   document.querySelectorAll('[data-rcm-k]').forEach(el=> el.addEventListener('click',()=>{ rcmAnsFor(currentAsset(), curF())[el.dataset.rcmK] = el.dataset.rcmV; render(); }));
   document.querySelectorAll('[data-rcm-undo]').forEach(el=> el.addEventListener('click',()=>{
-    const ans = rcmAnsFor(currentAsset(), curF()); const order=['H','S','O','T1','T2','T3']; const i=order.indexOf(el.dataset.rcmUndo);
+    const ans = rcmAnsFor(currentAsset(), curF()); const order=['H','S','O','T1','T2','TC','T3']; const i=order.indexOf(el.dataset.rcmUndo);
     order.slice(i).forEach(k=>delete ans[k]); render(); }));
   const toPlan = document.getElementById('btnRcmToPlan'); if(toPlan) toPlan.addEventListener('click',()=>{
     const a=currentAsset(), f=curF(); const ev=rcmEvaluate(rcmAnsFor(a,f)); if(!ev.decision) return;
-    const task=rcmTaskFor(f.comp, ev.decision); const st=new Date(); st.setDate(st.getDate()+14);
-    MAINT_PLAN.push({no:1+Math.max(0,...MAINT_PLAN.map(x=>x.no)), task:`${task[0]} (${f.code})`, type:RCM_DEC[ev.decision].plan, start:fmtD(st), end:fmtD(st), dur:'1 '+L('day','วัน'), m:MON[st.getMonth()], len:1, notes:`RCM ${ev.decision} · ${L('interval','รอบ')} ${task[1]}`});
+    const dec=RCM_DEC[ev.decision]; if(!dec.plan) return; // redesign is not a maintenance task
+    const st=new Date(); st.setDate(st.getDate()+14);
+    const lib=rcmLib(f.comp).tasks, g=RCM_GENERIC.tasks;
+    const items = ev.decision==='COMB' ? [[lib.CBM||g.CBM, rcmPlanType(a,f.comp,'CBM')], [lib.PM||g.PM, 'PM']] : [[rcmTaskFor(f.comp, ev.decision), rcmPlanType(a,f.comp,ev.decision)]];
+    items.forEach(([task,type])=> MAINT_PLAN.push({no:1+Math.max(0,...MAINT_PLAN.map(x=>x.no)), task:`${task[0]} (${f.code})`, type, sub:dec.sub||'', start:fmtD(st), end:fmtD(st), dur:'1 '+L('day','วัน'), m:MON[st.getMonth()], len:1, notes:`RCM ${ev.decision} · ${L('interval','รอบ')} ${task[1]}${type==='PdM'?' · '+L('timing from HI trend forecast','กำหนดเวลาจากการพยากรณ์แนวโน้ม HI'):''}`}));
     render(); toast(L('Added to maintenance plan','เพิ่มเข้าแผนบำรุงรักษาแล้ว'),'success'); });
   document.querySelectorAll('[data-dga-tab]').forEach(el=> el.addEventListener('click',()=>{ state.dgaSubTab = el.dataset.dgaTab; render(); }));
   const dgaSel = document.getElementById('dgaSamplingSelect'); if(dgaSel) dgaSel.addEventListener('change',(e)=>{ state.dgaSampleIdx = Number(e.target.value); render(); });
@@ -3466,7 +3482,7 @@ function initReportsChartsInner(){
   const comps = Object.entries(r.highByComp).sort((x,y)=>y[1]-x[1]);
   mkChart('repFmeaBar',{type:'bar',data:{labels:comps.map(c=>c[0]),datasets:[{data:comps.map(c=>c[1]),backgroundColor:'#e0473d'}]},options:{...commonOpts(),indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor},ticks:{precision:0}},y:{grid:{display:false}}}}});
 }
-function fleetRows(){ return [['ID','Location','Last sample','Health Index','Status','DGA code','Main issue','Strategy','Next sampling','PoF class','CoF class','Risk score','Risk level'], ...ASSETS.map(a=>{ const r=riskOf(a); return [a.id,a.loc,a.last,a.hi,a.status,a._as?a._as.dga.code:'',mainIssueOf(a),strategyOf(a),a.next,r.pofClass,r.cofClass,r.score,r.level]; })]; }
+function fleetRows(){ return [['ID','Location','Last sample','Health Index','Status','DGA code','Main issue','Strategy (RCM)','Next sampling','HI decreasing rate (pts/yr)','Risk level'], ...ASSETS.map(a=>{ const r=riskOf(a); return [a.id,a.loc,a.last,a.hi,a.status,a._as?a._as.dga.code:'',mainIssueOf(a),strategyOf(a),a.next,r.rate===null?'':r.rate.toFixed(2),r.level]; })]; }
 function attachReportsEvents(){
   const gen = document.getElementById('btnGenerateReport'); if(gen) gen.addEventListener('click', ()=>{
     openExportChoiceModal(()=>{ downloadFile('Asset_Summary_Report.csv', toCSV(fleetRows()), 'text/csv'); toast(t('toast_generated'),'success'); }, ()=>savePdf(document.getElementById('content'), `RCM_Fleet_Report_${pdfDate()}.pdf`, {skipButtons:true, title:L('RCM Transformer — Fleet report','RCM Transformer — รายงานภาพรวมหม้อแปลง')}));
@@ -3488,8 +3504,7 @@ function renderGuide(){
   ];
   const pages = [
     ['home', t('nav_overview'), L('Snapshot of the area: how many units are healthy / warning / critical, the units that need action now, and each substation\'s reliability.','สรุปภาพรวมพื้นที่: หม้อแปลงปกติ / เฝ้าระวัง / วิกฤตกี่ตัว ตัวที่ต้องดำเนินการตอนนี้ และความน่าเชื่อถือของแต่ละสถานี')],
-    ['reliability', t('nav_reliability'), L('Chance that the whole system supplies its load for 1, 3 or 5 years, and which unit would hurt supply most if it failed. Based on failure history and how substations are connected — not on oil tests.','โอกาสที่ระบบจ่ายไฟได้ครบตลอด 1, 3 หรือ 5 ปี และตัวที่ถ้าเสียจะกระทบการจ่ายไฟมากที่สุด คำนวณจากประวัติการเสียและรูปแบบการต่อของสถานี ไม่ได้ใช้ผลตรวจน้ำมัน')],
-    ['schematic', t('nav_schematic'), L('Single-line diagram of each substation; click a transformer to open it.','แผนภาพเส้นเดี่ยวของแต่ละสถานี คลิกหม้อแปลงเพื่อเปิดดู')],
+    ['reliability', t('nav_reliability'), L('Chance that the whole system supplies its load for 1, 3 or 5 years, and which unit would hurt supply most if it failed. Based on failure history and how substations are connected — not on oil tests. The second tab shows the single-line diagram of each substation.','โอกาสที่ระบบจ่ายไฟได้ครบตลอด 1, 3 หรือ 5 ปี และตัวที่ถ้าเสียจะกระทบการจ่ายไฟมากที่สุด คำนวณจากประวัติการเสียและรูปแบบการต่อของสถานี ไม่ได้ใช้ผลตรวจน้ำมัน แท็บที่สองแสดงแผนภาพวงจรของแต่ละสถานี')],
     ['assets', t('nav_assets'), L('Full list of transformers with a filter. Import lab results, download the template, or add a transformer here.','รายการหม้อแปลงทั้งหมดพร้อมตัวกรอง นำเข้าผลแล็บ ดาวน์โหลดแม่แบบ หรือเพิ่มหม้อแปลงได้ที่หน้านี้')],
     ['risk', t('nav_risk'), L('Risk matrix (Health Index × yearly fall rate), condition-vs-age check, and the maintenance priority list.','เมทริกซ์ความเสี่ยง (HI × อัตราลดลงต่อปี) การเทียบสภาพกับอายุ และรายการลำดับความสำคัญในการซ่อมบำรุง')],
     ['reports', t('nav_reports'), L('Fleet charts, task summary and key takeaways. Generate a PDF or export CSV for one transformer or all.','กราฟภาพรวม สรุปงาน และประเด็นสำคัญ สร้าง PDF หรือส่งออก CSV สำหรับหม้อแปลงตัวเดียวหรือทั้งหมด')],
@@ -3507,7 +3522,8 @@ function renderGuide(){
     ['DGA', L('Dissolved Gas Analysis — gases in the oil that reveal overheating or electrical discharge inside.','การวิเคราะห์ก๊าซละลายในน้ำมัน — บอกความร้อนเกินหรือการดิสชาร์จภายใน')],
     ['FMEA · RPN', L('Failure Mode and Effects Analysis. RPN = Severity × Occurrence × Detection (1–1000); higher = more urgent.','การวิเคราะห์โหมดความเสียหายและผลกระทบ RPN = ความรุนแรง × โอกาสเกิด × การตรวจพบ (1–1000) ยิ่งสูงยิ่งเร่งด่วน')],
     ['RCM', L('Reliability Centered Maintenance — a decision logic (SAE JA1011) that picks the right task for each failure mode.','การบำรุงรักษาที่เน้นความน่าเชื่อถือ — ตรรกะตัดสินใจ (SAE JA1011) ที่เลือกงานให้เหมาะกับแต่ละโหมดความเสียหาย')],
-    ['CM · PM · CBM · PdM · FFT', L('Corrective (fix after failure) · Preventive (on a fixed schedule) · Condition-based (when tests show a problem) · Predictive (from trends) · Failure-finding task (test a hidden function, e.g. a protection device).','แก้ไขหลังเสีย · ป้องกันตามรอบเวลา · ตามสภาพ (เมื่อผลตรวจพบปัญหา) · เชิงคาดการณ์ (จากแนวโน้ม) · งานค้นหาความเสียหายที่ซ่อนอยู่ (ทดสอบฟังก์ชันที่ปกติมองไม่เห็น เช่น อุปกรณ์ป้องกัน)')],
+    ['BM · CM · PM · CBM · PdM', L('Breakdown (run to failure) · Corrective (fix when an abnormality is found) · Preventive (time-based) · Condition-based (when a condition limit is reached) · Predictive (trend analysis and forecasting).','ซ่อมเมื่อเสีย (ใช้งานจนเสีย) · แก้ไข (เมื่อพบความผิดปกติ) · ป้องกัน (ตามรอบเวลา) · ตามสภาพ (เมื่อถึงเกณฑ์สภาพ) · คาดการณ์ (วิเคราะห์แนวโน้มและพยากรณ์)')],
+    ['FFT · COMB · RD', L('RCM results: failure-finding task for a hidden function, e.g. a protection device (scheduled as PM) · combination of tasks (CBM + PM) · redesign (an engineering change, not maintenance).','ผลจาก RCM: งานตรวจหาความล้มเหลวซ่อนเร้นของฟังก์ชันที่มองไม่เห็น เช่น อุปกรณ์ป้องกัน (จัดเป็น PM) · ทำหลายงานร่วมกัน (CBM + PM) · ออกแบบใหม่ (งานปรับปรุงทางวิศวกรรม ไม่ใช่งานบำรุงรักษา)')],
     ['λ · R(t)', L('Failure rate per year · chance a unit runs t years without failing.','อัตราการเสียต่อปี · โอกาสที่หม้อแปลงทำงานได้ t ปีโดยไม่เสีย')],
     ['R<sub>SS</sub> · R<sub>sys</sub>', L('Reliability of one substation · of the whole system.','ความน่าเชื่อถือของสถานีหนึ่ง · ของทั้งระบบ')],
     ['k-out-of-n', L('At least k of the n transformers must work to carry the peak load (e.g. 2-out-of-2 = both are needed, no spare).','ต้องมีหม้อแปลงทำงานอย่างน้อย k จาก n ตัวจึงรับโหลดสูงสุดได้ (เช่น 2-out-of-2 = ต้องใช้ทั้งสองตัว ไม่มีตัวสำรอง)')],
@@ -3587,6 +3603,9 @@ function settingsTabContent(){
     <tr><td><b>CBM</b> ${state.lang==='th'?'ตามสภาพ':'Condition Based'}</td><td class="small-muted">${state.lang==='th'?'เมื่อถึงเกณฑ์สภาพ':'When condition threshold met'}</td></tr>
     <tr><td><b>PdM</b> ${state.lang==='th'?'คาดการณ์':'Predictive'}</td><td class="small-muted">${state.lang==='th'?'วิเคราะห์แนวโน้มและพยากรณ์':'Trend analysis & forecasting'}</td></tr>
     </tbody></table></div>
+    <div class="notebox" style="margin-top:12px;">${gicon('help',16)}<div>${L(
+      '<b>How RCM decisions map to these types:</b> on-condition task → CBM (PdM when the HI trend is long enough to forecast) · scheduled restoration / replacement → PM · failure-finding task (FFT) → PM · combination of tasks → CBM + PM · no task worth doing → BM. CM is raised when CBM / PdM / FFT finds an abnormality. Redesign is an engineering change, not a maintenance type.',
+      '<b>ผลตัดสินใจ RCM กับประเภทงาน:</b> งานตามสภาพ → CBM (เป็น PdM เมื่อมีแนวโน้ม HI พอพยากรณ์) · ซ่อม/เปลี่ยนตามรอบ → PM · งานตรวจหาความล้มเหลวซ่อนเร้น (FFT) → PM · ทำหลายงานร่วมกัน → CBM + PM · ไม่มีงานที่คุ้มค่า → BM · CM เกิดเมื่อ CBM / PdM / FFT ตรวจพบความผิดปกติ · การออกแบบใหม่เป็นงานปรับปรุงทางวิศวกรรม ไม่ใช่ประเภทงานบำรุงรักษา')}</div></div>
   </div>`;
   if(state.settingsTab==='users') return `
   <div class="card"><div class="card-head"><h3>${t('settings_users')}</h3><button class="btn btn-primary" id="btnAddUser" style="padding:6px 12px;font-size:12px;">${t('add_user')}</button></div>
@@ -3759,6 +3778,7 @@ function pageMeta(){
   return titles[state.page] || ['RCM Transformer',''];
 }
 function render(){
+  if(state.page==='schematic'){ state.page='reliability'; state.relTab='diagram'; } // old links keep working
   ensureNet(); recomputeAll(); saveData();
   const nb = document.getElementById('bellCount'); if(nb){ const n = notificationsList().length; nb.textContent = n; if(!notifRead) nb.style.display = n ? '' : 'none'; }
   renderNav();
@@ -3773,8 +3793,10 @@ function render(){
   else if(state.page==='assets'){ content.innerHTML = renderAssetsPage(); attachGlobalViewLinks(); attachAssetsPageEvents(); attachDataButtons(); }
   else if(state.page==='detail'){ syncAssetData(); content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(currentAsset()); }
   else if(state.page==='risk'){ content.innerHTML = renderRiskPage(); attachGlobalViewLinks(); initRiskCharts(); }
-  else if(state.page==='reliability'){ content.innerHTML = netHtml(); attachGlobalViewLinks(); const fold=document.getElementById('relCalcFold'); if(fold) fold.addEventListener('toggle',()=>{ state.relCalcOpen=fold.open; const h=fold.querySelector('.calc-fold-hint'); if(h) h.textContent = fold.open?L('Hide','ซ่อน'):L('Show','แสดง'); }); }
-  else if(state.page==='schematic'){ content.innerHTML = schematicHtml(); }
+  else if(state.page==='reliability'){ const dg = state.relTab==='diagram';
+    content.innerHTML = `<div class="tabs">${[['system',L('System reliability','ความน่าเชื่อถือของระบบ')],['diagram',L('Single-line diagram','แผนภาพวงจร')]].map(([k,n])=>`<button class="tab ${(dg?'diagram':'system')===k?'active':''}" data-reltab="${k}">${n}</button>`).join('')}</div>` + (dg ? schematicHtml() : netHtml());
+    document.querySelectorAll('[data-reltab]').forEach(b=> b.addEventListener('click',()=>{ state.relTab=b.dataset.reltab; render(); }));
+    attachGlobalViewLinks(); const fold=document.getElementById('relCalcFold'); if(fold) fold.addEventListener('toggle',()=>{ state.relCalcOpen=fold.open; const h=fold.querySelector('.calc-fold-hint'); if(h) h.textContent = fold.open?L('Hide','ซ่อน'):L('Show','แสดง'); });  }
   else if(state.page==='reports'){ content.innerHTML = renderReports(); initReportsCharts(); attachReportsEvents(); }
   else if(state.page==='settings'){ content.innerHTML = renderSettings(); attachSettingsEvents(); }
   else if(state.page==='healthindex-overview'){ content.innerHTML = renderCategoryOverview('healthindex'); attachCategoryOverviewEvents(); }
