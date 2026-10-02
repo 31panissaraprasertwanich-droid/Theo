@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Transformer condition-based maintenance dashboard: Health Index from DGA and oil tests, risk ranking, FMEA/RCM decisions, maintenance planning and system reliability.">
+<meta property="og:title" content="RCM Transformer — Reliability Centered Maintenance">
+<meta property="og:description" content="Transformer condition-based maintenance dashboard: Health Index from DGA and oil tests, risk ranking, FMEA/RCM decisions, maintenance planning and system reliability.">
+<meta property="og:type" content="website">
 <title>RCM Transformer</title>
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -138,6 +142,12 @@ table{width:100%; border-collapse:collapse; font-size:12.6px;}
 th{text-align:left; padding:9px 10px; color:var(--muted); font-weight:700; border-bottom:1px solid var(--border); white-space:nowrap; font-size:11.5px; text-transform:uppercase; letter-spacing:.3px;}
 td{padding:10px 10px; border-bottom:1px solid var(--border); white-space:nowrap;}
 tr:last-child td{border-bottom:none;}
+.calc-fold > summary{cursor:pointer; list-style:none; margin-bottom:0;}
+.calc-fold > summary::-webkit-details-marker{display:none;}
+.calc-fold > summary h3::before{content:'▸'; display:inline-block; margin-right:8px; transition:transform .15s; color:var(--muted);}
+.calc-fold[open] > summary{margin-bottom:14px;}
+.calc-fold[open] > summary h3::before{transform:rotate(90deg);}
+.calc-fold-hint{color:var(--accent-2); font-weight:700;}
 .tbl-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;}
 .pill{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;}
 .pill-healthy{background:var(--green-bg); color:var(--green);}
@@ -601,6 +611,15 @@ tbody tr:last-child td{border-bottom:none;}
 .login-overlay{background:linear-gradient(160deg,#E8EEF4 0%,#F6F8FA 100%);}
 .login-card{box-shadow:0 18px 44px rgba(30,42,51,.12);}
 .ov-grid table{min-width:560px;}
+/* phones: keep HI / Risk / Next sampling on one row instead of three full-width boxes */
+@media (max-width:760px){
+  .detail-head .kpi-row{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
+  .detail-head .kpi-row > .kpi{min-width:0; padding:8px 10px; flex:none; width:auto;}
+  .detail-head .kpi-row .klabel{font-size:10px; white-space:normal; line-height:1.25;}
+  .detail-head .kpi-row .kvalue{font-size:18px;}
+  .detail-head .kpi-row .kvalue .pill{font-size:11px; padding:3px 8px;}
+  .detail-head .kpi-row > details{grid-column:1 / -1; justify-self:start;}
+}
 </style>
 </head>
 <body>
@@ -614,7 +633,8 @@ tbody tr:last-child td{border-bottom:none;}
       <div class="formrow"><label id="loginPassLabel">Password</label><input name="password" type="password" required autocomplete="current-password"></div>
       <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;" id="loginSubmitBtn">Sign in</button>
     </form>
-    <div class="login-hint" id="loginHint">Demo mode — for demonstration purposes.</div>
+    <button type="button" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" id="loginDemoBtn">Enter demo (no account needed)</button>
+    <div class="login-hint" id="loginHint">Demo mode — any username and password will work.</div>
   </div>
 </div>
 <div class="app" id="appRoot" style="visibility:hidden;">
@@ -634,7 +654,7 @@ tbody tr:last-child td{border-bottom:none;}
         <div class="page-title"><h1 id="pageTitle">Overview</h1><p id="pageSub">Monitor · Analyze · Plan · Maintain</p></div>
       </div>
       <div class="topbar-right">
-        <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="globalSearch" placeholder="Search asset ID or location..."></div>
+        <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="globalSearch" placeholder="Go to transformer — type ID, press Enter"></div>
         <div class="langtoggle"><button id="langEn" class="active" data-lang="en">EN</button><button id="langTh" data-lang="th">TH</button></div>
         <div class="bell" id="guideBtn" title="Help / Guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.8.5-1.1 1-1.1 1.9"/><circle cx="12" cy="17.2" r="1" fill="currentColor" stroke="none"/></svg></div>
         <div style="position:relative;">
@@ -642,7 +662,7 @@ tbody tr:last-child td{border-bottom:none;}
           <div id="bellDropdown"></div>
         </div>
         <div style="position:relative;">
-          <div class="user" id="userMenuBtn" style="cursor:pointer;"><div class="avatar">PP</div><div><div class="u-name">Panissara P.</div><div class="u-role" id="userRole">Industrial Engineering</div></div></div>
+          <div class="user" id="userMenuBtn" style="cursor:pointer;"><div class="avatar">DU</div><div><div class="u-name">Demo User</div><div class="u-role" id="userRole">Industrial Engineering</div></div></div>
           <div id="userDropdown"></div>
         </div>
       </div>
@@ -678,11 +698,11 @@ const UI = {
  nav_plan:['Maintenance Plan','แผนบำรุงรักษา'], nav_reports:['Reports','รายงาน'], nav_settings:['Settings','ตั้งค่า'], nav_reliability:['Reliability','ความน่าเชื่อถือ'], nav_schematic:['Schematic','แผนภาพวงจร'], sub_schematic:['Single-line diagram of each substation and its transformers','แผนภาพเส้นเดี่ยวของแต่ละสถานีและหม้อแปลง'],
  brand_sub:['Reliability Centered Maintenance','การบำรุงรักษาเชิงความน่าเชื่อถือ'],
  footer_tag:['Reliable Grid<br>Sustainable Tomorrow','โครงข่ายเชื่อถือได้<br>เพื่ออนาคตยั่งยืน'],
- search_ph:['Search asset ID or location...','ค้นหารหัสสินทรัพย์หรือสถานที่...'],
+ search_ph:['Go to transformer — type ID, press Enter','ไปที่หม้อแปลง — พิมพ์รหัสแล้วกด Enter'],
  role:['Industrial Engineering','วิศวกรรมอุตสาหการ'], logout:['Log out','ออกจากระบบ'],
  login_title:['Sign in','เข้าสู่ระบบ'], login_sub:['Access the RCM Transformer dashboard','เข้าใช้งานแดชบอร์ด RCM Transformer'],
  login_user:['Username','ชื่อผู้ใช้'], login_pass:['Password','รหัสผ่าน'], login_submit:['Sign in','เข้าสู่ระบบ'],
- login_hint:['Demo mode — for demonstration purposes.','โหมดสาธิต — สำหรับการนำเสนอ'],
+ login_hint:['Demo mode — any username and password will work.','โหมดสาธิต — ใส่ชื่อผู้ใช้และรหัสผ่านอะไรก็ได้'], login_demo:['Enter demo (no account needed)','เข้าสู่ระบบแบบสาธิต (ไม่ต้องมีบัญชี)'],
  notifications:['Notifications','การแจ้งเตือน'], mark_all_read:['Mark all read','อ่านทั้งหมด'], view_all:['View All →','ดูทั้งหมด →'],
  sub_overview:['Monitor · Analyze · Plan · Maintain','ติดตาม · วิเคราะห์ · วางแผน · บำรุงรักษา'],
  sub_assets:['Manage and monitor all transformer assets','จัดการและติดตามสินทรัพย์หม้อแปลงทั้งหมด'],
@@ -693,7 +713,7 @@ const UI = {
  ov_fmea_desc:['Each transformer\'s single highest-risk failure mode. Click a row to see its full FMEA table.','โหมดความล้มเหลวที่มีความเสี่ยงสูงสุดของแต่ละหม้อแปลง กดแถวเพื่อดูตาราง FMEA เต็มของเครื่องนั้น'],
  ov_rcm_desc:['The top risk for each transformer and the maintenance strategy RCM recommends for it. Click a row to open its decision tree.','ความเสี่ยงสูงสุดของแต่ละหม้อแปลงและกลยุทธ์บำรุงรักษาที่ RCM แนะนำ กดแถวเพื่อเปิดแผนผังการตัดสินใจของเครื่องนั้น'],
  sub_reports:['Turn data into actionable maintenance decisions','เปลี่ยนข้อมูลเป็นการตัดสินใจบำรุงรักษา'],
- sub_reliability:['System reliability R(t) and importance — which transformer to focus on first','ความน่าเชื่อถือของระบบ R(t) และความสำคัญ — ควรโฟกัสหม้อแปลงตัวไหนก่อน'],
+ sub_reliability:['System reliability R(t) and importance — which unit matters most for supply','ความน่าเชื่อถือของระบบ R(t) และความสำคัญ — หม้อแปลงตัวไหนสำคัญต่อการจ่ายไฟมากที่สุด'],
  sub_settings:['Configure system parameters, criteria, and user management','ตั้งค่าพารามิเตอร์ระบบ เกณฑ์ และผู้ใช้งาน'],
  hero_title:['Reliable Transformers<br>for a Sustainable Tomorrow','หม้อแปลงที่เชื่อถือได้<br>เพื่ออนาคตที่ยั่งยืน'],
  total_assets:['Total Assets','สินทรัพย์ทั้งหมด'], healthy:['Healthy','ปกติ'], warning:['Warning','เฝ้าระวัง'], critical:['Critical','วิกฤต'],
@@ -705,7 +725,7 @@ const UI = {
  manufacturer:['Manufacturer','ผู้ผลิต'], year:['Year','ปีที่ผลิต'], last_inspection:['Last Inspection','ตรวจล่าสุด'], next_plan:['Next Plan','แผนถัดไป'], view:['View','ดู'],
  asset_location:['Asset Location','ตำแหน่งสินทรัพย์'], view_map:['View Map','ดูแผนที่'], recent_activities:['Recent Activities','กิจกรรมล่าสุด'],
  hi_trend_fleet:['Health Index Trend (Fleet Average)','แนวโน้มดัชนีสุขภาพ (ค่าเฉลี่ยรวม)'], maint_strategy:['Maintenance Strategy (Current)','กลยุทธ์บำรุงรักษา (ปัจจุบัน)'],
- all_status:['All Status','สถานะทั้งหมด'], all_voltage:['All Voltage','แรงดันทั้งหมด'], search_assets:['Search assets...','ค้นหาสินทรัพย์...'],
+ all_status:['All Status','สถานะทั้งหมด'], all_voltage:['All Voltage','แรงดันทั้งหมด'], search_assets:['Filter this list...','กรองรายการนี้...'],
  back_to_assets:['← Back to Assets','← กลับไปยังสินทรัพย์'], viewing_asset:['Viewing:','กำลังดู:'], export_report:['Export Report','ส่งออกรายงาน'], more_actions:['More Actions ▾','การกระทำอื่นๆ ▾'],
  health_index:['Health Index','ดัชนีสุขภาพ'], rpn_max:['RPN (Max)','RPN (สูงสุด)'], dga_diagnosis:['DGA Diagnosis','ผลวินิจฉัย DGA'], next_action:['Next Action','การกระทำถัดไป'],
  kpi_hi_tip:['Overall condition score (0–100) combining DGA, oil test, and inspection results. Higher is healthier.','คะแนนสภาพโดยรวม (0–100) รวมผล DGA, ตรวจน้ำมัน และตรวจสอบด้วยสายตา ยิ่งสูงยิ่งสุขภาพดี'],
@@ -869,7 +889,8 @@ let CRIT = JSON.parse(JSON.stringify(CRIT_DEFAULT));
 function critIsDefault(){ return JSON.stringify(CRIT)===JSON.stringify(CRIT_DEFAULT); }
 function score4(v, lim){ return v<lim[0]?1 : v<=lim[1]?2 : v<=lim[2]?3 : 4; }
 function levelScore(g,v){ return score4(v, CRIT.level[g]); }
-function rateScore(g,r){ if(r===null || r===undefined || r<=0) return 1; if(g==='C2H2') return 4; return score4(r, CRIT.rate[g]); } // any C2H2 increase = 4
+const C2H2_MIN_RATE = 1; // ppm/year — smaller C2H2 rises are within normal lab repeatability, so they are not counted as an increase
+function rateScore(g,r){ if(r===null || r===undefined || r<=0) return 1; if(g==='C2H2') return r>=C2H2_MIN_RATE ? 4 : 1; return score4(r, CRIT.rate[g]); } // a real C2H2 increase = 4
 function gasRates(s, prev){ if(!prev) return null; const y = yearsBetween(s.date, prev.date); if(y<=0) return null; const r={}; GASES.forEach(g=>r[g]=(s.gases[g]-prev.gases[g])/y); return r; }
 
 /* Duval Triangle 1 — zone boundaries per IEC 60599 */
@@ -958,7 +979,8 @@ function diagnoseDGA(gs, rates){
   if(Lm===1){ ff='A'; code='N'; }
   else { gc=gasCond(Lm,Rm); dc=dpmCond(pzone,Rm); ff=FF_TABLE[dc][gc-1]; if(!ff){ falseFlag=true; const m=Math.max(gc,dc); ff=FF_TABLE[m][m-1]; } code=zone; }
   let agree=null; if(code!=='N'){ const fam=famOf(zone); agree=[famOf(zone), famOf(iec), rog===null?null:ROGERS_FAM[rog]].filter(x=>x===fam).length; }
-  return {code, zone, pzone, pct, lv, rs, Lm, Rm, gc, dc, ff, falseFlag, hasRate:!!rates, r1,r2,r5, iec, rogers:rog, agree};
+  const co2co = gs.CO>0 ? gs.CO2/gs.CO : null; // IEC 60599: CO2/CO < 3 suggests the fault involves paper
+  return {code, zone, pzone, pct, lv, rs, Lm, Rm, gc, dc, ff, falseFlag, hasRate:!!rates, r1,r2,r5, iec, rogers:rog, agree, co2co, paperInvolved: co2co!==null && co2co<3};
 }
 
 /* ---------- Oil Quality Factor (Table 4) & Paper Condition Factor (Table 5, Fig. 6) ---------- */
@@ -1011,6 +1033,7 @@ function assessSample(s, prev, a){
 }
 /* paper Table 8 */
 const HI_CATS = [[85,'VG',['Very good','ดีมาก']],[70,'G',['Good','ดี']],[50,'C',['Caution','ต้องระวัง']],[30,'P',['Poor','ต่ำ']],[0,'VP',['Very poor','ต่ำมาก']]];
+function fmtHi(v){ const n=Number(v); return (v===null||v===undefined||isNaN(n)) ? '—' : n.toFixed(1); } // one decimal everywhere HI is shown
 function hiCat(hi){ const c=HI_CATS.find(x=>hi>=x[0]); return {code:c[1], name:L(c[2][0],c[2][1])}; }
 function statusFromHi(hi){ return hi<50?'Critical' : hi<70?'Warning' : 'Healthy'; }
 function statusOf(as){ return statusFromHi(as.hi); }
@@ -1106,7 +1129,9 @@ function mainIssueOf(a){ if(!a._as) return '—'; return issueLabel(issuesOf(a._
 function strategyOf(a){ return a.status==='Critical'?'CBM + PdM':a.status==='Warning'?'CBM':'PM'; }
 function recommendedActions(rows, dga){
   const acts=[]; const bad=new Set(issuesOf(rows).map(r=>r.key)); const fam=famOf(dga.code);
-  if(fam==='T'||fam==='DT') acts.push(dga.code==='T2'||dga.code==='T3' ? L('Thermal fault involving paper — check loading, cooling and hot spots; plan internal inspection','ความร้อนที่กระทบกระดาษฉนวน — ตรวจโหลด ระบบระบายความร้อน และจุดร้อน; วางแผนตรวจภายใน') : L('Check cooling system and loading; infrared thermography','ตรวจระบบระบายความร้อนและโหลด; ถ่ายภาพความร้อน'));
+  if(fam==='T'||fam==='DT') acts.push(dga.paperInvolved ? L('Thermal fault involving paper (CO₂/CO < 3) — check loading, cooling and hot spots; plan internal inspection','ความร้อนที่กระทบกระดาษฉนวน (CO₂/CO < 3) — ตรวจโหลด ระบบระบายความร้อน และจุดร้อน; วางแผนตรวจภายใน')
+    : (dga.code==='T2'||dga.code==='T3') ? L('Hot spot in oil or metal parts (connections, core, leads) — check loading, cooling and connections; plan internal inspection','จุดร้อนในน้ำมันหรือชิ้นส่วนโลหะ (จุดต่อ แกนเหล็ก สายนำ) — ตรวจโหลด ระบบระบายความร้อน และจุดต่อ; วางแผนตรวจภายใน')
+    : L('Check cooling system and loading; infrared thermography','ตรวจระบบระบายความร้อนและโหลด; ถ่ายภาพความร้อน'));
   if(fam==='D'||fam==='DT') acts.push(L('Electrical tests; inspect bushings, OLTC and earthing connections','ทดสอบทางไฟฟ้า; ตรวจบุชชิ่ง OLTC และจุดต่อลงดิน'));
   if(fam==='PD') acts.push(L('Partial-discharge measurement; check for moisture / gas bubbles','วัดดิสชาร์จบางส่วน; ตรวจความชื้นและฟองก๊าซ'));
   if(fam==='S') acts.push(L('Stray gassing from the oil itself — monitor the gas rate; not a fault if stable','ก๊าซเกิดจากตัวน้ำมันเอง — ติดตามอัตราการเกิดก๊าซ ไม่ใช่ความผิดปกติหากคงที่'));
@@ -1152,7 +1177,7 @@ function gasRowsOf(s){
   return GASES.map(g=>{ if(!CRIT.level[g]) return {g, v:fmtPpm(s.gases[g]), range:g==='CO'?'< 350':'< 5000', status: (g==='CO'?s.gases[g]<350:s.gases[g]<5000)?'ok':'warn'};
     const b=levelScore(g,s.gases[g]); return {g, v:fmtPpm(s.gases[g]), range:'< '+CRIT.level[g][0], status: b===1?'ok':b<=2?'warn':'up'}; });
 }
-function attentionList(){ return ASSETS.filter(a=>a.status!=='Healthy').sort((x,y)=>x.hi-y.hi).slice(0,5); }
+function attentionList(){ return riskList().map(x=>x.a).filter(a=>a.status!=='Healthy' || riskOf(a).level!=='Low').slice(0,5); } // same order as the Risk & Priority page
 function planStatus(tk){ const today=new Date(); today.setHours(0,0,0,0);
   if(tk.wo){ if(tk.wo.status==='Closed') return 'Completed'; const due=parseD(tk.wo.due); return (due && due<today) ? 'Overdue' : 'In Progress'; }
   if(tk.done) return 'Completed';
@@ -1362,13 +1387,13 @@ function getMaintFor(asset){ if(!MAINT_STORE[asset.id]) MAINT_STORE[asset.id] = 
 let MAINT_PLAN = MAINT_TR014;
 const TYPE_COLOR = {BM:'#8b9099',CM:'#e0473d',PM:'#5E7A8C',CBM:'#1fa571',PdM:'#8759d6'};
 let USERS = [
- {name:'Panissara P.', role:'Admin', email:'panissara.p@rcmtransformer.app', status:'Active'},
+ {name:'Demo User', role:'Admin', email:'demo.user@rcmtransformer.app', status:'Active'},
  {name:'Maintenance Team', role:'Operator', email:'maint.team@rcmtransformer.app', status:'Active'},
  {name:'Supervisor', role:'Viewer', email:'supervisor@rcmtransformer.app', status:'Active'},
 ];
 function notificationsList(){
   const out=[];
-  if(NOTIF.risk) ASSETS.filter(a=>a.status==='Critical').sort((x,y)=>x.hi-y.hi).forEach(a=>out.push({en:`${a.id} is Critical — HI ${a.hi} (${mainIssueOf(a)})`, th:`${a.id} อยู่ในระดับวิกฤต — HI ${a.hi}`, t:a.last}));
+  if(NOTIF.risk) ASSETS.filter(a=>a.status==='Critical').sort((x,y)=>x.hi-y.hi).forEach(a=>out.push({en:`${a.id} is Critical — HI ${fmtHi(a.hi)} (${mainIssueOf(a)})`, th:`${a.id} อยู่ในระดับวิกฤต — HI ${fmtHi(a.hi)}`, t:a.last}));
   if(NOTIF.dga) ASSETS.filter(a=>a.status==='Warning' && a._as && a._as.dga.code!=='N').forEach(a=>out.push({en:`${a.id} DGA indicates ${a._as.dga.code}`, th:`${a.id} ผล DGA บ่งชี้ ${a._as.dga.code}`, t:a.last}));
   if(NOTIF.overdue) ASSETS.forEach(a=>{ const n=(MAINT_STORE[a.id]||[]).filter(tk=>planStatus(tk)==='Overdue').length; if(n) out.push({en:`${a.id}: ${n} maintenance task(s) overdue`, th:`${a.id}: งานบำรุงรักษาเลยกำหนด ${n} งาน`, t:fmtD(new Date())}); });
   return out;
@@ -1615,6 +1640,7 @@ function openExportChoiceModal(onCsv, onPdf){
 }
 
 function downloadFile(filename, content, mime){
+  if(/csv/i.test(mime||'') && typeof content==='string' && content.charCodeAt(0)!==0xFEFF) content = '\uFEFF' + content; // Excel needs the BOM to read Thai as UTF-8
   const blob = new Blob([content], {type: mime || 'text/plain'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1622,7 +1648,7 @@ function downloadFile(filename, content, mime){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url), 2000);
 }
-function toCSV(rows){ return rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\\n'); }
+function toCSV(rows){ return rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n'); }
 
 /* ============ CHARTS ============ */
 function destroyCharts(){ Object.values(chartRegistry).forEach(c=>{ try{ c && c.destroy(); }catch(e){} }); chartRegistry={}; }
@@ -1694,7 +1720,7 @@ function renderCategoryOverview(kind){
     const cat = categoryFor(a);
     if(kind==='healthindex'){
       const cls = a.hi>=80?t('good'):a.hi>=60?t('moderate'):a.hi>=40?t('poor'):t('critical');
-      return `<tr><td><b>${a.id}</b></td><td>${a.loc}</td><td style="font-weight:800;color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${cls}</span></td><td><button class="viewlink" data-goto-detail="${a.id}|healthindex">${t('view_details')}</button></td></tr>`;
+      return `<tr><td><b>${a.id}</b></td><td>${a.loc}</td><td style="font-weight:800;color:${hiColor(a.hi)}">${fmtHi(a.hi)}</td><td><span class="pill ${statusPillClass(a.status)}">${cls}</span></td><td><button class="viewlink" data-goto-detail="${a.id}|healthindex">${t('view_details')}</button></td></tr>`;
     }
     if(kind==='fmea'){
       const fmea = getFmeaFor(a); const maxF = fmea.slice().sort((x,y)=>y.rpn-x.rpn)[0];
@@ -1737,7 +1763,7 @@ function heroBannerHtml(){
       <div class="chips">${N.sts.map(c=>`<button class="chip" data-goto-sch="${esc(c.st.id)}"><span class="st-code">${esc(c.st.id)}</span><span><b>${esc(c.st.name)}</b> · ${c.units.length} ${L('units','ตัว')}</span><span style="font-weight:800;color:${rBand(c.R)};">R<sub>SS</sub> ${f4(c.R)}</span></button>`).join('')}</div>
     </div>
     <div class="side">
-      <div class="kpi"><div class="l">${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub> (${N.t} ${L(N.t>1?'yrs':'yr','ปี')})</div><div class="v" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</div>${N.ranked[0]?`<div style="font-size:11.5px;margin-top:2px;">${L('Focus first','โฟกัสก่อน')}: <b>${esc(N.ranked[0].a.id)}</b> (${pctR(N.ranked[0].IC)})</div>`:''}<button class="linklike" data-goto-rel="1" style="font-size:12px;text-align:left;">${L('How it is calculated →','ดูวิธีคำนวณ →')}</button></div>
+      <div class="kpi"><div class="l">${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub> (${N.t} ${L(N.t>1?'yrs':'yr','ปี')})</div><div class="v" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</div>${N.ranked[0]?`<div style="font-size:11.5px;margin-top:2px;">${L('Most critical to supply','สำคัญต่อระบบมากที่สุด')}: <b>${esc(N.ranked[0].a.id)}</b> (${pctR(N.ranked[0].IC)})</div>`:''}<button class="linklike" data-goto-rel="1" style="font-size:12px;text-align:left;">${L('How it is calculated →','ดูวิธีคำนวณ →')}</button></div>
       <div class="kpi"><div class="l">${L('Critical transformers','หม้อแปลงวิกฤต')}</div><div class="v" style="color:${urgent?'#c62d23':'#1fa571'};">${urgent}</div>${urgent?`<button class="linklike" data-goto-risk="1" style="font-size:12px;text-align:left;">${L('See priority →','ดูลำดับความสำคัญ →')}</button>`:`<span class="small-muted" style="font-size:12px;">${L('none','ไม่มี')}</span>`}</div>
     </div>
   </section>`;
@@ -1762,7 +1788,9 @@ function ensureNet(){
   NET.stations.forEach(st=> st.trs.forEach(id=>{ const a=ASSETS.find(x=>x.id===id); if(a){ a.loc = st.name; if(a.fails==null) a.fails = seed[id]||0; } }));
   return NET;
 }
-function opYears(a){ const y = +(a.inService || a.year); if(!y) return 0; return Math.max(0.1, (Date.now() - new Date(y, 6, 1).getTime()) / (365.25*864e5)); }
+/* reference date = latest lab result in the fleet (not today), so results stay the same until new data is added */
+function netRefDate(){ const ds = ASSETS.map(a=>parseD(a.last)).filter(Boolean); return ds.length ? new Date(Math.max(...ds)) : new Date(); }
+function opYears(a){ const y = +(a.inService || a.year); if(!y) return 0; return Math.max(0.1, (netRefDate().getTime() - new Date(y, 6, 1).getTime()) / (365.25*864e5)); }
 function trRel(a, t){
   const r = Math.max(0, Math.floor(+a.fails || 0)), T = opYears(a);
   const lam = T>0 ? (r>0 ? r/T : NET_ZERO_K/T) : 0;
@@ -1804,9 +1832,9 @@ function netStationSvg(c, mode){
       ${sld?'':top?`<circle cx="${x-34}" cy="${busY+66}" r="13" fill="#c62d23"/><text x="${x-34}" y="${busY+70}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">#1</text>`
            :`<circle cx="${x-34}" cy="${busY+66}" r="12" fill="#fff" stroke="#AAB4BD"/><text x="${x-34}" y="${busY+70}" text-anchor="middle" font-size="10.5" font-weight="800" fill="#2B4C6F">#${u.rank}</text>`}
       <text x="${tx}" y="${busY+58}" font-size="13.5" font-weight="800" fill="#1E2A33">${u.a.id}</text>
-      <text x="${tx}" y="${busY+76}" font-size="13" font-weight="800" fill="${col}">${sld?`HI ${u.a.hi} · ${trStatus(u.a.status)}`:`R ${f4(u.R)}`}</text>
+      <text x="${tx}" y="${busY+76}" font-size="13" font-weight="800" fill="${col}">${sld?`HI ${fmtHi(u.a.hi)} · ${trStatus(u.a.status)}`:`R ${f4(u.R)}`}</text>
       <text x="${tx}" y="${busY+93}" font-size="11" fill="#5F6B75">${sld?`${esc(u.a.volt||'')} kV`:`λ ${f4(u.lam)}/${L('yr','ปี')}`}</text>
-      <text x="${tx}" y="${busY+109}" font-size="11" fill="#5F6B75">${sld?`${u.a.cap||'?'} MVA · ${esc(u.a.mfr||'')}`:`HI ${u.a.hi} · ${u.a.cap||'?'} MVA`}</text></g>`; }).join('');
+      <text x="${tx}" y="${busY+109}" font-size="11" fill="#5F6B75">${sld?`${u.a.cap||'?'} MVA · ${esc(u.a.mfr||'')}`:`HI ${fmtHi(u.a.hi)} · ${u.a.cap||'?'} MVA`}</text></g>`; }).join('');
   return `<svg viewBox="0 0 ${W} ${H}" style="max-width:${W}px;margin:0 auto;" role="img" aria-label="${esc(c.st.name)} single-line diagram">
     <line x1="14" y1="${busY}" x2="${W-14}" y2="${busY}" stroke="#1E2A33" stroke-width="4"/>
     <text x="16" y="${busY-9}" font-size="11" font-weight="800" fill="#2B4C6F">${esc((c.st.kv||'115/24 kV').split('/')[0].replace(/kV/i,'').trim())} kV</text>
@@ -1828,7 +1856,7 @@ function netSummaryHtml(){
   const N = netCalc(); const top = N.ranked[0];
   return `<div class="card" style="margin-bottom:16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;">
     <div style="display:flex;align-items:center;gap:12px;">${badge('reliability',40)}<div><div class="label" style="font-weight:700;color:var(--muted);font-size:12.5px;">${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub>(${N.t} ${L(N.t>1?'yrs':'yr','ปี')})</div><div style="font-size:24px;font-weight:800;color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</div></div></div>
-    <div style="flex:1;min-width:220px;font-size:13px;">${top?`${L('Focus first','โฟกัสก่อน')}: <b>${top.a.id}</b> (${esc(top.c.st.name)}) · ${L(`${pctR(top.IC)} chance it is the cause if the system fails`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}<div class="small-muted">${N.sts.map(c=>`${esc(c.st.name)} R<sub>SS</sub> ${f4(c.R)}`).join(' · ')}</div>`:`<span class="small-muted">${L('No substation set up yet.','ยังไม่ได้ตั้งค่าสถานี')}</span>`}</div>
+    <div style="flex:1;min-width:220px;font-size:13px;">${top?`${L('Most critical to supply','สำคัญต่อระบบมากที่สุด')}: <b>${top.a.id}</b> (${esc(top.c.st.name)}) · ${L(`${pctR(top.IC)} chance it is the cause if the system fails`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}<div class="small-muted">${N.sts.map(c=>`${esc(c.st.name)} R<sub>SS</sub> ${f4(c.R)}`).join(' · ')}</div>`:`<span class="small-muted">${L('No substation set up yet.','ยังไม่ได้ตั้งค่าสถานี')}</span>`}</div>
     <button class="btn btn-primary" data-goto-rel="1">${L('Open reliability page →','เปิดหน้าความน่าเชื่อถือ →')}</button></div>`;
 }
 function rbdSvg(N){
@@ -1873,7 +1901,7 @@ function schematicHtml(){
       <div class="net-st" style="border:none;background:none;padding:0;">${netStationSvg(c,'sld')}</div>
       <div class="small-muted" style="font-size:11.5px;margin-bottom:8px;">${netRedundancyText(c)}</div>
       <div class="tbl-wrap"><table class="rowlink sch-tbl"><thead><tr><th>${L('Transformer','หม้อแปลง')}</th><th>MVA</th><th>${L('Voltage','แรงดัน')}</th><th>${L('Manufacturer','ผู้ผลิต')}</th><th>${L('Year','ปีผลิต')}</th><th>HI</th><th>${t('status')}</th><th>${L('Load','โหลด')} %</th></tr></thead><tbody>
-      ${c.units.map(u=>`<tr data-view="${esc(u.a.id)}" style="cursor:pointer;"><td><b>${esc(u.a.id)}</b></td><td>${u.a.cap||'—'}</td><td>${esc(u.a.volt||'—')} kV</td><td>${esc(u.a.mfr||'—')}</td><td>${u.a.year||'—'}</td><td style="color:${hiColor(u.a.hi)};font-weight:800;">${u.a.hi}</td><td><span class="pill ${statusPillClass(u.a.status)}">${trStatus(u.a.status)}</span></td><td>${u.a.load??'—'}</td></tr>`).join('') || `<tr><td colspan="8" class="small-muted">${L('No transformer yet','ยังไม่มีหม้อแปลง')}</td></tr>`}
+      ${c.units.map(u=>`<tr data-view="${esc(u.a.id)}" style="cursor:pointer;"><td><b>${esc(u.a.id)}</b></td><td>${u.a.cap||'—'}</td><td>${esc(u.a.volt||'—')} kV</td><td>${esc(u.a.mfr||'—')}</td><td>${u.a.year||'—'}</td><td style="color:${hiColor(u.a.hi)};font-weight:800;">${fmtHi(u.a.hi)}</td><td><span class="pill ${statusPillClass(u.a.status)}">${trStatus(u.a.status)}</span></td><td>${u.a.load??'—'}</td></tr>`).join('') || `<tr><td colspan="8" class="small-muted">${L('No transformer yet','ยังไม่มีหม้อแปลง')}</td></tr>`}
       </tbody></table></div></div>`).join('');
   return `<div class="card" style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
       ${tabs}<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" data-net-addst="1" style="padding:6px 12px;font-size:12px;">+ ${L('Add substation','เพิ่มสถานี')}</button><button class="btn btn-outline" data-goto-rel="1" style="padding:6px 12px;font-size:12px;">${L('Reliability (R) →','ความน่าเชื่อถือ (R) →')}</button></div></div>
@@ -1888,8 +1916,8 @@ function netHtml(){
   const rank = N.ranked.map(u=>`<tr data-view="${esc(u.a.id)}" style="cursor:pointer;"><td><b>${u.rank}</b></td><td><b>${esc(u.a.id)}</b></td><td><span class="st-code">${esc(u.c.st.id)}</span> ${esc(u.c.st.name)}</td>
       <td style="color:${rBand(u.R)};font-weight:800;">${f4(u.R)}</td>
       <td><div style="display:flex;align-items:center;gap:8px;"><div class="icbar" style="flex:1;"><i style="width:${u.IC/maxIC*100}%;"></i></div><b style="min-width:52px;text-align:right;">${pctR(u.IC)}</b></div></td>
-      <td style="color:${hiColor(u.a.hi)};font-weight:800;">${u.a.hi}</td>
-      <td>${u.rank===1?`<span class="pill pill-critical">${L('Focus first','โฟกัสก่อน')}</span>`:u.IC>=0.15?`<span class="pill pill-warning">${L('Plan','วางแผน')}</span>`:`<span class="pill pill-healthy">${L('Monitor','ติดตาม')}</span>`}</td></tr>`).join('');
+      <td style="color:${hiColor(u.a.hi)};font-weight:800;">${fmtHi(u.a.hi)}</td>
+      <td>${u.rank===1?`<span class="pill pill-critical">${L('Key unit','ตัวหลัก')}</span>`:u.IC>=0.15?`<span class="pill pill-warning">${L('Plan','วางแผน')}</span>`:`<span class="pill pill-healthy">${L('Monitor','ติดตาม')}</span>`}</td></tr>`).join('');
   const units = N.sts.flatMap(c=>c.units);
   const step = (n, title, why, body)=>`<div class="calc-step"><div class="sh"><span class="sn">${n}</span><h4>${title}</h4></div><p class="why">${why}</p>${body}</div>`;
   const s1 = step(1, L('Reliability of each transformer','ความน่าเชื่อถือของหม้อแปลงแต่ละตัว'),
@@ -1900,7 +1928,7 @@ function netHtml(){
         <td><div class="cv">${f4(u.lam)}</div><div class="cf">${u.zero?'0.693':u.r} ÷ ${u.T.toFixed(2)}</div></td>
         <td><div class="cv" style="color:${rBand(u.R)};">${f4(u.R)}</div><div class="cf">e<sup>−${f4(u.lam)}×${tt}</sup></div></td></tr>`).join('')}
       </tbody></table></div>
-      <p class="small-muted" style="font-size:11px;margin:6px 0 0;">* ${L('No failure recorded yet: 0.693 is used instead of 0 (median estimate, χ²<sub>0.50,2</sub> ÷ 2) so R is not 100 %.','ยังไม่เคยเสีย: ใช้ 0.693 แทน 0 (ค่าประมาณกลาง χ²<sub>0.50,2</sub> ÷ 2) เพื่อไม่ให้ R เป็น 100%')}</p>${refNote('Constant failure rate λ = r ÷ T and R(t) = e<sup>−λt</sup> (exponential model): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley.','อัตราการเสียคงที่ λ = r ÷ T และ R(t) = e<sup>−λt</sup> (แบบเอกซ์โพเนนเชียล): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley')}`);
+      <p class="small-muted" style="font-size:11px;margin:6px 0 0;">* ${L('No failure recorded yet: 0.693 is used instead of 0 (median estimate, χ²<sub>0.50,2</sub> ÷ 2) so R is not 100 %.','ยังไม่เคยเสีย: ใช้ 0.693 แทน 0 (ค่าประมาณกลาง χ²<sub>0.50,2</sub> ÷ 2) เพื่อไม่ให้ R เป็น 100%')} ${L(`T is counted from the in-service year to the latest lab result (${fmtD(netRefDate())}).`,`T นับจากปีที่เริ่มใช้งานถึงวันที่ผลแล็บล่าสุด (${fmtD(netRefDate())})`)}</p>${refNote('Constant failure rate λ = r ÷ T and R(t) = e<sup>−λt</sup> (exponential model): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley.','อัตราการเสียคงที่ λ = r ÷ T และ R(t) = e<sup>−λt</sup> (แบบเอกซ์โพเนนเชียล): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley')}`);
   const s2 = step(2, L('Reliability of each substation','ความน่าเชื่อถือของแต่ละสถานี'),
       L('Combine the transformers by how they are connected: parallel = they back each other up, series = all are needed.','รวมหม้อแปลงตามการต่อ: ขนาน = สำรองกันได้ · อนุกรม = ต้องใช้ทุกตัว'),
       `<div class="tbl-wrap"><table><thead><tr><th>${L('Substation','สถานี')}</th><th>${L('Connection','การต่อ')}</th><th>${L('Formula','สูตร')}</th><th>${L('With numbers','แทนค่า')}</th><th style="text-transform:none">R<sub>SS</sub></th></tr></thead><tbody>
@@ -1921,22 +1949,25 @@ function netHtml(){
         <td><div class="cv" style="color:${u.rank===1?'#c62d23':'inherit'};">${pctR(u.IC)}</div><div class="cf">${f4(u.IB)} × ${f4(1-u.R)} ÷ ${f4(1-N.Rsys)}</div></td></tr>`).join('')}
       </tbody></table></div>${refNote('Birnbaum importance I<sub>B</sub>: Birnbaum (1969), <i>Multivariate Analysis II</i>, Academic Press · criticality importance I<sub>C</sub>: Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., ch. 5.','Birnbaum importance I<sub>B</sub>: Birnbaum (1969), <i>Multivariate Analysis II</i>, Academic Press · Criticality importance I<sub>C</sub>: Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., บทที่ 5')}`);
   return `<div class="card" style="margin-bottom:16px;">
-    <div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('System reliability — which transformer to focus on first','ความน่าเชื่อถือของระบบ — ควรโฟกัสหม้อแปลงตัวไหนก่อน')}</h3>
+    <div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('System reliability — which unit matters most for supply','ความน่าเชื่อถือของระบบ — หม้อแปลงตัวไหนสำคัญต่อการจ่ายไฟมากที่สุด')}</h3>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span class="small-muted">${L('Mission time','ช่วงเวลา')} t</span>
       <div class="seg">${[1,3,5].map(v=>`<button class="${+NET.t===v?'on':''}" data-net-t="${v}">${v} ${L(v>1?'yrs':'yr','ปี')}</button>`).join('')}</div>
       <button class="btn btn-primary" data-net-addst="1" style="padding:6px 12px;font-size:12px;">+ ${L('Add substation','เพิ่มสถานี')}</button>
       <button class="btn btn-outline" data-net-edit="1" style="padding:6px 12px;font-size:12px;">${L('Edit network','แก้ไขเครือข่าย')}</button></div></div>
     <div class="net-sys"><span>${L('System reliability','ความน่าเชื่อถือของระบบ')} R<sub>sys</sub>(${tt} ${yr}) <b class="big" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</b></span>
-      ${top?`<span>${L('Focus first','โฟกัสก่อน')}: <b>${esc(top.a.id)}</b> (${esc(top.c.st.name)}) — ${L(`if the system fails, ${pctR(top.IC)} chance this unit is the cause`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}</span>`:''}</div>
+      ${top?`<span>${L('Most critical to supply','สำคัญต่อระบบมากที่สุด')}: <b>${esc(top.a.id)}</b> (${esc(top.c.st.name)}) — ${L(`if the system fails, ${pctR(top.IC)} chance this unit is the cause`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}</span>`:''}</div>
     <div style="margin:4px 0 10px;">${stHtml || `<p class="small-muted">${L('No substation yet — press “+ Add substation”.','ยังไม่มีสถานี — กด “+ เพิ่มสถานี”')}</p>`}</div>
     <div class="net-legend"><span><i style="background:#1fa571"></i>R ≥ 0.95</span><span><i style="background:#d99012"></i>0.85–0.95</span><span><i style="background:#c62d23"></i>&lt; 0.85</span><span>${L('Reliability block diagram: blocks side by side = series (all needed) · stacked = parallel (back each other up). Click a block to open the transformer.','แผนภาพบล็อกความน่าเชื่อถือ (RBD): บล็อกเรียงต่อกัน = อนุกรม (ต้องใช้ทุกตัว) · บล็อกซ้อนกัน = ขนาน (สำรองกันได้) · กดที่บล็อกเพื่อเปิดหม้อแปลง')}</span><button class="linklike" data-goto-sch="1" style="font-size:11.5px;">${L('See the single-line diagram →','ดูแผนภาพวงจร →')}</button></div>
   </div>
   <div class="card" style="margin-bottom:16px;">
-    <div class="card-head"><h3>${L('Priority ranking','ลำดับความสำคัญ')}</h3><span class="small-muted">${L('by criticality importance I_C','เรียงตาม Criticality importance (I<sub>C</sub>)')}</span></div>
+    <div class="card-head"><h3>${L('Importance ranking','อันดับความสำคัญต่อระบบ')}</h3><span class="small-muted">${L('by criticality importance I_C','เรียงตาม Criticality importance (I<sub>C</sub>)')}</span></div>
     <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>#</th><th>${L('Transformer','หม้อแปลง')}</th><th>${L('Substation','สถานี')}</th><th>R(${tt})</th><th style="min-width:200px;">${L('Chance it causes a system failure','โอกาสเป็นสาเหตุที่ระบบล้มเหลว')} (I<sub>C</sub>)</th><th>HI</th><th></th></tr></thead><tbody>${rank||`<tr><td colspan="7" class="small-muted">—</td></tr>`}</tbody></table></div>
-    <p class="small-muted" style="font-size:11.5px;margin:8px 0 0;">${L('A healthy unit with no backup can rank above a poorer unit that has one. Use together with HI and risk.','หม้อแปลงที่สภาพดีแต่ไม่มีตัวสำรอง อาจสำคัญกว่าตัวที่สภาพต่ำกว่าแต่มีตัวสำรอง · ใช้ร่วมกับ HI และความเสี่ยง')}</p>
+    <div class="notebox" style="margin-top:10px;">${gicon('help',16)}<div style="flex:1;">${L(
+      '<b>This ranking is not the maintenance order.</b> It uses each unit\'s failure history (λ) and how the substations are connected — it does not use oil-test condition (HI). So a healthy unit with no backup can rank above a poorer unit that has one. It answers "which unit would hurt supply most if it failed?". For "which unit to maintain first", use the Risk & Priority page.',
+      '<b>อันดับนี้ไม่ใช่ลำดับการซ่อมบำรุง</b> คำนวณจากประวัติการเสีย (λ) และรูปแบบการต่อของสถานี โดยไม่ได้ใช้ผลตรวจน้ำมัน (HI) หม้อแปลงสภาพดีแต่ไม่มีตัวสำรองจึงอาจอยู่อันดับสูงกว่าตัวที่สภาพแย่กว่าแต่มีตัวสำรอง อันดับนี้ตอบคำถามว่า "ถ้าตัวไหนเสีย จะกระทบการจ่ายไฟมากที่สุด" ส่วนคำถามว่า "ควรซ่อมตัวไหนก่อน" ให้ดูหน้าความเสี่ยงและลำดับความสำคัญ')}
+      <div style="margin-top:6px;"><button class="linklike" data-goto-page="risk" style="font-size:12px;">${L('Open Risk & Priority →','เปิดหน้าความเสี่ยงและลำดับความสำคัญ →')}</button></div></div></div>
   </div>
-  ${N.sts.length?`<div class="card"><div class="card-head"><h3>${L('How it is calculated — step by step','วิธีคำนวณ — ทีละขั้น')}</h3><span class="small-muted">t = ${tt} ${yr}</span></div>${s1}${s2}${s3}${s4}</div>`:''}`;
+  ${N.sts.length?`<details class="card calc-fold" id="relCalcFold" ${state.relCalcOpen?'open':''}><summary class="card-head"><h3>${L('How it is calculated — step by step','วิธีคำนวณ — ทีละขั้น')}</h3><span class="small-muted">t = ${tt} ${yr} · <span class="calc-fold-hint">${state.relCalcOpen?L('Hide','ซ่อน'):L('Show','แสดง')}</span></span></summary>${s1}${s2}${s3}${s4}</details>`:''}`;
 }
 /* ---------- settings: network editor ---------- */
 function stCodeProblem(code, except){
@@ -2017,7 +2048,7 @@ function attachNetEvents(){
 }
 function renderOverview(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
-  const N = ASSETS.length, avgHi = N?Math.round(ASSETS.reduce((x,a)=>x+a.hi,0)/N):0;
+  const N = ASSETS.length, avgHi = N?fmtHi(ASSETS.reduce((x,a)=>x+a.hi,0)/N):'—';
   const NC = netCalc(); const top = NC.ranked[0];
   const latest = ASSETS.map(a=>parseD(a.last)).filter(Boolean).sort((x,y)=>y-x)[0];
   const demo = ASSETS.filter(isDemoAsset).length;
@@ -2033,13 +2064,13 @@ function renderOverview(){
     <div class="k"><span>${t('healthy')}</span><b style="color:var(--green);">${healthy}</b></div>
     <div class="k"><span>${t('warning')}</span><b style="color:${warning?'var(--amber)':'var(--text)'};">${warning}</b></div>
     <div class="k" ${critical?'data-goto-risk="1" style="cursor:pointer;"':''}><span>${t('critical')}</span><b style="color:${critical?'var(--red)':'var(--text)'};">${critical}</b></div>
-    <div class="k k-r" data-goto-rel="1"><span>${L(`System reliability over ${NC.t} ${NC.t>1?'years':'year'}`,`ความน่าเชื่อถือของระบบ ${NC.t} ปี`)}</span><b style="color:${rBand(NC.Rsys)};">${NC.sts.length?f4(NC.Rsys):'—'}</b><em>${top?L(`Focus first: ${esc(top.a.id)}`,`โฟกัสก่อน: ${esc(top.a.id)}`):''}</em></div>
+    <div class="k k-r" data-goto-rel="1"><span>${L(`System reliability over ${NC.t} ${NC.t>1?'years':'year'}`,`ความน่าเชื่อถือของระบบ ${NC.t} ปี`)}</span><b style="color:${rBand(NC.Rsys)};">${NC.sts.length?f4(NC.Rsys):'—'}</b><em>${top?L(`Most critical to supply: ${esc(top.a.id)}`,`สำคัญต่อระบบมากที่สุด: ${esc(top.a.id)}`):''}</em></div>
   </div>
   <div class="ov-grid">
     <section class="card">
       <div class="card-head"><h3>${L('Needs action','ต้องดำเนินการ')}</h3><button class="linklike" data-goto-assets="1">${L('All transformers','หม้อแปลงทั้งหมด')}</button></div>
       ${att.length?`<div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${L('Transformer','หม้อแปลง')}</th><th>HI</th><th>${L('Risk','ความเสี่ยง')}</th><th>DGA</th><th>${L('Next step','ขั้นต่อไป')}</th></tr></thead><tbody>
-      ${att.map(a=>`<tr data-view="${esc(a.id)}"><td><b>${esc(a.id)}</b><div class="small-muted" style="font-size:12px;">${esc(a.loc||'')}</div></td><td style="color:${hiColor(a.hi)};font-weight:700;">${a.hi}</td><td>${riskPill(riskOf(a).level)}</td><td>${a._as&&a._as.dga.code!=='N'?`<b>${a._as.dga.code}</b><div class="small-muted" style="font-size:12px;white-space:normal;">${dgaName(a._as.dga.code)}</div>`:'—'}</td><td class="ov-act">${profileFor(a).nextAction[state.lang]}</td></tr>`).join('')}
+      ${att.map(a=>`<tr data-view="${esc(a.id)}"><td><b>${esc(a.id)}</b><div class="small-muted" style="font-size:12px;">${esc(a.loc||'')}</div></td><td style="color:${hiColor(a.hi)};font-weight:700;">${fmtHi(a.hi)}</td><td>${riskPill(riskOf(a).level)}</td><td>${a._as&&a._as.dga.code!=='N'?`<b>${a._as.dga.code}</b><div class="small-muted" style="font-size:12px;white-space:normal;">${dgaName(a._as.dga.code)}</div>`:'—'}</td><td class="ov-act">${profileFor(a).nextAction[state.lang]}</td></tr>`).join('')}
       </tbody></table></div>`:`<p class="small-muted" style="margin:0;">${L('No transformer needs action right now.','ตอนนี้ไม่มีหม้อแปลงที่ต้องดำเนินการ')}</p>`}
     </section>
     <section class="card">
@@ -2085,13 +2116,14 @@ function attachOverviewEvents(){
 
 /* ============ ASSETS LIST PAGE ============ */
 function renderAssetsPage(){
+  const banner = demoBannerHtml();
   const list = ASSETS.filter(a=>{
     const matchStatus = state.assetFilterStatus==='All' || a.status===state.assetFilterStatus;
     const q = state.assetSearch.trim().toLowerCase();
     const matchSearch = !q || a.id.toLowerCase().includes(q) || a.loc.toLowerCase().includes(q) || a.mfr.toLowerCase().includes(q);
     return matchStatus && matchSearch;
   });
-  return `
+  return `${banner}
   <div class="card">
     <div class="card-head"><h3>${t('assets_title')}</h3><div class="filter-row">
       <button class="btn btn-ghost" data-import-template="1">${gicon('download',0,'width:13px;height:13px')} ${L('Template','แม่แบบ')}</button>
@@ -2109,7 +2141,7 @@ function renderAssetsPage(){
       <span class="small-muted">${list.length} / ${ASSETS.length}</span>
     </div>
     <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${t('asset_id')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${L('Risk','ความเสี่ยง')}</th><th>${t('main_issue')}</th><th>${L('Next sampling','ตรวจครั้งถัดไป')}</th><th></th></tr></thead><tbody>
-    ${list.length ? list.map((a,i)=>`<tr data-view="${a.id}"><td><b>${a.id}</b><div class="small-muted">${a.loc}</div></td><td style="font-weight:800;color:${hiColor(a.hi)}">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${riskPill(riskOf(a).level)}</td><td class="small-muted" style="white-space:normal;min-width:160px;">${a.status==='Healthy'?'—':mainIssueOf(a)}</td><td>${a.next}</td><td style="color:var(--muted);">›</td></tr>`).join('') : `<tr><td colspan="7" class="small-muted" style="text-align:center;padding:20px;">${t('toast_no_result')}</td></tr>`}
+    ${list.length ? list.map((a,i)=>`<tr data-view="${a.id}"><td><b>${a.id}</b><div class="small-muted">${a.loc}</div></td><td style="font-weight:800;color:${hiColor(a.hi)}">${fmtHi(a.hi)}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td>${riskPill(riskOf(a).level)}</td><td class="small-muted" style="white-space:normal;min-width:160px;">${a.status==='Healthy'?'—':mainIssueOf(a)}</td><td>${a.next}</td><td style="color:var(--muted);">›</td></tr>`).join('') : `<tr><td colspan="7" class="small-muted" style="text-align:center;padding:20px;">${t('toast_no_result')}</td></tr>`}
     </tbody></table></div>
   </div>`;
 }
@@ -2182,7 +2214,7 @@ function detailHeader(a){
       <div class="small-muted" style="margin-top:3px;">${a.loc} · ${a.volt} kV${a.cap?` · ${a.cap} MVA`:''}${a.year?` · ${L('built','ผลิตปี')} ${a.year}`:''}</div>
     </div>
     <div class="kpi-row">
-      <div class="kpi"><div><div class="klabel">Health Index</div><div class="kvalue" style="color:${hiColor(a.hi)};">${a.hi}</div></div></div>
+      <div class="kpi"><div><div class="klabel">Health Index</div><div class="kvalue" style="color:${hiColor(a.hi)};">${fmtHi(a.hi)}</div></div></div>
       <div class="kpi"><div><div class="klabel">${L('Risk','ความเสี่ยง')}</div><div class="kvalue">${riskPill(rk.level)}</div></div></div>
       <div class="kpi"><div><div class="klabel">${L('Next sampling','ตรวจครั้งถัดไป')}</div><div class="kvalue" style="font-size:14px;">${a.next}</div></div></div>
       ${detailMoreMenu(a)}
@@ -2205,7 +2237,7 @@ function detailSummaryTab(a){
   return `
   <div class="grid" style="grid-template-columns:1fr 1.25fr; gap:16px; margin-bottom:16px; align-items:stretch;">
     <div class="card sumcard">
-      <div class="sum-hi"><div class="sum-num" style="color:${fg};">${a.hi}</div><div><div class="sum-cat" style="color:${fg};">${cat.name}</div><div class="small-muted">Health Index · ${L('sample','ผลตรวจ')} ${a.last}</div></div></div>
+      <div class="sum-hi"><div class="sum-num" style="color:${fg};">${fmtHi(a.hi)}</div><div><div class="sum-cat" style="color:${fg};">${cat.name}</div><div class="small-muted">Health Index · ${L('sample','ผลตรวจ')} ${a.last}</div></div></div>
       <p class="sum-sentence">${sentence}</p>
       <ul class="sum-facts">
         <li><span>${L('Risk','ความเสี่ยง')} ${tip(L('Health Index combined with how fast it is falling (Tamma et al., 2021, Table 10).','ค่า HI ร่วมกับความเร็วที่ HI ลดลง (Tamma et al., 2021 ตาราง 10)'))}</span><b>${riskPill(rk.level)}</b></li>
@@ -2232,9 +2264,9 @@ function taskStratSummary(a){ const c={}; let pend=0; (a.id===state.assetId && s
   return parts.join(' · ') || '—'; }
 function strategyWhy(a, rk){
   const r = rk.rate===null?null:rk.rate;
-  if(a.status==='Critical') return L(`Why: HI ${a.hi} is below 50${r!==null?` and falling ${r.toFixed(1)} points/yr`:''} — condition must be watched closely (CBM) and trends used to decide the intervention time (PdM).`,`เหตุผล: HI ${a.hi} ต่ำกว่า 50${r!==null?` และลดลงปีละ ${r.toFixed(1)} คะแนน`:''} — ต้องติดตามสภาพใกล้ชิด (CBM) และใช้แนวโน้มกำหนดเวลาแก้ไข (PdM)`);
-  if(a.status==='Warning') return L(`Why: HI ${a.hi} is in the caution range (50–70) — act on measured condition rather than a fixed calendar (CBM).`,`เหตุผล: HI ${a.hi} อยู่ในช่วงต้องระวัง (50–70) — ควรบำรุงรักษาตามสภาพที่วัดได้แทนการทำตามรอบเวลา (CBM)`);
-  return L(`Why: HI ${a.hi} is 70 or above with no significant fault — routine time-based maintenance and sampling are enough (PM).`,`เหตุผล: HI ${a.hi} ตั้งแต่ 70 ขึ้นไป ไม่พบความผิดปกติสำคัญ — บำรุงรักษาและเก็บตัวอย่างตามรอบเวลาก็เพียงพอ (PM)`);
+  if(a.status==='Critical') return L(`Why: HI ${fmtHi(a.hi)} is below 50${r!==null?` and falling ${r.toFixed(1)} points/yr`:''} — condition must be watched closely (CBM) and trends used to decide the intervention time (PdM).`,`เหตุผล: HI ${fmtHi(a.hi)} ต่ำกว่า 50${r!==null?` และลดลงปีละ ${r.toFixed(1)} คะแนน`:''} — ต้องติดตามสภาพใกล้ชิด (CBM) และใช้แนวโน้มกำหนดเวลาแก้ไข (PdM)`);
+  if(a.status==='Warning') return L(`Why: HI ${fmtHi(a.hi)} is in the caution range (50–70) — act on measured condition rather than a fixed calendar (CBM).`,`เหตุผล: HI ${fmtHi(a.hi)} อยู่ในช่วงต้องระวัง (50–70) — ควรบำรุงรักษาตามสภาพที่วัดได้แทนการทำตามรอบเวลา (CBM)`);
+  return L(`Why: HI ${fmtHi(a.hi)} is 70 or above with no significant fault — routine time-based maintenance and sampling are enough (PM).`,`เหตุผล: HI ${fmtHi(a.hi)} ตั้งแต่ 70 ขึ้นไป ไม่พบความผิดปกติสำคัญ — บำรุงรักษาและเก็บตัวอย่างตามรอบเวลาก็เพียงพอ (PM)`);
 }
 function detailConditionTab(a){
   const v = state.condView==='dga' ? 'dga' : 'healthindex';
@@ -2369,7 +2401,7 @@ function openAddDgaResultModal(){
     const lab = labFor(a); const i = lab.findIndex(x=>x.date===smp.date); if(i>=0) lab.splice(i,1);
     lab.push(smp); sortLab(lab);
     state.dgaSampleIdx = lab.indexOf(smp);
-    render(); toast(L(`Saved — HI recalculated: ${a.hi}`,`บันทึกแล้ว — คำนวณ HI ใหม่: ${a.hi}`),'success');
+    render(); toast(L(`Saved — HI recalculated: ${fmtHi(a.hi)}`,`บันทึกแล้ว — คำนวณ HI ใหม่: ${fmtHi(a.hi)}`),'success');
   });
 }
 function openCompareDgaModal(){
@@ -2434,7 +2466,7 @@ function rateExplain(a, hr){
   return `<details style="margin-top:8px;"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--accent-2);">${L('How is this calculated?','อัตรานี้คิดยังไง?')}</summary>
     <ol style="font-size:12px;margin:8px 0 0;padding-left:18px;line-height:1.6;">
       <li>${L(`Take the Health Index of every lab sample — ${h.length} results over ${hr.span.toFixed(1)} years:`,`นำ HI ของผลแล็บทุกครั้งมาเรียงตามเวลา — ${h.length} ครั้ง ในช่วง ${hr.span.toFixed(1)} ปี:`)}
-        <div class="small-muted" style="margin:4px 0;">${h.map(p=>`${shortDate(p.date)}: <b>${p.hi}</b>`).join(' · ')}</div></li>
+        <div class="small-muted" style="margin:4px 0;">${h.map(p=>`${shortDate(p.date)}: <b>${fmtHi(p.hi)}</b>`).join(' · ')}</div></li>
       <li>${L('Draw the straight line that fits these points best (linear regression) — the dashed line in the chart. Using a line instead of just first-vs-last smooths out test-to-test noise.','ลากเส้นตรงที่ผ่านใกล้ทุกจุดมากที่สุด (linear regression) — คือเส้นประในกราฟ การใช้เส้นแทนการเอาครั้งแรกลบครั้งสุดท้าย ช่วยลดผลจากค่าที่แกว่งแต่ละครั้ง')}</li>
       <li>${L(`The line goes from <b>${lineStart.toFixed(1)}</b> to <b>${lineEnd.toFixed(1)}</b> over ${hr.span.toFixed(1)} years → (${lineStart.toFixed(1)} − ${lineEnd.toFixed(1)}) ÷ ${hr.span.toFixed(1)} = <b>${hr.rate.toFixed(1)} points per year</b>.`,`เส้นเริ่มที่ <b>${lineStart.toFixed(1)}</b> และจบที่ <b>${lineEnd.toFixed(1)}</b> ในเวลา ${hr.span.toFixed(1)} ปี → (${lineStart.toFixed(1)} − ${lineEnd.toFixed(1)}) ÷ ${hr.span.toFixed(1)} = <b>ลดลงปีละ ${hr.rate.toFixed(1)} คะแนน</b>`)}</li>
       <li>${L('The rate is used with the current HI in the risk table: 0–5 = slow, 5–10 = medium, more than 10 = fast.','นำอัตรานี้ไปใช้คู่กับค่า HI ปัจจุบันในตารางความเสี่ยง: 0–5 = ช้า, 5–10 = ปานกลาง, มากกว่า 10 = เร็ว')}
@@ -2489,7 +2521,7 @@ function hiCalcDetail(prof){
     ${step(4, L('Turn the three grades into the Health Index','แปลงเกรดทั้ง 3 กลุ่มเป็นดัชนีสุขภาพ'), `
       <p class="small-muted" style="margin:0 0 6px;">${(()=>{ const W=['FF','OQF','PCF'].map(k=>F[k].w); const sw=W.reduce((x,y)=>x+y,0); const m=W.map(w=>(w/sw*100).toFixed(1)); return L(`Grade A = full marks, B = ¾, C = ½, D = ¼, E = 0. Each part can give at most its weight: gas ${m[0]}, oil ${m[1]}, paper ${m[2]} points.`,`เกรด A = ได้เต็ม, B = ¾, C = ½, D = ¼, E = 0 แต่ละกลุ่มให้คะแนนได้สูงสุดเท่ากับน้ำหนัก: ก๊าซ ${m[0]}, น้ำมัน ${m[1]}, กระดาษ ${m[2]} คะแนน`); })()}</p>
       ${bar}
-      <div class="cformula">${parts.map(p=>`${names[p.k]} ${F[p.k].code}: ${p.sf}/4 × ${(p.w*100).toFixed(1)} = ${p.pts.toFixed(1)}`).join('<br>')}<br><b>HI = ${parts.map(p=>p.pts.toFixed(1)).join(' + ')} = ${prof.hi}</b></div>`)}
+      <div class="cformula">${parts.map(p=>`${names[p.k]} ${F[p.k].code}: ${p.sf}/4 × ${(p.w*100).toFixed(1)} = ${p.pts.toFixed(1)}`).join('<br>')}<br><b>HI = ${parts.map(p=>p.pts.toFixed(1)).join(' + ')} = ${fmtHi(prof.hi)}</b></div>`)}
     <p class="small-muted" style="font-size:10.5px;margin:10px 0 0;">${L('Method: Tamma, Prasojo & Suwarno (2021), High Voltage 6:314–327. The fault type shown on screen uses the Duval Triangle; the grade in step 1 keeps the paper’s Duval Pentagon rule. Missing 2-FAL counts as score 1, as in the paper’s examples.','วิธีการ: Tamma, Prasojo & Suwarno (2021), High Voltage 6:314–327 ชนิดความผิดปกติที่แสดงบนหน้าจอใช้สามเหลี่ยม Duval ส่วนเกรดในขั้นที่ 1 ใช้กฎห้าเหลี่ยม Duval ตามงานวิจัย หากไม่มีค่า 2-FAL ให้คะแนน 1 ตามตัวอย่างในงานวิจัย')}</p>
   </div>`;
 }
@@ -2757,7 +2789,7 @@ function rcmFlowHtml(a){
   const wos = plan.filter(tk=>tk.wo); const woOpen = wos.filter(tk=>tk.wo.status!=='Closed').length;
   const cur = state.detailTab==='condition' ? (state.condView==='dga'?'dga':'hi') : state.detailTab==='fmearcm' ? (state.fmView==='rcm'?'dec':'fmea') : state.detailTab==='plan' ? 'plan' : state.detailTab==='history' ? 'hist' : 'strat';
   const steps = [
-    {k:'hi', n:'Health Index', v:`HI ${a.hi}`, s:trStatus(a.status), c:hiColor(a.hi), tab:'condition', key:'condView', val:'healthindex'},
+    {k:'hi', n:'Health Index', v:`HI ${fmtHi(a.hi)}`, s:trStatus(a.status), c:hiColor(a.hi), tab:'condition', key:'condView', val:'healthindex'},
     {k:'fmea', n:'FMEA / RPN', v:topF?`RPN ${topF.rpn}`:'—', s:topF?`${topF.code} · ${topF.comp}`:L('no failure modes','ยังไม่มีโหมด'), tab:'fmearcm', key:'fmView', val:'fmea'},
     {k:'dga', n:'DGA', v:prof.code==='N'?L('Normal','ปกติ'):prof.code, s:prof.type[state.lang], c:prof.code==='N'?'var(--green)':'var(--red)', tab:'condition', key:'condView', val:'dga'},
     {k:'dec', n:L('Decision logic','ตรรกะตัดสินใจ'), v:topEv&&topEv.decision?topEv.decision:L('Pending','รอวิเคราะห์'), s:`${done}/${FMEA.length} ${L('modes analysed','โหมดวิเคราะห์แล้ว')}`, tab:'fmearcm', key:'fmView', val:'rcm'},
@@ -2779,7 +2811,7 @@ function rcmWhyList(a, f, ev){
   const items = ev.path.map(p=>{ const r=RCM_WHY[p.k]&&RCM_WHY[p.k][p.v]; return r?L(r[0],r[1]):''; }).filter(Boolean);
   const code = a._as ? a._as.dga.code : 'N';
   if(f.s>=9) items.unshift(L(`Severity ${f.s} (≥ 9) — this mode is handled first regardless of its RPN`,`ความรุนแรง ${f.s} (≥ 9) — โหมดนี้ต้องจัดการก่อนเสมอ ไม่ว่า RPN จะเท่าไร`));
-  items.push(L(`Evidence: ${f.code} RPN ${f.rpn} (S${f.s}·O${f.o}·D${f.d}) · HI ${a.hi} · DGA ${code==='N'?'normal':code}`,`หลักฐาน: ${f.code} RPN ${f.rpn} (S${f.s}·O${f.o}·D${f.d}) · HI ${a.hi} · DGA ${code==='N'?'ปกติ':code}`));
+  items.push(L(`Evidence: ${f.code} RPN ${f.rpn} (S${f.s}·O${f.o}·D${f.d}) · HI ${fmtHi(a.hi)} · DGA ${code==='N'?'normal':code}`,`หลักฐาน: ${f.code} RPN ${f.rpn} (S${f.s}·O${f.o}·D${f.d}) · HI ${fmtHi(a.hi)} · DGA ${code==='N'?'ปกติ':code}`));
   return items.map(x=>`<li>${x}</li>`).join('');
 }
 
@@ -2867,7 +2899,7 @@ function beforeAfterHtml(a){
   const r = mode==='measured' ? meas : baSimulate(a, key);
   const rate = riskOf(a).rate;
   const lvl = (hi)=>RISK_T10[hiRow(hi)][rateCol(rate)];
-  const side = (label, as, date)=>{ const st=statusFromHi(as.hi); return `<div class="ba-side"><div class="small-muted" style="font-weight:700;">${label}</div><div class="ba-num" style="color:${hiColor(as.hi)};">${as.hi}</div><div class="small-muted">Health Index · ${hiCat(as.hi).name}${date?` · ${date}`:''}</div>
+  const side = (label, as, date)=>{ const st=statusFromHi(as.hi); return `<div class="ba-side"><div class="small-muted" style="font-weight:700;">${label}</div><div class="ba-num" style="color:${hiColor(as.hi)};">${fmtHi(as.hi)}</div><div class="small-muted">Health Index · ${hiCat(as.hi).name}${date?` · ${date}`:''}</div>
       <div style="margin-top:9px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">${riskPill(lvl(as.hi))}<span class="pill ${statusPillClass(st)}">${trStatus(st)}</span></div></div>`; };
   const dHi = Math.round((r.after.hi - r.before.hi)*10)/10;
   const changed = r.after.rows.map((ra,i)=>({ra, rb:r.before.rows[i]})).filter(x=>x.rb && x.ra.key!=='age' && (x.ra.score!==x.rb.score || x.ra.res!==x.rb.res));
@@ -2912,7 +2944,7 @@ function assetReportHtml(a){
       <div style="text-align:right;color:#626a5c;">${L('Lab sample','ผลแล็บ')} <b style="color:#1d2118;">${prof.sample.date}</b><br>${L('Issued','ออกรายงาน')} ${fmtD(today)}</div>
     </div>
     <div class="rk">
-      <div><span>Health Index</span><b style="color:${a.hi<50?'#c62d23':a.hi<70?'#b07d05':'#178a5e'};">${a.hi}</b>${cat.name}</div>
+      <div><span>Health Index</span><b style="color:${a.hi<50?'#c62d23':a.hi<70?'#b07d05':'#178a5e'};">${fmtHi(a.hi)}</b>${cat.name}</div>
       <div><span>${L('Status','สถานะ')}</span><b>${trStatus(a.status)}</b>&nbsp;</div>
       <div><span>${L('Risk','ความเสี่ยง')}</span><b>${riskName(rk.level)}</b>${rk.rate===null?'—':L(`−${rk.rate.toFixed(1)} HI/yr`,`ลดลง ${rk.rate.toFixed(1)}/ปี`)}</div>
       <div><span>DGA</span><b>${d.code==='N'?L('Normal','ปกติ'):d.code}</b>${d.code==='N'?'':dgaName(d.code)}</div>
@@ -2923,7 +2955,7 @@ function assetReportHtml(a){
       <div><h2>${L('1 · Health Index breakdown','1 · ที่มาของดัชนีสุขภาพ')}</h2>
         <table><tr><th>${L('Factor','ปัจจัย')}</th><th>${L('Grade','เกรด')}</th><th>${L('Weight','น้ำหนัก')}</th><th>${L('Points','คะแนน')}</th></tr>
         ${fx.map(x=>`<tr><td>${x.name}</td><td><b>${x.code}</b> ${L(CODE_NAMES[x.code][0],CODE_NAMES[x.code][1])}</td><td>${x.w.toFixed(1)}%</td><td>${x.pts.toFixed(1)}</td></tr>`).join('')}
-        <tr><td colspan="3"><b>HI = Σ (SF ÷ 4 × W)</b></td><td><b>${prof.hi}</b></td></tr></table>
+        <tr><td colspan="3"><b>HI = Σ (SF ÷ 4 × W)</b></td><td><b>${fmtHi(prof.hi)}</b></td></tr></table>
         <div style="margin-top:5px;"><b>${L('Main issues','ปัญหาหลัก')}:</b> ${issues.length?issues.map(r=>issueLabel(r,d)).join(' · '):L('none significant','ไม่มีนัยสำคัญ')}</div>
       </div>
       <div><h2>${L('2 · Dissolved gas analysis','2 · ผลวิเคราะห์ก๊าซ (DGA)')}</h2>
@@ -2941,7 +2973,7 @@ function assetReportHtml(a){
         <div class="rbox"><b>${L('Tasks (RCM)','ระดับงาน (RCM)')}:</b> ${taskStratSummary(a)}</div>
       </div>
       <div><h2>${L('5 · Expected effect of maintenance','5 · ผลที่คาดหวังจากการบำรุงรักษา')}</h2>
-        <div class="rbox">${baTaskName(key, baScenario(a), a)}: HI <b>${sim.before.hi}</b> → <b>${sim.after.hi}</b> · ${L('risk','ความเสี่ยง')} ${riskName(RISK_T10[hiRow(sim.before.hi)][rateCol(rk.rate)])} → ${riskName(RISK_T10[hiRow(sim.after.hi)][rateCol(rk.rate)])}<br><span style="color:#626a5c;">${L('Expected value — confirm with a post-maintenance lab result.','ค่าคาดการณ์ — ต้องยืนยันด้วยผลแล็บหลังบำรุงรักษา')}</span></div>
+        <div class="rbox">${baTaskName(key, baScenario(a), a)}: HI <b>${fmtHi(sim.before.hi)}</b> → <b>${fmtHi(sim.after.hi)}</b> · ${L('risk','ความเสี่ยง')} ${riskName(RISK_T10[hiRow(sim.before.hi)][rateCol(rk.rate)])} → ${riskName(RISK_T10[hiRow(sim.after.hi)][rateCol(rk.rate)])}<br><span style="color:#626a5c;">${L('Expected value — confirm with a post-maintenance lab result.','ค่าคาดการณ์ — ต้องยืนยันด้วยผลแล็บหลังบำรุงรักษา')}</span></div>
       </div>
     </div>
     <h2>${L('6 · Maintenance plan & work orders','6 · แผนบำรุงรักษาและใบสั่งงาน')}</h2>
@@ -2964,7 +2996,7 @@ function closeAssetReport(){ const r=document.getElementById('reportRoot'); if(r
 function historyRows(a){
   const rows = [];
   const lab = labFor(a); lab.forEach((smp,i)=>{ const as=assessSample(smp, lab[i+1], a); const d=as.dga; const st=statusOf(as);
-    rows.push({date:smp.date, _d:parseD(smp.date), act:L('Oil sampling & lab tests','เก็บตัวอย่างน้ำมันและทดสอบ'), res:`HI ${as.hi} (${hiCat(as.hi).code}) · FF ${d.ff} · DGA ${d.code}`, style:`color:${statusColor(st)};font-weight:700;`, by:'Lab'}); });
+    rows.push({date:smp.date, _d:parseD(smp.date), act:L('Oil sampling & lab tests','เก็บตัวอย่างน้ำมันและทดสอบ'), res:`HI ${fmtHi(as.hi)} (${hiCat(as.hi).code}) · FF ${d.ff} · DGA ${d.code}`, style:`color:${statusColor(st)};font-weight:700;`, by:'Lab'}); });
   getMaintFor(a).filter(tk=>planStatus(tk)==='Completed').forEach(tk=>{ if(tk.wo&&tk.wo.status==='Closed') rows.push({date:tk.wo.closed, _d:parseD(tk.wo.closed), act:`${esc(tk.task)} · <span class="pill pill-closed">${tk.wo.no}</span>`, res:tk.wo.findings?esc(tk.wo.findings):t('completed'), by:esc(tk.wo.assignee||L('Field team','ทีมภาคสนาม'))}); else rows.push({date:(tk.done&&tk.done.date)||tk.end, _d:parseD((tk.done&&tk.done.date)||tk.end), act:tk.task, res:t('completed'), by:L('Field team','ทีมภาคสนาม')}); });
   return rows.sort((x,y)=>(y._d||0)-(x._d||0));
 }
@@ -3064,7 +3096,7 @@ function attachDetailEvents(){
   const baPlan = document.getElementById('btnBaToPlan'); if(baPlan) baPlan.addEventListener('click',()=>{ const a=currentAsset(); const key=BA_ACTIONS[state.baAction]?state.baAction:defaultBaAction(a); const name=baTaskName(key, baScenario(a), a);
     const st=new Date(); st.setDate(st.getDate()+14); const days=BA_ACTIONS[key].days; const en=new Date(st.getTime()+(days-1)*864e5);
     const exp=baSimulate(a,key);
-    MAINT_PLAN.push({no:1+Math.max(0,...MAINT_PLAN.map(x=>x.no)), task:name, type:'CM', start:fmtD(st), end:fmtD(en), dur:days+' '+L(days>1?'days':'day','วัน'), m:MON[st.getMonth()], len:days<=1?1:days<=4?2:3, notes:L(`Expected HI ${exp.before.hi} → ${exp.after.hi}`,`HI ที่คาดหวัง ${exp.before.hi} → ${exp.after.hi}`)});
+    MAINT_PLAN.push({no:1+Math.max(0,...MAINT_PLAN.map(x=>x.no)), task:name, type:'CM', start:fmtD(st), end:fmtD(en), dur:days+' '+L(days>1?'days':'day','วัน'), m:MON[st.getMonth()], len:days<=1?1:days<=4?2:3, notes:L(`Expected HI ${fmtHi(exp.before.hi)} → ${fmtHi(exp.after.hi)}`,`HI ที่คาดหวัง ${fmtHi(exp.before.hi)} → ${fmtHi(exp.after.hi)}`)});
     render(); toast(L('Added to maintenance plan','เพิ่มเข้าแผนบำรุงรักษาแล้ว'),'success'); });
   document.querySelectorAll('[data-create-plan]').forEach(el=> el.addEventListener('click',()=>{ state.detailTab='plan'; render(); }));
   document.querySelectorAll('.dl-doc').forEach(el=> el.addEventListener('click',()=>{
@@ -3238,7 +3270,7 @@ function deleteDemoAssets(){
 function demoBannerHtml(){
   const n = ASSETS.filter(isDemoAsset).length; if(!n) return '';
   const own = ASSETS.length - n;
-  return `<div class="notebox" style="margin-bottom:16px;align-items:center;">${gicon('help',16)}<div style="flex:1;">${L(`<b>${n} transformers are sample data</b> made up for demonstration. Import your real lab results, then remove the samples.`,`<b>หม้อแปลง ${n} ตัวเป็นข้อมูลตัวอย่าง</b> ที่สร้างขึ้นเพื่อสาธิต นำเข้าผลแล็บจริงแล้วค่อยลบข้อมูลตัวอย่าง`)}</div>
+  return `<div class="notebox" style="margin-bottom:16px;align-items:center;">${gicon('help',16)}<div style="flex:1;">${L(`<b>${n} transformers are sample data</b> made up for demonstration. Import your real lab results, then remove the samples.<br><span class="small-muted">Your data is saved only in this browser on this device — make a backup in Settings → System &amp; Data.</span>`,`<b>หม้อแปลง ${n} ตัวเป็นข้อมูลตัวอย่าง</b> ที่สร้างขึ้นเพื่อสาธิต นำเข้าผลแล็บจริงแล้วค่อยลบข้อมูลตัวอย่าง<br><span class="small-muted">ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น — สำรองข้อมูลได้ที่ ตั้งค่า → ระบบและข้อมูล</span>`)}</div>
     <button class="btn btn-outline" data-import-lab="1" style="padding:6px 11px;font-size:12px;">${gicon('upload',0,'width:13px;height:13px')} ${L('Import lab results','นำเข้าผลแล็บ')}</button>
     ${own?`<button class="btn btn-outline" data-del-demo="1" style="padding:6px 11px;font-size:12px;color:var(--red);">${L('Remove samples','ลบข้อมูลตัวอย่าง')}</button>`:''}</div>`;
 }
@@ -3271,7 +3303,7 @@ function renderRiskPage(){
   let grid = `<div></div>${RATE_COLS.map(c=>`<div class="ax">${c}</div>`).join('')}`;
   HI_ROWS.forEach((row,i)=>{ grid += `<div class="ax" style="font-size:10px;">${row[0]}</div>`;
     for(let j=0;j<3;j++){ const l=RISK_T10[i][j], col=RISK_COL[l]; const here=list.filter(o=>o.r.row===i && o.r.col===j);
-      grid += `<div class="cell" style="background:${col[0]};">${here.map(o=>`<button class="chip" data-view="${o.a.id}" title="HI ${o.a.hi} · ${o.r.rate===null?'—':o.r.rate.toFixed(1)}/yr">${o.a.id.replace('TR-','')}</button>`).join('')}<span class="sc" style="color:${col[1]};">${riskName(l)}</span></div>`; } });
+      grid += `<div class="cell" style="background:${col[0]};">${here.map(o=>`<button class="chip" data-view="${o.a.id}" title="HI ${fmtHi(o.a.hi)} · ${o.r.rate===null?'—':o.r.rate.toFixed(1)}/yr">${o.a.id.replace('TR-','')}</button>`).join('')}<span class="sc" style="color:${col[1]};">${riskName(l)}</span></div>`; } });
   return `
   <div class="grid g4" style="margin-bottom:16px;">
     ${['Very high','High','Medium','Low'].map(l=>`<div class="card stat">${badge(l==='Low'?'normal':l==='Medium'?'watch':l==='High'?'risk':'critical',44)}<div><div class="label">${riskName(l)}</div><div class="value">${cnt(l)}</div><div class="small-muted">${L('transformers','หม้อแปลง')}</div></div></div>`).join('')}
@@ -3289,7 +3321,7 @@ function renderRiskPage(){
     <p class="card-sub">${L('Sorted by risk level, then by faster HI decrease, then by lower HI.','เรียงตามระดับความเสี่ยง ตามด้วยอัตราการลดลงของ HI ที่เร็วกว่า และ HI ที่ต่ำกว่า')}</p>
     <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>HI</th><th title="${L('Slope of the straight line through all HI results — see Health Index tab','ความชันของเส้นตรงที่ลากผ่าน HI ทุกครั้ง — ดูได้ในแท็บดัชนีสุขภาพ')}">${L('Falling /yr','ลดลง/ปี')} ⓘ</th><th>${L('Risk','ความเสี่ยง')}</th><th>${L('Condition vs age','สภาพเทียบอายุ')}</th><th>${L('Action','การดำเนินการ')}</th></tr></thead><tbody>
     ${list.map((o,i)=>{ const ag=o.r.ageing, ri=o.r.rateInfo; return `<tr><td>${i+1}</td><td><button class="viewlink" data-view="${o.a.id}"><b>${o.a.id}</b></button></td>
-      <td style="color:${hiColor(o.a.hi)};font-weight:800;">${o.a.hi} <span class="small-muted">${hiCat(o.a.hi).code}</span></td>
+      <td style="color:${hiColor(o.a.hi)};font-weight:800;">${fmtHi(o.a.hi)} <span class="small-muted">${hiCat(o.a.hi).code}</span></td>
       <td>${ri.rate===null?'—':ri.rate.toFixed(2)}${ri.enough?'':'<span class="small-muted">*</span>'}</td><td>${riskPill(o.r.level)}</td>
       <td>${ag?`<span style="color:${ag.accelerated?'var(--red)':'var(--green)'};font-weight:700;">${ag.accelerated?L('Faster','เสื่อมเร็ว'):L('Normal','ปกติ')}</span> <span class="small-muted">(${ag.age} ${L('yr','ปี')})</span>`:'—'}</td>
       <td class="small-muted" style="white-space:normal;min-width:170px;">${riskAction(o.r)}</td></tr>`; }).join('')}
@@ -3314,7 +3346,7 @@ function riskCardHtml(a){
   const r = riskOf(a), ri = r.rateInfo, ag = r.ageing;
   return `<div class="card" style="margin-top:16px;"><div class="card-head"><h3>${L('Risk','ความเสี่ยง')}</h3>${riskPill(r.level)}</div>
     <div class="grid g3">
-      <ul class="hlist"><li><span class="k">Health Index</span><span class="v">${a.hi} · ${hiCat(a.hi).name}</span></li></ul>
+      <ul class="hlist"><li><span class="k">Health Index</span><span class="v">${fmtHi(a.hi)} · ${hiCat(a.hi).name}</span></li></ul>
       <ul class="hlist"><li><span class="k">${L('Falling per year','ลดลงต่อปี')}</span><span class="v">${ri.rate===null?'—':ri.rate.toFixed(1)+' '+L('points','คะแนน')}</span></li></ul>
       <ul class="hlist"><li><span class="k">${L('Condition vs age','สภาพเทียบกับอายุ')}</span><span class="v" style="color:${ag&&ag.accelerated?'var(--red)':'var(--green)'};">${!ag?'—':ag.accelerated?L('Ageing faster than normal','เสื่อมเร็วกว่าปกติ'):L('Normal','ปกติ')}</span></li></ul>
     </div>
@@ -3373,26 +3405,21 @@ function renderReportsInner(){
   const famCol = {N:'#1fa571',T:'#e0473d',D:'#eba020',PD:'#8759d6',DT:'#8b9099'};
   const topComp = Object.entries(r.highByComp).sort((x,y)=>y[1]-x[1])[0];
   const topFault = Object.entries(r.fam).filter(([k])=>k!=='N').sort((x,y)=>y[1]-x[1])[0];
-  const delta = (r.trend[4]!=null && r.trend[0]!=null) ? Math.round((r.trend[4]-r.trend[0])*10)/10 : 0;
+  const tN = r.trend.length, hiNow = r.trend[tN-1], hiYearAgo = r.trend[tN-1-Math.round(12/DEMO_STEP_MONTHS)];
+  const delta = (hiNow!=null && hiYearAgo!=null) ? Math.round((hiNow-hiYearAgo)*10)/10 : 0;
   const kts = [
-    L(`Average fleet HI is ${r.trend[4]} (${delta>=0?'+':''}${delta} vs 12 months ago)`,`HI เฉลี่ยทั้งฟลีท ${r.trend[4]} (${delta>=0?'+':''}${delta} เทียบกับ 12 เดือนก่อน)`),
+    L(`Average fleet HI is ${hiNow} (${delta>=0?'+':''}${delta} vs 12 months ago)`,`HI เฉลี่ยทั้งฟลีท ${hiNow} (${delta>=0?'+':''}${delta} เทียบกับ 12 เดือนก่อน)`),
     r.critical ? L(`${r.critical} transformer(s) critical: ${ASSETS.filter(a=>a.status==='Critical').map(a=>a.id).join(', ')} — resample within 1 month`,`หม้อแปลงวิกฤต ${r.critical} ตัว: ${ASSETS.filter(a=>a.status==='Critical').map(a=>a.id).join(', ')} — ควรเก็บตัวอย่างซ้ำภายใน 1 เดือน`) : L('No transformer is in the critical range','ไม่มีหม้อแปลงอยู่ในระดับวิกฤต'),
-    worst ? L(`Lowest HI: ${worst.id} (${worst.hi}) — ${mainIssueOf(worst)}`,`HI ต่ำสุด: ${worst.id} (${worst.hi}) — ${mainIssueOf(worst)}`) : '',
+    worst ? L(`Lowest HI: ${worst.id} (${fmtHi(worst.hi)}) — ${mainIssueOf(worst)}`,`HI ต่ำสุด: ${worst.id} (${fmtHi(worst.hi)}) — ${mainIssueOf(worst)}`) : '',
     topFault && topFault[1] ? L(`Most common DGA finding: ${famNames[topFault[0]]} (${topFault[1]} units)`,`ผล DGA ที่พบมากที่สุด: ${famNames[topFault[0]]} (${topFault[1]} ตัว)`) : L('No DGA fault indicated in the fleet','ไม่พบความผิดปกติจาก DGA ในฟลีท'),
     topComp ? L(`Component with most high-risk failure modes: ${topComp[0]} (${topComp[1]})`,`ส่วนประกอบที่มีความเสี่ยงสูงมากที่สุด: ${topComp[0]} (${topComp[1]})`) : '',
   ].filter(Boolean);
   return `
   <div class="grid g4" style="margin-bottom:16px;">
-    <div class="card stat">${badge('assets',44)}<div><div class="label">${t('total_transformers')}</div><div class="value">${r.N}</div></div></div>
-    <div class="card stat">${badge('normal',44)}<div><div class="label">${t('healthy')}</div><div class="value">${r.healthy}</div></div></div>
-    <div class="card stat">${badge('watch',44)}<div><div class="label">${t('warning')}</div><div class="value">${r.warning}</div></div></div>
-    <div class="card stat">${badge('critical',44)}<div><div class="label">${t('critical')}</div><div class="value">${r.critical}</div></div></div>
-  </div>
-  <div class="grid g4" style="margin-bottom:16px;">
+    <div class="card stat">${badge('assets',44)}<div><div class="label">${t('total_transformers')}</div><div class="value">${r.N}</div><div class="small-muted" style="font-size:11.5px;margin-top:2px;"><span style="color:var(--green);font-weight:700;">${r.healthy}</span> ${t('healthy')} · <span style="color:var(--amber);font-weight:700;">${r.warning}</span> ${t('warning')} · <span style="color:var(--red);font-weight:700;">${r.critical}</span> ${t('critical')}</div></div></div>
     <div class="card stat">${badge('risk',44)}<div><div class="label">${L('High / very-high risk','ความเสี่ยงสูง/สูงมาก')}</div><div class="value">${ASSETS.filter(a=>['High','Very high'].includes(riskOf(a).level)).length}</div></div></div>
-    <div class="card stat">${badge('scale',44)}<div><div class="label">${L('Top risk','ความเสี่ยงสูงสุด')}</div><div class="value">${(ASSETS.slice().sort((x,y)=>(riskOf(y).score-riskOf(x).score)||(x.hi-y.hi))[0]||{}).id||'—'}</div></div></div>
-    <div class="card stat">${badge('maintenance',44)}<div><div class="label">${t('total_maint_tasks')}</div><div class="value">${r.plans.length}</div></div></div>
-    <div class="card stat">${badge('plan',44)}<div><div class="label">${t('period')}</div><div class="value" style="font-size:14px;">${r.dates.length?fmtD(r.dates[0])+' – '+fmtD(r.dates[r.dates.length-1]):'—'}</div></div></div>
+    <div class="card stat">${badge('scale',44)}<div><div class="label">${L('Top risk','ความเสี่ยงสูงสุด')}</div><div class="value">${((riskList()[0]||{}).a||{}).id||'—'}</div></div></div>
+    <div class="card stat">${badge('maintenance',44)}<div><div class="label">${t('total_maint_tasks')}</div><div class="value">${r.plans.length}</div><div class="small-muted" style="font-size:11.5px;margin-top:2px;">${r.dates.length?fmtD(r.dates[0])+' – '+fmtD(r.dates[r.dates.length-1]):'—'}</div></div></div>
   </div>
   <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
     <button class="btn btn-primary" id="btnGenerateReport">${gicon('reports',0,'width:13px;height:13px')} ${t('generate_report')}</button>
@@ -3423,7 +3450,7 @@ function renderReportsInner(){
     <div class="card"><div class="card-head"><h3>${t('health_ranking')}</h3><span class="small-muted">${t('as_of')} ${new Date().toLocaleDateString(state.lang==='th'?'th-TH':'en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span></div>
       <p class="card-sub">${t('health_ranking_desc')}</p>
       <div class="tbl-wrap"><table><thead><tr><th>${t('rank')}</th><th>${t('id')}</th><th>${t('health_index')}</th><th>${t('status')}</th><th>${t('main_issue')}</th></tr></thead><tbody>
-      ${ASSETS.slice().sort((x,y)=>x.hi-y.hi).map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)};font-weight:700;">${a.hi}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td class="small-muted">${mainIssueOf(a)}</td></tr>`).join('')}
+      ${ASSETS.slice().sort((x,y)=>x.hi-y.hi).map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.id}</b></td><td style="color:${hiColor(a.hi)};font-weight:700;">${fmtHi(a.hi)}</td><td><span class="pill ${statusPillClass(a.status)}">${trStatus(a.status)}</span></td><td class="small-muted">${mainIssueOf(a)}</td></tr>`).join('')}
       </tbody></table></div>
     </div>
     <div class="card"><h3>${t('key_takeaways')}</h3>
@@ -3453,33 +3480,70 @@ function attachReportsEvents(){
 const SETTINGS_TABS = [['general','settings_general'],['net','settings_net'],['hi','settings_hi'],['fm','settings_fm'],['maint','settings_maint'],['sys','settings_sys']];
 /* ============ GUIDE / HELP PAGE ============ */
 function renderGuide(){
-  const items = [
-    ['home','guide_overview_t','guide_overview_d'],
-    ['assets','guide_assets_t','guide_assets_d'],
-    ['health','guide_hi_t','guide_hi_d'],
-    ['lab','guide_dga_t','guide_dga_d'],
-    ['fmea','guide_fmea_t','guide_fmea_d'],
-    ['rcm','guide_rcm_t','guide_rcm_d'],
-    ['risk','guide_risk_t','guide_risk_d'],
-    ['plan','guide_plan_t','guide_plan_d'],
-    ['reports','guide_reports_t','guide_reports_d'],
-    ['settings','guide_settings_t','guide_settings_d'],
+  const steps = [
+    ['upload', L('Import lab results','นำเข้าผลแล็บ'), L('Transformer Assets → Import lab results (Excel or CSV). Download the Template first to see the columns. New transformer IDs are created automatically.','ไปที่ สินทรัพย์หม้อแปลง → นำเข้าผลแล็บ (Excel หรือ CSV) ดาวน์โหลดแม่แบบก่อนเพื่อดูคอลัมน์ รหัสหม้อแปลงใหม่จะถูกสร้างให้อัตโนมัติ'), 'assets'],
+    ['risk', L('See which unit to act on first','ดูว่าควรจัดการตัวไหนก่อน'), L('Risk & Priority ranks every transformer by Health Index and how fast it is falling. This is the maintenance order used across the app.','หน้าความเสี่ยงและลำดับความสำคัญ จัดอันดับหม้อแปลงทุกตัวจาก HI และความเร็วที่ HI ลดลง ลำดับนี้คือลำดับการซ่อมบำรุงที่ใช้ทั้งระบบ'), 'risk'],
+    ['details', L('Open a transformer','เปิดดูหม้อแปลง'), L('Click any transformer to see why it scored that way, the DGA diagnosis, failure modes (FMEA), the RCM task for each, and what to do next.','คลิกหม้อแปลงตัวใดก็ได้เพื่อดูเหตุผลของคะแนน ผลวินิจฉัย DGA โหมดความเสียหาย (FMEA) งานตาม RCM ของแต่ละโหมด และสิ่งที่ควรทำต่อ'), null],
+    ['plan', L('Plan and close the work','วางแผนและปิดงาน'), L('In the Maintenance plan tab, add tasks, issue a work order and close it with findings. Add the next lab result to see the real before/after.','ในแท็บแผนบำรุงรักษา เพิ่มงาน ออกใบสั่งงาน และปิดงานพร้อมผลที่พบ จากนั้นเพิ่มผลแล็บครั้งถัดไปเพื่อดูผลก่อน/หลังจริง'), null],
+  ];
+  const pages = [
+    ['home', t('nav_overview'), L('Snapshot of the area: how many units are healthy / warning / critical, the units that need action now, and each substation\'s reliability.','สรุปภาพรวมพื้นที่: หม้อแปลงปกติ / เฝ้าระวัง / วิกฤตกี่ตัว ตัวที่ต้องดำเนินการตอนนี้ และความน่าเชื่อถือของแต่ละสถานี')],
+    ['reliability', t('nav_reliability'), L('Chance that the whole system supplies its load for 1, 3 or 5 years, and which unit would hurt supply most if it failed. Based on failure history and how substations are connected — not on oil tests.','โอกาสที่ระบบจ่ายไฟได้ครบตลอด 1, 3 หรือ 5 ปี และตัวที่ถ้าเสียจะกระทบการจ่ายไฟมากที่สุด คำนวณจากประวัติการเสียและรูปแบบการต่อของสถานี ไม่ได้ใช้ผลตรวจน้ำมัน')],
+    ['schematic', t('nav_schematic'), L('Single-line diagram of each substation; click a transformer to open it.','แผนภาพเส้นเดี่ยวของแต่ละสถานี คลิกหม้อแปลงเพื่อเปิดดู')],
+    ['assets', t('nav_assets'), L('Full list of transformers with a filter. Import lab results, download the template, or add a transformer here.','รายการหม้อแปลงทั้งหมดพร้อมตัวกรอง นำเข้าผลแล็บ ดาวน์โหลดแม่แบบ หรือเพิ่มหม้อแปลงได้ที่หน้านี้')],
+    ['risk', t('nav_risk'), L('Risk matrix (Health Index × yearly fall rate), condition-vs-age check, and the maintenance priority list.','เมทริกซ์ความเสี่ยง (HI × อัตราลดลงต่อปี) การเทียบสภาพกับอายุ และรายการลำดับความสำคัญในการซ่อมบำรุง')],
+    ['reports', t('nav_reports'), L('Fleet charts, task summary and key takeaways. Generate a PDF or export CSV for one transformer or all.','กราฟภาพรวม สรุปงาน และประเด็นสำคัญ สร้าง PDF หรือส่งออก CSV สำหรับหม้อแปลงตัวเดียวหรือทั้งหมด')],
+    ['settings', t('nav_settings'), L('Health Index criteria, network and substations, failure-mode library, maintenance settings, users, and backup / restore of your data.','เกณฑ์ HI เครือข่ายและสถานี คลังโหมดความเสียหาย การตั้งค่าบำรุงรักษา ผู้ใช้ และสำรอง/กู้คืนข้อมูล')],
+  ];
+  const tabs = [
+    [L('Summary','สรุป'), L('The score, main issue, risk and a short "what to do" list.','คะแนน ปัญหาหลัก ความเสี่ยง และรายการสิ่งที่ควรทำ')],
+    [L('Condition (HI · DGA)','สภาพ (HI · DGA)'), L('How the Health Index was calculated step by step, and the DGA diagnosis (Duval, IEC, Rogers).','วิธีคำนวณ HI ทีละขั้น และผลวินิจฉัย DGA (Duval, IEC, Rogers)')],
+    [L('FMEA & RCM','FMEA และ RCM'), L('Failure modes ranked by RPN and the RCM decision that picks a task for each.','โหมดความเสียหายเรียงตาม RPN และการตัดสินใจ RCM ที่เลือกงานให้แต่ละโหมด')],
+    [L('Maintenance plan','แผนบำรุงรักษา'), L('Task list / Gantt chart, work orders and the before-vs-after estimate.','รายการงาน / แกนต์ชาร์ต ใบสั่งงาน และการประมาณผลก่อน/หลังบำรุงรักษา')],
+    [L('History','ประวัติ'), L('All past lab results and documents.','ผลแล็บย้อนหลังและเอกสารทั้งหมด')],
+  ];
+  const terms = [
+    ['HI', L('Health Index, 0–100. Higher is better: ≥70 healthy, 50–70 warning, <50 critical.','ดัชนีสุขภาพ 0–100 ยิ่งสูงยิ่งดี: ≥70 ปกติ, 50–70 เฝ้าระวัง, <50 วิกฤต')],
+    ['DGA', L('Dissolved Gas Analysis — gases in the oil that reveal overheating or electrical discharge inside.','การวิเคราะห์ก๊าซละลายในน้ำมัน — บอกความร้อนเกินหรือการดิสชาร์จภายใน')],
+    ['FMEA · RPN', L('Failure Mode and Effects Analysis. RPN = Severity × Occurrence × Detection (1–1000); higher = more urgent.','การวิเคราะห์โหมดความเสียหายและผลกระทบ RPN = ความรุนแรง × โอกาสเกิด × การตรวจพบ (1–1000) ยิ่งสูงยิ่งเร่งด่วน')],
+    ['RCM', L('Reliability Centered Maintenance — a decision logic (SAE JA1011) that picks the right task for each failure mode.','การบำรุงรักษาที่เน้นความน่าเชื่อถือ — ตรรกะตัดสินใจ (SAE JA1011) ที่เลือกงานให้เหมาะกับแต่ละโหมดความเสียหาย')],
+    ['CM · PM · CBM · PdM · FFT', L('Corrective (fix after failure) · Preventive (on a fixed schedule) · Condition-based (when tests show a problem) · Predictive (from trends) · Failure-finding task (test a hidden function, e.g. a protection device).','แก้ไขหลังเสีย · ป้องกันตามรอบเวลา · ตามสภาพ (เมื่อผลตรวจพบปัญหา) · เชิงคาดการณ์ (จากแนวโน้ม) · งานค้นหาความเสียหายที่ซ่อนอยู่ (ทดสอบฟังก์ชันที่ปกติมองไม่เห็น เช่น อุปกรณ์ป้องกัน)')],
+    ['λ · R(t)', L('Failure rate per year · chance a unit runs t years without failing.','อัตราการเสียต่อปี · โอกาสที่หม้อแปลงทำงานได้ t ปีโดยไม่เสีย')],
+    ['R<sub>SS</sub> · R<sub>sys</sub>', L('Reliability of one substation · of the whole system.','ความน่าเชื่อถือของสถานีหนึ่ง · ของทั้งระบบ')],
+    ['k-out-of-n', L('At least k of the n transformers must work to carry the peak load (e.g. 2-out-of-2 = both are needed, no spare).','ต้องมีหม้อแปลงทำงานอย่างน้อย k จาก n ตัวจึงรับโหลดสูงสุดได้ (เช่น 2-out-of-2 = ต้องใช้ทั้งสองตัว ไม่มีตัวสำรอง)')],
+    ['I<sub>B</sub> · I<sub>C</sub>', L('Importance: how much the system depends on a unit · if the system fails, the chance this unit is the cause.','ความสำคัญ: ระบบพึ่งพาหม้อแปลงตัวนี้มากแค่ไหน · ถ้าระบบล้มเหลว มีโอกาสเท่าไรที่สาเหตุมาจากตัวนี้')],
+    ['B.E.', L('Buddhist Era year (= A.D. + 543), used on chart axes.','ปีพุทธศักราช (= ค.ศ. + 543) ใช้บนแกนกราฟ')],
   ];
   return `
   <div class="card" style="margin-bottom:16px;">
     <h3>${t('guide_title')}</h3>
-    <p class="card-sub" style="margin-bottom:0;">${t('guide_intro')}</p>
+    <p class="card-sub" style="margin-bottom:14px;">${L('New here? Follow these four steps.','เพิ่งเริ่มใช้? ทำตาม 4 ขั้นตอนนี้')}</p>
+    <div class="grid g2">
+      ${steps.map((s,i)=>`<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:12px;">${badge(s[0],34)}<div style="flex:1;"><div style="font-weight:800;font-size:13.5px;margin-bottom:3px;">${i+1}. ${s[1]}</div><div class="small-muted" style="font-size:12px;line-height:1.5;">${s[2]}</div>${s[3]?`<button class="linklike" data-goto-page="${s[3]}" style="font-size:12px;margin-top:4px;">${L('Go there →','ไปที่หน้านี้ →')}</button>`:''}</div></div>`).join('')}
+    </div>
   </div>
+  <h3 style="margin:4px 0 10px;">${L('Pages in the menu','หน้าต่างๆ ในเมนู')}</h3>
   <div class="grid g2">
-    ${items.map(([b,tk,dk])=>`<div class="card" style="display:flex; gap:12px; align-items:flex-start;">${badge(b,36)}<div><h3 style="margin-bottom:4px;">${t(tk)}</h3><p class="card-sub" style="margin:0;">${t(dk)}</p></div></div>`).join('')}
+    ${pages.map(([b,title,desc])=>`<div class="card" style="display:flex; gap:12px; align-items:flex-start;">${badge(b,36)}<div><h3 style="margin-bottom:4px;">${title}</h3><p class="card-sub" style="margin:0;">${desc}</p></div></div>`).join('')}
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <h3>${L('Inside a transformer page','ในหน้าหม้อแปลงแต่ละตัว')}</h3>
+    <p class="card-sub">${L('Open any transformer to see these tabs. The 1–5 strip at the top links them in order.','เปิดหม้อแปลงตัวใดก็ได้จะเห็นแท็บเหล่านี้ แถบขั้นตอน 1–5 ด้านบนเชื่อมแต่ละแท็บตามลำดับ')}</p>
+    <ul class="hlist">${tabs.map(([n,d])=>`<li><span class="k"><b>${n}</b> — ${d}</span></li>`).join('')}</ul>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <h3>${L('Terms and abbreviations','คำศัพท์และตัวย่อ')}</h3>
+    <div class="tbl-wrap"><table><tbody>${terms.map(([k,d])=>`<tr><td style="font-weight:800;white-space:nowrap;vertical-align:top;">${k}</td><td>${d}</td></tr>`).join('')}</tbody></table></div>
   </div>
   <div class="card" style="margin-top:16px;">
     <h3>${t('guide_tips_title')}</h3>
     <ul class="hlist">
+      <li><span class="k">✓ ${L('Type a transformer ID in the search box at the top and press Enter to jump straight to it.','พิมพ์รหัสหม้อแปลงในช่องค้นหาด้านบนแล้วกด Enter เพื่อไปที่หม้อแปลงตัวนั้นทันที')}</span></li>
       <li><span class="k">✓ ${t('guide_tip1')}</span></li>
       <li><span class="k">✓ ${t('guide_tip2')}</span></li>
       <li><span class="k">✓ ${t('guide_tip3')}</span></li>
-      <li><span class="k">✓ ${t('guide_tip4')}</span></li>
+      <li><span class="k">✓ ${L('Sample transformers are marked on the Transformer Assets page; remove them after importing your own data.','หม้อแปลงตัวอย่างจะมีป้ายแจ้งในหน้าสินทรัพย์หม้อแปลง ลบทิ้งได้หลังนำเข้าข้อมูลของคุณเอง')}</span></li>
+      <li><span class="k">✓ ${L('Data is saved only in this browser on this device. Use Settings → System &amp; Data → Backup to keep a copy or move to another computer.','ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น ใช้ ตั้งค่า → ระบบและข้อมูล → สำรองข้อมูล เพื่อเก็บสำเนาหรือย้ายไปเครื่องอื่น')}</span></li>
     </ul>
   </div>`;
 }
@@ -3581,7 +3645,7 @@ function openCritModal(){
     ${Object.keys(CRIT.oil).map(k=>row3(oilNames[k],'oil_'+k,CRIT.oil[k])).join('')}
     <div style="font-weight:800;font-size:12.5px;margin:10px 0 6px;">${L('Gas level limits (ppm)','เกณฑ์ระดับก๊าซ (ppm)')}</div>
     ${Object.keys(CRIT.level).map(g=>row3(g,'lv_'+g,CRIT.level[g])).join('')}
-    <div style="font-weight:800;font-size:12.5px;margin:10px 0 6px;">${L('Gas rate limits (ppm / year) — any C₂H₂ increase always scores 4','เกณฑ์อัตราก๊าซ (ppm/ปี) — C₂H₂ เพิ่มขึ้นเท่าไรก็ได้คะแนน 4')}</div>
+    <div style="font-weight:800;font-size:12.5px;margin:10px 0 6px;">${L(`Gas rate limits (ppm / year) — a C₂H₂ increase of ${C2H2_MIN_RATE} ppm/year or more always scores 4 (smaller changes are within lab repeatability)`,`เกณฑ์อัตราก๊าซ (ppm/ปี) — C₂H₂ เพิ่มขึ้นตั้งแต่ ${C2H2_MIN_RATE} ppm/ปี ได้คะแนน 4 เสมอ (น้อยกว่านี้ถือว่าอยู่ในช่วงคลาดเคลื่อนของแล็บ)`)}</div>
     ${Object.keys(CRIT.rate).map(g=>row3(g,'rt_'+g,CRIT.rate[g])).join('')}
     <div class="formrow"><label>${L('Accelerated-ageing tolerance (HI points below the normal line)','ช่วงยอมรับการเสื่อมตามอายุ (คะแนน HI ที่ต่ำกว่าเส้นปกติ)')}</label>${num('ageTol',CRIT.ageTol,'1')}</div>`,
   (d)=>{
@@ -3619,6 +3683,9 @@ function attachSettingsEvents(){
 
 /* ============ GLOBAL SEARCH / BELL / LANG ============ */
 function attachGlobalViewLinks(){
+  document.querySelectorAll('[data-goto-page]').forEach(el=>{
+    el.addEventListener('click',()=>{ state.page = el.dataset.gotoPage; render(); window.scrollTo(0,0); });
+  });
   document.querySelectorAll('[data-view]').forEach(el=>{
     el.addEventListener('click',()=>{ state.assetId = el.dataset.view; state.page='detail'; state.detailTab='overview'; render(); window.scrollTo(0,0); });
   });
@@ -3706,14 +3773,14 @@ function render(){
   else if(state.page==='assets'){ content.innerHTML = renderAssetsPage(); attachGlobalViewLinks(); attachAssetsPageEvents(); attachDataButtons(); }
   else if(state.page==='detail'){ syncAssetData(); content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(currentAsset()); }
   else if(state.page==='risk'){ content.innerHTML = renderRiskPage(); attachGlobalViewLinks(); initRiskCharts(); }
-  else if(state.page==='reliability'){ content.innerHTML = netHtml(); attachGlobalViewLinks(); }
+  else if(state.page==='reliability'){ content.innerHTML = netHtml(); attachGlobalViewLinks(); const fold=document.getElementById('relCalcFold'); if(fold) fold.addEventListener('toggle',()=>{ state.relCalcOpen=fold.open; const h=fold.querySelector('.calc-fold-hint'); if(h) h.textContent = fold.open?L('Hide','ซ่อน'):L('Show','แสดง'); }); }
   else if(state.page==='schematic'){ content.innerHTML = schematicHtml(); }
   else if(state.page==='reports'){ content.innerHTML = renderReports(); initReportsCharts(); attachReportsEvents(); }
   else if(state.page==='settings'){ content.innerHTML = renderSettings(); attachSettingsEvents(); }
   else if(state.page==='healthindex-overview'){ content.innerHTML = renderCategoryOverview('healthindex'); attachCategoryOverviewEvents(); }
   else if(state.page==='fmea-overview'){ content.innerHTML = renderCategoryOverview('fmea'); attachCategoryOverviewEvents(); }
   else if(state.page==='rcm-overview'){ content.innerHTML = renderCategoryOverview('rcm'); attachCategoryOverviewEvents(); }
-  else if(state.page==='guide'){ content.innerHTML = renderGuide(); }
+  else if(state.page==='guide'){ content.innerHTML = renderGuide(); attachGlobalViewLinks(); }
   attachNetEvents();
 }
 function openSidebar(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarBackdrop').classList.add('show'); }
@@ -3729,6 +3796,7 @@ document.getElementById('loginUserLabel').textContent = t('login_user');
 document.getElementById('loginPassLabel').textContent = t('login_pass');
 document.getElementById('loginSubmitBtn').textContent = t('login_submit');
 document.getElementById('loginHint').textContent = t('login_hint');
+  document.getElementById('loginDemoBtn').textContent = t('login_demo');
 document.addEventListener('click',(e)=>{ document.querySelectorAll('details.more[open], details.tip[open]').forEach(d=>{ if(!d.contains(e.target)) d.open=false; }); });
 let topbarBound = false;
 function showApp(){
@@ -3743,6 +3811,10 @@ function showLogin(){
 }
 document.getElementById('loginForm').addEventListener('submit', (e)=>{
   e.preventDefault();
+  try{ sessionStorage.setItem('rcm_logged_in','1'); }catch(err){}
+  showApp();
+});
+document.getElementById('loginDemoBtn').addEventListener('click', ()=>{
   try{ sessionStorage.setItem('rcm_logged_in','1'); }catch(err){}
   showApp();
 });
