@@ -182,6 +182,8 @@ details.tip-more > summary{cursor:pointer; font-size:12.5px; font-weight:700; co
 #v3dLabels{position:absolute; inset:0; pointer-events:none; overflow:hidden;}
 .v3d-tag{position:absolute; transform:translate(-50%,-50%); pointer-events:auto; display:inline-flex; align-items:center; gap:5px; font:inherit; font-size:11px; font-weight:700; white-space:nowrap; padding:3px 9px; border-radius:14px; border:1px solid rgba(36,71,107,.25); background:rgba(255,255,255,.92); color:#1E2A33; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.12);}
 .v3d-tag i{width:8px; height:8px; border-radius:50%;} .v3d-tag.on{background:#24476b; color:#fff; border-color:#24476b;}
+.v3d-legend{position:absolute; left:10px; bottom:10px; gap:10px; flex-wrap:wrap; font-size:11px; font-weight:700; background:rgba(255,255,255,.9); padding:5px 10px; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,.12); pointer-events:none;}
+.v3d-legend span{display:inline-flex; align-items:center; gap:5px;} .v3d-legend i{width:10px; height:10px; border-radius:3px; display:inline-block;}
 .v3d-parts{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
 .v3d-part{display:inline-flex; align-items:center; gap:6px; font:inherit; font-size:12px; padding:5px 10px; border-radius:20px; border:1px solid var(--border); background:#fff; cursor:pointer; color:var(--text);}
 .v3d-part i{width:10px; height:10px; border-radius:50%;} .v3d-part.on{border-color:var(--accent-2); background:var(--blue-bg); font-weight:700;}
@@ -2603,14 +2605,25 @@ function v3dStatus(){ const el=document.getElementById('v3dStatus'); if(!el) ret
     : `<div><div class="v3d-spin"></div>${L('Loading 3D model…','กำลังโหลดโมเดล 3D…')}${V3D.stage?`<div class="small-muted" style="font-size:11px;margin-top:4px;">${esc(V3D.stage)}</div>`:''}</div>`;
   const rt=document.getElementById('v3dRetry'); if(rt) rt.addEventListener('click',()=>{ V3D.st='idle'; v3dLoad(); });
 }
+/* hex → THREE.Color that displays as that exact sRGB colour (r152+ converts automatically; older builds need it by hand) */
+function v3dCol(hex){ const c=new THREE.Color(hex); if(!THREE.SRGBColorSpace && c.convertSRGBToLinear) c.convertSRGBToLinear(); return c; }
 function v3dApply(){
   const a = ASSETS.find(x=>x.id===state.assetId); if(!a || V3D.st!=='ready') return;
   const risks = {}; PART_RULES.forEach(([c])=>risks[c]=partRisk(a,c));
-  V3D.meshes.forEach(o=>{ const m=o.material, comp=o.userData.comp; if(!m.color) return;
-    m.color.copy(o.userData.base); if(m.emissive) m.emissive.setHex(0x000000);
-    if(V3D.mode==='risk'){ const r=comp&&risks[comp]; if(r) m.color.lerp(new THREE.Color(RISK_HEX[r.level]), 0.7); else m.color.lerp(new THREE.Color(0xc8ced4), 0.6); }
-    if(V3D.sel && comp===V3D.sel && m.emissive) m.emissive.setHex(0x1d4f8a).multiplyScalar(0.55);
-    const see = V3D.xray && o.userData.xray; m.transparent = see || o.userData.op<1; m.opacity = see ? 0.12 : o.userData.op; m.depthWrite = !see; m.needsUpdate = true; });
+  const risk = V3D.mode==='risk';
+  /* risk mode: flat, unlit-looking solid colours so red stays red (no tone mapping, no metal reflections) */
+  V3D.renderer.toneMapping = risk ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
+  const NEUTRAL = v3dCol(0xd5dae0), SEL = v3dCol(0x2f7de1);
+  V3D.meshes.forEach(o=>{ const m=o.material, comp=o.userData.comp, u=o.userData; if(!m.color) return;
+    if(!u.mat0) u.mat0 = {metal:m.metalness, rough:m.roughness, emi:m.emissive?m.emissive.clone():null, ei:m.emissiveIntensity};
+    m.color.copy(u.base); if('metalness' in m) m.metalness=u.mat0.metal; if('roughness' in m) m.roughness=u.mat0.rough;
+    if(m.emissive){ m.emissive.copy(u.mat0.emi); m.emissiveIntensity=u.mat0.ei; }
+    if(risk){ const r=comp&&risks[comp]; const c = r ? v3dCol(RISK_HEX[r.level]) : NEUTRAL;
+      m.color.copy(c); if('metalness' in m) m.metalness=0; if('roughness' in m) m.roughness=0.7;
+      if(m.emissive){ m.emissive.copy(c); m.emissiveIntensity = r ? 0.38 : 0.12; } }
+    if(V3D.sel && comp===V3D.sel && m.emissive){ if(risk){ m.emissiveIntensity = 0.75; } else { m.emissive.copy(SEL); m.emissiveIntensity = 0.45; } }
+    const see = V3D.xray && u.xray; m.transparent = see || u.op<1; m.opacity = see ? 0.12 : u.op; m.depthWrite = !see; m.needsUpdate = true; });
+  const lg=document.getElementById('v3dRiskLegend'); if(lg) lg.style.display = risk?'flex':'none';
 }
 function v3dMount(){
   const host = document.getElementById('v3dCanvas'); if(!host) return; v3dStatus();
@@ -2665,17 +2678,18 @@ function detail3dTab(a){
         <input type="range" id="v3dExRange" min="0" max="100" value="${Math.round((V3D.exT||0)*100)}" aria-label="${L('Explode amount','ระยะแยกชิ้นส่วน')}">
         <label class="v3d-chk"><input type="checkbox" id="v3dLabelsOn" ${V3D.labelsOn?'checked':''}> ${L('Part labels','ป้ายชื่อชิ้นส่วน')}</label>
       </div>
-      <div class="v3d-stage"><div id="v3dCanvas"></div><div id="v3dLabels"></div><div id="v3dStatus" class="v3d-status"></div></div>
+      <div class="v3d-stage"><div id="v3dCanvas"></div><div id="v3dLabels"></div><div id="v3dStatus" class="v3d-status"></div>
+        <div id="v3dRiskLegend" class="v3d-legend" style="display:${V3D.mode==='risk'?'flex':'none'};"><span><i style="background:#d0392f"></i>${L('High','สูง')}</span><span><i style="background:#e0a020"></i>${L('Medium','ปานกลาง')}</span><span><i style="background:#1fa571"></i>${L('Low','ต่ำ')}</span><span><i style="background:#d5dae0"></i>${L('Not in FMEA','ไม่อยู่ใน FMEA')}</span></div></div>
       <div class="small-muted" style="font-size:11.5px;margin-top:6px;">${L('Drag to rotate · scroll / pinch to zoom · right-drag to pan · click a part for details','ลากเพื่อหมุน · เลื่อนหรือถ่างนิ้วเพื่อซูม · ลากด้วยปุ่มขวาเพื่อเลื่อน · กดที่ชิ้นส่วนเพื่อดูข้อมูล')}</div>
       <div class="v3d-parts">${parts}</div>
-      <div class="small-muted" style="font-size:10px;margin-top:8px;text-align:right;">3D build 2026-10-02c${V3D.lib?` · ${V3D.lib.via}`:''}</div>
+      <div class="small-muted" style="font-size:10px;margin-top:8px;text-align:right;">3D build 2026-10-02d${V3D.lib?` · ${V3D.lib.via}`:''}</div>
     </div>
     <div class="card" id="v3dInfo"></div>
   </div>
   ${refNote('3D model of a typical oil-immersed power transformer; parts are linked to this unit\'s FMEA. Illustrative, not the as-built unit.','โมเดล 3D ของหม้อแปลงกำลังชนิดแช่น้ำมันแบบทั่วไป ชิ้นส่วนเชื่อมกับ FMEA ของหม้อแปลงตัวนี้ เป็นภาพประกอบ ไม่ใช่หม้อแปลงตัวจริง')}`;
 }
 function attach3dEvents(){
-  document.querySelectorAll('[data-v3d-mode]').forEach(b=>b.addEventListener('click',()=>{ V3D.mode=b.dataset.v3dMode; document.querySelectorAll('[data-v3d-mode]').forEach(x=>x.classList.toggle('on',x===b)); v3dApply(); }));
+  document.querySelectorAll('[data-v3d-mode]').forEach(b=>b.addEventListener('click',()=>{ V3D.mode=b.dataset.v3dMode; document.querySelectorAll('[data-v3d-mode]').forEach(x=>x.classList.toggle('on',x===b)); const lg=document.getElementById('v3dRiskLegend'); if(lg) lg.style.display = V3D.mode==='risk'?'flex':'none'; v3dApply(); }));
   const xr=document.getElementById('v3dXray'); if(xr) xr.addEventListener('click',()=>{ V3D.xray=!V3D.xray; xr.classList.toggle('active',V3D.xray); xr.textContent=V3D.xray?L('X-ray on','มองทะลุ: เปิด'):L('X-ray (see inside)','มองทะลุ (ดูข้างใน)'); v3dApply(); });
   const hm=document.getElementById('v3dHome'); if(hm) hm.addEventListener('click',()=>{ if(V3D.st!=='ready') return; V3D.camera.position.copy(V3D.home.pos); V3D.controls.target.copy(V3D.home.tgt); V3D.controls.update(); });
   document.querySelectorAll('[data-v3d-part]').forEach(b=>b.addEventListener('click',()=>v3dSelect(V3D.sel===b.dataset.v3dPart?null:b.dataset.v3dPart)));
