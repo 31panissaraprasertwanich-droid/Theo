@@ -915,13 +915,13 @@ const UI = {
  field_task_name:['Task Name','ชื่องาน'], field_task_type:['Type','ประเภท'], field_task_interval:['Interval','ความถี่'],
  field_start_date:['Start Date','วันที่เริ่ม'], field_task_duration:['Duration (days)','ระยะเวลา (วัน)'], field_task_details:['Task Details','รายละเอียดงาน'], field_task_details_ph:['e.g. Check bushing gasket and top oil level','เช่น ตรวจปะเก็นบุชชิ่งและระดับน้ำมันด้านบน'],
  note1:['How status is decided','วิธีกำหนดสถานะ'],
- note2:['HI ≥ 70 (Very good / Good) = Healthy, 50–70 (Caution) = Warning, < 50 (Poor / Very poor) = Critical. With less than 3 years of results the condition level (Table 2.8) and IC are used; the risk level (HI × decreasing rate, Table 2.9) is used once 3 years are available.','HI ≥ 70 (ดีมาก/ดี) = ปกติ, 50–70 = เฝ้าระวัง, < 50 (แย่/แย่มาก) = วิกฤต · เมื่อข้อมูลน้อยกว่า 3 ปี ใช้ระดับสภาพ (ตารางที่ 2.8) ร่วมกับค่า IC และจะใช้ระดับความเสี่ยง (HI × อัตราการลดลง ตารางที่ 2.9) เมื่อมีข้อมูลครบ 3 ปี'],
+ note2:['HI ≥ 70 (Very good / Good) = Healthy, 50–70 (Caution) = Warning, < 50 (Poor / Very poor) = Critical. With less than 3 years of results the condition level and IC are used; the risk level (HI × decreasing rate) is used once 3 years are available.','HI ≥ 70 (ดีมาก/ดี) = ปกติ, 50–70 = เฝ้าระวัง, < 50 (แย่/แย่มาก) = วิกฤต · เมื่อข้อมูลน้อยกว่า 3 ปี ใช้ระดับสภาพ ร่วมกับค่า IC และจะใช้ระดับความเสี่ยง (HI × อัตราการลดลง) เมื่อมีข้อมูลครบ 3 ปี'],
 };
 function t(key){ const row = UI[key]; if(!row) return key; return row[state.lang==='th'?1:0]; }
 
 Object.assign(UI, {
   nav_fmearcm:['FMEA & RCM','FMEA & RCM'], nav_risk:['Risk & Priority','ความเสี่ยงและลำดับความสำคัญ'], sub_risk:['Condition level + IC now; HI × decreasing rate once 3 years of data exist','ระดับสภาพ + ค่า IC (ใช้ HI × อัตราการลดลงเมื่อมีข้อมูลครบ 3 ปี)'],
-  guide_risk_t:['Risk & Priority','ความเสี่ยงและลำดับความสำคัญ'], guide_risk_d:['Ranking by condition level (Table 2.8) and criticality importance IC while there is less than 3 years of data; risk from the HI value and its yearly decreasing rate (Table 2.9) after that.','จัดลำดับด้วยระดับสภาพ (ตารางที่ 2.8) และค่าดัชนีความสำคัญ IC เมื่อข้อมูลน้อยกว่า 3 ปี และใช้ความเสี่ยงจากค่า HI กับอัตราการลดลงต่อปี (ตารางที่ 2.9) เมื่อมีข้อมูลครบ 3 ปี'],
+  guide_risk_t:['Risk & Priority','ความเสี่ยงและลำดับความสำคัญ'], guide_risk_d:['Ranking by condition level and criticality importance IC while there is less than 3 years of data; risk from the HI value and its yearly decreasing rate after that.','จัดลำดับด้วยระดับสภาพ และค่าดัชนีความสำคัญ IC เมื่อข้อมูลน้อยกว่า 3 ปี และใช้ความเสี่ยงจากค่า HI กับอัตราการลดลงต่อปี เมื่อมีข้อมูลครบ 3 ปี'],
   guide_rcm_d:['RCM analysis following the 7 questions of SAE JA1011: function, functional failure, failure mode, effect, consequence, proactive task and default action.','การวิเคราะห์ RCM ตาม 7 คำถามของ SAE JA1011: หน้าที่ ความล้มเหลวเชิงหน้าที่ โหมดความล้มเหลว ผลกระทบ ประเภทผลที่ตามมา งานเชิงป้องกัน และการดำเนินการเมื่อไม่มีงานที่เหมาะสม'],
   ov_rcm_desc:['RCM decisions per transformer (SAE JA1011). Click a row to open its worksheet.','ผลการตัดสินใจ RCM ของแต่ละหม้อแปลง (SAE JA1011) กดแถวเพื่อเปิดแผ่นงาน'],
 });
@@ -1058,7 +1058,7 @@ function rogersCase(r1,r2,r5){ const inR=(x,a,b)=>x>=a&&x<=b;
 const ROGERS_FAM = {0:'N',1:'PD',2:'D',3:'T',4:'T',5:'T'};
 
 /* ---------- Faults Factor (paper Fig. 4–5, Tables 2–3) ---------- */
-function gasCond(Lm,Rm){ if(Lm===1) return 1; if(Lm===2) return Rm===1?1:Rm<=3?2:3; if(Lm===3) return Rm===1?2:Rm<=3?3:4; return Rm===1?3:4; } // level 4 / rate 2 is not in the paper's Table 2 → Cond.4 (report Table 2.3 note)
+function gasCond(Lm,Rm){ if(Lm===1) return 1; if(Lm===2) return Rm===1?1:Rm<=3?2:3; if(Lm===3) return Rm===1?2:Rm<=3?3:4; return Rm===1?3:4; } // level 4 / rate 2 is not in the paper's Table 2 → Cond.4
 /* paper Fig. 4 — Duval Pentagon zones */
 function dpmCond(pz,Rm){ if(pz==='S') return Rm>1?2:1; if(pz==='PD'||pz==='O') return Rm>1?3:2; if(pz==='D1'||pz==='C') return 3; if(pz==='D2'||pz==='T3-H') return 4; return 2; }
 const FF_TABLE = {1:['A',null,null,null], 2:[null,'B','B','C'], 3:[null,'C','C','D'], 4:[null,'D','D','E']};
@@ -1099,7 +1099,7 @@ const PC_PARAMS = [
 
 const FACTOR_NAMES = {FF:['Faults Factor','ปัจจัยความผิดปกติ (Faults)'], OQF:['Oil Quality Factor','ปัจจัยคุณภาพน้ำมัน'], PCF:['Paper Condition Factor','ปัจจัยสภาพกระดาษฉนวน']};
 const CODE_SF = {A:4,B:3,C:2,D:1,E:0,FALSE:1};
-const CODE_NAMES = {FALSE:['Not in Table 2.4 (FALSE) — HI not calculated','ไม่อยู่ในตารางที่ 2.4 (FALSE) — ไม่คำนวณ HI'],A:['Normal','ปกติ'],B:['Acceptable','ยอมรับได้'],C:['Need caution','เฝ้าระวัง'],D:['Poor','เสื่อมสภาพ'],E:['Very poor','เสื่อมสภาพมาก']};
+const CODE_NAMES = {FALSE:['Not in the Faults Factor table (FALSE) — HI not calculated','ไม่อยู่ในตารางของ Faults Factor (FALSE) — ไม่คำนวณ HI'],A:['Normal','ปกติ'],B:['Acceptable','ยอมรับได้'],C:['Need caution','เฝ้าระวัง'],D:['Poor','เสื่อมสภาพ'],E:['Very poor','เสื่อมสภาพมาก']};
 function factorCode(v){ return v<1.2?'A' : v<1.5?'B' : v<2?'C' : v<=3?'D' : 'E'; }
 function paramStatus(score){ return score<=1?'Healthy' : score===2?'Warning' : 'Critical'; }
 function codeStatus(c){ return (c==='A'||c==='B')?'Healthy' : c==='C'?'Warning' : 'Critical'; }
@@ -1175,7 +1175,7 @@ function genDemoLab(a){
 }
 
 /* ---------- HI decline rate, ageing & risk (paper §3.3–3.5) ---------- */
-function hiHistory(a){ const lab=labFor(a); return lab.map((s,i)=>({date:s.date, hi:assessSample(s, lab[i+1], a).hi})).filter(p=>p.hi!==null).reverse(); }   /* FALSE samples are not used (report 3.2.5 rule 6) */
+function hiHistory(a){ const lab=labFor(a); return lab.map((s,i)=>({date:s.date, hi:assessSample(s, lab[i+1], a).hi})).filter(p=>p.hi!==null).reverse(); }   /* FALSE samples are not used */
 function hiRateOf(a){
   const h = hiHistory(a); if(h.length<2) return {rate:null, span:0, n:h.length, enough:false};
   const t0 = parseD(h[0].date); const xs = h.map(p=>(parseD(p.date)-t0)/(365.25*864e5)), ys = h.map(p=>p.hi);
@@ -1194,7 +1194,7 @@ const RATE_COLS = ['≤ 5','> 5 – 10','> 10'];
 function hiRow(hi){ return hi>=85?0 : hi>=70?1 : hi>=50?2 : hi>=30?3 : 4; }
 function rateCol(r){ return (r===null||r<=5)?0 : r<=10?1 : 2; }
 /* report 3.2.4: with < 3 years of HI history the decreasing rate cannot be estimated, so the transformer is
-   ranked by its condition level (Table 2.8) and then by criticality importance IC; the risk level of
+   ranked by its condition level and then by criticality importance IC; the risk level of
    Table 2.9 (Tamma Table 10) is used automatically once ≥ 3 years of results exist */
 function riskOf(a){
   if(a._risk && a._risk.hi===a.hi) return a._risk;
@@ -1226,7 +1226,7 @@ function riskFollow(r){ const x=RISK_FOLLOW[r.level]||RISK_FOLLOW['—']; return
 function addDaysD(d,n){ const x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
 function sampleOverdueDays(a){ const d=parseD(a.next); if(!d) return 0; const t=new Date(); t.setHours(0,0,0,0); return Math.max(0, Math.round((t-d)/864e5)); }
 function nextCell(a){ const n=sampleOverdueDays(a); return n>0 ? `<span style="color:var(--red);font-weight:700;">${a.next}</span> <span class="pill pill-overdue" style="white-space:nowrap;">${L(`Overdue ${n} d`,`เลยกำหนด ${n} วัน`)}</span>` : a.next; }
-const HI_LEGEND = ()=> L('HI grades (Table 2.8): VG ≥ 85 Very good · G 70 – <85 Good (both = Healthy) · C 50 – <70 Caution (= Warning) · P 30 – <50 Poor · VP < 30 Very poor (both = Critical)','ระดับสภาพ (ตารางที่ 2.8): VG ≥ 85 ดีมาก · G 70 – <85 ดี (ทั้งสอง = ปกติ) · C 50 – <70 เฝ้าระวัง · P 30 – <50 แย่ · VP < 30 แย่มาก (ทั้งสอง = สถานะวิกฤต)');
+const HI_LEGEND = ()=> L('HI grades: VG ≥ 85 Very good · G 70 – <85 Good (both = Healthy) · C 50 – <70 Caution (= Warning) · P 30 – <50 Poor · VP < 30 Very poor (both = Critical)','ระดับสภาพ: VG ≥ 85 ดีมาก · G 70 – <85 ดี (ทั้งสอง = ปกติ) · C 50 – <70 เฝ้าระวัง · P 30 – <50 แย่ · VP < 30 แย่มาก (ทั้งสอง = สถานะวิกฤต)');
 
 /* ---------- Asset-level assessment ---------- */
 const NEXT_INTERVAL = {Critical:1, Warning:3, Healthy:6};
@@ -1525,7 +1525,7 @@ function taskTypesHtml(){
     ['4','Failure-finding task (hidden failures)','งานค้นหาความล้มเหลวที่ซ่อนอยู่ (Failure Finding)','PM (FFT)'],
     ['5','Redesign','การออกแบบใหม่ (Redesign)','—'],
     ['6','Run to failure (no scheduled maintenance)','ใช้งานจนเสีย (Run to Failure)','BM']];
-  return `<details class="refnote" style="margin-top:10px;"><summary style="cursor:pointer;font-weight:700;color:var(--navy-2);">${L('6 task types and the order they are considered (report 2.1.6)','งานบำรุงรักษา 6 ประเภทและลำดับการพิจารณา (หัวข้อ 2.1.6)')}</summary>
+  return `<details class="refnote" style="margin-top:10px;"><summary style="cursor:pointer;font-weight:700;color:var(--navy-2);">${L('6 task types and the order they are considered','งานบำรุงรักษา 6 ประเภทและลำดับการพิจารณา')}</summary>
     <div class="tbl-wrap" style="margin-top:6px;"><table><thead><tr><th>#</th><th>${L('Task type','ประเภทงาน')}</th><th>${L('Plan type in this app','ประเภทในแผนของระบบ')}</th></tr></thead><tbody>${T.map(r=>`<tr><td>${r[0]}</td><td>${L(r[1],r[2])}</td><td>${r[3]}</td></tr>`).join('')}</tbody></table></div>
     <p class="small-muted" style="font-size:11.5px;margin:6px 0 0;">${L('Simplified PM task selection (Chiangkul et al., Fig. 7.3): (1) on-condition task if technically feasible and worth doing — usually the cheapest; (2) otherwise scheduled restoration or discard; (3) for hidden failures, a failure-finding task; (4) if nothing is feasible and worth doing: redesign (compulsory for safety consequences) or run to failure. The decision questions follow Nowlan &amp; Heap (1978) and SAE JA1012.','การเลือกประเภทงานแบบง่าย (วัฒนา เชียงกูล และคณะ รูปที่ 7.3): (1) งานตรวจตามสภาพ ถ้าทำได้ทางเทคนิคและคุ้มค่า — โดยทั่วไปมีค่าใช้จ่ายต่ำที่สุด (2) ถ้าไม่ได้ ให้พิจารณางานซ่อมคืนสภาพหรือเปลี่ยนชิ้นส่วนตามกำหนด (3) ถ้าเป็นความล้มเหลวที่ซ่อนอยู่ ให้พิจารณางานค้นหาความล้มเหลว (4) ถ้าไม่มีงานใดทำได้และคุ้มค่า ต้องออกแบบใหม่ (บังคับเมื่อกระทบความปลอดภัย) หรือใช้งานจนเสีย · คำถามในการตัดสินใจตาม Nowlan &amp; Heap (1978) และ SAE JA1012')}</p></details>`;
 }
@@ -2833,7 +2833,7 @@ function detailSummaryTab(a){
       <div class="sum-hi"><div class="sum-num" style="color:${fg};">${fmtHi(a.hi)}</div><div><div class="sum-cat" style="color:${fg};">${cat.name}</div><div class="small-muted">Health Index · ${L('sample','ผลตรวจ')} ${a.last}</div></div></div>
       <p class="sum-sentence">${sentence}</p>
       <ul class="sum-facts">
-        <li><span>${riskLbl()} ${tip(rk.provisional ? L('Less than 3 years of results: condition level from the HI value (report Table 2.8). The risk level of Table 2.9 needs ≥ 3 years.','ข้อมูลน้อยกว่า 3 ปี: ใช้ระดับสภาพจากค่า HI (ตารางที่ 2.8) ระดับความเสี่ยงตามตารางที่ 2.9 ต้องมีข้อมูล ≥ 3 ปี') : L('Health Index combined with how fast it is falling (report Table 2.9; Tamma et al., 2021, Table 10).','ค่า HI ร่วมกับความเร็วที่ HI ลดลง (ตารางที่ 2.9; Tamma et al., 2021 Table 10)'))}</span><b>${riskPill(rk.level)}</b></li>
+        <li><span>${riskLbl()} ${tip(rk.provisional ? L('Less than 3 years of results: condition level from the HI value. The risk level needs ≥ 3 years.','ข้อมูลน้อยกว่า 3 ปี: ใช้ระดับสภาพจากค่า HI ระดับความเสี่ยงต้องมีข้อมูล ≥ 3 ปี') : L('Health Index combined with how fast it is falling (Tamma et al., 2021, Table 10).','ค่า HI ร่วมกับความเร็วที่ HI ลดลง (Tamma et al., 2021 Table 10)'))}</span><b>${riskPill(rk.level)}</b></li>
         <li><span>${L('Falling per year','ลดลงต่อปี')}</span><b>${hr.rate===null?'—':hr.rate.toFixed(1)+' '+L('points','คะแนน')}</b></li>
         
         <li><span>DGA</span><b>${prof.code==='N'?L('normal','ปกติ'):`${prof.code} · ${prof.type[state.lang]}`}</b></li>
@@ -3704,7 +3704,7 @@ function attachDetailEvents(){
         [a.id,a.loc,prof.sample.date,a.hi,a.status,rpnMax,prof.code,DGA_NAMES[prof.code][0],prof.mainIssue.en,prof.strategy,prof.nextAction.en],[],
         ['Factor','Code','Score factor','Weight'], ...['FF','OQF','PCF'].map(k=>[k,prof.factors[k].code,prof.factors[k].sf,prof.factors[k].w]), [],
         ['Parameter','Result','Score','Weight'], ...prof.rows.map(r=>[r.p,r.res,r.score,r.key==='ff'?'':r.weight]), [],
-        ['HI decline rate (/yr)', riskOf(a).rate===null?'':riskOf(a).rate.toFixed(2)], [riskOf(a).provisional?'Condition level (Table 2.8)':'Risk (Table 2.9 / Tamma Table 10)', riskOf(a).level]];
+        ['HI decline rate (/yr)', riskOf(a).rate===null?'':riskOf(a).rate.toFixed(2)], [riskOf(a).provisional?'Condition level':'Risk (Tamma Table 10)', riskOf(a).level]];
       downloadFile(`${a.id}_report.csv`, toCSV(rows), 'text/csv'); toast(t('toast_exported'),'success'); }, ()=>downloadAssetReportPdf(a));
   });
   attachCritButtons();
@@ -3971,14 +3971,14 @@ function renderRiskPage(){
   let grid = `<div></div>${RATE_COLS.map(c=>`<div class="ax">${c}</div>`).join('')}`;
   HI_ROWS.forEach((row,i)=>{ grid += `<div class="ax" style="font-size:10px;">${row[0]}</div>`; for(let j=0;j<3;j++){ const l=RISK_T10[i][j], col=RISK_COL[l]; grid += `<div class="cell" style="background:${col[0]};"><span class="sc" style="color:${col[1]};">${riskName(l)}</span></div>`; } });
   return `
-  <div class="notebox" style="margin-bottom:16px;">${gicon('help',16)}<div><b>${L(`Only ${span.toFixed(1)} year(s) of test results — ranked by condition level and IC`,`มีผลทดสอบย้อนหลังเพียง ${span.toFixed(1)} ปี — จัดลำดับด้วยระดับสภาพและค่า IC`)}</b><br>${L('The HI decreasing rate needs at least 3 years of yearly HI (report 3.2.4). Until then the order is: (1) condition level from the HI (Table 2.8), (2) higher criticality importance IC first, (3) inside each transformer, the RPN of its failure modes. The risk matrix (Table 2.9) switches on automatically when 3 years of results exist.','อัตราการลดลงของ HI ต้องใช้ค่า HI รายปีย้อนหลังอย่างน้อย 3 ปี (หัวข้อ 3.2.4) ระหว่างนี้ลำดับความสำคัญคือ (1) ระดับสภาพจากค่า HI (ตารางที่ 2.8) (2) ถ้าระดับเท่ากัน หม้อแปลงที่มีค่า IC สูงกว่าอยู่ก่อน (3) ภายในหม้อแปลงแต่ละเครื่องใช้ค่า RPN ของรูปแบบความล้มเหลว · เมทริกซ์ความเสี่ยง (ตารางที่ 2.9) จะเปิดใช้เองเมื่อมีข้อมูลครบ 3 ปี')}</div></div>
-  ${falseUnits.length?`<div class="notebox" style="margin-bottom:16px;background:var(--amber-bg);">${gicon('help',16)}<div><b>Faults Factor = FALSE</b> — ${falseUnits.map(a=>`${esc(a.id)} (${a._falseSkip.join(', ')})`).join(' · ')}<br>${L('No HI is calculated for these results (report 3.2.5 rule 6); the latest valid result is used. Check them with an engineer.','ไม่คำนวณค่า HI ของผลทดสอบครั้งนี้ (หัวข้อ 3.2.5 ข้อ 6) ระบบใช้ผลล่าสุดที่คำนวณได้แทน ควรตรวจสอบกับวิศวกร')}</div></div>`:''}
+  <div class="notebox" style="margin-bottom:16px;">${gicon('help',16)}<div><b>${L(`Only ${span.toFixed(1)} year(s) of test results — ranked by condition level and IC`,`มีผลทดสอบย้อนหลังเพียง ${span.toFixed(1)} ปี — จัดลำดับด้วยระดับสภาพและค่า IC`)}</b><br>${L('The HI decreasing rate needs at least 3 years of yearly HI. Until then the order is: (1) condition level from the HI, (2) higher criticality importance IC first, (3) inside each transformer, the RPN of its failure modes. The risk matrix switches on automatically when 3 years of results exist.','อัตราการลดลงของ HI ต้องใช้ค่า HI รายปีย้อนหลังอย่างน้อย 3 ปี ระหว่างนี้ลำดับความสำคัญคือ (1) ระดับสภาพจากค่า HI (2) ถ้าระดับเท่ากัน หม้อแปลงที่มีค่า IC สูงกว่าอยู่ก่อน (3) ภายในหม้อแปลงแต่ละเครื่องใช้ค่า RPN ของรูปแบบความล้มเหลว · เมทริกซ์ความเสี่ยง จะเปิดใช้เองเมื่อมีข้อมูลครบ 3 ปี')}</div></div>
+  ${falseUnits.length?`<div class="notebox" style="margin-bottom:16px;background:var(--amber-bg);">${gicon('help',16)}<div><b>Faults Factor = FALSE</b> — ${falseUnits.map(a=>`${esc(a.id)} (${a._falseSkip.join(', ')})`).join(' · ')}<br>${L('No HI is calculated for these results; the latest valid result is used. Check them with an engineer.','ไม่คำนวณค่า HI ของผลทดสอบครั้งนี้ ระบบใช้ผลล่าสุดที่คำนวณได้แทน ควรตรวจสอบกับวิศวกร')}</div></div>`:''}
   <div class="grid" style="grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;">
     ${HI_CATS.map(c=>{ const col=RISK_COL[c[1]]; return `<div class="card stat" style="border-top:4px solid ${col[1]};"><div><div class="label">${L(c[2][0],c[2][1])} (${c[1]})</div><div class="value">${cnt(c[1])}</div><div class="small-muted">${L('transformers','หม้อแปลง')} · ${L('life','อายุเหลือ')} ${L(COND_LIFE[c[1]][0],COND_LIFE[c[1]][1])}</div></div></div>`; }).join('')}
   </div>
   <div class="card" style="margin-bottom:16px;"><h3>${L('Priority ranking','ลำดับความสำคัญ')}</h3>
-    <p class="card-sub">${L('Sorted by condition level (Table 2.8), then by criticality importance IC (higher first).','เรียงตามระดับสภาพ (ตารางที่ 2.8) แล้วตามค่า IC (สูงกว่าอยู่ก่อน)')}</p>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>HI</th><th>${L('Condition level','ระดับสภาพ')}</th><th title="${L('Criticality importance from the Reliability page','ค่าดัชนีความสำคัญจากหน้าความเชื่อถือได้')}">I<sub>C</sub> ⓘ</th><th>${L('Expected remaining life (Jahromi)','อายุที่คาดว่าเหลือ (Jahromi)')}</th><th>${L('Weakest factor','ปัจจัยที่ทำให้ HI ต่ำ')}</th><th>${L('Action (Table 2.8)','แนวทางดำเนินการ (ตารางที่ 2.8)')}</th></tr></thead><tbody>
+    <p class="card-sub">${L('Sorted by condition level, then by criticality importance IC (higher first).','เรียงตามระดับสภาพ แล้วตามค่า IC (สูงกว่าอยู่ก่อน)')}</p>
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>HI</th><th>${L('Condition level','ระดับสภาพ')}</th><th title="${L('Criticality importance from the Reliability page','ค่าดัชนีความสำคัญจากหน้าความเชื่อถือได้')}">I<sub>C</sub> ⓘ</th><th>${L('Expected remaining life (Jahromi)','อายุที่คาดว่าเหลือ (Jahromi)')}</th><th>${L('Weakest factor','ปัจจัยที่ทำให้ HI ต่ำ')}</th><th>${L('Action','แนวทางดำเนินการ')}</th></tr></thead><tbody>
     ${list.map((o,i)=>{ const F=o.a._as?o.a._as.factors:null; const worst=F?['FF','OQF','PCF'].sort((x,y)=>F[x].sf-F[y].sf)[0]:null; return `<tr><td>${i+1}</td><td><button class="viewlink" data-view="${o.a.id}"><b>${o.a.id}</b></button><div class="small-muted" style="font-size:11.5px;">${esc(o.a.loc||'')}</div></td>
       <td style="color:${hiColor(o.a.hi)};font-weight:800;">${fmtHi(o.a.hi)}</td><td>${riskPill(o.r.level)}</td>
       <td>${o.ic.rank?`${(o.ic.IC*100).toFixed(1)}% <span class="small-muted">#${o.ic.rank}</span>`:'—'}</td><td>${lifeOf(o.a)}</td>
@@ -3987,10 +3987,10 @@ function renderRiskPage(){
     </tbody></table></div>
     <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${HI_LEGEND()}</p>
   </div>
-  <div class="card" style="opacity:.55;"><h3>${L('Risk matrix — HI value × HI decreasing rate (Table 2.9)','เมทริกซ์ความเสี่ยง — ค่า HI × อัตราการลดลงของ HI (ตารางที่ 2.9)')} <span class="pill" style="background:#eef0f3;color:#5b6573;margin-left:6px;">${L('available with ≥ 3 years of data','ใช้ได้เมื่อมีข้อมูลครบ 3 ปี')}</span></h3>
+  <div class="card" style="opacity:.55;"><h3>${L('Risk matrix — HI value × HI decreasing rate','เมทริกซ์ความเสี่ยง — ค่า HI × อัตราการลดลงของ HI')} <span class="pill" style="background:#eef0f3;color:#5b6573;margin-left:6px;">${L('available with ≥ 3 years of data','ใช้ได้เมื่อมีข้อมูลครบ 3 ปี')}</span></h3>
     <p class="card-sub">${L('Shown for reference only. No transformer is placed on it until its decreasing rate can be estimated.','แสดงไว้อ้างอิงเท่านั้น ยังไม่วางหม้อแปลงลงในตารางจนกว่าจะคำนวณอัตราการลดลงได้')}</p>
     <div class="rmx" style="grid-template-columns:60px repeat(3,1fr);">${grid}</div></div>
-  ${refNote('Condition levels: Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327, Table 8 (report Table 2.8) · expected remaining life: Jahromi et al. (2009), <i>IEEE Electrical Insulation Magazine</i> 25(2):20–34, Table 11 · risk matrix: Tamma et al. (2021), Table 10 (report Table 2.9) · I<sub>C</sub>: Rausand &amp; Høyland (2004).','ระดับสภาพ: Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327, Table 8 (ตารางที่ 2.8) · อายุที่คาดว่าเหลือ: Jahromi et al. (2009), <i>IEEE Electrical Insulation Magazine</i> 25(2):20–34, Table 11 · เมทริกซ์ความเสี่ยง: Tamma et al. (2021), Table 10 (ตารางที่ 2.9) · I<sub>C</sub>: Rausand &amp; Høyland (2004)')}`;
+  ${refNote('Condition levels: Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327, Table 8 · expected remaining life: Jahromi et al. (2009), <i>IEEE Electrical Insulation Magazine</i> 25(2):20–34, Table 11 · risk matrix: Tamma et al. (2021), Table 10 · I<sub>C</sub>: Rausand &amp; Høyland (2004).','ระดับสภาพ: Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327, Table 8 · อายุที่คาดว่าเหลือ: Jahromi et al. (2009), <i>IEEE Electrical Insulation Magazine</i> 25(2):20–34, Table 11 · เมทริกซ์ความเสี่ยง: Tamma et al. (2021), Table 10 · I<sub>C</sub>: Rausand &amp; Høyland (2004)')}`;
 }
 function initRiskCharts(){
   const gridColor = cssv('--border'); const pts = ASSETS.map(a=>({a, ag:ageingOf(a)})).filter(o=>o.ag);
@@ -4261,7 +4261,7 @@ function settingsTabContent(){
     <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${L('Note: the paper lists 2-FAL = 0.214 and age = 0.234 in Table 5 but swaps them in Table 6; Table 5 is used here. Level 4 with rate score 2 is missing from Table 2 and is treated as Cond.3.','หมายเหตุ: งานวิจัยให้ 2-FAL = 0.214 และอายุ = 0.234 ในตาราง 5 แต่สลับกันในตาราง 6 ที่นี่ใช้ตาราง 5 และกรณีระดับก๊าซ 4 กับอัตรา 2 ไม่มีในตาราง 2 จึงถือเป็น Cond.3')}</p>
   </div>
   <div class="grid g2" style="margin-top:16px;">
-    <div class="card"><h3>${L('Risk matrix (Table 2.9 · Tamma Table 10) — used once 3 years of data exist','เมทริกซ์ความเสี่ยง (ตารางที่ 2.9 · Tamma Table 10) — ใช้เมื่อมีข้อมูลครบ 3 ปี')}</h3>
+    <div class="card"><h3>${L('Risk matrix (Tamma Table 10) — used once 3 years of data exist','เมทริกซ์ความเสี่ยง (Tamma Table 10) — ใช้เมื่อมีข้อมูลครบ 3 ปี')}</h3>
       <div class="tbl-wrap"><table><thead><tr><th>HI \\ ${L('rate /yr','อัตรา/ปี')}</th>${RATE_COLS.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>
       ${HI_ROWS.map((r,i)=>`<tr><td><b>${r[0]}</b></td>${RISK_T10[i].map(l=>`<td>${riskPill(l)}</td>`).join('')}</tr>`).join('')}
       </tbody></table></div></div>
