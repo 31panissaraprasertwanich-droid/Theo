@@ -707,6 +707,13 @@ button.ovb-status{cursor:pointer;} button.ovb-status:hover{background:rgba(255,2
 .ro-h{display:flex; gap:12px; align-items:center;}
 .ro-grid{display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px;} .ro-grid div{background:var(--bg,#f3f5f7); border-radius:8px; padding:8px 10px;} .ro-grid span{display:block; font-size:11px; color:var(--muted); font-weight:700;} .ro-grid b{font-size:12.5px;}
 @media (max-width:900px){ .rcm-split{grid-template-columns:1fr;} .rcm-list{position:static;} .ro-grid{grid-template-columns:1fr;} }
+
+.whyfold{margin:6px 0 0; font-size:12px;} .whyfold>summary{cursor:pointer; color:var(--accent-2); font-weight:700; list-style:none; display:inline-block;} .whyfold>summary::-webkit-details-marker{display:none;}
+.whyfold .whybody{margin-top:6px; padding:10px 12px; background:var(--bg); border-radius:9px; color:var(--muted); line-height:1.6;}
+.legend1{font-size:11.5px; color:var(--muted); margin:8px 0 0;}
+.qhelp{display:inline-block; margin-left:6px;} .qhelp>summary{cursor:pointer; list-style:none; display:inline-flex; width:20px; height:20px; border-radius:50%; background:var(--bg); border:1px solid var(--border); align-items:center; justify-content:center; font-size:12px; font-weight:800; color:var(--accent-2);} .qhelp>summary::-webkit-details-marker{display:none;}
+.qhelp[open] .rs-hint{display:block;}
+.sdl{display:block; font-size:12px; line-height:1.35;} .sdl.cons{color:var(--muted);}
 </style>
 </head>
 <body>
@@ -1296,6 +1303,7 @@ function profileFor(a, sampleIdx){
 }
 const MON_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 function beLabel(d){ const y=d.getFullYear(); return state.lang==='th' ? `${MON_TH[d.getMonth()]} ${String(y+543).slice(2)}` : `${MON[d.getMonth()]} ${y}`; }   /* chart labels use the Buddhist Era (พ.ศ.) */
+function whyFold(title, html){ return `<details class="whyfold"><summary>ⓘ ${title||L('How it works','วิธีคิด')}</summary><div class="whybody">${html}</div></details>`; }
 function refNote(en, th){ return `<details class="refnote"><summary style="cursor:pointer;font-weight:600;color:var(--navy-2);">${L('Reference','อ้างอิง')}</summary>${L(en, th)}</details>`; }
 function shortDate(s){ const d=parseD(s); return d?beLabel(d):s; }
 function fleetLabelsBE(){ const ref = ASSETS.map(a=>parseD(a.last)).filter(Boolean).sort((x,y)=>y-x)[0] || new Date();
@@ -1320,7 +1328,7 @@ const STORE_KEY = 'rcm_transformer_data_v4';
 let NOTIF = {risk:true, dga:true, overdue:true};
 let NET = null;   /* substations, transformer connection and reliability settings */
 let BA_SEEDED = false;
-function snapshotData(){ return {baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, planV:2, net:NET, focusV:2}; }
+function snapshotData(){ return {baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, planV:2, net:NET, focusV:2, fmeaV:3}; }
 function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
 function applyData(d){
   if(!d || d.v!==3 || !Array.isArray(d.assets)) return false;
@@ -1329,6 +1337,7 @@ function applyData(d){
   if(d.notif) NOTIF = Object.assign({risk:true,dga:true,overdue:true}, d.notif);
   if(d.planV!==2) Object.values(MAINT_STORE).forEach(markPastDone);
   NET = d.net || null; BA_SEEDED = !!d.baSeed;
+  if(d.fmeaV!==3){ FMEA_STORE = {}; RCM_STORE = {}; }   /* failure-mode list changed to the 10 modes of the report */
   if(d.focusV!==2){ /* focus on 2 substations: keep only their 4 transformers */
     const keep = ['LKB-TR1','LKB-TR2','LKB-TR3','CLK-TR1','CLK-TR2','CLK-TR3'];
     const kept = ASSETS.filter(a=>keep.includes(a.id));
@@ -1387,8 +1396,9 @@ const RCM_LIB = {
 const RCM_GENERIC = {fn:['Function to be defined','ยังไม่ได้กำหนดหน้าที่'], ff:['Functional failure to be defined','ยังไม่ได้กำหนดความล้มเหลวเชิงหน้าที่'],
   tasks:{CBM:['Condition-monitoring task','6 months'],PM:['Scheduled restoration / overhaul','1 year'],PMD:['Scheduled replacement of the part','1 year'],FFT:['Failure-finding (functional) test','6 months'],RD:['Redesign / modification','one-off']}};
 const RCM_DEFAULT_ANS = {
- 'FM-01':{H:'yes',S:'yes',T1:'yes'}, 'FM-02':{H:'yes',S:'yes',T1:'yes'}, 'FM-03':{H:'yes',S:'no',O:'yes',T1:'yes'},
- 'FM-04':{H:'no',S:'no',T1:'no',T2:'no',T2D:'no',T3:'yes'}, 'FM-05':{H:'yes',S:'yes',T1:'yes'}, 'FM-06':{H:'no',S:'no',T1:'no',T2:'no',T2D:'yes'}, 'FM-07':{H:'yes',S:'yes',T1:'yes'},
+ 'FM-01':{H:'yes',S:'yes',T1:'yes'}, 'FM-02':{H:'yes',S:'no',O:'yes',T1:'yes'}, 'FM-03':{H:'yes',S:'yes',T1:'yes'}, 'FM-04':{H:'yes',S:'no',O:'yes',T1:'yes'},
+ 'FM-05':{H:'yes',S:'no',O:'yes',T1:'no',T2:'yes'}, 'FM-06':{H:'yes',S:'no',O:'yes',T1:'no',T2:'yes'}, 'FM-07':{H:'yes',S:'yes',T1:'yes'},
+ 'FM-08':{H:'yes',S:'no',O:'no',T1:'no',T2:'no',T2D:'yes'}, 'FM-09':{H:'no',S:'no',T1:'no',T2:'no',T2D:'no',T3:'yes'}, 'FM-10':{H:'yes',S:'no',O:'no',T1:'yes'},
 };
 let RCM_STORE = {};
 function rcmAnsFor(a, f){
@@ -1441,8 +1451,23 @@ const RCM_DEC = {
   BM:{name:['BM — run to failure, repair when failed','BM — ใช้งานจนเสีย แล้วซ่อมเมื่อเสีย'], col:['#eef0f2','#5d6670'], plan:'BM'},
 };
 function rcmLib(comp){ return RCM_LIB[comp] || RCM_GENERIC; }
+const MODE_TASKS = {
+ 'FM-01':{CBM:[['DGA (CO, CO₂) and furan 2-FAL; follow the HI','DGA (CO, CO₂) และ 2-FAL ติดตามค่า HI'],'6 months']},
+ 'FM-02':{CBM:[['DGA and infrared thermography of connections','DGA และถ่ายภาพความร้อนจุดต่อ'],'6 months']},
+ 'FM-03':{CBM:[['DGA (H₂, C₂H₂); resample monthly if C₂H₂ rises','DGA (H₂, C₂H₂) ตรวจซ้ำทุกเดือนเมื่อ C₂H₂ เพิ่มขึ้น'],'6 months']},
+ 'FM-04':{CBM:[['Oil test (BDV, moisture, colour, acidity, IFT); filter oil when over the limit','ทดสอบน้ำมัน (BDV ความชื้น สี กรด IFT) กรองน้ำมันเมื่อเกินเกณฑ์'],'1 year']},
+ 'FM-05':{PM:[['OLTC overhaul at the manufacturer\'s operation count + OLTC oil test','ยกเครื่อง OLTC ตามจำนวนครั้งที่ผู้ผลิตกำหนด และทดสอบน้ำมัน OLTC'],'1 year']},
+ 'FM-06':{PM:[['Inspect, clean and lubricate the motor drive','ตรวจ ทำความสะอาด และหล่อลื่นชุดขับเคลื่อน'],'1 year']},
+ 'FM-07':{CBM:[['Bushing DF / capacitance test (DFR) + thermography','ทดสอบ DF และค่าความจุบูชชิ่ง (DFR) และถ่ายภาพความร้อน'],'2 years']},
+ 'FM-08':{PMD:[['Replace bushing seals and O-rings','เปลี่ยนซีลและโอริงบูชชิ่ง'],['at a planned outage','เมื่อหยุดจ่ายไฟตามแผน']]},
+ 'FM-09':{FFT:[['Fan and oil-pump start-up functional test','ทดสอบสั่งงานพัดลมและปั๊มน้ำมัน'],'3 months']},
+ 'FM-10':{CBM:[['Visual inspection, thermography and radiator cleaning','ตรวจด้วยสายตา ถ่ายภาพความร้อน และล้างทำความสะอาดหม้อน้ำ'],'1 year']},
+};   /* proposed tasks and intervals — to be confirmed with the mentor */
+function trTask(t){ return t ? t.map(x=>Array.isArray(x)?L(x[0],x[1]):x) : t; }
+function modeLib(f){ const comp = typeof f==='object' ? f.comp : f; const own = typeof f==='object' && MODE_TASKS[f.code] && (FMEA_TEMPLATE.find(t=>t.code===f.code)||{}).mode===f.mode ? MODE_TASKS[f.code] : {};
+  const out = Object.assign({}, rcmLib(comp).tasks, own); Object.keys(out).forEach(k=>out[k]=trTask(out[k])); return out; }
 function rcmTaskFor(comp, decision){ if(decision==='BM') return [L('Repair when failed','ซ่อมเมื่อเสีย'),'—'];
-  const lib=rcmLib(comp).tasks, g=RCM_GENERIC.tasks;
+  const lib=modeLib(comp), g=RCM_GENERIC.tasks;
   if(decision==='COMB'){ const c=lib.CBM||g.CBM, p=lib.PM||g.PM; return [`${c[0]} + ${p[0]}`, `${c[1]} / ${p[1]}`]; }
   if(decision==='PMD') return lib.PMD || lib.PM || g.PMD;
   return lib[decision] || g[decision]; }
@@ -1513,8 +1538,8 @@ function rcmInPlan(a, f){ return getMaintFor(a).some(p=>p.task.endsWith(`(${f.co
 function rcmAddToPlan(a, f){
   const ev=rcmEvaluate(rcmAnsFor(a,f)); if(!ev.decision) return false; const dec=RCM_DEC[ev.decision]; if(!dec.plan) return false;
   const plan=getMaintFor(a); const st=new Date(); st.setDate(st.getDate()+14);
-  const lib=rcmLib(f.comp).tasks, g=RCM_GENERIC.tasks;
-  const items = ev.decision==='COMB' ? [[lib.CBM||g.CBM, rcmPlanType(a,f.comp,'CBM')], [lib.PM||g.PM, 'PM']] : [[rcmTaskFor(f.comp, ev.decision), rcmPlanType(a,f.comp,ev.decision)]];
+  const lib=modeLib(f), g=RCM_GENERIC.tasks;
+  const items = ev.decision==='COMB' ? [[lib.CBM||g.CBM, rcmPlanType(a,f.comp,'CBM')], [lib.PM||g.PM, 'PM']] : [[rcmTaskFor(f, ev.decision), rcmPlanType(a,f.comp,ev.decision)]];
   items.forEach(([task,type])=> plan.push({no:1+Math.max(0,...plan.map(x=>x.no)), task:`${task[0]} (${f.code})`, type, sub:dec.sub||'', start:fmtD(st), end:fmtD(st), dur:'1 '+L('day','วัน'), m:MON[st.getMonth()], len:1, notes:`RCM ${ev.decision} · ${L('interval','รอบ')} ${task[1]}${type==='PdM'?' · '+L('timing from HI trend forecast','กำหนดเวลาจากการพยากรณ์แนวโน้ม HI'):''}`}));
   return true;
 }
@@ -1538,32 +1563,40 @@ let DGA_SAMPLES = [];
 function currentDgaGases(){ return DGA_SAMPLES[state.dgaSampleIdx] ? DGA_SAMPLES[state.dgaSampleIdx].gases : (DGA_SAMPLES[0]?DGA_SAMPLES[0].gases:[]); }
 
 /* ---- FMEA table per asset (curated for TR-014, generated for the rest) ---- */
-const FMEA_TR014 = [
- {no:1,code:'FM-01',comp:'Winding',mode:'Overheating',effect:'Insulation failure',s:5,o:2,d:4,rpn:40,risk:'High',control:'Temp. monitoring',action:'Improve cooling / DGA',status:'Open'},
- {no:2,code:'FM-02',comp:'Bushing',mode:'Leakage',effect:'Flashover',s:4,o:3,d:2,rpn:24,risk:'Medium',control:'Visual inspection',action:'Replace gasket',status:'Open'},
- {no:3,code:'FM-03',comp:'OLTC (Tap Changer)',mode:'Contact wear',effect:'Operation failure',s:4,o:3,d:3,rpn:36,risk:'Medium',control:'OLTC monitoring',action:'Contact-resistance trending',status:'Open'},
- {no:4,code:'FM-04',comp:'Cooling System',mode:'Fan failure',effect:'Overheating',s:3,o:2,d:3,rpn:18,risk:'Medium',control:'Routine check',action:'Preventive replacement',status:'Open'},
- {no:5,code:'FM-05',comp:'Oil',mode:'Degradation',effect:'Insulation loss',s:4,o:3,d:2,rpn:24,risk:'Medium',control:'Oil sampling',action:'Shorten sampling interval',status:'Open'},
- {no:6,code:'FM-06',comp:'Breather',mode:'Clogged / saturated',effect:'Moisture ingress',s:3,o:3,d:3,rpn:27,risk:'Medium',control:'Visual inspection',action:'Replace desiccant',status:'In Progress'},
- {no:7,code:'FM-07',comp:'Tank',mode:'External leakage',effect:'Environmental risk',s:3,o:2,d:2,rpn:12,risk:'Low',control:'Visual inspection',action:'Seal / Repair',status:'Closed'},
-];
+const RPN_HIGH = 40, RPN_MED = 18;   /* RPN 1–125 bands — provisional, to be confirmed with the advisor */
+function rpnLevel(r){ return r>=RPN_HIGH?'High':r>=RPN_MED?'Medium':'Low'; }
+/* 10 failure modes in the 4 component groups of the scope (insulation system, OLTC, bushing, cooling) —
+   O/S/D on the 1–5 scale; sd = utility defect code(s); resp = response-time code;
+   ev = which lab evidence drives O (null = O set by hand) */
+const SD_NAME = {T004:['Silica gel changed colour','ซิลิกาเจลเปลี่ยนสี'], T007:['Oil leak at bushing','น้ำมันรั่วซึมที่ Bushing'], T009:['Oil leak at radiator','น้ำมันรั่วซึมที่ Radiator'], T012:['Low transformer oil','น้ำมันหม้อแปลงต่ำ'],
+ T015:['Failed transformer replaced','เปลี่ยนหม้อแปลงชำรุด'], T016:['Transformer trip','หม้อแปลง Trip'], T017:['Fan damaged','พัดลมชำรุด'], T020:['Fan not running','พัดลมไม่ทำงาน'], T101:['Tap position reading wrong','Control desk tap อ่านไม่ตรง'],
+ T206:['Tap counter not working','Counter Tap ไม่ทำงาน'], T208:['Limit micro-switch stuck','Micro sw. limit ค้าง'], T209:['Cannot change tap electrically','เปลี่ยน Tap ทางไฟฟ้าไม่ได้'], T211:['Noise when changing tap','เปลี่ยน Tap แล้วมีเสียงดัง'], T212:['Low OLTC oil level','ระดับน้ำมัน OLTC ต่ำ']};
+function sdCodes(str){ return String(str||'').split(/[,\s]+/).map(x=>x.trim()).filter(x=>/^T\d+/.test(x)); }
+function sdCell(f){ const own=sdCodes(f.sd), cons=sdCodes(f.sdx); if(!own.length && !cons.length) return '<span class="small-muted">—</span>';
+  const nm=c=>SD_NAME[c]?' '+L(SD_NAME[c][0],SD_NAME[c][1]):'';
+  return own.map(c=>`<span class="sdl"><b>${c}</b>${nm(c)}</span>`).join('') + cons.map((c,i)=>`<span class="sdl cons">${i?'':L('if it escalates → ','ถ้าลุกลาม → ')}<b>${c}</b>${nm(c)}</span>`).join('') + (f.resp?`<span style="display:inline-block;margin-top:3px;">${respPill(f.resp)}</span>`:''); }
+const FMEA_GROUP = {ins:['Insulation system','ระบบฉนวน'], oltc:['OLTC','ชุดเปลี่ยนแทป (OLTC)'], bush:['Bushing','บูชชิ่ง'], cool:['Cooling system','ระบบระบายความร้อน']};
 const FMEA_TEMPLATE = [
- {code:'FM-01', comp:'Winding', mode:'Overheating', effect:'Insulation failure', cat:['Thermal','ความร้อน'], s:{healthy:2,warning:3,critical:5}, o:{healthy:1,warning:2,critical:2}, d:{healthy:2,warning:3,critical:4}, control:'Temp. monitoring', action:'Improve cooling / DGA'},
- {code:'FM-02', comp:'Bushing', mode:'Leakage', effect:'Flashover', cat:['Electrical','ไฟฟ้า'], s:{healthy:2,warning:4,critical:4}, o:{healthy:1,warning:2,critical:3}, d:{healthy:2,warning:2,critical:2}, control:'Visual inspection', action:'Replace gasket'},
- {code:'FM-03', comp:'OLTC (Tap Changer)', mode:'Contact wear', effect:'Operation failure', cat:['Mechanical','กลไก'], s:{healthy:2,warning:3,critical:4}, o:{healthy:1,warning:3,critical:3}, d:{healthy:2,warning:2,critical:3}, control:'OLTC monitoring', action:'Contact-resistance trending'},
- {code:'FM-04', comp:'Cooling System', mode:'Fan failure', effect:'Overheating', cat:['Thermal','ความร้อน'], s:{healthy:2,warning:3,critical:3}, o:{healthy:1,warning:2,critical:2}, d:{healthy:2,warning:2,critical:3}, control:'Routine check', action:'Preventive replacement'},
- {code:'FM-05', comp:'Oil', mode:'Degradation', effect:'Insulation loss', cat:['Chemical','เคมี'], s:{healthy:2,warning:3,critical:4}, o:{healthy:1,warning:3,critical:3}, d:{healthy:2,warning:2,critical:2}, control:'Oil sampling', action:'Shorten sampling interval'},
- {code:'FM-06', comp:'Breather', mode:'Clogged / saturated', effect:'Moisture ingress', cat:['Chemical','เคมี'], s:{healthy:1,warning:3,critical:3}, o:{healthy:1,warning:2,critical:3}, d:{healthy:2,warning:2,critical:3}, control:'Visual inspection', action:'Replace desiccant'},
- {code:'FM-07', comp:'Tank', mode:'External leakage', effect:'Environmental risk', cat:['Mechanical','กลไก'], s:{healthy:1,warning:2,critical:3}, o:{healthy:1,warning:1,critical:2}, d:{healthy:2,warning:2,critical:2}, control:'Visual inspection', action:'Seal / Repair'},
+ {code:'FM-01', grp:'ins', comp:'Winding', mode:'Paper insulation thermal ageing', effect:'Insulation strength lost, risk of internal short circuit', control:'DGA (CO, CO₂), 2-FAL', sd:'', sdx:'T016, T015', resp:'A', ev:'paper', s:5, o0:3, d:3},
+ {code:'FM-02', grp:'ins', comp:'Winding', mode:'Local hot spot (thermal fault)', effect:'Gas in oil, faster insulation ageing', control:'DGA, Duval Pentagon', sd:'', sdx:'T016', resp:'A', ev:'thermal', s:4, o0:3, d:2},
+ {code:'FM-03', grp:'ins', comp:'Winding', mode:'Partial discharge / internal arcing', effect:'Insulation damage, trip or permanent damage', control:'DGA (H₂, C₂H₂)', sd:'', sdx:'T016, T015', resp:'A', ev:'discharge', s:5, o0:2, d:3},
+ {code:'FM-04', grp:'ins', comp:'Oil', mode:'Oil degradation / high moisture', effect:'Lower dielectric strength, faster paper ageing', control:'BDV, moisture, colour, acidity, IFT', sd:'T004, T012', resp:'B', ev:'oil', s:3, o0:3, d:2},
+ {code:'FM-05', grp:'oltc', comp:'OLTC (Tap Changer)', mode:'Contact wear / burning', effect:'Incomplete tap change, heating or arcing', control:'OLTC oil BDV and moisture', sd:'T211, T212', resp:'A', ev:'oltc', s:4, o0:3, d:3},
+ {code:'FM-06', grp:'oltc', comp:'OLTC (Tap Changer)', mode:'Motor-drive failure', effect:'Cannot regulate secondary voltage', control:'Alarm and routine inspection', sd:'T209, T206, T208, T101', sdx:'', resp:'B', ev:null, s:3, o0:2, d:2},
+ {code:'FM-07', grp:'bush', comp:'Bushing', mode:'Internal insulation deterioration', effect:'Flashover or explosion, possible fire', control:'DFR (DF, capacitance), thermography', sd:'', sdx:'T016', resp:'A', ev:null, s:5, o0:2, d:2},
+ {code:'FM-08', grp:'bush', comp:'Bushing', mode:'Oil leakage at base / seals', effect:'Moisture ingress, low oil level', control:'Visual inspection', sd:'T007', resp:'C', ev:null, s:2, o0:4, d:1},
+ {code:'FM-09', grp:'cool', comp:'Cooling System', mode:'Fan / oil pump not running', effect:'High temperature at high load, derating', control:'Not known until the start temperature is reached', sd:'T020, T017', sdx:'', resp:'B', ev:null, s:3, o0:3, d:4},
+ {code:'FM-10', grp:'cool', comp:'Cooling System', mode:'Radiator clogged / leaking', effect:'Reduced cooling capacity', control:'Visual inspection, thermography', sd:'T009', resp:'C', ev:null, s:2, o0:2, d:2},
 ];
+function fmeaRow(tpl, i, o, status){ const rpn = tpl.s*o*tpl.d;
+  return {no:i+1, code:tpl.code, grp:tpl.grp, comp:tpl.comp, mode:tpl.mode, effect:tpl.effect, sd:tpl.sd, sdx:tpl.sdx||'', resp:tpl.resp, ev:tpl.ev, s:tpl.s, o, d:tpl.d, rpn, risk:rpnLevel(rpn), control:tpl.control, action:'-', status}; }
+const FMEA_TR014 = FMEA_TEMPLATE.map((tpl,i)=>fmeaRow(tpl, i, tpl.o0, 'Open'));
 function genFmeaForAsset(asset){
   const cat = categoryFor(asset); const seed = assetSeed(asset.id);
   return FMEA_TEMPLATE.map((tpl,i)=>{
-    const jitter = seededFrac(seed,i)>0.6 ? 1 : 0;
-    const s = Math.min(5, tpl.s[cat]); const o = Math.min(5, Math.max(1, tpl.o[cat]+jitter)); const d = Math.min(5, tpl.d[cat]);
-    const rpn = s*o*d; const risk = rpnLevel(rpn);
-    const status = cat==='healthy' ? (i%3===0?'Closed':'Monitor') : cat==='warning' ? 'Open' : (i===5?'In Progress':'Open');
-    return {no:i+1, code:tpl.code, comp:tpl.comp, mode:tpl.mode, effect:tpl.effect, s,o,d,rpn,risk,control:tpl.control,action:tpl.action,status: status==='Monitor'?'Closed':status};
+    const shift = cat==='healthy' ? -1 : cat==='critical' ? 1 : 0; const jitter = seededFrac(seed,i)>0.7 ? 1 : 0;
+    const o = Math.min(5, Math.max(1, tpl.o0 + shift + (shift<0?0:jitter)));
+    return fmeaRow(tpl, i, o, cat==='healthy' && i%3===0 ? 'Closed' : 'Open');
   });
 }
 let FMEA_STORE = {};
@@ -2267,7 +2300,7 @@ function netHtml(){
         <td><div class="cv">${f4(u.lam)}</div><div class="cf">${u.zero?'0.693':u.r} ÷ ${u.T.toFixed(2)}</div></td>
         <td><div class="cv" style="color:${rBand(u.R)};">${f4(u.R)}</div><div class="cf">e<sup>−${f4(u.lam)}×${tt}</sup></div></td></tr>`).join('')}
       </tbody></table></div>
-      <p class="small-muted" style="font-size:11px;margin:6px 0 0;">* ${L('No failure recorded yet: 0.693 is used instead of 0 (median estimate, χ²<sub>0.50,2</sub> ÷ 2) so R is not 100 %.','ยังไม่เคยเสีย: ใช้ 0.693 แทน 0 (ค่าประมาณกลาง χ²<sub>0.50,2</sub> ÷ 2) เพื่อไม่ให้ R เป็น 100%')} ${L(`T is counted from the installation date to the latest lab result (${fmtD(netRefDate())}). r counts only failures that took the transformer out of service; history before 2025 (B.E. 2568) comes from interviews with substation staff because the CMMS records start in 2025 — the values shown are placeholders until confirmed.`,`T นับจากวันที่ติดตั้งถึงวันที่ผลแล็บล่าสุด (${fmtD(netRefDate())}) · r นับเฉพาะการขัดข้องที่ทำให้หม้อแปลงหลุดออกจากระบบ · ประวัติก่อนปี 2568 ได้จากการสัมภาษณ์เจ้าหน้าที่สถานี เพราะระบบ CMMS เริ่มบันทึกในปี 2568 — ค่าที่แสดงเป็นค่าสมมติจนกว่าจะยืนยัน`)}</p>${refNote('Constant failure rate λ = r ÷ T and R(t) = e<sup>−λt</sup> (exponential model): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley.','อัตราการเสียคงที่ λ = r ÷ T และ R(t) = e<sup>−λt</sup> (แบบเอกซ์โพเนนเชียล): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley')}`);
+      <p class="small-muted" style="font-size:11px;margin:6px 0 0;">* ${L('No failure recorded yet: 0.693 is used instead of 0 (median estimate, χ²<sub>0.50,2</sub> ÷ 2) so R is not 100 %.','ยังไม่เคยเสีย: ใช้ 0.693 แทน 0 (ค่าประมาณกลาง χ²<sub>0.50,2</sub> ÷ 2) เพื่อไม่ให้ R เป็น 100%')} ${L(`T is counted from the installation date to the latest lab result (${fmtD(netRefDate())}). r counts only failures that took the transformer out of service (defect codes T016 trip and T015 replacement; oil-leak codes T006–T011 are not counted); history before 2025 (B.E. 2568) comes from interviews with substation staff because the CMMS records start in 2025 — the values shown are placeholders until confirmed.`,`T นับจากวันที่ติดตั้งถึงวันที่ผลแล็บล่าสุด (${fmtD(netRefDate())}) · r นับเฉพาะการขัดข้องที่ทำให้หม้อแปลงหลุดออกจากระบบ (รหัส T016 หม้อแปลง Trip และ T015 เปลี่ยนหม้อแปลงชำรุด ไม่นับรหัสน้ำมันรั่วซึม T006–T011) · ประวัติก่อนปี 2568 ได้จากการสัมภาษณ์เจ้าหน้าที่สถานี เพราะระบบ CMMS เริ่มบันทึกในปี 2568 — ค่าที่แสดงเป็นค่าสมมติจนกว่าจะยืนยัน`)}</p>${refNote('Constant failure rate λ = r ÷ T and R(t) = e<sup>−λt</sup> (exponential model): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley.','อัตราการเสียคงที่ λ = r ÷ T และ R(t) = e<sup>−λt</sup> (แบบเอกซ์โพเนนเชียล): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley')}`);
   const s2 = step(2, L('Reliability of each substation','ความเชื่อถือได้ของแต่ละสถานี'),
       L('Combine the transformers by how they are connected: parallel = they back each other up, series = all are needed.','รวมหม้อแปลงตามการต่อ: ขนาน = สำรองกันได้ · อนุกรม = ต้องใช้ทุกตัว'),
       `<div class="tbl-wrap"><table><thead><tr><th>${L('Substation','สถานี')}</th><th>${L('Connection','การต่อ')}</th><th>${L('Formula','สูตร')}</th><th>${L('With numbers','แทนค่า')}</th><th style="text-transform:none">R<sub>SS</sub></th></tr></thead><tbody>
@@ -2301,18 +2334,15 @@ function netHtml(){
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head"><h3>${L('Importance ranking','อันดับความสำคัญต่อระบบ')}</h3><span class="small-muted">${L('by criticality importance I_C','เรียงตาม Criticality importance (I<sub>C</sub>)')}</span></div>
     <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>#</th><th>${L('Transformer','หม้อแปลง')}</th><th>${L('Substation','สถานี')}</th><th>R(${tt})</th><th style="min-width:200px;">${L('If the system fails: chance this unit failed and caused it','ถ้าระบบล้ม: โอกาสที่ตัวนี้เสียและเป็นต้นเหตุ')} (I<sub>C</sub>)</th><th>HI</th><th>${L('Impact on supply','ผลต่อการจ่ายไฟ')}</th></tr></thead><tbody>${rank||`<tr><td colspan="7" class="small-muted">—</td></tr>`}</tbody></table></div>
-    <div class="notebox" style="margin-top:10px;">${gicon('help',16)}<div style="flex:1;">${L(
-      '<b>This ranking is not the maintenance order.</b> It uses each unit\'s failure history (λ) and how the substations are connected — it does not use oil-test condition (HI). So a healthy unit with no backup can rank above a poorer unit that has one. It answers "which unit would hurt supply most if it failed?". For "which unit to maintain first", use the Risk & Priority page.',
-      '<b>อันดับนี้ไม่ใช่ลำดับการซ่อมบำรุง</b> คำนวณจากประวัติการเสีย (λ) และรูปแบบการต่อของสถานี โดยไม่ได้ใช้ผลตรวจน้ำมัน (HI) หม้อแปลงสภาพดีแต่ไม่มีตัวสำรองจึงอาจอยู่อันดับสูงกว่าตัวที่สภาพแย่กว่าแต่มีตัวสำรอง อันดับนี้ตอบคำถามว่า "ถ้าตัวไหนเสีย จะกระทบการจ่ายไฟมากที่สุด" ส่วนคำถามว่า "ควรซ่อมตัวไหนก่อน" ให้ดูหน้าความเสี่ยงและลำดับความสำคัญ')}
-      <div style="margin-top:6px;"><button class="linklike" data-goto-page="risk" style="font-size:12px;">${L('Open Risk & Priority →','เปิดหน้าความเสี่ยงและลำดับความสำคัญ →')}</button></div></div></div>
+    <p class="legend1">${L('Impact on supply from failure history and station connection — not the maintenance order.','ผลต่อการจ่ายไฟจากประวัติการเสียและการต่อของสถานี — ไม่ใช่ลำดับการบำรุงรักษา')} <button class="linklike" data-goto-page="risk" style="font-size:12px;">${L('Maintenance priority →','ลำดับการบำรุงรักษา →')}</button></p>
   </div>
-  <div class="card" style="margin-bottom:16px;"><div class="card-head"><h3>${L('Model assumptions','สมมติฐานของแบบจำลอง')}</h3></div>
+  <details class="card calc-fold" style="margin-bottom:16px;"><summary class="card-head"><h3>ⓘ ${L('Model assumptions','สมมติฐานของแบบจำลอง')}</h3><span class="small-muted">${L('Show','แสดง')}</span></summary>
     <ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.7;">
       <li>${L('115 kV lines, breakers and busbars are assumed not to fail (R = 1); only transformers are modelled.','สายส่ง 115 kV เบรกเกอร์ และบัสบาร์ ถือว่าไม่เสีย (R = 1) แบบจำลองคิดเฉพาะหม้อแปลง')}</li>
       <li>${L('Constant failure rate (exponential model) and no repair during the mission time, so R(t) is lower than the availability of a repairable transformer.','อัตราการเสียคงที่ (แบบเอกซ์โพเนนเชียล) และไม่คิดการซ่อมระหว่างช่วงเวลา R(t) จึงต่ำกว่าความพร้อมใช้งานจริงของหม้อแปลงที่ซ่อมได้')}</li>
       <li>${L('λ = r ÷ T, where r is the number of failures recorded for the unit in Settings → Network. State what you count as a failure: if every forced outage is counted, λ is well above the major-failure rates of roughly 0.5–1 % per year reported in utility surveys (check the source before citing).','λ = r ÷ T โดย r คือจำนวนครั้งที่เสียซึ่งบันทึกไว้ใน ตั้งค่า → เครือข่าย ควรระบุนิยามของ “เสีย” ให้ชัด: ถ้านับทุกครั้งที่ต้องหยุดฉุกเฉิน (forced outage) ค่า λ จะสูงกว่าอัตราเสียหายหนักในผลสำรวจของการไฟฟ้า ซึ่งอยู่ราว 0.5–1% ต่อปี (ควรตรวจกับเอกสารต้นฉบับก่อนอ้างอิง)')}</li>
       <li>${L('Reliability here uses failure history only, not oil-test condition (HI). Condition-based priority is on the Risk & Priority page.','ความเชื่อถือได้ในหน้านี้ใช้ประวัติการเสียเท่านั้น ไม่ได้ใช้ผลตรวจน้ำมัน (HI) ลำดับตามสภาพอยู่ที่หน้าความเสี่ยงและลำดับความสำคัญ')}</li>
-    </ul></div>
+    </ul></details>
   ${N.sts.length?`<details class="card calc-fold" id="relCalcFold" ${state.relCalcOpen?'open':''}><summary class="card-head"><h3>${L('How it is calculated — step by step','วิธีคำนวณ — ทีละขั้น')}</h3><span class="small-muted">t = ${tt} ${yr} · <span class="calc-fold-hint">${state.relCalcOpen?L('Hide','ซ่อน'):L('Show','แสดง')}</span></span></summary>${s1}${s2}${s3}${s4}</details>`:''}`;
 }
 /* ---------- settings: network editor ---------- */
@@ -2361,6 +2391,7 @@ function netSettingsHtml(){
     <p class="small-muted" style="margin:0;">${L('Substations and their transformers are drawn on the Overview. k = how many transformers must be in service to carry the peak load: Auto picks it from the MVA ratings (k = 1 means the units back each other up).','สถานีและหม้อแปลงจะแสดงเป็นแผนภาพที่หน้าแรก · k = จำนวนหม้อแปลงที่ต้องใช้งานเพื่อรับโหลดสูงสุด · อัตโนมัติจะคำนวณจากพิกัด MVA (k = 1 คือสำรองกันได้)')}</p></div>
     ${stCards}
     <div class="card"><div class="card-head"><h3>${L('Failure history','ประวัติการเสีย')}</h3><span class="small-muted">λ = r ÷ T</span></div>
+      <p class="small-muted" style="font-size:12px;margin:0 0 8px;">${L('Count r by defect code: count T016 (transformer trip) and T015 (failed transformer replaced); do not count oil-leak codes T006–T011 (response code C, no outage).','นับ r ตามรหัสความผิดปกติ: นับ T016 (หม้อแปลง Trip) และ T015 (เปลี่ยนหม้อแปลงชำรุด) ไม่นับรหัสน้ำมันรั่วซึม T006–T011 (ระยะเวลาเข้าแก้ไขระดับ C และไม่ต้องหยุดจ่ายไฟ)')}</p>
       <div class="tbl-wrap"><table><thead><tr><th>${t('asset')}</th><th>${L('Installation date','วันที่ติดตั้ง')}</th><th>${L('Outage failures','ครั้งที่ขัดข้องจนหลุดจากระบบ')} <span style="text-transform:none;">r</span></th><th>T (${L('yr','ปี')})</th><th style="text-transform:none;">λ (/${L('yr','ปี')})</th></tr></thead><tbody>
       ${units.map(u=>`<tr><td><b>${u.a.id}</b></td><td><input type="date" style="width:140px;" data-net-a="installed" data-id="${u.a.id}" value="${esc(u.a.installed||'')}"></td><td><input type="number" min="0" step="1" style="width:80px;" data-net-a="fails" data-id="${u.a.id}" value="${+u.a.fails||0}"></td><td>${u.T.toFixed(1)}</td><td>${f4(u.lam)}${u.zero?'*':''}</td></tr>`).join('') || `<tr><td colspan="5" class="small-muted">—</td></tr>`}
       </tbody></table></div>
@@ -2753,7 +2784,7 @@ function v3dInfo(){
   const r=partRisk(a,V3D.sel);
   el.innerHTML = `<div style="font-weight:800;font-size:15px;">${L(V3D.sel, PART_TH[V3D.sel]||V3D.sel)}</div>
     ${!r ? `<div class="small-muted" style="margin-top:6px;">${L('No failure mode recorded for this part.','ยังไม่มีโหมดความล้มเหลวของชิ้นส่วนนี้')}</div>`
-    : r.list.slice().sort((x,y)=>y.rpn-x.rpn).map(f=>{ const ev=rcmEvaluate(rcmAnsFor(a,f)), s=rcmStrategy(a,f,ev), tk=ev.decision?rcmTaskFor(f.comp,ev.decision):null, inP=getMaintFor(a).filter(p=>p.task.endsWith(`(${f.code})`));
+    : r.list.slice().sort((x,y)=>y.rpn-x.rpn).map(f=>{ const ev=rcmEvaluate(rcmAnsFor(a,f)), s=rcmStrategy(a,f,ev), tk=ev.decision?rcmTaskFor(f,ev.decision):null, inP=getMaintFor(a).filter(p=>p.task.endsWith(`(${f.code})`));
       return `<div class="v3d-fm"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;"><b>${f.code} · ${f.mode}</b><span class="pill" style="background:${({High:'var(--red-bg)',Medium:'var(--amber-bg, #fdf1d6)',Low:'var(--green-bg)'})[f.risk]};color:${({High:'var(--red)',Medium:'#b07d05',Low:'var(--green)'})[f.risk]};">RPN ${f.rpn}</span></div>
         <div class="small-muted" style="margin:2px 0 2px;">${L('Effect','ผลกระทบ')}: ${esc(f.effect)}</div><div class="small-muted" style="margin:0 0 6px;">${L('Condition from lab','สภาพจากผลแล็บ')}: ${f.oWhy?esc(f.oWhy):L('not linked to lab results','ไม่ผูกกับผลแล็บ')}</div>
         <div>${rcmStrategyHtml(s)}</div>${tk?`<div style="font-size:12px;margin-top:4px;">${tk[0]} · ${L('every','ทุก')} ${tk[1]}</div>`:''}
@@ -3164,23 +3195,26 @@ function dgaSubTabContent(a){
   if(state.dgaSubTab==='trend') return trendBlock + refNote('Gas rate of change (ppm/year) and limits: IEEE Std C57.104-2019.','อัตราการเปลี่ยนแปลงของก๊าซ (ppm/ปี) และเกณฑ์: IEEE Std C57.104-2019');
   return `<div class="grid g2" style="align-items:stretch;">${gasResultsBlock}${duvalBlock}</div>${interpLine}${refNote('Normal gas ranges: IEEE Std C57.104-2019 · Duval Triangle: Duval (2002), <i>IEEE Electrical Insulation Magazine</i> 18(3); IEC 60599:2015.','ช่วงก๊าซปกติ: IEEE Std C57.104-2019 · สามเหลี่ยม Duval: Duval (2002), <i>IEEE Electrical Insulation Magazine</i> 18(3); IEC 60599:2015')}`;
 }
+const SD_RESP = {A:['within 7 hours','ภายใน 7 ชม.',0.3], B:['within 1–10 days','ภายใน 1–10 วัน',10], C:['within 11–90 days','ภายใน 11–90 วัน',90], D:['within 91–180 days','ภายใน 91–180 วัน',180], E:['within 360 days','ภายใน 360 วัน',360]};   /* response-time codes for defect repair */
+const SD_S_HINT = ()=> L('Severity guide from the response-time code of the related defect code: A (within 7 h) → 4–5 (5 if people or the transformer could be seriously harmed), B (1–10 days) → 3, C (11–90 days) → 2, D–E → 1.','แนวทางให้คะแนน S จากรหัสระยะเวลาเข้าดำเนินการแก้ไขของรหัสความผิดปกติที่เกี่ยวข้อง: A (ภายใน 7 ชม.) → 4–5 (ให้ 5 เมื่ออาจเป็นอันตรายต่อบุคคลหรือหม้อแปลงเสียหายถาวร) · B (1–10 วัน) → 3 · C (11–90 วัน) → 2 · D–E → 1');
+function respPill(c){ if(!c||!SD_RESP[c]) return '<span class="small-muted">—</span>'; const col=c==='A'?'pill-critical':c==='B'?'pill-warning':'pill-info'; return `<span class="pill ${col}" title="${esc(L(SD_RESP[c][0],SD_RESP[c][1]))}">${c}</span>`; }
 function detailFmeaTab(a){
   const high = FMEA.filter(f=>f.risk==='High').length, med = FMEA.filter(f=>f.risk==='Medium').length, low = FMEA.length-high-med;
   return `
   <div class="card-head" style="margin-bottom:6px;"><h3 style="font-size:16px;">${t('fmea_table')}</h3><button class="btn btn-primary" id="btnAddFmea">${icon('box',' style="width:13px;height:13px"')} ${t('add_failure_mode')}</button></div>
-  <p class="small-muted" style="margin:0 0 14px;">${t('fmea_sub')} — <b>${a.id}</b></p>
+  <p class="small-muted" style="margin:0 0 6px;">${t('fmea_sub')} — <b>${a.id}</b></p>
+  <div style="margin:0 0 12px;">${whyFold(L('FMEA type and scoring','ประเภท FMEA และเกณฑ์คะแนน'), '<b>'+L('Equipment FMEA · Hardware approach · qualitative criticality with RPN 1–5','Equipment FMEA · Hardware Approach · ประเมินความวิกฤตเชิงคุณภาพด้วย RPN 1–5')+'</b><br>'+L('The transformer in service is split into the 4 component groups of the scope (insulation system, OLTC, bushing, cooling system). Visible failure modes follow the recorded defect codes; internal insulation faults come from DGA and oil tests.','แยกหม้อแปลงที่ใช้งานอยู่เป็นส่วนประกอบ 4 กลุ่มตามขอบเขต (ระบบฉนวน OLTC บูชชิ่ง ระบบระบายความร้อน) รูปแบบความล้มเหลวที่แสดงอาการอ้างอิงรหัสความผิดปกติที่ใช้บันทึกงานซ่อม ส่วนความผิดปกติภายในฉนวนมาจากผล DGA และผลทดสอบน้ำมัน')+'<br><br>'+L('Scale 1–5 for O, S and D (MIL-STD-1629A), RPN = O × S × D from 1 to 125. RPN level: High ≥ 40, Medium 18–39, Low < 18 (provisional). Severity 5 is handled first regardless of RPN. O follows the latest lab result where the lab can show it (grade A → 1 … E → 5).','เกณฑ์ 1–5 ของ O, S และ D (MIL-STD-1629A) ค่า RPN = O × S × D อยู่ระหว่าง 1–125 · ระดับ RPN: สูง ≥ 40 ปานกลาง 18–39 ต่ำ < 18 (เกณฑ์ชั่วคราว) · ความรุนแรง 5 ต้องจัดการก่อนเสมอ · O ปรับตามผลแล็บล่าสุดเมื่อผลแล็บบอกได้ (เกรด A → 1 … E → 5)')+'<br>'+SD_S_HINT())}</div>
   <div class="grid" style="grid-template-columns:1fr; margin-bottom:16px;">
-    <div class="card"><div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('code')}</th><th>${t('component')}</th><th>${t('failure_mode')}</th><th>${t('effect')}</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>${L('RPN level','ระดับ RPN')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
-      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td><b>${esc(f.comp)}</b></td><td>${esc(f.mode)}</td><td class="small-muted">${esc(f.effect)}</td><td>${f.s}${f.s>=5?'<span class="sflag" title="'+L('Severity 5 (catastrophic): handle first regardless of RPN','ความรุนแรง 5 (หายนะ): ต้องจัดการก่อนเสมอไม่ว่า RPN เท่าไร')+'">S=5</span>':''}</td><td>${f.o}${f.oWhy?` <span class="small-muted" title="${esc(L('From lab result: ','จากผลแล็บ: ')+f.oWhy)}" style="cursor:help;">⟳</span>`:''}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':f.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
+    <div class="card"><div class="tbl-wrap"><table><thead><tr><th>#</th><th title="${esc(L('Failure-mode number used in this analysis (the cause) — not a repair-system code','เลขลำดับรูปแบบความล้มเหลวในการวิเคราะห์ (บอกสาเหตุ) — ไม่ใช่รหัสในระบบงานซ่อม'))}">${t('code')} ⓘ</th><th>${t('component')}</th><th>${t('failure_mode')}</th><th>${t('effect')}</th><th title="${esc(L('Code recorded in the repair system when this failure mode happens (symptom), with the required response time','รหัสที่จะถูกบันทึกในระบบงานซ่อมเมื่อรูปแบบนี้เกิดขึ้น (บอกอาการ) พร้อมระยะเวลาที่ต้องเข้าแก้ไข'))}">${L('Recorded as','บันทึกในระบบเป็น')} ⓘ</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>${L('RPN level','ระดับ RPN')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
+      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td><b>${esc(f.comp)}</b>${f.grp==='ins'?`<div class="small-muted" style="font-size:11px;">${L(FMEA_GROUP[f.grp][0],FMEA_GROUP[f.grp][1])}</div>`:''}</td><td>${esc(f.mode)}</td><td class="small-muted">${esc(f.effect)}</td><td style="white-space:normal;min-width:170px;">${sdCell(f)}</td><td>${f.s}${f.s>=5?'<span class="sflag" title="'+L('Severity 5 (catastrophic): handle first regardless of RPN','ความรุนแรง 5 (หายนะ): ต้องจัดการก่อนเสมอไม่ว่า RPN เท่าไร')+'">S=5</span>':''}</td><td>${f.o}${f.oWhy?` <span class="small-muted" title="${esc(L('From lab result: ','จากผลแล็บ: ')+f.oWhy)}" style="cursor:help;">⟳</span>`:''}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':f.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
       </tbody></table></div>
-      <p class="small-muted" style="font-size:11px;margin:8px 0 0;"><span class="sflag" style="margin:0 4px 0 0;">S=5</span>${L('Scale 1–5 for O, S and D (MIL-STD-1629A, after Chiangkul et al.), so RPN = O × S × D runs from 1 to 125. RPN level: High ≥ 40, Medium 18–39, Low < 18 (provisional bands). Severity 5 (catastrophic) is handled first regardless of RPN.','เกณฑ์ 5 ระดับ (1–5) ของ O, S และ D ตาม MIL-STD-1629A (วัฒนา เชียงกูล และคณะ) ค่า RPN = O × S × D จึงอยู่ระหว่าง 1–125 · ระดับ RPN: สูง ≥ 40 ปานกลาง 18–39 ต่ำ < 18 (เกณฑ์ชั่วคราว รอยืนยัน) · ความรุนแรง 5 (หายนะ) ต้องจัดการก่อนเสมอไม่ว่า RPN เท่าไร')}</p></div>
+      <p class="legend1"><span class="sflag" style="margin:0 4px 0 0;">S=5</span>${L('most severe, handle first','ร้ายแรงที่สุด จัดการก่อน')} · ⟳ ${L('O from lab result','O ตามผลแล็บ')} · ${respPill('A')} ${respPill('B')} ${respPill('C')} ${L('repair within 7 h / 10 days / 90 days','ต้องแก้ภายใน 7 ชม. / 10 วัน / 90 วัน')}</p></div>
 
   </div>
   <div class="grid" style="grid-template-columns:1fr 1fr; align-items:stretch;">
-    <div class="card"><h3>${t('risk_matrix')}</h3><p class="card-sub">${t('risk_matrix_desc')}</p>${chartBox('fmeaScatter',260)}
-      <p class="small-muted" style="font-size:11px;margin:8px 0 0;">⟳ ${L('O (occurrence) follows the latest lab result: grade A → 1, B → 2, C → 3, D → 4, E → 5. Edit a row to set O by hand.','O (โอกาสเกิด) ปรับตามผลแล็บล่าสุด: เกรด A → 1, B → 2, C → 3, D → 4, E → 5 กดแก้ไขแถวเพื่อกำหนด O เอง')}</p></div>
+    <div class="card"><h3>${t('risk_matrix')}</h3>${chartBox('fmeaScatter',260)}</div>
     <div class="card"><h3>${t('top5_risk')}</h3>
-      ${fmeaPriority(FMEA).slice(0,5).map(f=>`<div class="bar-row"><div class="bar-label">${f.comp}${f.s>=5?'<span class="sflag">S=5</span>':''}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,f.rpn/1.25)}%; background:${f.rpn>=RPN_HIGH?'var(--red)':f.rpn>=RPN_MED?'var(--amber)':'var(--green)'}"></div></div><div class="bar-val">${f.rpn}</div></div>`).join('')}
+      ${fmeaPriority(FMEA).slice(0,5).map(f=>`<div class="bar-row"><div class="bar-label" style="font-size:12px;" title="${esc(f.mode)}">${f.code} · ${esc(f.comp)}${f.s>=5?'<span class="sflag">S=5</span>':''}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,f.rpn/1.25)}%; background:${f.rpn>=RPN_HIGH?'var(--red)':f.rpn>=RPN_MED?'var(--amber)':'var(--green)'}"></div></div><div class="bar-val">${f.rpn}</div></div>`).join('')}
     </div>
   </div>
   ${refNote('RPN = O × S × D with the 1–5 scales of MIL-STD-1629A: วัฒนา เชียงกูล และคณะ, <i>การจัดการงานบำรุงรักษาด้วย Reliability (Reliability based Maintenance Management)</i>.','RPN = O × S × D ด้วยเกณฑ์ 1–5 ตาม MIL-STD-1629A: วัฒนา เชียงกูล และคณะ, <i>การจัดการงานบำรุงรักษาด้วย Reliability (Reliability based Maintenance Management)</i>')}`;
@@ -3196,6 +3230,10 @@ function openEditFmeaModal(no){
     <div class="formrow"><label>${t('field_component')}</label><input name="comp" value="${esc(f.comp)}" required></div>
     <div class="formrow"><label>${t('field_mode')}</label><input name="mode" value="${esc(f.mode)}" required></div>
     <div class="formrow"><label>${t('field_effect')}</label><input name="effect" value="${esc(f.effect)}" required></div>
+    <div class="grid g2" style="gap:0 12px;"><div class="formrow"><label>${L('Recorded as (codes)','บันทึกในระบบเป็นรหัส')}</label><input name="sd" value="${esc(f.sd||'')}" placeholder="${L('e.g. T007','เช่น T007')}"></div>
+    <div class="formrow"><label>${L('If it escalates (codes)','ถ้าลุกลามเป็นรหัส')}</label><input name="sdx" value="${esc(f.sdx||'')}" placeholder="${L('e.g. T016','เช่น T016')}"></div>
+    <div class="formrow"><label>${L('Response-time code','รหัสระยะเวลาเข้าแก้ไข')}</label><select name="resp"><option value="">—</option>${Object.keys(SD_RESP).map(k=>`<option value="${k}" ${f.resp===k?'selected':''}>${k} — ${L(SD_RESP[k][0],SD_RESP[k][1])}</option>`).join('')}</select></div></div>
+    ${whyFold(L('How to score S','แนวทางให้คะแนน S'), SD_S_HINT())}
     <div class="formrow"><label>${t('field_s')}</label><input name="s" type="number" min="1" max="5" value="${f.s}" required></div>
     <div class="formrow"><label>${t('field_o')}</label><input name="o" type="number" min="1" max="5" value="${f.o}" required></div>
     ${fmeaEvidence(currentAsset(), f)?`<label style="display:flex;gap:6px;align-items:center;font-size:12.5px;margin:-4px 0 10px;"><input type="checkbox" name="oAuto" ${f.oManual?'':'checked'}> ${L('Set O automatically from lab results','ให้ระบบกำหนด O จากผลแล็บ')}</label>`:''}
@@ -3204,7 +3242,7 @@ function openEditFmeaModal(no){
   `, (data)=>{
     const autoOk = !!fmeaEvidence(currentAsset(), f); const newO = Number(data.o);
     f.oManual = autoOk ? !data.oAuto : false; if(autoOk && data.oAuto && newO!==f.o) f.oManual = true;
-    f.comp=data.comp; f.mode=data.mode; f.effect=data.effect; f.s=Number(data.s); f.o=newO; f.d=Number(data.d); f.status=data.status;
+    f.comp=data.comp; f.mode=data.mode; f.effect=data.effect; f.sd=data.sd||''; f.sdx=data.sdx||''; f.resp=data.resp||''; f.s=Number(data.s); f.o=newO; f.d=Number(data.d); f.status=data.status;
     f.rpn = f.s*f.o*f.d; f.risk = rpnLevel(f.rpn);
     render(); toast(t('toast_saved'),'success');
   });
@@ -3214,13 +3252,17 @@ function openAddFmeaModal(){
     <div class="formrow"><label>${t('field_component')}</label><input name="comp" required></div>
     <div class="formrow"><label>${t('field_mode')}</label><input name="mode" required></div>
     <div class="formrow"><label>${t('field_effect')}</label><input name="effect" required></div>
+    <div class="grid g2" style="gap:0 12px;"><div class="formrow"><label>${L('Recorded as (codes)','บันทึกในระบบเป็นรหัส')}</label><input name="sd" value="" placeholder="${L('e.g. T007','เช่น T007')}"></div>
+    <div class="formrow"><label>${L('If it escalates (codes)','ถ้าลุกลามเป็นรหัส')}</label><input name="sdx" value="" placeholder="${L('e.g. T016','เช่น T016')}"></div>
+    <div class="formrow"><label>${L('Response-time code','รหัสระยะเวลาเข้าแก้ไข')}</label><select name="resp"><option value="">—</option>${Object.keys(SD_RESP).map(k=>`<option value="${k}" ${''===k?'selected':''}>${k} — ${L(SD_RESP[k][0],SD_RESP[k][1])}</option>`).join('')}</select></div></div>
+    ${whyFold(L('How to score S','แนวทางให้คะแนน S'), SD_S_HINT())}
     <div class="formrow"><label>${t('field_s')}</label><input name="s" type="number" min="1" max="5" value="3" required></div>
     <div class="formrow"><label>${t('field_o')}</label><input name="o" type="number" min="1" max="5" value="3" required></div>
     <div class="formrow"><label>${t('field_d')}</label><input name="d" type="number" min="1" max="5" value="3" required></div>
   `, (data)=>{
     const s=Number(data.s), o=Number(data.o), d=Number(data.d), rpn=s*o*d;
     const nextCode = 1+Math.max(0,...FMEA.map(f=>parseInt(String(f.code).replace(/\D/g,''),10)||0));
-    FMEA.push({no:1+Math.max(0,...FMEA.map(f=>f.no)), code:`FM-${String(nextCode).padStart(2,'0')}`, comp:data.comp, mode:data.mode, effect:data.effect, s,o,d, rpn, risk: rpnLevel(rpn), control:'-', action:'-', status:'Open'});
+    FMEA.push({no:1+Math.max(0,...FMEA.map(f=>f.no)), code:`FM-${String(nextCode).padStart(2,'0')}`, comp:data.comp, mode:data.mode, effect:data.effect, sd:data.sd||'', sdx:data.sdx||'', resp:data.resp||'', ev:null, s,o,d, rpn, risk: rpnLevel(rpn), control:'-', action:'-', status:'Open'});
     render(); toast(t('toast_added'),'success');
   });
 }
@@ -3267,11 +3309,11 @@ function detailRcmTab(a){
       <div class="rs-a">${seg(p.k, p.v)}${why?`<span class="rs-why">→ ${L(why[0],why[1])}</span>`:''}</div>
       ${p.k==='O' && hint && hint.v!==p.v ? `<div class="rs-warn">${hint.text}</div>`:''}</div></li>`; }).join('');
   if(ev.next){ const h = RCM_QHINT[ev.qKey];
-    steps += `<li class="rcm-step cur"><span class="rs-n">${ev.path.length+1}</span><div class="rs-b"><div class="rs-q big">${qtxt(ev.qKey)}</div>
-      ${h?`<div class="rs-hint">${L(h[0],h[1])}</div>`:''}${ev.next==='O' && hint ? `<div class="rs-hint" style="color:var(--amber);">${hint.text}</div>`:''}
+    steps += `<li class="rcm-step cur"><span class="rs-n">${ev.path.length+1}</span><div class="rs-b"><div class="rs-q big" style="display:inline;">${qtxt(ev.qKey)}</div>
+      ${h?`<details class="qhelp"><summary title="${esc(L('How to answer','ช่วยตอบ'))}">?</summary><div class="rs-hint">${L(h[0],h[1])}</div></details>`:''}${ev.next==='O' && hint ? `<div class="rs-hint" style="color:var(--amber);">${hint.text}</div>`:''}
       <div class="rs-btns"><button class="btn btn-primary" data-rcm-set="${ev.next}" data-rcm-v="yes">${t('yes')}</button><button class="btn btn-outline" data-rcm-set="${ev.next}" data-rcm-v="no">${t('no')}</button></div></div></li>`; }
 
-  const task = ev.decision ? rcmTaskFor(f.comp, ev.decision) : null;
+  const task = ev.decision ? rcmTaskFor(f, ev.decision) : null;
   const nextF = list.find(x=>x.code!==f.code && !rcmEvaluate(rcmAnsFor(a,x)).decision) || list[(list.indexOf(f)+1)%list.length];
   const result = !ev.decision ? '' : `<div class="rcm-out">
       <div class="ro-h"><span class="rs-n" style="background:var(--green);color:#fff;">✓</span><div><div class="small-muted" style="font-weight:700;">${L('Result — strategy to do','ผลลัพธ์ — กลยุทธ์ที่ควรทำ')}</div><div style="margin-top:4px;">${rcmStrategyHtml(st, true)}</div></div></div>
@@ -3288,7 +3330,7 @@ function detailRcmTab(a){
   return `
   <div class="card" style="margin-bottom:14px;">
     <div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('RCM decision','การตัดสินใจ RCM')} — ${a.id}</h3><div class="rcm-sum">${summary}</div></div>
-    <ol class="rcm-how"><li><b>${L('Pick a failure mode','เลือกโหมดความล้มเหลว')}</b> ${L('from the list (most urgent first)','จากรายการ (เรียงจากเร่งด่วนที่สุด)')}</li><li><b>${L('Answer Yes / No','ตอบ ใช่ / ไม่')}</b> ${L('to each question — tap an answer again to change it','ทีละข้อ — กดคำตอบอื่นเพื่อแก้ได้ทันที')}</li><li><b>${L('Get the strategy','ได้กลยุทธ์')}</b> → ${L('confirm and add it to the plan','กดยืนยัน แล้วเพิ่มเข้าแผน')}</li></ol>
+    <p class="legend1" style="margin-top:2px;">${L('Pick a failure mode → answer Yes / No → confirm the strategy and add it to the plan','เลือกโหมด → ตอบ ใช่ / ไม่ → ยืนยันกลยุทธ์แล้วเพิ่มเข้าแผน')}</p>
     <p class="small-muted" style="margin:6px 0 0;font-size:12px;">${rcmConfLine(a).trim()} · <span class="rcm-dot ok">✓</span> ${L('confirmed','ยืนยันแล้ว')} <span class="rcm-dot df"></span> ${L('default answers','ค่าตั้งต้น')} <span class="rcm-dot rv">!</span> ${L('review','ควรทบทวน')}</p>
   </div>
   <div class="rcm-split">
@@ -3435,11 +3477,11 @@ function woCell(tk, st, ti){
 }
 function woSectionHtml(a){
   const list = MAINT_PLAN.map((tk,ti)=>({tk,ti})).filter(x=>x.tk.wo).sort((x,y)=>(x.tk.wo.status==='Closed')-(y.tk.wo.status==='Closed'));
-  const body = list.length ? `<div class="tbl-wrap"><table><thead><tr><th>WO</th><th>${t('task')}</th><th>${L('Assigned to','ผู้รับผิดชอบ')}</th><th>${L('Priority','ความสำคัญ')}</th><th>${L('Due','กำหนดเสร็จ')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
+  const body = list.length ? `<div class="tbl-wrap"><table><thead><tr><th>WO</th><th>${t('task')}</th><th>${L('Assigned to','ผู้รับผิดชอบ')}</th><th>${L('Response code','รหัสระยะเวลา')}</th><th>${L('Due','กำหนดเสร็จ')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
     ${list.map(({tk,ti})=>{ const w=tk.wo; const closed=w.status==='Closed';
       return `<tr><td><b>${w.no}</b><div class="small-muted">${L('issued','ออก')} ${w.issued}</div></td>
         <td style="white-space:normal;">${esc(tk.task)} <span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}</span>${w.instr?`<div class="small-muted">${esc(w.instr)}</div>`:''}${closed&&w.findings?`<div class="small-muted" style="color:var(--green);">✓ ${esc(w.findings)}</div>`:''}</td>
-        <td>${esc(w.assignee||'—')}</td><td><span class="pill ${w.priority==='P1'?'pill-critical':w.priority==='P2'?'pill-warning':'pill-info'}">${w.priority||'—'}</span></td>
+        <td>${esc(w.assignee||'—')}</td><td>${SD_RESP[w.priority] ? respPill(w.priority) : `<span class="pill ${w.priority==='P1'?'pill-critical':w.priority==='P2'?'pill-warning':'pill-info'}">${w.priority||'—'}</span>`}</td>
         <td>${closed?`${L('done','เสร็จ')} ${w.closed}`:w.due}</td>
         <td><span class="pill ${closed?'pill-closed':'pill-progress'}">${closed?L('Closed','ปิดแล้ว'):L('Open','เปิดอยู่')}</span></td>
         <td style="white-space:nowrap;">${closed?'':`<button class="btn btn-primary" data-wo-close="${ti}" style="padding:4px 10px;font-size:11.5px;">${L('Close','ปิดงาน')}</button> <button class="linklike" data-wo-cancel="${ti}" style="font-size:11.5px;">${L('Cancel','ยกเลิก')}</button>`}</td></tr>`; }).join('')}
@@ -3449,15 +3491,18 @@ function woSectionHtml(a){
 }
 function openIssueWoModal(tk){
   const a = currentAsset(); const rk = riskOf(a);
-  const pri = {'Very high':'P1','High':'P1','Medium':'P2','Low':'P3',VP:'P1',P:'P1',C:'P2',G:'P3',VG:'P3'}[rk.level] || 'P2';
+  const fm = (tk.task.match(/\((FM-\d+)\)\s*$/)||[])[1]; const f = fm ? (getFmeaFor(a).find(x=>x.code===fm)) : null;
+  const pri = (tk.type==='CM' && f && f.resp) ? f.resp : (['VP','P','Very high','High'].includes(rk.level) ? 'B' : 'C');
+  const dueOf = (c)=>{ const d0=new Date(); const n=SD_RESP[c]?SD_RESP[c][2]:30; const d=new Date(d0.getTime()+n*864e5); const pe=parseD(tk.end); return (tk.type!=='CM' && pe && pe>d0 && pe<d) ? pe : d; };
   openModal(`${L('Issue work order','ออกใบสั่งงาน')} — ${esc(tk.task)}`, `
-    <div class="notebox" style="margin-bottom:12px;">${a.id} · ${tk.type} · ${L('planned','ตามแผน')} ${tk.start} → ${tk.end} · ${L('risk','ความเสี่ยง')} ${riskName(rk.level)}</div>
+    <div class="notebox" style="margin-bottom:12px;">${a.id} · ${tk.type} · ${L('planned','ตามแผน')} ${tk.start} → ${tk.end} · ${riskLbl()} ${riskName(rk.level)}</div>
     <div class="formrow"><label>${L('Assign to','ผู้รับผิดชอบ')}</label><select name="assignee">${USERS.map(u=>`<option ${u.role==='Operator'?'selected':''}>${esc(u.name)}</option>`).join('')}</select></div>
-    <div class="formrow"><label>${L('Priority','ความสำคัญ')}</label><select name="priority">${[['P1',L('P1 — urgent','P1 — ด่วน')],['P2',L('P2 — normal','P2 — ปกติ')],['P3',L('P3 — routine','P3 — ตามรอบ')]].map(p=>`<option value="${p[0]}" ${p[0]===pri?'selected':''}>${p[1]}</option>`).join('')}</select></div>
-    <div class="formrow"><label>${L('Due date','กำหนดเสร็จ')}</label><input type="date" name="due" value="${isoD(parseD(tk.end)||new Date())}" required></div>
+    <div class="formrow"><label>${L('Response-time code','รหัสระยะเวลาเข้าแก้ไข')}</label><select name="priority" id="woResp">${Object.keys(SD_RESP).map(k=>`<option value="${k}" ${k===pri?'selected':''}>${k} — ${L(SD_RESP[k][0],SD_RESP[k][1])}</option>`).join('')}</select></div>
+    <div class="formrow"><label>${L('Due date','กำหนดเสร็จ')} <span class="small-muted">(${L('set from the code; can be changed','ตั้งตามรหัส แก้ไขได้')})</span></label><input type="date" name="due" id="woDue" value="${isoD(dueOf(pri))}" required></div>${f?`<p class="small-muted" style="font-size:11.5px;margin:-4px 0 8px;">${f.code} · ${esc(f.mode)}${f.sd?` · ${esc(f.sd)}`:''}</p>`:''}
     <div class="formrow"><label>${L('Instructions','คำสั่งงาน')}</label><input name="instr" value="${esc(tk.notes||'')}"></div>`,
   (d)=>{ tk.wo = {no:nextWoNo(), status:'Open', issued:fmtD(new Date()), assignee:d.assignee, priority:d.priority, due:fmtD(new Date(d.due+'T00:00:00')), instr:d.instr||''};
     render(); toast(L(`Work order ${tk.wo.no} issued`,`ออกใบสั่งงาน ${tk.wo.no} แล้ว`),'success'); });
+  const rs=document.getElementById('woResp'), du=document.getElementById('woDue'); if(rs&&du) rs.addEventListener('change',()=>{ du.value = isoD(dueOf(rs.value)); });
 }
 function openCloseWoModal(tk){
   openModal(`${L('Close work order','ปิดใบสั่งงาน')} ${tk.wo.no}`, `
@@ -3596,7 +3641,7 @@ function assetReportHtml(a){
     </div>
     <h2>${L('3 · Failure modes & RCM decision (priority: S = 5 first, then RPN)','3 · โหมดความล้มเหลวและการตัดสินใจ RCM (ลำดับ: S = 5 ก่อน แล้วตาม RPN)')}</h2>
     <table><tr><th>${L('Code','รหัส')}</th><th>${L('Component — failure mode','ชิ้นส่วน — โหมดความล้มเหลว')}</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>${L('RCM decision','ผล RCM')}</th><th>${L('Task · interval','งาน · รอบ')}</th></tr>
-    ${fm.map(({f,e})=>{ const tk=e.decision?rcmTaskFor(f.comp,e.decision):null; return `<tr><td>${f.code}</td><td>${f.comp} — ${f.mode}</td><td>${f.s}${f.s>=5?' ⚑':''}</td><td>${f.o}</td><td>${f.d}</td><td><b>${f.rpn}</b></td><td>${e.decision||L('pending','รอวิเคราะห์')}</td><td>${tk?tk[0]+' · '+tk[1]:'—'}</td></tr>`; }).join('')}</table>
+    ${fm.map(({f,e})=>{ const tk=e.decision?rcmTaskFor(f,e.decision):null; return `<tr><td>${f.code}</td><td>${f.comp} — ${f.mode}</td><td>${f.s}${f.s>=5?' ⚑':''}</td><td>${f.o}</td><td>${f.d}</td><td><b>${f.rpn}</b></td><td>${e.decision||L('pending','รอวิเคราะห์')}</td><td>${tk?tk[0]+' · '+tk[1]:'—'}</td></tr>`; }).join('')}</table>
     <div class="r2">
       <div><h2>${L('4 · Strategy','4 · กลยุทธ์')}</h2>
         <div class="rbox"><b>${L('Tasks (RCM)','ระดับงาน (RCM)')}:</b> ${taskStratSummary(a)}</div>
@@ -3747,20 +3792,18 @@ function attachDetailEvents(){
    FMEA ↔ lab link: Occurrence (O) follows the latest lab evidence
    ===================================================================== */
 const G2O = {A:1,B:2,C:3,D:4,E:5};   /* lab grade → Occurrence on the 1–5 scale */
-const RPN_HIGH = 40, RPN_MED = 18;   /* RPN 1–125 bands — provisional, to be confirmed with the advisor */
-function rpnLevel(r){ return r>=RPN_HIGH?'High':r>=RPN_MED?'Medium':'Low'; }
 function worseCode(a,b){ return CODE_SF[a]<=CODE_SF[b]?a:b; }
 function fmeaEvidence(a, f, as){
   as = as || a._as; if(!as) return null; const d=as.dga, F=as.factors, fam=famOf(d.code);
   const gasIf = (ok)=> ok ? d.ff : 'A';
   const gasTxt = d.code==='N' ? L('gas normal','ก๊าซปกติ') : `DGA ${d.code}`;
-  switch(f.comp){
-    case 'Winding': { const g=worseCode(gasIf(fam==='T'||fam==='DT'), F.PCF.code); return {g, why:`${gasTxt} · ${L('paper','กระดาษ')} ${F.PCF.code}`}; }
-    case 'Bushing': return {g:gasIf(fam==='D'||fam==='PD'||fam==='DT'), why:gasTxt};
-    case 'OLTC (Tap Changer)': return {g:gasIf(fam==='D'||fam==='DT'), why:gasTxt};
-    case 'Cooling System': return {g:gasIf(fam==='T'), why:gasTxt};
-    case 'Oil': return {g:F.OQF.code, why:`${L('oil quality','คุณภาพน้ำมัน')} ${F.OQF.code}`};
-    case 'Breather': { const r=F.OQF.rows.find(x=>x.key==='water'); const g=({1:'A',2:'C',3:'D',4:'E'})[r&&r.score||1]; return {g, why:`${L('water','ความชื้น')} ${r?r.res:'—'}`}; }
+  const ev = f.ev!==undefined ? f.ev : ((FMEA_TEMPLATE.find(t=>t.code===f.code&&t.mode===f.mode)||{}).ev||null);
+  switch(ev){
+    case 'paper': { const g=worseCode(gasIf(fam==='T'||fam==='DT'), F.PCF.code); return {g, why:`${gasTxt} · ${L('paper','กระดาษ')} ${F.PCF.code}`}; }
+    case 'thermal': return {g:gasIf(fam==='T'||fam==='DT'), why:gasTxt};
+    case 'discharge': return {g:gasIf(fam==='D'||fam==='PD'||fam==='DT'), why:gasTxt};
+    case 'oltc': return {g:gasIf(fam==='D'||fam==='DT'), why:gasTxt};
+    case 'oil': { const r=F.OQF.rows.find(x=>x.key==='water'); const gw=({1:'A',2:'C',3:'D',4:'E'})[r&&r.score||1]; const g=worseCode(F.OQF.code, gw); return {g, why:`${L('oil quality','คุณภาพน้ำมัน')} ${F.OQF.code} · ${L('water','ความชื้น')} ${r?r.res:'—'}`}; }
     default: return null;
   }
 }
@@ -3971,13 +4014,12 @@ function renderRiskPage(){
   let grid = `<div></div>${RATE_COLS.map(c=>`<div class="ax">${c}</div>`).join('')}`;
   HI_ROWS.forEach((row,i)=>{ grid += `<div class="ax" style="font-size:10px;">${row[0]}</div>`; for(let j=0;j<3;j++){ const l=RISK_T10[i][j], col=RISK_COL[l]; grid += `<div class="cell" style="background:${col[0]};"><span class="sc" style="color:${col[1]};">${riskName(l)}</span></div>`; } });
   return `
-  <div class="notebox" style="margin-bottom:16px;">${gicon('help',16)}<div><b>${L(`Only ${span.toFixed(1)} year(s) of test results — ranked by condition level and IC`,`มีผลทดสอบย้อนหลังเพียง ${span.toFixed(1)} ปี — จัดลำดับด้วยระดับสภาพและค่า IC`)}</b><br>${L('The HI decreasing rate needs at least 3 years of yearly HI. Until then the order is: (1) condition level from the HI, (2) higher criticality importance IC first, (3) inside each transformer, the RPN of its failure modes. The risk matrix switches on automatically when 3 years of results exist.','อัตราการลดลงของ HI ต้องใช้ค่า HI รายปีย้อนหลังอย่างน้อย 3 ปี ระหว่างนี้ลำดับความสำคัญคือ (1) ระดับสภาพจากค่า HI (2) ถ้าระดับเท่ากัน หม้อแปลงที่มีค่า IC สูงกว่าอยู่ก่อน (3) ภายในหม้อแปลงแต่ละเครื่องใช้ค่า RPN ของรูปแบบความล้มเหลว · เมทริกซ์ความเสี่ยง จะเปิดใช้เองเมื่อมีข้อมูลครบ 3 ปี')}</div></div>
+  <div class="notebox" style="margin-bottom:16px;align-items:center;">${gicon('help',16)}<div><b>${L(`${span.toFixed(1)} year(s) of data · ranked by condition level, then IC`,`ข้อมูล ${span.toFixed(1)} ปี · เรียงตามระดับสภาพ แล้วตามค่า IC`)}</b>${whyFold(L('Why this order','ทำไมเรียงแบบนี้'), L('The HI decreasing rate needs at least 3 years of yearly HI. Until then the order is: (1) condition level from the HI, (2) higher criticality importance IC first, (3) inside each transformer, the RPN of its failure modes. The risk matrix switches on automatically when 3 years of results exist.','อัตราการลดลงของ HI ต้องใช้ค่า HI รายปีย้อนหลังอย่างน้อย 3 ปี ระหว่างนี้ลำดับความสำคัญคือ (1) ระดับสภาพจากค่า HI (2) ถ้าระดับเท่ากัน หม้อแปลงที่มีค่า IC สูงกว่าอยู่ก่อน (3) ภายในหม้อแปลงแต่ละเครื่องใช้ค่า RPN ของรูปแบบความล้มเหลว · เมทริกซ์ความเสี่ยง จะเปิดใช้เองเมื่อมีข้อมูลครบ 3 ปี') + '<br>' + L('This is a lexicographic multi-criteria rule: IC is used only when the condition level is tied.','เป็นการตัดสินใจแบบหลายเกณฑ์วิธี Lexicographic คือใช้ค่า IC เฉพาะเมื่อระดับสภาพเท่ากัน') + '<br>' + HI_LEGEND())}</div></div>
   ${falseUnits.length?`<div class="notebox" style="margin-bottom:16px;background:var(--amber-bg);">${gicon('help',16)}<div><b>Faults Factor = FALSE</b> — ${falseUnits.map(a=>`${esc(a.id)} (${a._falseSkip.join(', ')})`).join(' · ')}<br>${L('No HI is calculated for these results; the latest valid result is used. Check them with an engineer.','ไม่คำนวณค่า HI ของผลทดสอบครั้งนี้ ระบบใช้ผลล่าสุดที่คำนวณได้แทน ควรตรวจสอบกับวิศวกร')}</div></div>`:''}
   <div class="grid" style="grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;">
     ${HI_CATS.map(c=>{ const col=RISK_COL[c[1]]; return `<div class="card stat" style="border-top:4px solid ${col[1]};"><div><div class="label">${L(c[2][0],c[2][1])} (${c[1]})</div><div class="value">${cnt(c[1])}</div><div class="small-muted">${L('transformers','หม้อแปลง')} · ${L('life','อายุเหลือ')} ${L(COND_LIFE[c[1]][0],COND_LIFE[c[1]][1])}</div></div></div>`; }).join('')}
   </div>
   <div class="card" style="margin-bottom:16px;"><h3>${L('Priority ranking','ลำดับความสำคัญ')}</h3>
-    <p class="card-sub">${L('Sorted by condition level, then by criticality importance IC (higher first).','เรียงตามระดับสภาพ แล้วตามค่า IC (สูงกว่าอยู่ก่อน)')}</p>
     <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>HI</th><th>${L('Condition level','ระดับสภาพ')}</th><th title="${L('Criticality importance from the Reliability page','ค่าดัชนีความสำคัญจากหน้าความเชื่อถือได้')}">I<sub>C</sub> ⓘ</th><th>${L('Expected remaining life (Jahromi)','อายุที่คาดว่าเหลือ (Jahromi)')}</th><th>${L('Weakest factor','ปัจจัยที่ทำให้ HI ต่ำ')}</th><th>${L('Action','แนวทางดำเนินการ')}</th></tr></thead><tbody>
     ${list.map((o,i)=>{ const F=o.a._as?o.a._as.factors:null; const worst=F?['FF','OQF','PCF'].sort((x,y)=>F[x].sf-F[y].sf)[0]:null; return `<tr><td>${i+1}</td><td><button class="viewlink" data-view="${o.a.id}"><b>${o.a.id}</b></button><div class="small-muted" style="font-size:11.5px;">${esc(o.a.loc||'')}</div></td>
       <td style="color:${hiColor(o.a.hi)};font-weight:800;">${fmtHi(o.a.hi)}</td><td>${riskPill(o.r.level)}</td>
@@ -3985,10 +4027,8 @@ function renderRiskPage(){
       <td>${worst?`${L(FACTOR_NAMES[worst][0],FACTOR_NAMES[worst][1])} <b>${F[worst].code}</b>`:'—'}</td>
       <td class="small-muted" style="white-space:normal;min-width:190px;"><span style="color:var(--text);">${riskAction(o.r)}</span>${sampleOverdueDays(o.a)?`<div style="font-size:11.5px;margin-top:2px;color:var(--red);font-weight:700;">${L(`sampling overdue ${sampleOverdueDays(o.a)} d`,`เลยกำหนดเก็บตัวอย่าง ${sampleOverdueDays(o.a)} วัน`)}</div>`:''}</td></tr>`; }).join('')}
     </tbody></table></div>
-    <p class="small-muted" style="font-size:11px;margin:8px 0 0;">${HI_LEGEND()}</p>
   </div>
   <div class="card" style="opacity:.55;"><h3>${L('Risk matrix — HI value × HI decreasing rate','เมทริกซ์ความเสี่ยง — ค่า HI × อัตราการลดลงของ HI')} <span class="pill" style="background:#eef0f3;color:#5b6573;margin-left:6px;">${L('available with ≥ 3 years of data','ใช้ได้เมื่อมีข้อมูลครบ 3 ปี')}</span></h3>
-    <p class="card-sub">${L('Shown for reference only. No transformer is placed on it until its decreasing rate can be estimated.','แสดงไว้อ้างอิงเท่านั้น ยังไม่วางหม้อแปลงลงในตารางจนกว่าจะคำนวณอัตราการลดลงได้')}</p>
     <div class="rmx" style="grid-template-columns:60px repeat(3,1fr);">${grid}</div></div>
   ${refNote('Condition levels: Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327, Table 8 · expected remaining life: Jahromi et al. (2009), <i>IEEE Electrical Insulation Magazine</i> 25(2):20–34, Table 11 · risk matrix: Tamma et al. (2021), Table 10 · I<sub>C</sub>: Rausand &amp; Høyland (2004).','ระดับสภาพ: Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327, Table 8 · อายุที่คาดว่าเหลือ: Jahromi et al. (2009), <i>IEEE Electrical Insulation Magazine</i> 25(2):20–34, Table 11 · เมทริกซ์ความเสี่ยง: Tamma et al. (2021), Table 10 · I<sub>C</sub>: Rausand &amp; Høyland (2004)')}`;
 }
@@ -4530,6 +4570,9 @@ document.getElementById('sidebarBackdrop').addEventListener('click', closeSideba
 
 /* ============ THAI DISPLAY LAYER ============ */
 const TH_TERMS = {
+ 'Paper insulation thermal ageing':'กระดาษฉนวนเสื่อมสภาพจากความร้อน','Local hot spot (thermal fault)':'ความร้อนผิดปกติเฉพาะจุด','Partial discharge / internal arcing':'ดิสชาร์จบางส่วนหรืออาร์กภายใน','Oil degradation / high moisture':'น้ำมันฉนวนเสื่อมหรือความชื้นสูง','Contact wear / burning':'หน้าสัมผัสสึกหรอหรือไหม้','Motor-drive failure':'ชุดขับเคลื่อน (Motor Drive) ขัดข้อง','Internal insulation deterioration':'ฉนวนภายในเสื่อม','Oil leakage at base / seals':'น้ำมันรั่วซึมที่ฐานหรือซีล','Fan / oil pump not running':'พัดลมหรือปั๊มน้ำมันไม่ทำงาน','Radiator clogged / leaking':'หม้อน้ำ (Radiator) อุดตันหรือรั่ว',
+ 'Insulation strength lost, risk of internal short circuit':'ความแข็งแรงของฉนวนลดลง เสี่ยงลัดวงจรภายใน','Gas in oil, faster insulation ageing':'เกิดก๊าซในน้ำมัน ฉนวนเสื่อมเร็ว','Insulation damage, trip or permanent damage':'ฉนวนเสียหาย ทริปหรือเสียหายถาวร','Lower dielectric strength, faster paper ageing':'ความคงทนต่อแรงดันลดลง กระดาษเสื่อมเร็วขึ้น','Incomplete tap change, heating or arcing':'เปลี่ยนแทปไม่สมบูรณ์ เกิดความร้อนหรืออาร์ก','Cannot regulate secondary voltage':'ควบคุมแรงดันด้านทุติยภูมิไม่ได้','Flashover or explosion, possible fire':'วาบไฟหรือระเบิด อาจลุกลามเป็นไฟไหม้','Moisture ingress, low oil level':'ความชื้นเข้า ระดับน้ำมันลดลง','High temperature at high load, derating':'อุณหภูมิสูงเมื่อโหลดสูง ต้องลดโหลด','Reduced cooling capacity':'ระบายความร้อนได้น้อยลง',
+ 'BDV, moisture, colour, acidity, IFT':'BDV ความชื้น สี กรด IFT','OLTC oil BDV and moisture':'BDV และความชื้นของน้ำมัน OLTC','Alarm and routine inspection':'สัญญาณเตือนและการตรวจเยี่ยม','DFR (DF, capacitance), thermography':'DFR (DF และค่าความจุ) ภาพถ่ายความร้อน','Not known until the start temperature is reached':'ไม่ทราบจนกว่าจะถึงอุณหภูมิที่สั่งงาน','Visual inspection, thermography':'ตรวจด้วยสายตา ภาพถ่ายความร้อน','(consequence)':'(ผลที่ตามมา)',
  'Winding':'ขดลวด','Bushing':'บุชชิ่ง','OLTC (Tap Changer)':'OLTC (ตัวเปลี่ยนแทป)','Cooling System':'ระบบระบายความร้อน','Oil':'น้ำมันฉนวน','Breather':'เบรทเทอร์','Tank':'ตัวถัง',
  'Overheating':'ร้อนเกิน','Leakage':'รั่วซึม','Contact wear':'หน้าสัมผัสสึก','Fan failure':'พัดลมเสีย','Degradation':'เสื่อมสภาพ','Clogged / saturated':'อุดตัน / อิ่มตัว','External leakage':'รั่วซึมภายนอก',
  'Insulation failure':'ฉนวนเสียหาย','Flashover':'วาบไฟตามผิว','Operation failure':'ทำงานไม่ได้','Insulation loss':'สูญเสียความเป็นฉนวน','Moisture ingress':'ความชื้นเข้า','Environmental risk':'เสี่ยงต่อสิ่งแวดล้อม',
@@ -4569,7 +4612,7 @@ loadData();
   const c = new Date(d1.getTime() + 15*864e5); if(c>=d0) return; const st = new Date(c.getTime() - 2*864e5);
   const plan = getMaintFor(a);
   plan.push({no:1+Math.max(0,...plan.map(x=>x.no)), task:'Oil filtration & degassing', type:'CM', start:fmtD(st), end:fmtD(c), dur:'3 days', m:MON[st.getMonth()], len:2,
-    notes:'Sample record for demonstration', wo:{no:nextWoNo(), status:'Closed', issued:fmtD(st), assignee:'Maintenance Team', priority:'P2', due:fmtD(c), instr:'', closed:fmtD(c), findings:'Oil filtered and degassed (sample record)'}});
+    notes:'Sample record for demonstration', wo:{no:nextWoNo(), status:'Closed', issued:fmtD(st), assignee:'Maintenance Team', priority:'C', due:fmtD(c), instr:'', closed:fmtD(c), findings:'Oil filtered and degassed (sample record)'}});
 })();
 /* ============ LOGIN GATE ============ */
 document.getElementById('loginTitle').textContent = t('login_title');
