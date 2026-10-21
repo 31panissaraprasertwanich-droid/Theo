@@ -749,6 +749,7 @@ button.ovb-status{cursor:pointer;} button.ovb-status:hover{background:rgba(255,2
       </div>
       <div class="topbar-right">
         <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="globalSearch" placeholder="Search transformer ID…"></div>
+        <button class="btn btn-outline" id="mockToggle" style="padding:6px 12px;font-size:12px;white-space:nowrap;">View with data</button>
         <div class="langtoggle"><button id="langEn" class="active" data-lang="en">EN</button><button id="langTh" data-lang="th">TH</button></div>
         <div class="bell" id="guideBtn" title="Help / Guide" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.8.5-1.1 1-1.1 1.9"/><circle cx="12" cy="17.2" r="1" fill="currentColor" stroke="none"/></svg></div>
         <div style="position:relative;">
@@ -790,8 +791,8 @@ const UI = {
  nav_overview:['Overview','ภาพรวม'], nav_assets:['Transformer Assets','หม้อแปลง'], nav_healthindex:['Health Index','ดัชนีสุขภาพ'],
  nav_dga:['DGA Analysis','วิเคราะห์ DGA'], nav_fmea:['FMEA & RPN','FMEA & RPN'], nav_rcm:['RCM Decision','การตัดสินใจ RCM'],
  nav_plan:['Maintenance Plan','แผนบำรุงรักษา'], nav_reports:['Reports','รายงาน'], nav_settings:['Settings','ตั้งค่า'], nav_reliability:['Reliability','ความเชื่อถือได้'], nav_schematic:['Schematic','แผนภาพวงจร'], sub_schematic:['Single-line diagram of each substation and its transformers','แผนภาพเส้นเดี่ยวของแต่ละสถานีและหม้อแปลง'],
- brand_sub:['Reliability Centered Maintenance','การบำรุงรักษาที่มีความเชื่อถือได้เป็นศูนย์กลาง'],
- footer_tag:['Reliable Grid<br>Sustainable Tomorrow','โครงข่ายเชื่อถือได้<br>เพื่ออนาคตยั่งยืน'],
+ brand_sub:['Reliability Centered Maintenance','ระบบบำรุงรักษาแบบ RCM'],
+ footer_tag:['',''],
  search_ph:['Search transformer ID…','ค้นหารหัสหม้อแปลง…'],
  role:['Maintenance Engineer','วิศวกรบำรุงรักษา'], logout:['Log out','ออกจากระบบ'],
  login_title:['RCM Transformer','RCM Transformer'], login_sub:['Reliability Centered Maintenance for power transformers','ระบบบำรุงรักษาหม้อแปลงไฟฟ้าที่มีความเชื่อถือได้เป็นศูนย์กลาง'],
@@ -1217,7 +1218,7 @@ function isLowLevel(l){ return ['Low','VG','G'].includes(l); }
 const COND_LIFE = {VG:['> 15 years','มากกว่า 15 ปี'], G:['> 10 years','มากกว่า 10 ปี'], C:['≤ 10 years','ไม่เกิน 10 ปี'], P:['< 3 years','น้อยกว่า 3 ปี'], VP:['End of life','สิ้นอายุการใช้งาน']};   /* Jahromi et al. (2009), Table 11 */
 function lifeOf(a){ const c=hiCat(a.hi).code; const x=COND_LIFE[c]; return x?L(x[0],x[1]):'—'; }
 function icOfMap(){ const m={}; try{ netCalc().ranked.forEach(u=>{ m[u.a.id]={IC:u.IC, rank:u.rank}; }); }catch(e){} return m; }
-const RISK_COL = {'Very high':['#B3261E','#ffffff'],'High':['#fbe3e1','#c62d23'],'Medium':['#fdf1d6','#b07d05'],'Low':['#e3f5ec','#178a5e'], VG:['#e3f5ec','#178a5e'], G:['#eef7e6','#4d8a1f'], C:['#fdf1d6','#b07d05'], P:['#fbe3e1','#c62d23'], VP:['#B3261E','#ffffff'], '—':['#eef0f3','#5b6573']};
+const RISK_COL = {'Very high':['#B3261E','#ffffff'],'High':['#fde7d3','#b85a0c'],'Medium':['#fdf1d6','#b07d05'],'Low':['#e3f5ec','#178a5e'], VG:['#e3f5ec','#178a5e'], G:['#eef7e6','#4d8a1f'], C:['#fdf1d6','#b07d05'], P:['#fde7d3','#b85a0c'], VP:['#B3261E','#ffffff'], '—':['#eef0f3','#5b6573']};
 function riskName(l){ const c=HI_CATS.find(x=>x[1]===l); if(c) return `${L(c[2][0],c[2][1])} (${l})`; if(l==='—') return L('HI not calculated','ไม่คำนวณ HI'); return ({'Very high':L('Very high','สูงมาก'),'High':L('High','สูง'),'Medium':L('Medium','ปานกลาง'),'Low':L('Low','ต่ำ')})[l]; }
 function riskPill(l){ const c=RISK_COL[l]||RISK_COL['—']; return `<span class="pill" style="background:${c[0]};color:${c[1]};">${riskName(l)}</span>`; }
 /* single source for every page: what to do now + how often to resample, both from the risk level */
@@ -2448,7 +2449,7 @@ function renderOverview(){
       <button class="btn ovb-btn" data-import-lab="1">${gicon('upload',0,'width:13px;height:13px')} ${L('Import lab results','นำเข้าผลแล็บ')}</button>
     </div>
   </section>
-  ${ASSETS.filter(a=>sampleOverdueDays(a)>0).sort((x,y)=>RISK_ORDER[riskOf(x).level]-RISK_ORDER[riskOf(y).level]).map(a=>`<button data-view="${esc(a.id)}" style="display:flex;width:100%;gap:10px;align-items:center;text-align:left;font:inherit;cursor:pointer;border:1px solid var(--red);background:var(--red-bg);color:var(--red);border-radius:12px;padding:10px 14px;margin:0 0 12px;"><b>${L(`${esc(a.id)}: oil sampling is overdue by ${sampleOverdueDays(a)} days`,`${esc(a.id)}: เลยกำหนดเก็บตัวอย่างน้ำมัน ${sampleOverdueDays(a)} วัน`)}</b><span style="flex:1;">${L('was due','ครบกำหนด')} ${a.next} · ${riskName(riskOf(a).level)}</span><span>→</span></button>`).join('')}
+  ${(()=>{ const od=ASSETS.filter(a=>sampleOverdueDays(a)>0).sort((x,y)=>RISK_ORDER[riskOf(x).level]-RISK_ORDER[riskOf(y).level]); return od.length?`<div style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;border:1px solid var(--amber);background:var(--amber-bg);border-radius:12px;padding:10px 14px;margin:0 0 12px;font-size:13.5px;"><b style="color:var(--text);">${L(`${od.length} transformer${od.length>1?'s':''} overdue for oil sampling`,`เลยกำหนดเก็บตัวอย่างน้ำมัน ${od.length} เครื่อง`)}:</b>${od.map(a=>`<button class="linklike" data-view="${esc(a.id)}" style="font-weight:700;">${esc(a.id)} (${sampleOverdueDays(a)} ${L('d','วัน')})</button>`).join('<span class="small-muted">·</span>')}</div>`:''; })()}
   <div class="card kstrip">
     <div class="k"><span>${L('Transformers','หม้อแปลงทั้งหมด')}</span><b>${N}</b><em>${L('average HI','HI เฉลี่ย')} ${avgHi}</em></div>
     <div class="k"><span>${t('healthy')}</span><b style="color:var(--green);">${healthy}</b></div>
@@ -2460,7 +2461,7 @@ function renderOverview(){
     <section class="card">
       <div class="card-head"><h3>${L('Needs action','ต้องดำเนินการ')}</h3><button class="linklike" data-goto-assets="1">${L('All transformers','หม้อแปลงทั้งหมด')}</button></div>
       ${att.length?`<div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${L('Transformer','หม้อแปลง')}</th><th>HI</th><th>${riskLbl()}</th><th>DGA</th><th>${L('Next step','ขั้นต่อไป')}</th></tr></thead><tbody>
-      ${att.map(a=>`<tr data-view="${esc(a.id)}"><td><b>${esc(a.id)}</b><div class="small-muted" style="font-size:12px;">${esc(a.loc||'')}</div></td><td style="color:${hiColor(a.hi)};font-weight:700;">${fmtHi(a.hi)}</td><td>${riskPill(riskOf(a).level)}</td><td>${a._as&&a._as.dga.code!=='N'?`<b>${a._as.dga.code}</b><div class="small-muted" style="font-size:12px;white-space:normal;">${dgaName(a._as.dga.code)}</div>`:'—'}</td><td class="ov-act"><span style="color:var(--text);">${riskAction(riskOf(a))}</span><div style="font-size:12px;margin-top:2px;">${riskFollow(riskOf(a))}</div></td></tr>`).join('')}
+      ${att.map(a=>`<tr data-view="${esc(a.id)}"><td><b>${esc(a.id)}</b><div class="small-muted" style="font-size:12px;">${esc(a.loc||'')}</div></td><td style="color:${hiColor(a.hi)};font-weight:700;">${fmtHi(a.hi)}</td><td>${riskPill(riskOf(a).level)}</td><td>${a._as&&a._as.dga.code!=='N'?`<b title="${esc(dgaName(a._as.dga.code))}">${a._as.dga.code}</b>`:'—'}</td><td class="ov-act"><span style="color:var(--text);">${riskAction(riskOf(a))}</span></td></tr>`).join('')}
       </tbody></table></div>`:`<p class="small-muted" style="margin:0;">${L('No transformer needs action right now.','ตอนนี้ไม่มีหม้อแปลงที่ต้องดำเนินการ')}</p>`}
     </section>
     <section class="card">
@@ -4020,11 +4021,10 @@ function renderRiskPage(){
     ${HI_CATS.map(c=>{ const col=RISK_COL[c[1]]; return `<div class="card stat" style="border-top:4px solid ${col[1]};"><div><div class="label">${L(c[2][0],c[2][1])} (${c[1]})</div><div class="value">${cnt(c[1])}</div><div class="small-muted">${L('transformers','หม้อแปลง')} · ${L('life','อายุเหลือ')} ${L(COND_LIFE[c[1]][0],COND_LIFE[c[1]][1])}</div></div></div>`; }).join('')}
   </div>
   <div class="card" style="margin-bottom:16px;"><h3>${L('Priority ranking','ลำดับความสำคัญ')}</h3>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>HI</th><th>${L('Condition level','ระดับสภาพ')}</th><th title="${L('Criticality importance from the Reliability page','ค่าดัชนีความสำคัญจากหน้าความเชื่อถือได้')}">I<sub>C</sub> ⓘ</th><th>${L('Expected remaining life (Jahromi)','อายุที่คาดว่าเหลือ (Jahromi)')}</th><th>${L('Weakest factor','ปัจจัยที่ทำให้ HI ต่ำ')}</th><th>${L('Action','แนวทางดำเนินการ')}</th></tr></thead><tbody>
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>${t('asset')}</th><th>HI</th><th>${L('Condition level','ระดับสภาพ')}</th><th title="${L('Criticality importance from the Reliability page','ค่าดัชนีความสำคัญจากหน้าความเชื่อถือได้')}">I<sub>C</sub> ⓘ</th><th>${L('Action','แนวทางดำเนินการ')}</th></tr></thead><tbody>
     ${list.map((o,i)=>{ const F=o.a._as?o.a._as.factors:null; const worst=F?['FF','OQF','PCF'].sort((x,y)=>F[x].sf-F[y].sf)[0]:null; return `<tr><td>${i+1}</td><td><button class="viewlink" data-view="${o.a.id}"><b>${o.a.id}</b></button><div class="small-muted" style="font-size:11.5px;">${esc(o.a.loc||'')}</div></td>
       <td style="color:${hiColor(o.a.hi)};font-weight:800;">${fmtHi(o.a.hi)}</td><td>${riskPill(o.r.level)}</td>
-      <td>${o.ic.rank?`${(o.ic.IC*100).toFixed(1)}% <span class="small-muted">#${o.ic.rank}</span>`:'—'}</td><td>${lifeOf(o.a)}</td>
-      <td>${worst?`${L(FACTOR_NAMES[worst][0],FACTOR_NAMES[worst][1])} <b>${F[worst].code}</b>`:'—'}</td>
+      <td>${o.ic.rank?`${(o.ic.IC*100).toFixed(1)}% <span class="small-muted">#${o.ic.rank}</span>`:'—'}</td>
       <td class="small-muted" style="white-space:normal;min-width:190px;"><span style="color:var(--text);">${riskAction(o.r)}</span>${sampleOverdueDays(o.a)?`<div style="font-size:11.5px;margin-top:2px;color:var(--red);font-weight:700;">${L(`sampling overdue ${sampleOverdueDays(o.a)} d`,`เลยกำหนดเก็บตัวอย่าง ${sampleOverdueDays(o.a)} วัน`)}</div>`:''}</td></tr>`; }).join('')}
     </tbody></table></div>
   </div>
@@ -4535,6 +4535,34 @@ function pageMeta(){
   };
   return titles[state.page] || ['RCM Transformer',''];
 }
+/* ============ EMPTY-STATE MOCKUP (view the app before any data) ============ */
+let MOCK_EMPTY = true; try{ const v=localStorage.getItem('rcm_mock_empty'); if(v==='0') MOCK_EMPTY=false; }catch(e){}
+const MOCK_PAGES = ['overview','assets','detail','risk','reliability','reports','fmearcm','planall'];
+function mkKpi(label){ return `<div class="kpi"><div class="l">${label}</div><div class="v" style="color:var(--muted);">—</div><span class="small-muted" style="font-size:12px;">${L('no data yet','ยังไม่มีข้อมูล')}</span></div>`; }
+function mkChart(title, h){ return `<div class="card"><div class="card-head"><div style="font-weight:800;">${title}</div></div><div style="height:${h||220}px;border:2px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--muted);font-size:13px;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>${L('Chart appears after data is imported','กราฟจะแสดงเมื่อนำเข้าข้อมูล')}</div></div>`; }
+function mkTable(title, cols){ return `<div class="card"><div class="card-head"><div style="font-weight:800;">${title}</div></div><div class="tbl-wrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody><tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:28px 8px;">${L('No data yet — import lab results to fill this table','ยังไม่มีข้อมูล — นำเข้าผลทดสอบเพื่อแสดงตารางนี้')}</td></tr></tbody></table></div></div>`; }
+function mockBanner(){ return `<div class="notebox" style="margin-bottom:16px;align-items:center;flex-wrap:wrap;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg><div style="flex:1;min-width:220px;"><b>${L('Mockup: the app before any data is imported','แบบจำลองหน้าเว็บตอนยังไม่มีข้อมูล')}</b><br><span class="small-muted">${L('Every box fills in once transformer data and lab results are imported.','ทุกช่องจะแสดงผลเมื่อนำเข้าข้อมูลหม้อแปลงและผลทดสอบ')}</span></div><button class="btn btn-primary" data-mock-toggle="1" style="padding:7px 14px;font-size:12.5px;">${L('View with sample data','ดูแบบจำลองเมื่อมีข้อมูล')}</button></div>`; }
+function renderMock(page){
+  const T=(en,th)=>L(en,th);
+  let body='';
+  if(page==='overview') body = `<div class="kpi-row" style="margin-bottom:16px;">${mkKpi(T('Transformers','หม้อแปลงทั้งหมด'))}${mkKpi(T('Average HI','HI เฉลี่ย'))}${mkKpi(T('System reliability','ความเชื่อถือได้ของระบบ'))}${mkKpi(T('Critical transformers','หม้อแปลงวิกฤต'))}</div>
+    <div class="grid g2" style="margin-bottom:16px;">${mkChart(T('Transformers by condition level','จำนวนหม้อแปลงตามระดับสภาพ'))}${mkChart(T('HI trend','แนวโน้มค่า HI'))}</div>
+    ${mkTable(T('Maintenance priority','ลำดับความสำคัญของการบำรุงรักษา'),[T('Transformer','หม้อแปลง'),T('Substation','สถานี'),'HI',T('Risk level','ระดับความเสี่ยง'),'IC',T('Next task','งานถัดไป')])}`;
+  else if(page==='assets') body = `<div style="display:flex;gap:8px;margin-bottom:12px;"><button class="btn btn-primary" data-import-lab="1">${T('Import data','นำเข้าข้อมูล')}</button></div>${mkTable(T('Transformer assets','รายการหม้อแปลง'),[T('ID','รหัส'),T('Substation','สถานี'),T('Rated kV / MVA','พิกัด kV / MVA'),T('Last test','ทดสอบล่าสุด'),'HI',T('Status','สถานะ')])}`;
+  else if(page==='detail') body = `<div class="tabs">${['Overview|ภาพรวม','Health Index|ดัชนีสุขภาพ','DGA|DGA','FMEA & RPN|FMEA & RPN','RCM|RCM','Plan|แผน'].map((x,i)=>{const[a,b]=x.split('|');return `<button class="tab ${i===0?'active':''}">${T(a,b)}</button>`;}).join('')}</div>
+    <div class="kpi-row" style="margin:12px 0 16px;">${mkKpi('HI')}${mkKpi(T('Condition level','ระดับสภาพ'))}${mkKpi(T('HI decreasing rate','อัตราการลดลงของ HI'))}${mkKpi(T('Risk level','ระดับความเสี่ยง'))}</div>
+    <div class="grid g2">${mkChart(T('Factors FF · OQF · PCF','ปัจจัย FF · OQF · PCF'))}${mkChart(T('Duval Pentagon (DGA)','Duval Pentagon (DGA)'))}</div>`;
+  else if(page==='risk') body = `<div class="grid g2" style="margin-bottom:16px;">${mkChart(T('Risk matrix (HI × decreasing rate)','ตารางความเสี่ยง (HI × อัตราการลดลง)'))}${mkChart(T('Importance IC by transformer','ค่า IC รายหม้อแปลง'))}</div>${mkTable(T('Priority ranking','การจัดลำดับความสำคัญ'),['#',T('Transformer','หม้อแปลง'),T('Risk level','ระดับความเสี่ยง'),'IC',T('Highest RPN mode','รูปแบบที่ RPN สูงสุด')])}`;
+  else if(page==='reliability') body = `<div class="kpi-row" style="margin-bottom:16px;">${mkKpi(T('System reliability Rsys','ความเชื่อถือได้ของระบบ Rsys'))}${mkKpi(T('Most critical transformer','หม้อแปลงสำคัญที่สุด'))}</div><div class="grid g2" style="margin-bottom:16px;">${mkChart(T('Reliability block diagram','แผนภาพบล็อกความเชื่อถือได้'),260)}${mkChart(T('R(t) over 1, 3, 5 years','R(t) ที่ 1, 3, 5 ปี'),260)}</div>${mkTable(T('Importance by transformer','ค่าความสำคัญรายหม้อแปลง'),[T('Transformer','หม้อแปลง'),'λ','R(t)','IB','IC'])}`;
+  else if(page==='reports') body = `<div class="grid g2" style="margin-bottom:16px;">${mkChart(T('Fleet HI summary','สรุป HI ทั้งหมด'))}${mkChart(T('Work orders by status','ใบสั่งงานตามสถานะ'))}</div><div class="card"><div style="font-weight:800;margin-bottom:8px;">${T('Export','ส่งออกรายงาน')}</div><div style="display:flex;gap:8px;"><button class="btn btn-outline" disabled>CSV</button><button class="btn btn-outline" disabled>PDF</button></div><p class="small-muted" style="margin-top:8px;">${T('Available once data is imported.','ใช้ได้เมื่อมีข้อมูล')}</p></div>`;
+  else if(page==='fmearcm') body = mkTable(T('FMEA & RCM decision','FMEA และการตัดสินใจ RCM'),[T('Failure mode','รูปแบบความล้มเหลว'),T('Component','ส่วนประกอบ'),'O','S','D','RPN',T('RCM task','งานตาม RCM')]);
+  else if(page==='planall') body = `${mkChart(T('Maintenance timeline','ไทม์ไลน์แผนบำรุงรักษา'),200)}<div style="height:16px"></div>${mkTable(T('Maintenance plan','แผนบำรุงรักษา'),[T('Task','งาน'),T('Transformer','หม้อแปลง'),T('Start','เริ่ม'),T('End','สิ้นสุด'),T('Status','สถานะ')])}`;
+  return mockBanner()+body;
+}
+function updateMockToggle(){ const b=document.getElementById('mockToggle'); if(b) b.textContent = MOCK_EMPTY ? L('View with data','ดูแบบมีข้อมูล') : L('View without data','ดูแบบไม่มีข้อมูล'); }
+function setMock(v){ MOCK_EMPTY=v; try{ localStorage.setItem('rcm_mock_empty', v?'1':'0'); }catch(e){} render(); }
+document.addEventListener('click', e=>{ const t=e.target.closest('[data-mock-toggle],#mockToggle'); if(t){ e.preventDefault(); setMock(!MOCK_EMPTY); } });
+
 function render(){
   if(state.page==='schematic'){ state.page='reliability'; state.relTab='diagram'; } // old links keep working
   if(/-overview$/.test(state.page)) state.page='fmearcm';
@@ -4548,6 +4576,8 @@ function render(){
   document.getElementById('pageSub').textContent = sub;
   const content = document.getElementById('content');
   destroyCharts();
+  updateMockToggle();
+  if(MOCK_EMPTY && MOCK_PAGES.includes(state.page)){ content.innerHTML = renderMock(state.page); attachDataButtons(); attachNetEvents(); applyRole(); return; }
   if(state.page==='overview'){ content.innerHTML = renderOverview(); attachGlobalViewLinks(); attachOverviewEvents(); attachDataButtons(); initOverviewCharts(); }
   else if(state.page==='assets'){ content.innerHTML = renderAssetsPage(); attachGlobalViewLinks(); attachAssetsPageEvents(); attachDataButtons(); }
   else if(state.page==='detail'){ syncAssetData(); content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(currentAsset()); if(state.detailTab==='model3d') attach3dEvents(); }
