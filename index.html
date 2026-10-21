@@ -714,6 +714,33 @@ button.ovb-status{cursor:pointer;} button.ovb-status:hover{background:rgba(255,2
 .qhelp{display:inline-block; margin-left:6px;} .qhelp>summary{cursor:pointer; list-style:none; display:inline-flex; width:20px; height:20px; border-radius:50%; background:var(--bg); border:1px solid var(--border); align-items:center; justify-content:center; font-size:12px; font-weight:800; color:var(--accent-2);} .qhelp>summary::-webkit-details-marker{display:none;}
 .qhelp[open] .rs-hint{display:block;}
 .sdl{display:block; font-size:12px; line-height:1.35;} .sdl.cons{color:var(--muted);}
+
+.nav-step{font-size:10.5px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.10);color:inherit;opacity:.8;}
+.flowbar{background:var(--card,#fff);border:1px solid var(--border);border-radius:14px;padding:10px 14px;margin:0 0 14px;display:flex;flex-direction:column;gap:8px;}
+.flow-steps{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.flow-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:transparent;border-radius:999px;padding:4px 10px 4px 4px;font:inherit;font-size:12.5px;color:var(--muted);cursor:pointer;}
+.flow-chip .n{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;background:var(--border);color:var(--text);}
+.flow-chip.done .n{background:#d7e6dc;color:#1f6b3d;}
+.flow-chip.on{border-color:#2B4C6F;color:var(--text);font-weight:700;background:rgba(43,76,111,.06);}
+.flow-chip.on .n{background:#2B4C6F;color:#fff;}
+.flow-chip:hover{border-color:#2B4C6F;}
+.flow-arr{color:var(--muted);font-size:14px;}
+.flow-now{font-size:13px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;}
+.flow-nav{margin-left:auto;display:flex;gap:8px;}
+.btn-sm{padding:5px 10px;font-size:12.5px;}
+.flowcard{margin:0 0 14px;}
+.flowcard-h{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:12px;}
+.flowcard-h b{font-size:15px;}
+.flowcard-g{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;counter-reset:s;}
+.flow-step{position:relative;text-align:left;border:1px solid var(--border);background:transparent;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;font:inherit;color:var(--text);cursor:pointer;transition:border-color .15s, box-shadow .15s;}
+.flow-step:hover{border-color:#2B4C6F;box-shadow:0 2px 10px rgba(43,76,111,.12);}
+.flow-step:not(:last-child)::after{content:'›';position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;}
+.flow-step .n{width:26px;height:26px;border-radius:50%;background:#2B4C6F;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+.flow-step b{font-size:13.5px;}
+.flow-step .d{font-size:12px;color:var(--muted);line-height:1.45;flex:1;}
+.flow-step .i{font-size:12px;font-weight:700;color:#2B4C6F;}
+@media (max-width:1180px){ .flowcard-g{grid-template-columns:repeat(3,1fr);} .flow-step::after{display:none;} }
+@media (max-width:720px){ .flowcard-g{grid-template-columns:1fr 1fr;} .flow-chip .tx{display:none;} .flow-chip.on .tx{display:inline;} .flow-nav{margin-left:0;} }
 </style>
 </head>
 <body>
@@ -749,7 +776,7 @@ button.ovb-status{cursor:pointer;} button.ovb-status:hover{background:rgba(255,2
       </div>
       <div class="topbar-right">
         <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="globalSearch" placeholder="Search transformer ID…"></div>
-        <button class="btn btn-outline" id="mockToggle" style="padding:6px 12px;font-size:12px;white-space:nowrap;">View with data</button>
+        <button class="btn btn-outline" id="mockToggle" style="display:none;padding:6px 12px;font-size:12px;white-space:nowrap;">View with data</button>
         <div class="langtoggle"><button id="langEn" class="active" data-lang="en">EN</button><button id="langTh" data-lang="th">TH</button></div>
         <div class="bell" id="guideBtn" title="Help / Guide" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.8.5-1.1 1-1.1 1.9"/><circle cx="12" cy="17.2" r="1" fill="currentColor" stroke="none"/></svg></div>
         <div style="position:relative;">
@@ -942,12 +969,12 @@ function translateDiag(s){ const r = DIAG_TR[s]; return r ? r[state.lang==='th'?
 
 /* ============ DATA ============ */
 const ASSETS = [
- {id:'LKB-TR1',loc:'Lat Krabang IE SS',cap:50,volt:'115/24',hi:24,status:'Critical',last:'18 Sep 2026',next:'18 Oct 2026',mfr:'Mitsubishi',year:2010,installed:'2011-02-15',type:'ONAN/ONAF',load:62,topOil:68,amb:32},
- {id:'LKB-TR2',loc:'Lat Krabang IE SS',cap:60,volt:'115/24',hi:81,status:'Healthy',last:'25 Aug 2026',next:'25 Feb 2027',mfr:'Siemens',year:2014,installed:'2014-11-20',type:'ONAN/ONAF',load:56,topOil:53,amb:31},
- {id:'LKB-TR3',loc:'Lat Krabang IE SS',cap:60,volt:'115/24',hi:55,status:'Warning',last:'4 Sep 2026',next:'4 Dec 2026',mfr:'Tirathai',year:2016,installed:'2017-03-10',type:'ONAN/ONAF',load:51,topOil:55,amb:31},
- {id:'CLK-TR1',loc:'Chalong Krung SS',cap:50,volt:'115/24',hi:28,status:'Critical',last:'28 Jul 2026',next:'28 Aug 2026',mfr:'Hyundai',year:2007,installed:'2008-06-02',type:'ONAN/ONAF',load:66,topOil:69,amb:32},
- {id:'CLK-TR2',loc:'Chalong Krung SS',cap:60,volt:'115/24',hi:92,status:'Healthy',last:'18 Aug 2026',next:'18 Feb 2027',mfr:'ABB',year:2019,installed:'2019-12-05',type:'ONAN/ONAF',load:48,topOil:49,amb:31},
- {id:'CLK-TR3',loc:'Chalong Krung SS',cap:60,volt:'115/24',hi:74,status:'Healthy',last:'11 Aug 2026',next:'11 Feb 2027',mfr:'ABB',year:2012,installed:'2013-04-18',type:'ONAN/ONAF',load:54,topOil:56,amb:31},
+ {id:'LKB-TR1',loc:'Lat Krabang IE SS',cap:60,volt:'115/24',hi:24,status:'Critical',last:'18 Sep 2026',next:'18 Oct 2026',mfr:'ABB',year:1998,installed:'1998-12-21',type:'ONAN/ONAF',load:62,topOil:68,amb:32},
+ {id:'LKB-TR2',loc:'Lat Krabang IE SS',cap:60,volt:'115/24',hi:81,status:'Healthy',last:'25 Aug 2026',next:'25 Feb 2027',mfr:'ABB',year:2014,installed:'2014-01-22',type:'ONAN/ONAF',load:56,topOil:53,amb:31},
+ {id:'LKB-TR3',loc:'Lat Krabang IE SS',cap:60,volt:'115/24',hi:55,status:'Warning',last:'4 Sep 2026',next:'4 Dec 2026',mfr:'ABB',year:2000,installed:'2000-03-06',type:'ONAN/ONAF',load:51,topOil:55,amb:31},
+ {id:'CLK-TR1',loc:'Chalong Krung SS',cap:60,volt:'115/24',hi:28,status:'Critical',last:'28 Jul 2026',next:'28 Aug 2026',mfr:'Tirathai',year:2013,installed:'2013-12-21',type:'ONAN/ONAF',load:66,topOil:69,amb:32},
+ {id:'CLK-TR2',loc:'Chalong Krung SS',cap:60,volt:'115/24',hi:92,status:'Healthy',last:'18 Aug 2026',next:'18 Feb 2027',mfr:'Tirathai',year:2013,installed:'2013-12-21',type:'ONAN/ONAF',load:48,topOil:49,amb:31},
+ {id:'CLK-TR3',loc:'Chalong Krung SS',cap:60,volt:'115/24',hi:74,status:'Healthy',last:'11 Aug 2026',next:'11 Feb 2027',mfr:'Pauwels Trafo',year:1990,installed:'1990-12-27',type:'ONAN/ONAF',load:54,topOil:56,amb:31},
 ];
 function assetSeed(id){ let h=0; for(let i=0;i<id.length;i++) h=(h*31+id.charCodeAt(i))>>>0; return h; }
 function seededFrac(seed,salt){ const x=Math.sin(seed*0.0013+salt*7.13)*10000; return x-Math.floor(x); }
@@ -1169,7 +1196,7 @@ function demoSample(sig, c, seed, k, date){
     colour: Math.round((0.4 + 3.1*c + (aging?0.6:0))*j(15)*10)/10,
     fal: Math.round(40*Math.exp(4.2*c)*(aging?3:1)*j(16)) };
 }
-const N_DEMO = 3, DEMO_STEP_MONTHS = 6;   /* CMMS history = 1 year (B.E. 2568–2569): 3 samples, 6 months apart */
+const N_DEMO = 5, DEMO_STEP_MONTHS = 6;   /* demo history B.E. 2567–2569 (3 calendar years): 5 samples, 6 months apart */
 function genDemoLab(a){
   const sig = DEMO_SIGNATURE[a.id] || 'N'; const seed = assetSeed(a.id); const target = a.hi;
   const last = parseD(a.last) || new Date(2026,8,1);
@@ -1212,7 +1239,7 @@ function riskOf(a){
 }
 function levelAt(hi, r){ return (r && r.provisional) ? hiCat(hi).code : RISK_T10[hiRow(hi)][rateCol(r?r.rate:null)]; }
 function fleetHasTrend(){ return ASSETS.some(a=>hiRateOf(a).enough); }
-function riskLbl(){ return fleetHasTrend() ? riskLbl() : L('Condition','ระดับสภาพ'); }
+function riskLbl(){ return fleetHasTrend() ? L('Risk level','ระดับความเสี่ยง') : L('Condition','ระดับสภาพ'); }
 function isUrgent(l){ return ['High','Very high','P','VP'].includes(l); }
 function isLowLevel(l){ return ['Low','VG','G'].includes(l); }
 const COND_LIFE = {VG:['> 15 years','มากกว่า 15 ปี'], G:['> 10 years','มากกว่า 10 ปี'], C:['≤ 10 years','ไม่เกิน 10 ปี'], P:['< 3 years','น้อยกว่า 3 ปี'], VP:['End of life','สิ้นอายุการใช้งาน']};   /* Jahromi et al. (2009), Table 11 */
@@ -1307,10 +1334,11 @@ function beLabel(d){ const y=d.getFullYear(); return state.lang==='th' ? `${MON_
 function whyFold(title, html){ return `<details class="whyfold"><summary>ⓘ ${title||L('How it works','วิธีคิด')}</summary><div class="whybody">${html}</div></details>`; }
 function refNote(en, th){ return `<details class="refnote"><summary style="cursor:pointer;font-weight:600;color:var(--navy-2);">${L('Reference','อ้างอิง')}</summary>${L(en, th)}</details>`; }
 function shortDate(s){ const d=parseD(s); return d?beLabel(d):s; }
-function fleetLabelsBE(){ const ref = ASSETS.map(a=>parseD(a.last)).filter(Boolean).sort((x,y)=>y-x)[0] || new Date();
-  return Array.from({length:N_DEMO},(_,i)=>{ const d=new Date(ref.getFullYear(), ref.getMonth()-(N_DEMO-1-i)*DEMO_STEP_MONTHS, 1); return beLabel(d); }); }
-const FLEET_LABELS = Array.from({length:N_DEMO},(_,i)=>{ const m=(N_DEMO-1-i)*DEMO_STEP_MONTHS; return m===0?['Latest','ล่าสุด']:[`${m/12} yr ago`,`${m/12} ปีก่อน`]; });
-function fleetTrend(){ const vals=[]; for(let k=N_DEMO-1;k>=0;k--){ const his=ASSETS.map(a=>{ const lab=labFor(a); return lab[k]?assessSample(lab[k],lab[k+1],a).hi:null; }).filter(x=>x!==null); vals.push(his.length?Math.round(his.reduce((x,y)=>x+y,0)/his.length*10)/10:null); } return vals; }
+function annualHi(a){ const m={}; hiHistory(a).forEach(p=>{ const d=parseD(p.date); if(d) m[d.getFullYear()]=p.hi; }); return m; }   /* one HI per calendar year = the latest result of that year */
+function fleetYears(){ const ys=new Set(); ASSETS.forEach(a=>Object.keys(annualHi(a)).forEach(y=>ys.add(+y))); return [...ys].sort((x,y)=>x-y); }
+function fleetLabelsBE(){ return fleetYears().map(y=>state.lang==='th'?`พ.ศ. ${y+543}`:String(y)); }
+const FLEET_LABELS = [];
+function fleetTrend(){ return fleetYears().map(y=>{ const v=ASSETS.map(a=>annualHi(a)[y]).filter(x=>x!==undefined&&x!==null); return v.length?Math.round(v.reduce((p,q)=>p+q,0)/v.length*10)/10:null; }); }
 function gasRowsOf(s){
   return GASES.map(g=>{ if(!CRIT.level[g]) return {g, v:fmtPpm(s.gases[g]), range:g==='CO'?'< 350':'< 5000', status: (g==='CO'?s.gases[g]<350:s.gases[g]<5000)?'ok':'warn'};
     const b=levelScore(g,s.gases[g]); return {g, v:fmtPpm(s.gases[g]), range:'< '+CRIT.level[g][0], status: b===1?'ok':b<=2?'warn':'up'}; });
@@ -1325,7 +1353,7 @@ function statusPill(st){ return `<span class="pill ${st==='Completed'?'pill-heal
 function markPastDone(list){ const today=new Date(); today.setHours(0,0,0,0); (list||[]).forEach(tk=>{ const e=parseD(tk.end); if(!tk.wo && !tk.done && e && e<today) tk.done={date:tk.end}; }); return list; }
 
 /* ---------- Persistence (browser localStorage) ---------- */
-const STORE_KEY = 'rcm_transformer_data_v4';
+const STORE_KEY = 'rcm_transformer_data_v5';
 let NOTIF = {risk:true, dga:true, overdue:true};
 let NET = null;   /* substations, transformer connection and reliability settings */
 let BA_SEEDED = false;
@@ -1575,7 +1603,10 @@ const SD_NAME = {T004:['Silica gel changed colour','ซิลิกาเจล�
 function sdCodes(str){ return String(str||'').split(/[,\s]+/).map(x=>x.trim()).filter(x=>/^T\d+/.test(x)); }
 function sdCell(f){ const own=sdCodes(f.sd), cons=sdCodes(f.sdx); if(!own.length && !cons.length) return '<span class="small-muted">—</span>';
   const nm=c=>SD_NAME[c]?' '+L(SD_NAME[c][0],SD_NAME[c][1]):'';
-  return own.map(c=>`<span class="sdl"><b>${c}</b>${nm(c)}</span>`).join('') + cons.map((c,i)=>`<span class="sdl cons">${i?'':L('if it escalates → ','ถ้าลุกลาม → ')}<b>${c}</b>${nm(c)}</span>`).join('') + (f.resp?`<span style="display:inline-block;margin-top:3px;">${respPill(f.resp)}</span>`:''); }
+  const all=[...own.map(c=>c+nm(c)), ...cons.map(c=>L('if it escalates → ','ถ้าลุกลาม → ')+c+nm(c))];
+  const first = own.length ? `<b>${own[0]}</b>${nm(own[0])}` : `${L('escalates → ','ลุกลาม → ')}<b>${cons[0]}</b>`;
+  const more = all.length-1;
+  return `<span class="sdl" title="${esc(all.join('\n'))}">${first}${more>0?` <span class="small-muted" style="font-weight:700;">+${more}</span>`:''}</span>` + (f.resp?` <span style="display:inline-block;">${respPill(f.resp)}</span>`:''); }
 const FMEA_GROUP = {ins:['Insulation system','ระบบฉนวน'], oltc:['OLTC','ชุดเปลี่ยนแทป (OLTC)'], bush:['Bushing','บูชชิ่ง'], cool:['Cooling system','ระบบระบายความร้อน']};
 const FMEA_TEMPLATE = [
  {code:'FM-01', grp:'ins', comp:'Winding', mode:'Paper insulation thermal ageing', effect:'Insulation strength lost, risk of internal short circuit', control:'DGA (CO, CO₂), 2-FAL', sd:'', sdx:'T016, T015', resp:'A', ev:'paper', s:5, o0:3, d:3},
@@ -1671,8 +1702,8 @@ let state = {page:'overview', assetId:'LKB-TR1', detailTab:'overview', rcmMode:'
 let chartRegistry = {};
 
 const NAV = [
- {id:'overview', key:'nav_overview', badge:'home'}, {id:'reliability', key:'nav_reliability', badge:'reliability'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'risk', key:'nav_risk', badge:'risk'},
- {id:'fmearcm', key:'nav_fmearcm', badge:'fmea'}, {id:'planall', key:'nav_plan', badge:'plan'},
+ {id:'overview', key:'nav_overview', badge:'home'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'reliability', key:'nav_reliability', badge:'reliability'},
+ {id:'fmearcm', key:'nav_fmearcm', badge:'fmea'}, {id:'risk', key:'nav_risk', badge:'risk'}, {id:'planall', key:'nav_plan', badge:'plan'},
  {sep:1}, {id:'reports', key:'nav_reports', badge:'reports'},
  {sep:1}, {id:'guide', key:'guide_title', badge:'help'}, {id:'settings', key:'nav_settings', badge:'settings'},
 ];
@@ -1932,13 +1963,37 @@ const valueLabelPlugin = {
   }
 };
 const hiBandPlugin = { id:'hiBands', beforeDatasetsDraw(ch){ const a=ch.chartArea, y=ch.scales.y; if(!a||!y) return; const c=ch.ctx; c.save();
-  c.fillStyle='rgba(194,57,47,.07)'; c.fillRect(a.left, y.getPixelForValue(50), a.width, y.getPixelForValue(0)-y.getPixelForValue(50));
-  c.fillStyle='rgba(185,127,14,.09)'; c.fillRect(a.left, y.getPixelForValue(70), a.width, y.getPixelForValue(50)-y.getPixelForValue(70)); c.restore(); } };
-function unitTrendSets(){ const pal=['#1fa571','#8759d6','#d99012','#c62d23','#0d7a68','#5E7A8C'];
-  return ASSETS.map((a,i)=>{ const lab=labFor(a), d=[]; for(let k=N_DEMO-1;k>=0;k--) d.push(lab[k]?assessSample(lab[k],lab[k+1],a).hi:null);
-    return {label:a.id, noLabel:true, data:d, borderColor:pal[i%pal.length], backgroundColor:pal[i%pal.length], borderWidth:1.5, pointRadius:2, tension:.3, fill:false, spanGaps:true}; }); }
+  const band=(lo,hi,col,txt,tc)=>{ const t=y.getPixelForValue(hi), b=y.getPixelForValue(lo); c.fillStyle=col; c.fillRect(a.left,t,a.width,b-t); c.fillStyle=tc; c.font='600 11px Inter, "Noto Sans Thai", sans-serif'; c.textAlign='right'; c.fillText(txt, a.right-6, b-6); };
+  band(0,30,'rgba(194,57,47,.10)',L('Very poor < 30','แย่มาก < 30'),'rgba(179,38,30,.75)');
+  band(30,50,'rgba(232,120,40,.08)',L('Poor 30–50','แย่ 30–50'),'rgba(184,90,12,.8)');
+  band(50,70,'rgba(235,160,32,.08)',L('Caution 50–70','เฝ้าระวัง 50–70'),'rgba(176,125,5,.85)');
+  c.restore(); } };
+function unitTrendSets(){ const pal=['#1fa571','#8759d6','#d99012','#c62d23','#0d7a68','#5E7A8C']; const ys=fleetYears();
+  return ASSETS.map((a,i)=>{ const m=annualHi(a); return {label:a.id, noLabel:true, data:ys.map(y=>m[y]??null), borderColor:pal[i%pal.length], backgroundColor:pal[i%pal.length], borderWidth:1.5, borderDash:[5,4], pointRadius:3, tension:.25, fill:false, spanGaps:true}; }); }
 function chartBox(id, heightPx){ return `<div class="chart-box" style="height:${heightPx}px;"><canvas id="${id}"></canvas></div>`; }
 const commonOpts = ()=>({ responsive:true, maintainAspectRatio:false });
+
+/* ============ WORKFLOW (links the pages into one process) ============ */
+const FLOW = [
+ {page:'assets',      t:['Data & condition','ข้อมูลและสภาพ'],          d:['Register transformers, import oil-lab results → HI and DGA are calculated','บันทึกหม้อแปลง นำเข้าผลแล็บน้ำมัน → ระบบคำนวณ HI และ DGA']},
+ {page:'reliability', t:['Reliability','ความเชื่อถือได้'],          d:['Reliability R(t) of each unit and of the substation, importance IC','ความน่าจะเป็นที่ทำงานได้ R(t) ของแต่ละเครื่องและทั้งสถานี ค่าความสำคัญ IC']},
+ {page:'fmearcm',     t:['FMEA & RCM','FMEA & RCM'],                  d:['Rank failure modes by RPN, answer the RCM decision questions → task type','จัดลำดับโหมดความเสียหายด้วย RPN ตอบคำถาม RCM → ได้ประเภทงาน']},
+ {page:'risk',        t:['Risk & priority','ความเสี่ยงและลำดับ'],     d:['Combine HI, its decreasing rate and IC → which unit first','รวม HI อัตราการลดลง และ IC → เครื่องไหนต้องทำก่อน']},
+ {page:'planall',     t:['Maintenance plan','แผนบำรุงรักษา'],         d:['Tasks, intervals and due dates; create work orders','กำหนดงาน รอบเวลา วันครบกำหนด และออกใบสั่งงาน']},
+ {page:'reports',     t:['Reports','รายงาน'],                         d:['Summarise results and export CSV / PDF','สรุปผลและส่งออก CSV / PDF']},
+];
+function flowIdx(){ return FLOW.findIndex(f=>f.page===state.page); }
+function flowBar(){ const k=flowIdx(); if(k<0) return ''; const nx=FLOW[k+1], pv=FLOW[k-1];
+  return `<div class="flowbar">
+    <div class="flow-steps">${FLOW.map((f,i)=>`<button class="flow-chip ${i===k?'on':i<k?'done':''}" data-flow="${f.page}" title="${esc(L(f.d[0],f.d[1]))}"><span class="n">${i+1}</span><span class="tx">${L(f.t[0],f.t[1])}</span></button>`).join('<span class="flow-arr">›</span>')}</div>
+    <div class="flow-now"><span class="small-muted">${L(`Step ${k+1} of ${FLOW.length}`,`ขั้นที่ ${k+1} จาก ${FLOW.length}`)}:</span> ${L(FLOW[k].d[0],FLOW[k].d[1])}
+      <span class="flow-nav">${pv?`<button class="btn btn-ghost btn-sm" data-flow="${pv.page}">← ${L(pv.t[0],pv.t[1])}</button>`:''}${nx?`<button class="btn btn-primary btn-sm" data-flow="${nx.page}">${L('Next','ถัดไป')}: ${L(nx.t[0],nx.t[1])} →</button>`:''}</span></div>
+  </div>`; }
+function flowCard(){ const N=ASSETS.length; const urgent=riskList().filter(o=>isUrgent(o.r.level)).length;
+  const info=[`${N} ${L('units','เครื่อง')}`, L('R(t), IC','R(t), IC'), `${ASSETS.reduce((x,a)=>x+getFmeaFor(a).length,0)} ${L('failure modes','โหมด')}`, urgent?`${urgent} ${L('need action','ต้องจัดการ')}`:L('no high risk','ไม่มีความเสี่ยงสูง'), L('tasks & due dates','งานและกำหนดการ'), 'CSV / PDF'];
+  return `<div class="card flowcard"><div class="flowcard-h"><b>${L('How the system works','ขั้นตอนการทำงานของระบบ')}</b><span class="small-muted">${L('Each step uses the result of the step before. Click a step to open it.','แต่ละขั้นใช้ผลจากขั้นก่อนหน้า กดที่ขั้นเพื่อเปิดหน้านั้น')}</span></div>
+   <div class="flowcard-g">${FLOW.map((f,i)=>`<button class="flow-step" data-flow="${f.page}"><span class="n">${i+1}</span><b>${L(f.t[0],f.t[1])}</b><span class="d">${L(f.d[0],f.d[1])}</span><span class="i">${info[i]} →</span></button>`).join('')}</div></div>`; }
+function attachFlow(){ document.querySelectorAll('[data-flow]').forEach(b=>b.addEventListener('click',()=>{ state.page=b.dataset.flow; render(); window.scrollTo(0,0); })); }
 
 /* ============ NAV RENDER ============ */
 function renderNav(){
@@ -1949,7 +2004,8 @@ function renderNav(){
       ? (state.page===n.id+'-overview' || (state.page==='detail' && state.detailTab===n.id))
       : (n.id==='dga'||n.id==='plan') ? (state.page==='detail' && state.detailTab===n.id)
       : state.page===n.id;
-    return `<div class="navitem ${isActive?'active':''}" data-nav="${n.id}">${badge(n.badge,30)}<span>${t(n.key)}</span></div>`;
+    const st = FLOW.findIndex(f=>f.page===n.id);
+    return `<div class="navitem ${isActive?'active':''}" data-nav="${n.id}">${badge(n.badge,30)}<span style="flex:1;">${t(n.key)}</span>${st>=0?`<span class="nav-step">${st+1}</span>`:''}</div>`;
   }).join('');
   el.querySelectorAll('.navitem').forEach(item=>{
     item.addEventListener('click', ()=>{
@@ -2147,7 +2203,7 @@ function relRealSvg(N){
     ${tx(rx+16,ry+106,N.sts.map(c=>f4(c.R)).join(' × '),{fs:10.5,c:'#38434d'})}
     ${tx(rx+16,ry+132,L('Every substation must supply','ทุกสถานีต้องจ่ายไฟได้'),{fs:10})}
     ${tx(rx+16,ry+146,L('its load → substations in series','จึงคูณกันแบบอนุกรม'),{fs:10})}`);
-  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" style="max-width:none;" role="img" aria-label="System reliability on the power network" font-family="Inter, 'Noto Sans Thai', sans-serif">${parts.join('')}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-width:${W}px;display:block;" role="img" aria-label="System reliability on the power network" font-family="Inter, 'Noto Sans Thai', sans-serif">${parts.join('')}</svg>`;
 }
 function rbdSvg(N){
   const BW=118, BH=48, VG=64, PAD=22, WIRE=26;
@@ -2178,7 +2234,7 @@ function rbdSvg(N){
   });
   parts.push(`<line x1="${x}" y1="${mid}" x2="${x+WIRE}" y2="${mid}" stroke="#2B4C6F" stroke-width="2"/>`); x += WIRE;
   parts.push(`<rect x="${x}" y="${mid-14}" width="56" height="28" rx="6" fill="#2B4C6F"/><text x="${x+28}" y="${mid+4}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${L('Load','โหลด')}</text>`); x += 56 + 16;
-  return `<svg viewBox="0 0 ${x} ${H}" width="${x}" style="max-width:none;" role="img" aria-label="Reliability block diagram">${parts.join('')}</svg>`;
+  return `<svg viewBox="0 0 ${x} ${H}" style="width:100%;height:auto;max-width:${x}px;display:block;" role="img" aria-label="Reliability block diagram">${parts.join('')}</svg>`;
 }
 /* ---------- realistic single-line diagram (IEC 60617-style symbols) ---------- */
 function sldRealSvg(c){
@@ -2474,9 +2530,9 @@ function renderOverview(){
     </section>
   </div>
   <section class="card">
-    <div class="card-head"><h3>${t('hi_trend_fleet')}</h3><span class="small-muted" style="font-size:12px;display:flex;gap:12px;align-items:center;"><label style="display:flex;gap:5px;align-items:center;cursor:pointer;"><input type="checkbox" id="ovTrendUnits" ${state.trendUnits?'checked':''}> ${L('show each transformer','แสดงรายตัว')}</label>${L('years in C.E.','ปี พ.ศ.')}</span></div>
+    <div class="card-head"><h3>${t('hi_trend_fleet')}</h3><span class="small-muted" style="font-size:12px;display:flex;gap:12px;align-items:center;"><label style="display:flex;gap:5px;align-items:center;cursor:pointer;"><input type="checkbox" id="ovTrendUnits" ${state.trendUnits?'checked':''}> ${L('show each transformer','แสดงรายตัว')}</label></span></div>
     ${chartBox('ovTrend2',200)}
-    <p class="refnote" style="margin-top:8px;">${L('The slope of this line is the HI decline rate (points per year). Together with today’s HI it sets the risk level in the Risk matrix.','ความชันของเส้นนี้คืออัตรา HI ลดลง (คะแนนต่อปี) ใช้ร่วมกับค่า HI ปัจจุบันเพื่อหาระดับความเสี่ยงใน Risk matrix')} ${L('Shaded bands: red = Critical (HI < 50), amber = Warning (50–70).','แถบสี: แดง = วิกฤต (HI < 50) เหลือง = เฝ้าระวัง (50–70)')}</p>
+    <p class="refnote" style="margin-top:8px;">${L('The slope of this line is the HI decline rate (points per year). Together with today’s HI it sets the risk level in the Risk matrix.','ความชันของเส้นนี้คืออัตรา HI ลดลง (คะแนนต่อปี) ใช้ร่วมกับค่า HI ปัจจุบันเพื่อหาระดับความเสี่ยงใน Risk matrix')} ${L('One point per year = the latest HI of that year, averaged over all transformers.','1 จุดต่อปี = ค่า HI ล่าสุดของปีนั้น เฉลี่ยทุกเครื่อง')}</p>
     ${refNote('Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327.','Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327')}
   </section>
   ${demo?`<p class="ov-demo">${L(`${demo} of these transformers are sample data for demonstration.`,`หม้อแปลง ${demo} ตัวในหน้านี้เป็นข้อมูลตัวอย่างเพื่อการสาธิต`)}</p>`:''}`;
@@ -2493,7 +2549,7 @@ function initOverviewCharts(){
   const healthy = ASSETS.filter(a=>a.status==='Healthy').length, warning = ASSETS.filter(a=>a.status==='Warning').length, critical = ASSETS.filter(a=>a.status==='Critical').length;
   const gridColor = cssv('--border');
   if(document.getElementById('ovDonut')) mkChart('ovDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[healthy,warning,critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('ovTrend2',{type:'line',plugins:[hiBandPlugin,valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{label:L('Fleet average','ค่าเฉลี่ยทั้งกลุ่ม'),data:fleetTrend(),borderColor:'#2B4C6F',backgroundColor:'#2B4C6F22',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#5E7A8C'}, ...(state.trendUnits?unitTrendSets():[])]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:!!state.trendUnits,position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
+  mkChart('ovTrend2',{type:'line',plugins:[hiBandPlugin,valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{label:L('Fleet average','ค่าเฉลี่ยทั้งกลุ่ม'),data:fleetTrend(),borderColor:'#2B4C6F',backgroundColor:'#2B4C6F',fill:false,borderWidth:3,tension:.25,pointRadius:6,pointHoverRadius:7,pointBackgroundColor:'#ffffff',pointBorderColor:'#2B4C6F',pointBorderWidth:2.5}, ...(state.trendUnits?unitTrendSets():[])]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:!!state.trendUnits,position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{min:0,max:100,grid:{color:gridColor},ticks:{font:{size:11},color:cssv('--muted')}},x:{grid:{display:false},ticks:{font:{size:11},color:cssv('--muted')}}}}});
 }
 function attachOverviewEvents(){
   document.querySelectorAll('[data-goto-risk]').forEach(b=>b.addEventListener('click',()=>{ state.page='risk'; render(); window.scrollTo(0,0); }));
@@ -3207,7 +3263,7 @@ function detailFmeaTab(a){
   <div style="margin:0 0 12px;">${whyFold(L('FMEA type and scoring','ประเภท FMEA และเกณฑ์คะแนน'), '<b>'+L('Equipment FMEA · Hardware approach · qualitative criticality with RPN 1–5','Equipment FMEA · Hardware Approach · ประเมินความวิกฤตเชิงคุณภาพด้วย RPN 1–5')+'</b><br>'+L('The transformer in service is split into the 4 component groups of the scope (insulation system, OLTC, bushing, cooling system). Visible failure modes follow the recorded defect codes; internal insulation faults come from DGA and oil tests.','แยกหม้อแปลงที่ใช้งานอยู่เป็นส่วนประกอบ 4 กลุ่มตามขอบเขต (ระบบฉนวน OLTC บูชชิ่ง ระบบระบายความร้อน) รูปแบบความล้มเหลวที่แสดงอาการอ้างอิงรหัสความผิดปกติที่ใช้บันทึกงานซ่อม ส่วนความผิดปกติภายในฉนวนมาจากผล DGA และผลทดสอบน้ำมัน')+'<br><br>'+L('Scale 1–5 for O, S and D (MIL-STD-1629A), RPN = O × S × D from 1 to 125. RPN level: High ≥ 40, Medium 18–39, Low < 18 (provisional). Severity 5 is handled first regardless of RPN. O follows the latest lab result where the lab can show it (grade A → 1 … E → 5).','เกณฑ์ 1–5 ของ O, S และ D (MIL-STD-1629A) ค่า RPN = O × S × D อยู่ระหว่าง 1–125 · ระดับ RPN: สูง ≥ 40 ปานกลาง 18–39 ต่ำ < 18 (เกณฑ์ชั่วคราว) · ความรุนแรง 5 ต้องจัดการก่อนเสมอ · O ปรับตามผลแล็บล่าสุดเมื่อผลแล็บบอกได้ (เกรด A → 1 … E → 5)')+'<br>'+SD_S_HINT())}</div>
   <div class="grid" style="grid-template-columns:1fr; margin-bottom:16px;">
     <div class="card"><div class="tbl-wrap"><table><thead><tr><th>#</th><th title="${esc(L('Failure-mode number used in this analysis (the cause) — not a repair-system code','เลขลำดับรูปแบบความล้มเหลวในการวิเคราะห์ (บอกสาเหตุ) — ไม่ใช่รหัสในระบบงานซ่อม'))}">${t('code')} ⓘ</th><th>${t('component')}</th><th>${t('failure_mode')}</th><th>${t('effect')}</th><th title="${esc(L('Code recorded in the repair system when this failure mode happens (symptom), with the required response time','รหัสที่จะถูกบันทึกในระบบงานซ่อมเมื่อรูปแบบนี้เกิดขึ้น (บอกอาการ) พร้อมระยะเวลาที่ต้องเข้าแก้ไข'))}">${L('Recorded as','บันทึกในระบบเป็น')} ⓘ</th><th>S</th><th>O</th><th>D</th><th>RPN</th><th>${L('RPN level','ระดับ RPN')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>
-      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td><b>${esc(f.comp)}</b>${f.grp==='ins'?`<div class="small-muted" style="font-size:11px;">${L(FMEA_GROUP[f.grp][0],FMEA_GROUP[f.grp][1])}</div>`:''}</td><td>${esc(f.mode)}</td><td class="small-muted">${esc(f.effect)}</td><td style="white-space:normal;min-width:170px;">${sdCell(f)}</td><td>${f.s}${f.s>=5?'<span class="sflag" title="'+L('Severity 5 (catastrophic): handle first regardless of RPN','ความรุนแรง 5 (หายนะ): ต้องจัดการก่อนเสมอไม่ว่า RPN เท่าไร')+'">S=5</span>':''}</td><td>${f.o}${f.oWhy?` <span class="small-muted" title="${esc(L('From lab result: ','จากผลแล็บ: ')+f.oWhy)}" style="cursor:help;">⟳</span>`:''}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':f.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
+      ${FMEA.map(f=>`<tr><td>${f.no}</td><td><span class="pill pill-info">${f.code}</span></td><td><b>${esc(f.comp)}</b>${f.grp==='ins'?`<div class="small-muted" style="font-size:11px;">${L(FMEA_GROUP[f.grp][0],FMEA_GROUP[f.grp][1])}</div>`:''}</td><td style="white-space:normal;min-width:150px;max-width:230px;">${esc(f.mode)}</td><td class="small-muted" style="white-space:normal;min-width:180px;max-width:240px;font-size:12.5px;">${esc(f.effect)}</td><td style="white-space:normal;min-width:130px;max-width:190px;">${sdCell(f)}</td><td>${f.s}${f.s>=5?'<span class="sflag" title="'+L('Severity 5 (catastrophic): handle first regardless of RPN','ความรุนแรง 5 (หายนะ): ต้องจัดการก่อนเสมอไม่ว่า RPN เท่าไร')+'">S=5</span>':''}</td><td>${f.o}${f.oWhy?` <span class="small-muted" title="${esc(L('From lab result: ','จากผลแล็บ: ')+f.oWhy)}" style="cursor:help;">⟳</span>`:''}</td><td>${f.d}</td><td style="font-weight:800;">${f.rpn}</td><td><span class="pill ${f.risk==='High'?'pill-critical':f.risk==='Medium'?'pill-warning':'pill-healthy'}">${trRisk(f.risk)}</span></td><td><span class="pill ${statusPillClass(f.status)}">${trStatus(f.status)}</span></td><td><button class="viewlink" data-edit-fmea="${f.no}">${t('edit')}</button></td></tr>`).join('')}
       </tbody></table></div>
       <p class="legend1"><span class="sflag" style="margin:0 4px 0 0;">S=5</span>${L('most severe, handle first','ร้ายแรงที่สุด จัดการก่อน')} · ⟳ ${L('O from lab result','O ตามผลแล็บ')} · ${respPill('A')} ${respPill('B')} ${respPill('C')} ${L('repair within 7 h / 10 days / 90 days','ต้องแก้ภายใน 7 ชม. / 10 วัน / 90 วัน')}</p></div>
 
@@ -4075,7 +4131,7 @@ function renderPlanOverview(){
     ${stat(L('PM completion','PM ที่เสร็จตามกำหนด'), pmRate===null?'—':pmRate+'%', pmRate===null ? L(`no PM task is due yet · target ≥ ${PM_TARGET}%`,`ยังไม่มีงาน PM ที่ถึงกำหนด · เป้าหมาย ≥ ${PM_TARGET}%`) : L(`of PM tasks due so far · target ≥ ${PM_TARGET}%`,`ของงาน PM ที่ถึงกำหนดแล้ว · เป้าหมาย ≥ ${PM_TARGET}%`), pmRate===null?'':pmRate>=PM_TARGET?'var(--green)':'var(--red)')}
     ${stat(L('Overdue','เลยกำหนด'), `${over} <span style="font-size:12px;">(${overPct}%)</span>`, L(`target ≤ ${OVERDUE_TARGET}%`,`เป้าหมาย ≤ ${OVERDUE_TARGET}%`), over?(overPct<=OVERDUE_TARGET?'var(--amber)':'var(--red)'):'var(--green)')}
   </div>
-  ${samp.length?`<div class="notebox" style="margin-bottom:16px;background:var(--red-bg);">${L('Oil sampling overdue','เลยกำหนดเก็บตัวอย่างน้ำมัน')}: ${samp.map(a=>`<button class="linklike" data-goto-detail="${esc(a.id)}|plan" style="color:var(--red);">${esc(a.id)} (${sampleOverdueDays(a)} ${L('d','วัน')})</button>`).join(' · ')}</div>`:''}
+  ${samp.length?`<div class="notebox" style="margin-bottom:16px;background:var(--amber-bg);border-color:var(--amber);">${L('Oil sampling overdue','เลยกำหนดเก็บตัวอย่างน้ำมัน')}: ${samp.map(a=>`<button class="linklike" data-goto-detail="${esc(a.id)}|plan" style="font-weight:700;">${esc(a.id)} (${sampleOverdueDays(a)} ${L('d','วัน')})</button>`).join(' · ')}</div>`:''}
   <div class="card"><div class="card-head"><h3>${t('maint_schedule')} — ${L('all transformers','ทุกหม้อแปลง')}</h3><span class="small-muted">${L('Overdue first, then by date. Click a row to open that transformer’s plan.','งานเลยกำหนดขึ้นก่อน แล้วเรียงตามวันที่ กดแถวเพื่อเปิดแผนของหม้อแปลงนั้น')}</span></div>
     <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${t('asset')}</th><th>${riskLbl()}</th><th>${t('task')}</th><th>${t('type')}</th><th>${t('start')}</th><th>${t('end')}</th><th>${t('status')}</th><th>${L('Work order','ใบสั่งงาน')}</th></tr></thead><tbody>
     ${rows.map(({a,tk,st})=>`<tr data-goto-detail="${esc(a.id)}|plan"><td><b>${esc(a.id)}</b></td><td>${riskPill(riskOf(a).level)}</td><td style="white-space:normal;min-width:180px;">${esc(tk.task)}</td><td><span class="pill" style="background:${TYPE_COLOR[tk.type]}22;color:${TYPE_COLOR[tk.type]};">${tk.type}${tk.sub?' · '+tk.sub:''}</span></td><td>${tk.start}</td><td>${tk.end}</td><td>${statusPill(st)}</td><td>${tk.wo?`<span class="pill ${tk.wo.status==='Closed'?'pill-closed':'pill-progress'}">${tk.wo.no}</span>`:'<span class="small-muted">—</span>'}</td></tr>`).join('') || `<tr><td colspan="8" class="small-muted">${L('No tasks yet.','ยังไม่มีงาน')}</td></tr>`}
@@ -4193,7 +4249,7 @@ function initReportsChartsInner(){
   const gridColor = cssv('--border'); const r = reportStats();
   mkChart('repDonut',{type:'doughnut',data:{labels:[t('healthy'),t('warning'),t('critical')],datasets:[{data:[r.healthy,r.warning,r.critical],backgroundColor:['#1fa571','#eba020','#e0473d'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
   mkChart('repDgaDonut',{type:'doughnut',data:{labels:Object.keys(r.fam),datasets:[{data:Object.values(r.fam),backgroundColor:['#1fa571','#e0473d','#eba020','#8759d6','#8b9099'],borderWidth:0}]},options:{...commonOpts(),cutout:'72%',plugins:{legend:{display:false}}}});
-  mkChart('repTrend',{type:'line',plugins:[hiBandPlugin,valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{label:'Avg HI',data:r.trend,borderColor:'#2B4C6F',backgroundColor:'#2B4C6F22',fill:true,tension:.35,pointRadius:3}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
+  mkChart('repTrend',{type:'line',plugins:[hiBandPlugin,valueLabelPlugin],data:{labels:fleetLabelsBE(),datasets:[{label:'Avg HI',data:r.trend,borderColor:'#2B4C6F',backgroundColor:'#2B4C6F',fill:false,borderWidth:3,tension:.25,pointRadius:6,pointBackgroundColor:'#ffffff',pointBorderColor:'#2B4C6F',pointBorderWidth:2.5}]},options:{...commonOpts(),layout:{padding:{top:18}},plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gridColor}},x:{grid:{display:false}}}}});
   const comps = Object.entries(r.highByComp).sort((x,y)=>y[1]-x[1]);
   mkChart('repFmeaBar',{type:'bar',plugins:[{id:'barVals',afterDatasetsDraw(ch){ const {ctx}=ch; ch.getDatasetMeta(0).data.forEach((b,i)=>{ ctx.save(); ctx.fillStyle=cssv('--text')||'#1f2a37'; ctx.font='700 11px Inter, sans-serif'; ctx.textBaseline='middle'; ctx.fillText(String(ch.data.datasets[0].data[i]), b.x+6, b.y); ctx.restore(); }); }}],data:{labels:comps.map(c=>c[0]),datasets:[{data:comps.map(c=>c[1]),backgroundColor:'#e0473d'}]},options:{...commonOpts(),indexAxis:'y',layout:{padding:{right:22}},plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{precision:0},title:{display:true,text:L('Number of high-risk failure modes','จำนวนรูปแบบความเสียหายเสี่ยงสูง'),font:{size:11}}},y:{grid:{display:false}}}}});
 }
@@ -4284,7 +4340,8 @@ function renderGuide(){
 }
 function renderSettings(){
   return `<div class="tabs">${SETTINGS_TABS.map(s=>`<button class="tab ${state.settingsTab===s[0]?'active':''}" data-stab="${s[0]}">${t(s[1])}</button>`).join('')}</div>
-  <div id="settingsBody">${settingsTabContent()}</div>`;
+  <div id="settingsBody">${settingsTabContent()}</div>
+  <div class="card" style="margin-top:16px;display:flex;gap:16px;align-items:center;justify-content:space-between;"><div><b>${L('Page layout preview','ดูแบบจำลองหน้าเว็บ')}</b><div class="small-muted" style="font-size:12.5px;">${L('Show every page as an empty layout, as it looks before any data is imported.','แสดงทุกหน้าเป็นแบบจำลองว่าง เหมือนตอนยังไม่ได้นำเข้าข้อมูล')}</div></div><button class="btn btn-outline" data-mock-toggle="1">${MOCK_EMPTY?L('View with data','ดูแบบมีข้อมูล'):L('View without data','ดูแบบไม่มีข้อมูล')}</button></div>`;
 }
 function settingsTabContent(){
   if(state.settingsTab==='net') return netSettingsHtml();
@@ -4536,27 +4593,27 @@ function pageMeta(){
   return titles[state.page] || ['RCM Transformer',''];
 }
 /* ============ EMPTY-STATE MOCKUP (view the app before any data) ============ */
-let MOCK_EMPTY = true; try{ const v=localStorage.getItem('rcm_mock_empty'); if(v==='0') MOCK_EMPTY=false; }catch(e){}
+let MOCK_EMPTY = false; try{ const v=localStorage.getItem('rcm_mock_empty'); if(v==='1') MOCK_EMPTY=true; }catch(e){}
 const MOCK_PAGES = ['overview','assets','detail','risk','reliability','reports','fmearcm','planall'];
 function mkKpi(label){ return `<div class="kpi"><div class="l">${label}</div><div class="v" style="color:var(--muted);">—</div><span class="small-muted" style="font-size:12px;">${L('no data yet','ยังไม่มีข้อมูล')}</span></div>`; }
-function mkChart(title, h){ return `<div class="card"><div class="card-head"><div style="font-weight:800;">${title}</div></div><div style="height:${h||220}px;border:2px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--muted);font-size:13px;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>${L('Chart appears after data is imported','กราฟจะแสดงเมื่อนำเข้าข้อมูล')}</div></div>`; }
+function mockChartCard(title, h){ return `<div class="card"><div class="card-head"><div style="font-weight:800;">${title}</div></div><div style="height:${h||220}px;border:2px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--muted);font-size:13px;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>${L('Chart appears after data is imported','กราฟจะแสดงเมื่อนำเข้าข้อมูล')}</div></div>`; }
 function mkTable(title, cols){ return `<div class="card"><div class="card-head"><div style="font-weight:800;">${title}</div></div><div class="tbl-wrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody><tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:28px 8px;">${L('No data yet — import lab results to fill this table','ยังไม่มีข้อมูล — นำเข้าผลทดสอบเพื่อแสดงตารางนี้')}</td></tr></tbody></table></div></div>`; }
 function mockBanner(){ return `<div class="notebox" style="margin-bottom:16px;align-items:center;flex-wrap:wrap;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg><div style="flex:1;min-width:220px;"><b>${L('Mockup: the app before any data is imported','แบบจำลองหน้าเว็บตอนยังไม่มีข้อมูล')}</b><br><span class="small-muted">${L('Every box fills in once transformer data and lab results are imported.','ทุกช่องจะแสดงผลเมื่อนำเข้าข้อมูลหม้อแปลงและผลทดสอบ')}</span></div><button class="btn btn-primary" data-mock-toggle="1" style="padding:7px 14px;font-size:12.5px;">${L('View with sample data','ดูแบบจำลองเมื่อมีข้อมูล')}</button></div>`; }
 function renderMock(page){
   const T=(en,th)=>L(en,th);
   let body='';
   if(page==='overview') body = `<div class="kpi-row" style="margin-bottom:16px;">${mkKpi(T('Transformers','หม้อแปลงทั้งหมด'))}${mkKpi(T('Average HI','HI เฉลี่ย'))}${mkKpi(T('System reliability','ความเชื่อถือได้ของระบบ'))}${mkKpi(T('Critical transformers','หม้อแปลงวิกฤต'))}</div>
-    <div class="grid g2" style="margin-bottom:16px;">${mkChart(T('Transformers by condition level','จำนวนหม้อแปลงตามระดับสภาพ'))}${mkChart(T('HI trend','แนวโน้มค่า HI'))}</div>
+    <div class="grid g2" style="margin-bottom:16px;">${mockChartCard(T('Transformers by condition level','จำนวนหม้อแปลงตามระดับสภาพ'))}${mockChartCard(T('HI trend','แนวโน้มค่า HI'))}</div>
     ${mkTable(T('Maintenance priority','ลำดับความสำคัญของการบำรุงรักษา'),[T('Transformer','หม้อแปลง'),T('Substation','สถานี'),'HI',T('Risk level','ระดับความเสี่ยง'),'IC',T('Next task','งานถัดไป')])}`;
   else if(page==='assets') body = `<div style="display:flex;gap:8px;margin-bottom:12px;"><button class="btn btn-primary" data-import-lab="1">${T('Import data','นำเข้าข้อมูล')}</button></div>${mkTable(T('Transformer assets','รายการหม้อแปลง'),[T('ID','รหัส'),T('Substation','สถานี'),T('Rated kV / MVA','พิกัด kV / MVA'),T('Last test','ทดสอบล่าสุด'),'HI',T('Status','สถานะ')])}`;
   else if(page==='detail') body = `<div class="tabs">${['Overview|ภาพรวม','Health Index|ดัชนีสุขภาพ','DGA|DGA','FMEA & RPN|FMEA & RPN','RCM|RCM','Plan|แผน'].map((x,i)=>{const[a,b]=x.split('|');return `<button class="tab ${i===0?'active':''}">${T(a,b)}</button>`;}).join('')}</div>
     <div class="kpi-row" style="margin:12px 0 16px;">${mkKpi('HI')}${mkKpi(T('Condition level','ระดับสภาพ'))}${mkKpi(T('HI decreasing rate','อัตราการลดลงของ HI'))}${mkKpi(T('Risk level','ระดับความเสี่ยง'))}</div>
-    <div class="grid g2">${mkChart(T('Factors FF · OQF · PCF','ปัจจัย FF · OQF · PCF'))}${mkChart(T('Duval Pentagon (DGA)','Duval Pentagon (DGA)'))}</div>`;
-  else if(page==='risk') body = `<div class="grid g2" style="margin-bottom:16px;">${mkChart(T('Risk matrix (HI × decreasing rate)','ตารางความเสี่ยง (HI × อัตราการลดลง)'))}${mkChart(T('Importance IC by transformer','ค่า IC รายหม้อแปลง'))}</div>${mkTable(T('Priority ranking','การจัดลำดับความสำคัญ'),['#',T('Transformer','หม้อแปลง'),T('Risk level','ระดับความเสี่ยง'),'IC',T('Highest RPN mode','รูปแบบที่ RPN สูงสุด')])}`;
-  else if(page==='reliability') body = `<div class="kpi-row" style="margin-bottom:16px;">${mkKpi(T('System reliability Rsys','ความเชื่อถือได้ของระบบ Rsys'))}${mkKpi(T('Most critical transformer','หม้อแปลงสำคัญที่สุด'))}</div><div class="grid g2" style="margin-bottom:16px;">${mkChart(T('Reliability block diagram','แผนภาพบล็อกความเชื่อถือได้'),260)}${mkChart(T('R(t) over 1, 3, 5 years','R(t) ที่ 1, 3, 5 ปี'),260)}</div>${mkTable(T('Importance by transformer','ค่าความสำคัญรายหม้อแปลง'),[T('Transformer','หม้อแปลง'),'λ','R(t)','IB','IC'])}`;
-  else if(page==='reports') body = `<div class="grid g2" style="margin-bottom:16px;">${mkChart(T('Fleet HI summary','สรุป HI ทั้งหมด'))}${mkChart(T('Work orders by status','ใบสั่งงานตามสถานะ'))}</div><div class="card"><div style="font-weight:800;margin-bottom:8px;">${T('Export','ส่งออกรายงาน')}</div><div style="display:flex;gap:8px;"><button class="btn btn-outline" disabled>CSV</button><button class="btn btn-outline" disabled>PDF</button></div><p class="small-muted" style="margin-top:8px;">${T('Available once data is imported.','ใช้ได้เมื่อมีข้อมูล')}</p></div>`;
+    <div class="grid g2">${mockChartCard(T('Factors FF · OQF · PCF','ปัจจัย FF · OQF · PCF'))}${mockChartCard(T('Duval Pentagon (DGA)','Duval Pentagon (DGA)'))}</div>`;
+  else if(page==='risk') body = `<div class="grid g2" style="margin-bottom:16px;">${mockChartCard(T('Risk matrix (HI × decreasing rate)','ตารางความเสี่ยง (HI × อัตราการลดลง)'))}${mockChartCard(T('Importance IC by transformer','ค่า IC รายหม้อแปลง'))}</div>${mkTable(T('Priority ranking','การจัดลำดับความสำคัญ'),['#',T('Transformer','หม้อแปลง'),T('Risk level','ระดับความเสี่ยง'),'IC',T('Highest RPN mode','รูปแบบที่ RPN สูงสุด')])}`;
+  else if(page==='reliability') body = `<div class="kpi-row" style="margin-bottom:16px;">${mkKpi(T('System reliability Rsys','ความเชื่อถือได้ของระบบ Rsys'))}${mkKpi(T('Most critical transformer','หม้อแปลงสำคัญที่สุด'))}</div><div class="grid g2" style="margin-bottom:16px;">${mockChartCard(T('Reliability block diagram','แผนภาพบล็อกความเชื่อถือได้'),260)}${mockChartCard(T('R(t) over 1, 3, 5 years','R(t) ที่ 1, 3, 5 ปี'),260)}</div>${mkTable(T('Importance by transformer','ค่าความสำคัญรายหม้อแปลง'),[T('Transformer','หม้อแปลง'),'λ','R(t)','IB','IC'])}`;
+  else if(page==='reports') body = `<div class="grid g2" style="margin-bottom:16px;">${mockChartCard(T('Fleet HI summary','สรุป HI ทั้งหมด'))}${mockChartCard(T('Work orders by status','ใบสั่งงานตามสถานะ'))}</div><div class="card"><div style="font-weight:800;margin-bottom:8px;">${T('Export','ส่งออกรายงาน')}</div><div style="display:flex;gap:8px;"><button class="btn btn-outline" disabled>CSV</button><button class="btn btn-outline" disabled>PDF</button></div><p class="small-muted" style="margin-top:8px;">${T('Available once data is imported.','ใช้ได้เมื่อมีข้อมูล')}</p></div>`;
   else if(page==='fmearcm') body = mkTable(T('FMEA & RCM decision','FMEA และการตัดสินใจ RCM'),[T('Failure mode','รูปแบบความล้มเหลว'),T('Component','ส่วนประกอบ'),'O','S','D','RPN',T('RCM task','งานตาม RCM')]);
-  else if(page==='planall') body = `${mkChart(T('Maintenance timeline','ไทม์ไลน์แผนบำรุงรักษา'),200)}<div style="height:16px"></div>${mkTable(T('Maintenance plan','แผนบำรุงรักษา'),[T('Task','งาน'),T('Transformer','หม้อแปลง'),T('Start','เริ่ม'),T('End','สิ้นสุด'),T('Status','สถานะ')])}`;
+  else if(page==='planall') body = `${mockChartCard(T('Maintenance timeline','ไทม์ไลน์แผนบำรุงรักษา'),200)}<div style="height:16px"></div>${mkTable(T('Maintenance plan','แผนบำรุงรักษา'),[T('Task','งาน'),T('Transformer','หม้อแปลง'),T('Start','เริ่ม'),T('End','สิ้นสุด'),T('Status','สถานะ')])}`;
   return mockBanner()+body;
 }
 function updateMockToggle(){ const b=document.getElementById('mockToggle'); if(b) b.textContent = MOCK_EMPTY ? L('View with data','ดูแบบมีข้อมูล') : L('View without data','ดูแบบไม่มีข้อมูล'); }
@@ -4591,7 +4648,8 @@ function render(){
   else if(state.page==='fmearcm'){ content.innerHTML = renderFmeaRcmOverview(); attachCategoryOverviewEvents(); }
   else if(state.page==='planall'){ content.innerHTML = renderPlanOverview(); attachCategoryOverviewEvents(); }
   else if(state.page==='guide'){ content.innerHTML = renderGuide(); attachGlobalViewLinks(); }
-  attachNetEvents(); applyRole();
+  if(flowIdx()>=0) content.insertAdjacentHTML('afterbegin', flowBar());
+  attachFlow(); attachNetEvents(); applyRole();
 }
 function openSidebar(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarBackdrop').classList.add('show'); }
 function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarBackdrop').classList.remove('show'); }
