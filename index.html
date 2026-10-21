@@ -1189,7 +1189,7 @@ function hiRateOf(a){
   const n=xs.length, mx=xs.reduce((s,v)=>s+v,0)/n, my=ys.reduce((s,v)=>s+v,0)/n;
   let num=0, den=0; xs.forEach((x,i)=>{ num+=(x-mx)*(ys[i]-my); den+=(x-mx)*(x-mx); });
   const slope = den? num/den : 0; const span = xs[n-1];
-  return {rate: Math.abs(slope)<1e-9?0:-slope, slope, intercept: my - slope*mx, span, n, enough: span>=3-1e-6};
+  return {rate: Math.abs(slope)<1e-9?0:-slope, slope, intercept: my - slope*mx, span, n, enough: new Set(h.map(p=>{ const d=parseD(p.date); return d?d.getFullYear():null; }).filter(Boolean)).size>=3};   /* at least 3 yearly HI values (report 3.2.5) */
 }
 const NORMAL_HI = {a:-1.8074, b:104.51}; // paper Eq. (3), 150 kV PLN fleet
 function ageingOf(a){ const age = ageAt(a, parseD(a.last)||new Date()); if(age===null) return null;
