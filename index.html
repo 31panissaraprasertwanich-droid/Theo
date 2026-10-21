@@ -715,7 +715,14 @@ button.ovb-status{cursor:pointer;} button.ovb-status:hover{background:rgba(255,2
 .qhelp[open] .rs-hint{display:block;}
 .sdl{display:block; font-size:12px; line-height:1.35;} .sdl.cons{color:var(--muted);}
 
-.nav-step{font-size:10.5px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.10);color:inherit;opacity:.8;}
+.nav-flow-h{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 12px 6px;}
+.navitem.flow-item{position:relative;}
+.navitem.flow-item:not(.last)::before{content:'';position:absolute;left:29px;top:38px;bottom:-10px;width:2px;background:#d4dacb;z-index:0;}
+.nav-step{position:relative;z-index:1;flex:0 0 30px;width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;background:#fff;color:#2B4C6F;border:2px solid #2B4C6F;}
+.navitem.flow-item.done .nav-step{background:#2B4C6F;color:#fff;}
+.navitem.flow-item.active .nav-step{background:#D9822B;border-color:#D9822B;color:#fff;box-shadow:0 0 0 4px rgba(217,130,43,.22);}
+.nav-txt{display:flex;flex-direction:column;line-height:1.3;}
+.nav-txt small{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.02em;}
 .flowbar{background:var(--card,#fff);border:1px solid var(--border);border-radius:14px;padding:10px 14px;margin:0 0 14px;display:flex;flex-direction:column;gap:8px;}
 .flow-steps{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
 .flow-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:transparent;border-radius:999px;padding:4px 10px 4px 4px;font:inherit;font-size:12.5px;color:var(--muted);cursor:pointer;}
@@ -1704,7 +1711,7 @@ let chartRegistry = {};
 const NAV = [
  {id:'overview', key:'nav_overview', badge:'home'}, {id:'assets', key:'nav_assets', badge:'assets'}, {id:'reliability', key:'nav_reliability', badge:'reliability'},
  {id:'fmearcm', key:'nav_fmearcm', badge:'fmea'}, {id:'risk', key:'nav_risk', badge:'risk'}, {id:'planall', key:'nav_plan', badge:'plan'},
- {sep:1}, {id:'reports', key:'nav_reports', badge:'reports'},
+ {id:'reports', key:'nav_reports', badge:'reports'},
  {sep:1}, {id:'guide', key:'guide_title', badge:'help'}, {id:'settings', key:'nav_settings', badge:'settings'},
 ];
 const ICONS = {
@@ -2004,8 +2011,10 @@ function renderNav(){
       ? (state.page===n.id+'-overview' || (state.page==='detail' && state.detailTab===n.id))
       : (n.id==='dga'||n.id==='plan') ? (state.page==='detail' && state.detailTab===n.id)
       : state.page===n.id;
-    const st = FLOW.findIndex(f=>f.page===n.id);
-    return `<div class="navitem ${isActive?'active':''}" data-nav="${n.id}">${badge(n.badge,30)}<span style="flex:1;">${t(n.key)}</span>${st>=0?`<span class="nav-step">${st+1}</span>`:''}</div>`;
+    const st = FLOW.findIndex(f=>f.page===n.id), cur=flowIdx();
+    const head = st===0 ? `<div class="nav-flow-h">${L('Workflow','ขั้นตอนการทำงาน')}</div>` : '';
+    if(st<0) return `<div class="navitem ${isActive?'active':''}" data-nav="${n.id}">${badge(n.badge,30)}<span>${t(n.key)}</span></div>`;
+    return head+`<div class="navitem flow-item ${isActive?'active':''} ${st===FLOW.length-1?'last':''} ${cur>=0&&st<cur?'done':''}" data-nav="${n.id}"><span class="nav-step">${st+1}</span><span class="nav-txt"><small>${L('Step','ขั้นที่')} ${st+1}</small>${t(n.key)}</span></div>`;
   }).join('');
   el.querySelectorAll('.navitem').forEach(item=>{
     item.addEventListener('click', ()=>{
