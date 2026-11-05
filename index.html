@@ -800,6 +800,9 @@ table.crit-t td{white-space:normal;vertical-align:top;font-size:13px;} table.cri
 @media (max-width:640px){ .ovtr-chip{min-width:0;flex:1 1 30%;padding:7px 9px;} .ovtr-chip span{font-size:11px !important;} .ovtr-chip b{font-size:16px !important;} }
 .ovtr-chip span{font-size:12px;color:var(--muted);font-weight:600;} .ovtr-chip b{font-size:20px;line-height:1.25;} .ovtr-chip small{font-size:12px;font-weight:600;color:var(--muted);}
 .ovtr-wrap{border-radius:12px;overflow:hidden;}
+.repprio{display:flex;gap:12px;padding:10px 6px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:8px;} .repprio:hover{background:var(--blue-bg);} .repprio:last-child{border-bottom:none;}
+.rp-n{flex:0 0 30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
+.rp-b{flex:1;min-width:0;} .rp-h{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;} .rp-w{font-size:12.5px;margin-top:3px;line-height:1.5;} .rp-a{font-size:12.5px;color:var(--muted);margin-top:2px;}
 .repunit{display:grid;grid-template-columns:74px 1fr auto;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:6px;} .repunit:hover{background:var(--blue-bg);} .repunit:last-of-type{border-bottom:none;}
 .ru-id{font-weight:800;font-size:13px;} .ru-bar{position:relative;height:14px;background:var(--border);border-radius:999px;overflow:hidden;} .ru-bar>span{display:block;height:100%;border-radius:999px;} .ru-bar i{position:absolute;top:0;bottom:0;width:2px;background:var(--card);opacity:.9;}
 .ru-v{font-size:13px;white-space:nowrap;min-width:92px;text-align:right;}
@@ -1804,6 +1807,18 @@ function repBar(name, sub, vals, col){ /* vals: [{id, p}] */ const v=vals.filter
   return `<div class="repbar" title="${esc(low.map(x=>`${x.id} ${x.p.toFixed(0)}%`).join(' · '))}"><div class="repbar-h"><span><b>${name}</b>${sub?` <span class="small-muted">${sub}</span>`:''}</span><span style="font-weight:800;color:${c};">${avg===null?'—':avg.toFixed(1)+'%'}</span></div>
     <div class="repbar-t"><div style="width:${avg===null?0:avg.toFixed(1)}%;background:${col||c};"></div></div>
     <div class="small-muted" style="font-size:11.5px;margin-top:3px;">${!v.length ? L('no data yet','ยังไม่มีข้อมูล') : !low.length ? L('all units at full score','ทุกเครื่องได้คะแนนเต็ม') : `${L('lowest','ต่ำสุด')}: ${low.map(x=>`<button class="linklike" data-view="${esc(x.id)}" style="font-size:11.5px;padding:0;">${esc(x.id)}</button> ${x.p.toFixed(0)}%`).join(' · ')}`} <span style="float:right;">${v.length}/${vals.length}</span></div></div>`; }
+let REP_SPARE = {};
+function repPriorityList(list){
+  const rows=list.map(a=>({a, r:riskOf(a), ic:(REP_IC_MAP[a.id]||{IC:0}).IC})).sort((x,y)=>(RISK_ORDER[x.r.level]-RISK_ORDER[y.r.level]) || (y.ic-x.ic) || ((y.r.rate||0)-(x.r.rate||0)) || ((x.a.hi??999)-(y.a.hi??999)));
+  const word=h=> h==null?L('no HI','ไม่มี HI') : h>=70?L('good','ดี') : h>=50?L('caution','เฝ้าระวัง') : L('poor','แย่');
+  const col=h=> h==null?'var(--muted)' : h>=70?'#1fa571' : h>=50?'#e0a21a' : '#d64532';
+  return rows.map((o,i)=>{ const a=o.a, r=o.r; const sp=REP_SPARE[a.id];
+    const why=[ `${L('condition','สภาพ')} <b style="color:${col(a.hi)};">${word(a.hi)}</b> (HI ${fmtHi(a.hi)})`,
+      r.rate!=null && r.rate>=1 ? L(`HI falling ${r.rate.toFixed(1)} pts/yr`,`HI ลดลงปีละ ${r.rate.toFixed(1)} คะแนน`) : null,
+      sp===true ? L('if it fails, another unit can take the load','ถ้าเสีย มีเครื่องอื่นรับโหลดแทนได้') : sp===false ? `<b>${L('no spare — if it fails the load is lost','ไม่มีเครื่องสำรอง — ถ้าเสียจ่ายไฟไม่ครบ')}</b>` : null ].filter(Boolean).join(' · ');
+    return `<div class="repprio" data-view="${esc(a.id)}"><div class="rp-n" style="background:${(RISK_COL[r.level]||RISK_COL['—'])[0]};color:${(RISK_COL[r.level]||RISK_COL['—'])[1]};">${i+1}</div>
+      <div class="rp-b"><div class="rp-h"><b>${esc(a.id)}</b> <span class="small-muted">${esc((stationOf(a.id)||{}).name||a.loc||'')}</span> ${riskPill(r.level)}</div>
+        <div class="rp-w">${why}</div><div class="rp-a">→ ${esc(riskAction(r))}</div></div></div>`; }).join('') || `<p class="small-muted">${L('No transformers','ไม่มีหม้อแปลง')}</p>`; }
 function renderRepDash(){
   const list=ASSETS.slice(); const withHi=list.filter(a=>a.hi!==null&&a.hi!==undefined);
   const avg=withHi.length? Math.round(withHi.reduce((t,a)=>t+a.hi,0)/withHi.length*10)/10 : null;
@@ -1811,12 +1826,12 @@ function renderRepDash(){
   const over=list.filter(a=>sampleOverdueDays(a)>0).length; let rs=null; try{ rs=netCalc().Rsys; }catch(e){}
   const fac=(k)=>list.map(a=>({id:a.id, p: a._as&&a._as.factors&&a._as.factors[k] ? a._as.factors[k].sf/4*100 : null}));
   const comp=(k)=>list.map(a=>{ const s=compScore(a,k); return {id:a.id, p: s===null?null:(s-1)/4*100}; });
-  const actN=withHi.filter(a=>repQuad(a)==='act').length;
+  const actN=list.filter(a=>{ const l=riskOf(a).level; return l==='Very high'||l==='High'||l==='VP'||l==='P'; }).length;
   const kpi=(lab,val,sub,col)=>`<div class="card repkpi"><div class="small-muted" style="font-size:12.5px;font-weight:700;">${lab}</div><div style="font-size:28px;font-weight:800;line-height:1.15;color:${col||'var(--text)'};">${val}</div><div class="small-muted" style="font-size:12px;">${sub}</div></div>`;
   return `
   <div class="repkpis">
     ${kpi(L('Transformers in poor condition','หม้อแปลงสภาพแย่'), `${poor} <span style="font-size:15px;color:var(--muted);font-weight:600;">/ ${withHi.length}</span>`, L('Health Index below 50','ดัชนีสุขภาพต่ำกว่า 50'), poor?'var(--red)':'var(--green)')}
-    ${kpi(L('Must act first','ต้องดำเนินการก่อน'), actN, L('poor condition and no spare to take the load','สภาพแย่ และไม่มีเครื่องรับโหลดแทน'), actN?'var(--red)':'var(--green)')}
+    ${kpi(L('Must act first','ต้องดำเนินการก่อน'), actN, L('high / very high risk','ความเสี่ยงสูง / สูงมาก'), actN?'var(--red)':'var(--green)')}
     ${kpi(L('Oil sampling overdue','เก็บตัวอย่างน้ำมันเลยกำหนด'), over, L('transformers','เครื่อง'), over?'var(--red)':'var(--green)')}
     ${kpi(L('Chance of no supply interruption (1 yr)','โอกาสจ่ายไฟได้ไม่สะดุดใน 1 ปี'), rs===null?'—':(rs*100).toFixed(1)+'%', L(`system reliability ${rs===null?'—':rs.toFixed(4)}`,`ความเชื่อถือได้ของระบบ ${rs===null?'—':rs.toFixed(4)}`))}
   </div>
@@ -1828,8 +1843,7 @@ function renderRepDash(){
         <div class="repcnt" style="--c:var(--red);"><div>${L('Poor','แย่')}</div><b>${poor}</b><span>${L('below 50','ต่ำกว่า 50')}</span></div></div>
       ${repUnitBars(list)}
       <p class="small-muted" style="font-size:12px;margin:8px 0 0;">${L(`Average of ${withHi.length}: ${fmtHi(avg)}`,`ค่าเฉลี่ย ${withHi.length} เครื่อง: ${fmtHi(avg)}`)}${nohi?` · ${L('no HI','ไม่มี HI')} ${nohi}`:''} · Tamma et al. (2021)</p></div>
-    <div class="card"><h3>${L('What to do first','ควรดูแลเครื่องไหนก่อน')}</h3><p class="card-sub">${L('Condition (left = good, right = poor) × how much the supply is hit if the unit fails (bottom = has a spare, top = no spare). Tap a dot to open.','สภาพ (ซ้าย = ดี ขวา = แย่) × ถ้าเสียจะกระทบการจ่ายไฟแค่ไหน (ล่าง = มีเครื่องสำรอง บน = ไม่มีสำรอง) แตะจุดเพื่อเปิดดู')}</p>${repMatrix(list)}${repMatrixNote(list)}
-      <p class="small-muted" style="font-size:11.5px;margin:6px 0 0;">${L(`Vertical axis = critical importance IC from system reliability; line at IC ${REP_IC_HIGH*100}% (set by the project). Horizontal line at HI 50.`,`แกนตั้ง = ดัชนีความสำคัญวิกฤต (IC) จากความเชื่อถือได้ของระบบ เส้นแบ่งที่ IC ${REP_IC_HIGH*100}% (ผู้จัดทำกำหนด) แกนนอนแบ่งที่ HI 50`)}</p></div>
+    <div class="card"><h3>${L('What to do first','ควรดูแลเครื่องไหนก่อน')}</h3><p class="card-sub">${L('Same order as the Risk & priority page: risk level first, then how much the supply depends on the unit. Tap a row to open.','ลำดับเดียวกับหน้าความเสี่ยงและลำดับ: เรียงตามระดับความเสี่ยงก่อน แล้วตามความสำคัญต่อการจ่ายไฟ แตะเพื่อเปิดดู')}</p>${repPriorityList(list)}</div>
   </div>
   <div class="grid g2" style="gap:16px;align-items:start;margin-bottom:16px;">
     <div class="card"><h3>${L('What the Health Index is made of','ดัชนีสุขภาพมาจากอะไร')}</h3><p class="card-sub">${L('Average score of each part · fuller bar = better · lowest units shown below','คะแนนเฉลี่ยของแต่ละส่วน · แถบยิ่งเต็มยิ่งดี · ใต้แถบบอกเครื่องที่ต่ำสุด')}</p>
@@ -3128,7 +3142,7 @@ function renderOverview(){
   </div>
   <section class="card">
     <div class="card-head"><h3>${t('hi_trend_fleet')}</h3><span class="small-muted" style="font-size:13px;display:flex;gap:12px;align-items:center;"><label style="display:flex;gap:5px;align-items:center;cursor:pointer;"><input type="checkbox" id="ovTrendUnits" ${state.trendUnits?'checked':''}> ${L('show each transformer','แสดงรายตัว')}</label></span></div>
-    ${ovTrendHead()}<div class="ovtr-wrap">${ovTrendSvg()}</div>
+    ${chartBox('ovTrend2',200)}
     <p class="refnote" style="margin-top:8px;">${L('The slope of this line is the HI decline rate (points per year). Together with today’s HI it sets the risk level in the Risk matrix.','ความชันของเส้นนี้คืออัตรา HI ลดลง (คะแนนต่อปี) ใช้ร่วมกับค่า HI ปัจจุบันเพื่อหาระดับความเสี่ยงใน Risk matrix')} ${L('One point per year = the latest HI of that year, averaged over all transformers.','1 จุดต่อปี = ค่า HI ล่าสุดของปีนั้น เฉลี่ยทุกเครื่อง')}</p>
     ${trendExplainHtml('fleet')}
     ${refNote('Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327.','Tamma, Prasojo &amp; Suwarno (2021), <i>High Voltage</i> 6:314–327')}
@@ -5211,8 +5225,7 @@ function renderReports(){
       <optgroup label="${L('Substation','สถานี')}">${NET.stations.map(st=>`<option value="st:${esc(st.id)}" ${sc==='st:'+st.id?'selected':''}>${esc(st.id)} — ${esc(st.name)}</option>`).join('')}</optgroup>
       <optgroup label="${L('Transformer','หม้อแปลง')}">${ASSETS.map(a=>`<option value="tr:${esc(a.id)}" ${sc==='tr:'+a.id?'selected':''}>${esc(a.id)} — ${esc(a.loc||'')}</option>`).join('')}</optgroup></select>
     <span class="small-muted">${L('Charts use C.E. years.','กราฟแสดงปีเป็น พ.ศ.')}</span></div>`;
-  REP_IC_MAP = icOfMap();
-  return bar + withReportScope(renderRepDash) + withReportScope(renderReportsInner) + dpmCompareTable();
+  return bar + withReportScope(renderReportsInner) + dpmCompareTable();
 }
 function initReportsCharts(){ return withReportScope(initReportsChartsInner); }
 function renderReportsInner(){
@@ -5783,7 +5796,7 @@ function render(){ chartFontDefaults();
     content.innerHTML = `<div class="tabs">${[['system',L('System reliability','ความเชื่อถือได้ของระบบ')],['diagram',L('Single-line diagram','แผนภาพวงจร')]].map(([k,n])=>`<button class="tab ${(dg?'diagram':'system')===k?'active':''}" data-reltab="${k}">${n}</button>`).join('')}</div>` + (dg ? schematicHtml() : netHtml());
     document.querySelectorAll('[data-reltab]').forEach(b=> b.addEventListener('click',()=>{ state.relTab=b.dataset.reltab; render(); }));
     attachGlobalViewLinks(); const fold=document.getElementById('relCalcFold'); if(fold) fold.addEventListener('toggle',()=>{ state.relCalcOpen=fold.open; const h=fold.querySelector('.calc-fold-hint'); if(h) h.textContent = fold.open?L('Hide','ซ่อน'):L('Show','แสดง'); });  }
-  else if(state.page==='reports'){ content.innerHTML = renderReports(); initReportsCharts(); attachReportsEvents(); attachGlobalViewLinks(); }
+  else if(state.page==='reports'){ content.innerHTML = renderReports(); initReportsCharts(); attachReportsEvents(); }
   else if(state.page==='settings'){ content.innerHTML = renderSettings(); attachSettingsEvents(); }
   else if(state.page==='fmearcm'){ content.innerHTML = renderFmeaRcmOverview(); attachCategoryOverviewEvents(); }
   else if(state.page==='planall'){ content.innerHTML = renderPlanOverview(); attachCategoryOverviewEvents(); }
