@@ -1537,6 +1537,84 @@ function openCompEdit(a){ const c=a.ctest||{};
       <div class="formrow"><label>${L('OLTC operation counter','OLTC counter (ครั้ง)')}</label><input name="oltc" type="number" min="0" step="1" value="${c.oltc??''}"></div>
     </div>`, (d)=>{ a.ctest={date:d.date||'', tand:compNum(d.tand), dfr:compNum(d.dfr), oltc:compNum(d.oltc)}; FMEA_STORE[a.id] && linkFmea(a, FMEA_STORE[a.id]); a._risk=null; recomputeAll(); saveData(); render(); toast(t('toast_saved'),'success'); }); }
 
+/* =====================================================================
+   Import of the utility's 4-sheet test-record workbook
+   (DataPower Transformer · Breakdown-WaterContent-oil · DGA · DFR_Bushing)
+   ===================================================================== */
+const UTIL_HEAD = {
+  dp:['Station_Th','Bay','Manufacturer','Rated_kV','Rated_MVA','TR_S/N.','Year','OLTC_Type','OLTC_S/N.','OLTC_Mfg.','Drive_Type','Drive_Mfg.','OFU_Type','OFU_Mfg.','Energize Date','Contract No.','AGE','Sub_Lat','Sub_Long'],
+  bdv:['ประทับเวลา','Sampling Date','Test Date','RoomTemperature','Oil Temperature','เครื่อง Oil Tester','Substation','Rated Voltage(kV)','Bay','Compartment','ค่า Breakdown voltage ครั้งที่ 1','ค่า Breakdown voltage ครั้งที่ 2','ค่า Breakdown voltage ครั้งที่ 3','ค่า Breakdown voltage ครั้งที่ 4','ค่า Breakdown voltage ครั้งที่ 5','ค่า Breakdown voltage ครั้งที่ 6','Summary and Comment','ค่า Water Content ครั้งที่ 1','ค่า Water Content ครั้งที่ 2','ค่า Water Content ครั้งที่ 3','เครื่องทดสอบ Water Content','Color Index'],
+  dga:['ประทับเวลา','Sampling Date','Test Date','Oil Temperature','เครื่องทดสอบ DGA','Substation','Rated Voltage(kV)','Bay','Compartment','H2','H2O','CO2','CO','C2H4','C2H6','CH4','C2H2','TDCG','Summary and Comment','% Methane_CH4','% Ethylene_C2H4','% Acetylene_C2H2',"Duval's Condition"],
+  dfr:['ประทับเวลา','Test Date','Station','Bay','Phase','Bushing Mfg.','Year','Type','Serial No.','%DF@1Hz','C@1Hz_pF','%DF@50Hz','C@50Hz_pF','Measument','Section','comment','OIP/RIP','Life Time','SubAndBay','Criteria'],
+};
+const UTIL_SHEETS = {dp:'DataPower Transformer', bdv:'Breakdown-WaterContent-oil', dga:'DGA', dfr:'DFR_Bushing'};
+function utilKeyOf(name){ const n=String(name).toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(n.includes('datapower')) return 'dp'; if(n.includes('breakdown')||n.includes('watercontent')) return 'bdv'; if(n==='dga'||n.startsWith('dga')) return 'dga'; if(n.includes('dfr')) return 'dfr'; return null; }
+function utilIsWorkbook(names){ const ks=names.map(utilKeyOf); return ks.includes('dga') && ks.includes('bdv'); }
+const utilNorm = s=>String(s??'').toLowerCase().replace(/\s+/g,'').replace(/[^0-9a-zก-๙%@]/g,'');
+function utilRows(table){ if(!table||!table.length) return []; const head=table[0].map(utilNorm);
+  return table.slice(1).filter(r=>r.some(c=>String(c).trim()!=='')).map((r,i)=>{ const o={_line:i+2}; head.forEach((h,j)=>{ if(h) o[h]=r[j]; }); return o; }); }
+const utilGet = (o,col)=> o[utilNorm(col)];
+function utilNum(v){ if(v===null||v===undefined) return null; if(typeof v==='number') return isNaN(v)?null:v; let s=String(v).trim(); if(!s) return null;
+  if(/^(nd|n\.d\.|not detected|-|—)$/i.test(s)) return 0; s=s.replace(/^[<≤>≥]\s*/,'').replace(/,/g,''); const m=s.match(/-?\d+(\.\d+)?/); return m?Number(m[0]):null; }
+function utilMean(vals){ const v=vals.map(utilNum).filter(x=>x!==null); return v.length? Math.round(v.reduce((t,x)=>t+x,0)/v.length*100)/100 : null; }
+const utilId = (st,bay)=> `${String(st??'').trim()}-${String(bay??'').trim()}`;
+const utilMain = c=>{ const s=String(c??'').trim().toLowerCase(); return !s || /main|ถังหลัก|tank/.test(s) && !/oltc|tap/.test(s); };
+function analyseUtilityWorkbook(sh){
+  const errors=[], samples=[], newAssets={}, updates={}, dfr={}; let skippedOltc=0;
+  const dp=utilRows(sh.dp), bdv=utilRows(sh.bdv), dga=utilRows(sh.dga), dfrR=utilRows(sh.dfr);
+  /* 1. nameplate */
+  dp.forEach(o=>{ const st=utilGet(o,'Station_Th'), bay=utilGet(o,'Bay'); if(!String(st??'').trim()||!String(bay??'').trim()){ errors.push(L(`DataPower row ${o._line}: no station or bay`,`DataPower แถว ${o._line}: ไม่มีสถานีหรือ Bay`)); return; }
+    const id=utilId(st,bay); const en=parseImportDate(utilGet(o,'Energize Date')); const kv=utilGet(o,'Rated_kV');
+    updates[id]={id, Location:String(st).trim(), Manufacturer:String(utilGet(o,'Manufacturer')??'').trim(), MVA:utilNum(utilGet(o,'Rated_MVA')), Voltage:String(kv??'').trim(), Year:utilNum(utilGet(o,'Year')), InstallDate:en?isoD(en):'', serial:String(utilGet(o,'TR_S/N.')??'').trim(), oltcType:String(utilGet(o,'OLTC_Type')??'').trim(), oltcMfg:String(utilGet(o,'OLTC_Mfg.')??'').trim()}; });
+  /* 2. oil BDV / water / colour (main tank only) */
+  const oil={}; bdv.forEach(o=>{ if(!utilMain(utilGet(o,'Compartment'))){ skippedOltc++; return; }
+    const id=utilId(utilGet(o,'Substation'),utilGet(o,'Bay')); const d=parseImportDate(utilGet(o,'Sampling Date'))||parseImportDate(utilGet(o,'Test Date'));
+    if(!d){ errors.push(L(`BDV row ${o._line}: date not recognised`,`BDV แถว ${o._line}: อ่านวันที่ไม่ได้`)); return; }
+    const raw=[1,2,3,4,5,6].map(i=>utilNum(utilGet(o,'ค่า Breakdown voltage ครั้งที่ '+i))).filter(x=>x!==null), wr=[1,2,3].map(i=>utilNum(utilGet(o,'ค่า Water Content ครั้งที่ '+i))).filter(x=>x!==null);
+    (oil[id]=oil[id]||[]).push({d, bdv:utilMean(raw), bdvRaw:raw, moisture:utilMean(wr), waterRaw:wr, colour:utilNum(utilGet(o,'Color Index')), line:o._line}); });
+  /* 3. DGA (main tank) + pair with the oil test of the same sample (±7 days) */
+  const usedOil=new Set();
+  dga.forEach(o=>{ if(!utilMain(utilGet(o,'Compartment'))){ skippedOltc++; return; }
+    const id=utilId(utilGet(o,'Substation'),utilGet(o,'Bay')); if(id==='-'){ errors.push(L(`DGA row ${o._line}: no substation or bay`,`DGA แถว ${o._line}: ไม่มีสถานีหรือ Bay`)); return; }
+    const d=parseImportDate(utilGet(o,'Sampling Date'))||parseImportDate(utilGet(o,'Test Date')); if(!d){ errors.push(L(`DGA row ${o._line}: date not recognised`,`DGA แถว ${o._line}: อ่านวันที่ไม่ได้`)); return; }
+    const gases={}; let bad=[]; GASES.forEach(g=>{ const v=utilNum(utilGet(o,g)); if(v===null||v<0) bad.push(g); gases[g]=v; });
+    if(bad.length){ errors.push(L(`DGA row ${o._line} (${id}): missing ${bad.join(', ')}`,`DGA แถว ${o._line} (${id}): ไม่มีค่า ${bad.join(', ')}`)); return; }
+    const cand=(oil[id]||[]).map((x,k)=>({x,k,dd:Math.abs(x.d-d)/864e5})).filter(c=>c.dd<=7).sort((p,q)=>p.dd-q.dd)[0];
+    if(!cand){ errors.push(L(`DGA row ${o._line} (${id}, ${fmtD(d)}): no BDV / water result within 7 days — skipped`,`DGA แถว ${o._line} (${id}, ${fmtD(d)}): ไม่มีผล BDV / ความชื้นที่ห่างไม่เกิน 7 วัน — ข้าม`)); return; }
+    usedOil.add(id+'#'+cand.k); const q=cand.x;
+    samples.push({id, sample:{date:fmtD(d), gases, bdv:q.bdv, bdvRaw:q.bdvRaw, moisture:q.moisture, waterRaw:q.waterRaw, acidity:null, ift:null, colour:q.colour, fal:null,
+      utilDuval:String(utilGet(o,"Duval's Condition")??'').trim()||null, utilTdcg:utilNum(utilGet(o,'TDCG')), src:'utility'}});
+    if(!ASSETS.some(a=>a.id===id) && !newAssets[id]) newAssets[id]=Object.assign({id}, updates[id]||{Location:String(utilGet(o,'Substation')??'').trim(), Voltage:String(utilGet(o,'Rated Voltage(kV)')??'').trim()}); });
+  Object.keys(oil).forEach(id=>oil[id].forEach((x,k)=>{ if(!usedOil.has(id+'#'+k)) errors.push(L(`BDV row ${x.line} (${id}, ${fmtD(x.d)}): no DGA result within 7 days — skipped`,`BDV แถว ${x.line} (${id}, ${fmtD(x.d)}): ไม่มีผล DGA ที่ห่างไม่เกิน 7 วัน — ข้าม`)); }));
+  /* 4. bushing DFR — worst HV phase of the latest test */
+  dfrR.forEach(o=>{ const sec=String(utilGet(o,'Section')??'').trim(); if(sec && !/hv|h\b|primary|แรงสูง/i.test(sec)) return;
+    const id=utilId(utilGet(o,'Station'),utilGet(o,'Bay')); const d=parseImportDate(utilGet(o,'Test Date')); const v=utilNum(utilGet(o,'%DF@1Hz')); if(!d||v===null) return;
+    const cur=dfr[id]; if(!cur || d>cur.d) dfr[id]={d, v}; else if(+d===+cur.d && v>cur.v) cur.v=v; });
+  const upd = Object.values(updates).filter(u=>ASSETS.some(a=>a.id===u.id));
+  return {utility:true, errors, samples, newAssets:Object.values(newAssets), updates:upd, allUpdates:updates, dfr, skippedOltc};
+}
+function applyUtilityExtras(r){
+  r.updates.forEach(u=>{ const a=ASSETS.find(x=>x.id===u.id); if(!a) return;
+    if(u.Manufacturer) a.mfr=u.Manufacturer; if(u.MVA) a.cap=u.MVA; if(u.Voltage) a.volt=u.Voltage; if(u.Year) a.year=u.Year; if(u.InstallDate) a.installed=u.InstallDate;
+    if(u.serial) a.serial=u.serial; if(u.oltcType) a.oltcType=u.oltcType; if(u.oltcMfg) a.oltcMfg=u.oltcMfg; });
+  r.newAssets.forEach(n=>{ const a=ASSETS.find(x=>x.id===n.id); if(!a) return; if(n.Manufacturer) a.mfr=n.Manufacturer; if(n.serial) a.serial=n.serial; if(n.oltcType) a.oltcType=n.oltcType; if(n.oltcMfg) a.oltcMfg=n.oltcMfg;
+    ensureNet(); const st=NET.stations.find(s=>s.name===n.Location); if(st && !st.trs.includes(a.id)) setStation(a.id, st.id); });
+  Object.keys(r.dfr).forEach(id=>{ const a=ASSETS.find(x=>x.id===id); if(!a) return; const v=r.dfr[id]; a.ctest=Object.assign({}, a.ctest||{}, {dfr:v.v, dfrDate:isoD(v.d)}); if(!a.ctest.date) a.ctest.date=isoD(v.d); });
+}
+function downloadUtilityTemplate(){
+  if(typeof XLSX==='undefined' || !XLSX.utils){ downloadFile('lab_results_template.csv', '﻿'+importTemplateCsv(), 'text/csv'); return; }
+  const ex = {
+    dp:['STATION-A','TR1','Manufacturer A','115/24',50,'SN-0001',2010,'','','','','','','','2010-06-01','','','',''],
+    bdv:['','2026-03-15','2026-03-16',30,45,'','STATION-A',115,'TR1','Main Tank',72,74,71,73,75,72,'',8,9,8,'',0.6],
+    dga:['','2026-03-15','2026-03-16',45,'','STATION-A',115,'TR1','Main Tank',12,'',1900,210,8,30,20,0,280,'','','','',''],
+    dfr:['','2026-03-20','STATION-A','TR1','H1','','2010','','',0.42,'','','','','HV','','OIP','',''],
+  };
+  const wb=XLSX.utils.book_new();
+  Object.keys(UTIL_SHEETS).forEach(k=> XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([UTIL_HEAD[k], ex[k]]), UTIL_SHEETS[k]));
+  XLSX.writeFile(wb, 'test_records_template.xlsx');
+}
+
 function snapshotData(){ return {baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
 function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
 function applyData(d){
@@ -1567,18 +1645,25 @@ function labFormFields(p){
   return `<div class="formrow"><label>${L('Sampling date','วันที่เก็บตัวอย่าง')}</label><input name="date" type="date" value="${isoD(parseD(p.date)||new Date())}" required></div>
   <div style="font-weight:800;font-size:13.5px;margin:10px 0 4px;">${L('Dissolved gases (ppm)','ก๊าซที่ละลายในน้ำมัน (ppm)')}</div>
   <div class="grid g2" style="gap:0 12px;">${GASES.map(g=>num('g_'+g, g, p.gases[g])).join('')}</div>
-  <div style="font-weight:800;font-size:13.5px;margin:10px 0 4px;">${L('Oil & paper tests','ผลทดสอบน้ำมันและกระดาษ')}</div>
+  <div style="font-weight:800;font-size:13.5px;margin:10px 0 4px;">${L('Breakdown voltage (kV) — readings 1–6, the mean is used','ค่า Breakdown voltage (kV) ครั้งที่ 1–6 — ใช้ค่าเฉลี่ย')}</div>
+  <div class="grid" style="grid-template-columns:repeat(6,1fr);gap:0 8px;">${[0,1,2,3,4,5].map(i=>{ const raw=p.bdvRaw||[p.bdv]; return `<div class="formrow"><label>${i+1}</label><input name="bdv${i+1}" type="number" min="0" step="any" value="${raw[i]??''}" ${i===0?'required':''}></div>`; }).join('')}</div>
+  <div style="font-weight:800;font-size:13.5px;margin:6px 0 4px;">${L('Water content (ppm) — readings 1–3, the mean is used','ค่า Water Content (ppm) ครั้งที่ 1–3 — ใช้ค่าเฉลี่ย')}</div>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:0 8px;">${[0,1,2].map(i=>{ const raw=p.waterRaw||[p.moisture]; return `<div class="formrow"><label>${i+1}</label><input name="water${i+1}" type="number" min="0" step="any" value="${raw[i]??''}" ${i===0?'required':''}></div>`; }).join('')}</div>
+  <div class="grid g2" style="gap:0 12px;">${num('colour','Color Index',p.colour,'0.1')}</div>
+  <div style="font-weight:800;font-size:13.5px;margin:10px 0 4px;">${L('Other oil & paper tests — optional (not in the utility form)','ผลทดสอบอื่น — ไม่บังคับ (ไม่มีในแบบฟอร์มของหน่วยงาน)')}</div>
   <div class="grid g2" style="gap:0 12px;">
-    ${num('bdv','BDV (kV)',p.bdv)}${num('moisture',L('Water content (ppm)','ความชื้น (ppm)'),p.moisture)}
-    ${num('acidity',L('Acidity (mgKOH/g)','ความเป็นกรด (mgKOH/g)'),p.acidity,'0.001')}${num('ift','IFT (dyne/cm)',p.ift)}
-    ${num('colour',L('Colour scale','สีน้ำมัน (colour scale)'),p.colour,'0.1')}${num('fal',L('Furan 2-FAL (ppb) — optional','ฟูแรน 2-FAL (ppb) — ไม่บังคับ'),p.fal,'1',false)}
+    ${num('acidity',L('Acidity (mgKOH/g)','ความเป็นกรด (mgKOH/g)'),p.acidity,'0.001',false)}${num('ift','IFT (dyne/cm)',p.ift,'any',false)}
+    ${num('fal',L('Furan 2-FAL (ppb)','ฟูแรน 2-FAL (ppb)'),p.fal,'1',false)}
   </div>
   <p class="small-muted" style="font-size:12px;margin:4px 0 0;">${L('Gas rates are calculated from the previous sample. If 2-FAL is blank, the Paper Condition Factor uses only CO/CO₂ and age (as in the paper).','อัตราก๊าซคำนวณจากตัวอย่างครั้งก่อน หากไม่กรอก 2-FAL ปัจจัยกระดาษจะใช้เฉพาะ CO/CO₂ และอายุ (ตามงานวิจัย)')}</p>`;
 }
 function sampleFromForm(data){
   const d = data.date ? new Date(data.date+'T00:00:00') : new Date();
   const gases={}; GASES.forEach(g=>gases[g]=Math.max(0,Number(data['g_'+g])||0));
-  return {date:fmtD(d), gases, bdv:Number(data.bdv), moisture:Number(data.moisture), acidity:Number(data.acidity), ift:Number(data.ift), colour:Number(data.colour), fal: data.fal===''||data.fal==null ? null : Number(data.fal)};
+  const opt=(v)=> v===''||v==null||isNaN(Number(v)) ? null : Number(v);
+  const bdvRaw=[1,2,3,4,5,6].map(i=>opt(data['bdv'+i])).filter(v=>v!==null), waterRaw=[1,2,3].map(i=>opt(data['water'+i])).filter(v=>v!==null);
+  const mean=(a)=> a.length ? Math.round(a.reduce((t,x)=>t+x,0)/a.length*100)/100 : null;
+  return {date:fmtD(d), gases, bdv:mean(bdvRaw), bdvRaw, moisture:mean(waterRaw), waterRaw, acidity:opt(data.acidity), ift:opt(data.ift), colour:opt(data.colour), fal:opt(data.fal)};
 }
 
 /* =====================================================================
@@ -2824,7 +2909,7 @@ function renderAssetsPage(){
       <button class="btn btn-ghost" data-import-template="1">${gicon('download',0,'width:13px;height:13px')} ${L('Template','แม่แบบ')}</button>
       <button class="btn btn-outline" data-import-lab="1">${gicon('upload',0,'width:13px;height:13px')} ${L('Import lab results','นำเข้าผลแล็บ')}</button>
       <button class="btn btn-primary" id="btnAddAsset">${icon('box',' style="width:13px;height:13px"')} ${t('add_asset')}</button></div></div>
-    <p class="small-muted" style="margin:-4px 0 12px;font-size:12.5px;">${L('Import accepts Excel (.xlsx) or CSV — one row per lab result. Download the template to see the columns; new transformer IDs are created automatically.','นำเข้าได้ทั้ง Excel (.xlsx) และ CSV — 1 แถวต่อผลแล็บ 1 ครั้ง ดาวน์โหลดแม่แบบเพื่อดูคอลัมน์ รหัสหม้อแปลงใหม่จะถูกสร้างให้อัตโนมัติ')}</p>
+    <p class="small-muted" style="margin:-4px 0 12px;font-size:12.5px;">${L('Import the utility test-record workbook as it is (sheets DataPower Transformer, Breakdown-WaterContent-oil, DGA, DFR_Bushing) — or a one-row-per-result Excel / CSV. Transformer code = Station + Bay; new codes are created automatically. Download the template to see the columns.','นำเข้าแบบฟอร์มบันทึกผลตรวจของหน่วยงานได้ทั้งไฟล์ (ชีต DataPower Transformer, Breakdown-WaterContent-oil, DGA, DFR_Bushing) หรือไฟล์ Excel / CSV แบบ 1 แถวต่อผล 1 ครั้ง รหัสหม้อแปลง = สถานี + Bay และสร้างรหัสใหม่ให้อัตโนมัติ ดาวน์โหลดแม่แบบเพื่อดูคอลัมน์')}</p>
     <div class="filter-row" style="margin-bottom:14px;">
       <input class="chip-input" id="assetSearchInput" placeholder="${t('search_assets')}" style="min-width:220px;" value="${esc(state.assetSearch)}">
       <select class="chip-input" id="assetStatusFilter">
@@ -3393,7 +3478,10 @@ function openCompareDgaModal(){
   document.getElementById('cmpA').addEventListener('change', upd);
   document.getElementById('cmpB').addEventListener('change', upd);
 }
-function detailHealthIndexTab(a){
+function detailHealthIndexTab(a){ const as=a._as; const mrows = as ? as.rows.filter(r=>r.key!=='ff' && r.score===null) : []; const miss = mrows.some(r=>r.key!=='fal') ? mrows.map(r=>r.p) : [];   /* 2-FAL alone may be blank (paper) */
+  const note = miss.length ? `<div class="card" style="margin-bottom:12px;border-left:4px solid var(--amber);padding:10px 14px;"><b style="color:var(--amber);">${L('HI from incomplete data','HI คิดจากข้อมูลไม่ครบ')}</b> <span style="font-size:13px;">— ${L('no result for','ไม่มีผล')} ${miss.join(', ')}. ${L('These items are left out and the weights of the rest re-normalised (Tamma et al., 2021). Add the values in the lab result to complete the HI.','หัวข้อเหล่านี้ไม่นำมาคิด และปรับน้ำหนักหัวข้อที่เหลือให้รวมเท่าเดิม (Tamma et al., 2021) กรอกค่าเพิ่มในผลแล็บเพื่อให้ HI ครบ')}</span></div>` : '';
+  return note + detailHealthIndexTabBase(a); }
+function detailHealthIndexTabBase(a){
   const prof = profileFor(a); const cat = hiCat(prof.hi); const rk = riskOf(a); const ag = rk.ageing; const hr = rk.rateInfo;
   const F = prof.factors; const d = prof.dga;
   const fg = a.status==='Critical'?'var(--red)':a.status==='Warning'?'var(--amber)':'var(--green)';
@@ -3491,7 +3579,10 @@ function hiCalcDetail(prof){
     <p class="small-muted" style="font-size:12px;margin:10px 0 0;">${L(`Method: Tamma, Prasojo & Suwarno (2021), High Voltage 6:314–327. Step 1 uses ${CRIT.dpm==='pentagon'?'the paper’s Duval Pentagon rule':'Duval Triangle 1 mapped to the paper’s Pentagon conditions (adapted; change in Settings → Health Index)'}. Missing 2-FAL counts as score 1, as in the paper’s examples.`,`วิธีการ: Tamma, Prasojo & Suwarno (2021), High Voltage 6:314–327 ขั้นที่ 1 ใช้${CRIT.dpm==='pentagon'?'กฎห้าเหลี่ยม Duval ตามงานวิจัย':'สามเหลี่ยม Duval 1 เทียบกับระดับชนิดของห้าเหลี่ยมตามงานวิจัย (ปรับใช้ เปลี่ยนได้ที่ ตั้งค่า → ดัชนีสุขภาพ)'} หากไม่มีค่า 2-FAL ให้คะแนน 1 ตามตัวอย่างในงานวิจัย`)}</p>
   </div>`;
 }
-function detailDgaTab(a){
+function detailDgaTab(a){ const s0=labFor(a)[0]; const d=a._as&&a._as.dga;
+  const note = (s0 && s0.utilDuval) ? `<div class="card" style="margin-bottom:12px;padding:10px 14px;border-left:4px solid var(--blue-bg);font-size:13px;"><b>${L('Utility record','ผลในแบบฟอร์มของหน่วยงาน')}</b> (${esc(s0.date)}): Duval's Condition <b>${esc(s0.utilDuval)}</b>${s0.utilTdcg!=null?` · TDCG ${fmtPpm(s0.utilTdcg)} ppm`:''} — ${L('this app','ระบบนี้')}: <b>${d?esc(d.code==='N'?L('Normal','ปกติ'):(d.zone||d.code)):'—'}</b>${d && s0.utilDuval && String(d.zone||d.code).toUpperCase()!==s0.utilDuval.toUpperCase() && !(d.code==='N' && /^n/i.test(s0.utilDuval)) ? ` <span class="pill pill-warning">${L('different — check','ไม่ตรงกัน — ควรตรวจสอบ')}</span>`:''}</div>` : '';
+  return note + detailDgaTabBase(a); }
+function detailDgaTabBase(a){
   if(!['gas','ratio','trend'].includes(state.dgaSubTab)) state.dgaSubTab = state.dgaSubTab==='rogers'||state.dgaSubTab==='iec' ? 'ratio' : state.dgaSubTab==='trend' ? 'trend' : 'gas';
   const subtabs = [['gas',L('Gases & Duval','ผลก๊าซและ Duval')],['ratio',L('Ratio methods','วิธีอัตราส่วน')],['trend',L('Trend','แนวโน้ม')]];
   return `
@@ -4211,8 +4302,8 @@ function simulateAfterSample(s, key, scen){
   const x = JSON.parse(JSON.stringify(s)); x.date = fmtD(new Date());
   const rep = key==='replacement';
   GASES.forEach(g=>{ if(g==='CO'||g==='CO2' || scen==='oil') return; const v=x.gases[g]*(rep?0.05:0.1); x.gases[g] = v>=10?Math.round(v):Math.round(v*100)/100; });
-  x.moisture = Math.min(x.moisture, rep?8:10); x.bdv = Math.max(x.bdv, rep?75:70);
-  if(key!=='filtration'){ x.acidity = Math.min(x.acidity, rep?0.01:0.03); x.ift = Math.max(x.ift, rep?42:38); x.colour = Math.min(x.colour, rep?0.5:1.0); }
+  if(x.moisture!=null) x.moisture = Math.min(x.moisture, rep?8:10); if(x.bdv!=null) x.bdv = Math.max(x.bdv, rep?75:70);
+  if(key!=='filtration'){ if(x.acidity!=null) x.acidity = Math.min(x.acidity, rep?0.01:0.03); if(x.ift!=null) x.ift = Math.max(x.ift, rep?42:38); if(x.colour!=null) x.colour = Math.min(x.colour, rep?0.5:1.0); }
   return x;
 }
 function hasActiveFault(a){ const c=a._as?a._as.dga.code:'N'; const f=famOf(c); return c!=='N' && f!=='S' && f!=='N'; }
@@ -4552,14 +4643,14 @@ function readImportFile(file, done){
   const name=file.name.toLowerCase(); const rd=new FileReader();
   if(/\.(xlsx|xls)$/.test(name)){
     if(typeof XLSX==='undefined'){ toast(L('Excel reader failed to load — save the sheet as CSV and try again.','โหลดตัวอ่าน Excel ไม่ได้ — บันทึกเป็น CSV แล้วลองใหม่')); return; }
-    rd.onload=()=>{ try{ const wb=XLSX.read(new Uint8Array(rd.result),{type:'array',cellDates:true}); const ws=wb.Sheets[wb.SheetNames[0]]; done(XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''})); }catch(e){ toast(L('Could not read the file','อ่านไฟล์ไม่ได้')); } };
+    rd.onload=()=>{ try{ const wb=XLSX.read(new Uint8Array(rd.result),{type:'array',cellDates:true}); if(utilIsWorkbook(wb.SheetNames)){ const sh={}; wb.SheetNames.forEach(n=>{ const k=utilKeyOf(n); if(k && !sh[k]) sh[k]=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''}); }); done({utility:true, sheets:sh}); return; } const ws=wb.Sheets[wb.SheetNames[0]]; done(XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''})); }catch(e){ toast(L('Could not read the file','อ่านไฟล์ไม่ได้')); } };
     rd.readAsArrayBuffer(file);
   } else { rd.onload=()=>done(parseCsvText(String(rd.result).replace(/^\uFEFF/,''))); rd.readAsText(file); }
 }
 function analyseImport(table){
   if(!table.length) return {errors:[L('The file is empty','ไฟล์ว่าง')], samples:[], newAssets:[]};
   const head = table[0].map(h=>IMPORT_ALIAS[String(h).toLowerCase().replace(/[^a-z0-9]/g,'')]||null);
-  const need = ['AssetID','Date','H2','CH4','C2H6','C2H4','C2H2','CO','CO2','BDV_kV','Water_ppm','Acidity','IFT','Colour'];
+  const need = ['AssetID','Date','H2','CH4','C2H6','C2H4','C2H2','CO','CO2','BDV_kV','Water_ppm','Colour'];   /* Acidity, IFT, FAL_ppb optional */
   const missing = need.filter(c=>!head.includes(c));
   if(missing.length) return {errors:[L(`Missing columns: ${missing.join(', ')}`,`ไม่พบคอลัมน์: ${missing.join(', ')}`)], samples:[], newAssets:[]};
   const errors=[], samples=[], newAssets={};
@@ -4570,7 +4661,7 @@ function analyseImport(table){
     const bad = need.slice(2).filter(k=>num(k)===null||isNaN(num(k))||num(k)<0);
     if(bad.length){ errors.push(L(`Row ${line} (${id}): missing or invalid ${bad.join(', ')}`,`แถว ${line} (${id}): ค่าว่างหรือไม่ถูกต้อง ${bad.join(', ')}`)); return; }
     const fal=num('FAL_ppb');
-    samples.push({id, sample:{date:fmtD(d), gases:{H2:num('H2'),CH4:num('CH4'),C2H6:num('C2H6'),C2H4:num('C2H4'),C2H2:num('C2H2'),CO:num('CO'),CO2:num('CO2')}, bdv:num('BDV_kV'), moisture:num('Water_ppm'), acidity:num('Acidity'), ift:num('IFT'), colour:num('Colour'), fal:(fal===null||isNaN(fal))?null:fal}});
+    samples.push({id, sample:{date:fmtD(d), gases:{H2:num('H2'),CH4:num('CH4'),C2H6:num('C2H6'),C2H4:num('C2H4'),C2H2:num('C2H2'),CO:num('CO'),CO2:num('CO2')}, bdv:num('BDV_kV'), moisture:num('Water_ppm'), acidity:(v=>v===null||isNaN(v)?null:v)(num('Acidity')), ift:(v=>v===null||isNaN(v)?null:v)(num('IFT')), colour:num('Colour'), fal:(fal===null||isNaN(fal))?null:fal}});
     if(!ASSETS.some(a=>a.id===id)){ const na=newAssets[id]||{id}; ['Location','Year','MVA','Voltage','InstallDate'].forEach(k=>{ if(String(o[k]??'').trim()!=='' && na[k]===undefined) na[k]=o[k]; }); newAssets[id]=na; }
   });
   return {errors, samples, newAssets:Object.values(newAssets)};
@@ -4578,22 +4669,28 @@ function analyseImport(table){
 function openImportModal(){
   const inp=document.createElement('input'); inp.type='file'; inp.accept='.csv,.xlsx,.xls,text/csv';
   inp.addEventListener('change',()=>{ const f=inp.files[0]; if(!f) return; readImportFile(f, (table)=>{
-    const r=analyseImport(table); const ids=[...new Set(r.samples.map(x=>x.id))];
+    const r = (table && table.utility) ? analyseUtilityWorkbook(table.sheets) : analyseImport(table); const ids=[...new Set(r.samples.map(x=>x.id))];
     openModal(L('Import lab results','นำเข้าผลแล็บ')+' — '+f.name, `
       <ul class="hlist">
         <li><span class="k">${L('Lab results to add','ผลแล็บที่จะเพิ่ม')}</span><span class="v">${r.samples.length}</span></li>
         <li><span class="k">${L('Transformers','หม้อแปลง')}</span><span class="v">${ids.length}</span></li>
         <li><span class="k">${L('New transformers to create','หม้อแปลงใหม่ที่จะสร้าง')}</span><span class="v">${r.newAssets.length}${r.newAssets.length?` <span class="small-muted">(${r.newAssets.map(x=>x.id).slice(0,8).join(', ')}${r.newAssets.length>8?'…':''})</span>`:''}</span></li>
+        ${r.utility?`<li><span class="k">${L('Format','รูปแบบไฟล์')}</span><span class="v">${L('Utility test-record workbook (4 sheets)','แบบฟอร์มบันทึกผลตรวจของหน่วยงาน (4 ชีต)')}</span></li>
+        <li><span class="k">${L('Transformer data updated (DataPower)','ข้อมูลหม้อแปลงที่อัปเดต (DataPower)')}</span><span class="v">${r.updates.length}</span></li>
+        <li><span class="k">${L('Bushing DFR results','ผล DFR บูชชิ่ง')}</span><span class="v">${Object.keys(r.dfr).length}</span></li>
+        <li><span class="k">${L('OLTC-compartment rows (kept out of the HI)','แถวช่อง OLTC (ไม่นำมาคิด HI)')}</span><span class="v">${r.skippedOltc}</span></li>`:''}
         <li><span class="k">${L('Rows skipped','แถวที่ข้าม')}</span><span class="v" style="color:${r.errors.length?'var(--red)':'inherit'};">${r.errors.length}</span></li>
       </ul>
       ${r.errors.length?`<div class="small-muted" style="font-size:12.5px;max-height:130px;overflow:auto;margin-top:8px;">${r.errors.slice(0,15).map(e=>'• '+esc(e)).join('<br>')}${r.errors.length>15?'<br>…':''}</div>`:''}
       ${r.newAssets.some(x=>!x.InstallDate&&!x.Year)?`<p class="small-muted" style="font-size:12.5px;color:var(--amber);">${L('Some new transformers have no InstallDate — their age cannot be scored until you set it (Edit transformer).','หม้อแปลงใหม่บางตัวไม่มีวันที่ติดตั้ง (InstallDate) — จะยังคิดคะแนนอายุไม่ได้จนกว่าจะกรอก (แก้ไขข้อมูลหม้อแปลง)')}</p>`:''}
+      ${r.utility?`<p class="small-muted" style="font-size:12.5px;">${L('BDV = mean of the 6 readings, water = mean of the 3 readings. The workbook has no acidity, IFT or 2-FAL — the Health Index is calculated from the factors available (weights re-normalised) and they can be added later in each lab result.','BDV = ค่าเฉลี่ย 6 ครั้ง ความชื้น = ค่าเฉลี่ย 3 ครั้ง แบบฟอร์มนี้ไม่มีความเป็นกรด IFT และ 2-FAL — ดัชนีสุขภาพจะคิดจากปัจจัยที่มี (ปรับน้ำหนักให้รวมเท่าเดิม) และเพิ่มค่าเหล่านี้ภายหลังได้ในผลแล็บแต่ละครั้ง')}</p>`:''}
       <p class="small-muted" style="font-size:12.5px;">${L('A result with the same transformer and date as an existing one replaces it.','ผลที่หม้อแปลงและวันที่ซ้ำกับของเดิมจะแทนที่ของเดิม')}</p>`,
-    ()=>{ if(!r.samples.length){ toast(L('Nothing to import','ไม่มีข้อมูลให้นำเข้า')); return; }
+    ()=>{ if(!r.samples.length && !(r.utility && (r.updates.length || Object.keys(r.dfr).length))){ toast(L('Nothing to import','ไม่มีข้อมูลให้นำเข้า')); return; }
       r.newAssets.forEach(n=>ASSETS.push({id:n.id, loc:String(n.Location||'—'), cap:Number(n.MVA)||0, volt:String(n.Voltage||'—'), hi:0, status:'Healthy', last:'—', next:'—', mfr:'—', year:Number(n.Year)||null, installed:(()=>{ const d=n.InstallDate?parseImportDate(n.InstallDate):null; return d?isoD(d):undefined; })(), type:'—', load:null, topOil:null, amb:null, demo:false}));
       ids.forEach(id=>{ const a=ASSETS.find(x=>x.id===id); if(a && isDemoAsset(a)){ a.demo=false; LAB[id]=[]; delete FMEA_STORE[id]; delete MAINT_STORE[id]; delete RCM_STORE[id]; } });
       r.samples.forEach(x=>{ const lab = LAB[x.id] || (LAB[x.id]=[]); const i=lab.findIndex(y=>y.date===x.sample.date); if(i>=0) lab.splice(i,1); lab.push(x.sample); });
       ids.forEach(id=>sortLab(LAB[id]));
+      if(r.utility) applyUtilityExtras(r);
       render();
       const used = []; r.samples.forEach(x=>{ const a=ASSETS.find(y=>y.id===x.id); if(a) afterJobsOf(a, x.sample.date).forEach(no=>used.push(`${no} (${x.id})`)); });
       toast(L(`Imported ${r.samples.length} results — everything recalculated`,`นำเข้า ${r.samples.length} ผลแล้ว — คำนวณใหม่ทั้งหมด`)
@@ -4601,7 +4698,7 @@ function openImportModal(){
   }); });
   inp.click();
 }
-function downloadImportTemplate(){ downloadFile('lab_results_template.csv', '\uFEFF'+importTemplateCsv(), 'text/csv'); }
+function downloadImportTemplate(){ downloadUtilityTemplate(); }
 
 /* =====================================================================
    Transformer info (editable operating data) / delete / demo data
