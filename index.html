@@ -1553,7 +1553,7 @@ function utilKeyOf(name){ const n=String(name).toLowerCase().replace(/[^a-z0-9]/
 function utilIsWorkbook(names){ const ks=names.map(utilKeyOf); return ks.includes('dga') && ks.includes('bdv'); }
 const utilNorm = s=>String(s??'').toLowerCase().replace(/\s+/g,'').replace(/[^0-9a-zก-๙%@]/g,'');
 function utilRows(table){ if(!table||!table.length) return []; const head=table[0].map(utilNorm);
-  return table.slice(1).filter(r=>r.some(c=>String(c).trim()!=='')).map((r,i)=>{ const o={_line:i+2}; head.forEach((h,j)=>{ if(h) o[h]=r[j]; }); return o; }); }
+  return table.slice(1).map((r,i)=>[r,i]).filter(([r])=>r.some(c=>String(c).trim()!=='')).map(([r,i])=>{ const o={_line:i+2, _raw:table[0].map((h,j)=>[String(h??''), implogCell(r[j])])}; head.forEach((h,j)=>{ if(h) o[h]=r[j]; }); return o; }); }
 const utilGet = (o,col)=> o[utilNorm(col)];
 function utilNum(v){ if(v===null||v===undefined) return null; if(typeof v==='number') return isNaN(v)?null:v; let s=String(v).trim(); if(!s) return null;
   if(/^(nd|n\.d\.|not detected|-|—)$/i.test(s)) return 0; s=s.replace(/^[<≤>≥]\s*/,'').replace(/,/g,''); const m=s.match(/-?\d+(\.\d+)?/); return m?Number(m[0]):null; }
@@ -1572,7 +1572,7 @@ function analyseUtilityWorkbook(sh){
     const id=utilId(utilGet(o,'Substation'),utilGet(o,'Bay')); const d=parseImportDate(utilGet(o,'Sampling Date'))||parseImportDate(utilGet(o,'Test Date'));
     if(!d){ errors.push(L(`BDV row ${o._line}: date not recognised`,`BDV แถว ${o._line}: อ่านวันที่ไม่ได้`)); return; }
     const raw=[1,2,3,4,5,6].map(i=>utilNum(utilGet(o,'ค่า Breakdown voltage ครั้งที่ '+i))).filter(x=>x!==null), wr=[1,2,3].map(i=>utilNum(utilGet(o,'ค่า Water Content ครั้งที่ '+i))).filter(x=>x!==null);
-    (oil[id]=oil[id]||[]).push({d, bdv:utilMean(raw), bdvRaw:raw, moisture:utilMean(wr), waterRaw:wr, colour:utilNum(utilGet(o,'Color Index')), line:o._line}); });
+    (oil[id]=oil[id]||[]).push({d, bdv:utilMean(raw), bdvRaw:raw, moisture:utilMean(wr), waterRaw:wr, colour:utilNum(utilGet(o,'Color Index')), line:o._line, raw:o._raw}); });
   /* 3. DGA (main tank) + pair with the oil test of the same sample (±7 days) */
   const usedOil=new Set();
   dga.forEach(o=>{ if(!utilMain(utilGet(o,'Compartment'))){ skippedOltc++; return; }
@@ -1584,7 +1584,7 @@ function analyseUtilityWorkbook(sh){
     if(!cand){ errors.push(L(`DGA row ${o._line} (${id}, ${fmtD(d)}): no BDV / water result within 7 days — skipped`,`DGA แถว ${o._line} (${id}, ${fmtD(d)}): ไม่มีผล BDV / ความชื้นที่ห่างไม่เกิน 7 วัน — ข้าม`)); return; }
     usedOil.add(id+'#'+cand.k); const q=cand.x;
     samples.push({id, sample:{date:fmtD(d), gases, bdv:q.bdv, bdvRaw:q.bdvRaw, moisture:q.moisture, waterRaw:q.waterRaw, acidity:null, ift:null, colour:q.colour, fal:null,
-      utilDuval:String(utilGet(o,"Duval's Condition")??'').trim()||null, utilTdcg:utilNum(utilGet(o,'TDCG')), src:'utility'}});
+      utilDuval:String(utilGet(o,"Duval's Condition")??'').trim()||null, utilTdcg:utilNum(utilGet(o,'TDCG')), src:{sheets:{[UTIL_SHEETS.bdv]:{line:q.line, cols:q.raw}, [UTIL_SHEETS.dga]:{line:o._line, cols:o._raw}}}}});
     if(!ASSETS.some(a=>a.id===id) && !newAssets[id]) newAssets[id]=Object.assign({id}, updates[id]||{Location:String(utilGet(o,'Substation')??'').trim(), Voltage:String(utilGet(o,'Rated Voltage(kV)')??'').trim()}); });
   Object.keys(oil).forEach(id=>oil[id].forEach((x,k)=>{ if(!usedOil.has(id+'#'+k)) errors.push(L(`BDV row ${x.line} (${id}, ${fmtD(x.d)}): no DGA result within 7 days — skipped`,`BDV แถว ${x.line} (${id}, ${fmtD(x.d)}): ไม่มีผล DGA ที่ห่างไม่เกิน 7 วัน — ข้าม`)); }));
   /* 4. bushing DFR — worst HV phase of the latest test */
@@ -1615,10 +1615,116 @@ function downloadUtilityTemplate(){
   XLSX.writeFile(wb, 'test_records_template.xlsx');
 }
 
-function snapshotData(){ return {baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
+/* =====================================================================
+   Import history + original test-record viewer
+   Every import keeps the file's sheets (as read) so the source data can be
+   opened and checked later; each lab result keeps its own original rows.
+   ===================================================================== */
+let IMPORT_LOG = [];
+const IMPLOG_MAX = 20, IMPLOG_MAX_CHARS = 1500000;
+function implogCell(v){ if(v instanceof Date && !isNaN(v)) return isoD(v); return v===null||v===undefined ? '' : v; }
+function implogAdd(file, kind, sheets, counts){
+  const clean={}; Object.keys(sheets||{}).forEach(n=>{ clean[n]=(sheets[n]||[]).map(r=>(r||[]).map(implogCell)); });
+  let entry={id:'imp'+Date.now(), file, at:new Date().toISOString(), kind, counts, sheets:clean};
+  if(JSON.stringify(entry).length > IMPLOG_MAX_CHARS){ entry.sheets=null; entry.tooBig=true; }
+  IMPORT_LOG.unshift(entry); if(IMPORT_LOG.length>IMPLOG_MAX) IMPORT_LOG.length=IMPLOG_MAX;
+  /* keep total storage reasonable: drop sheet copies of the oldest logs first */
+  let tot=JSON.stringify(IMPORT_LOG).length; for(let i=IMPORT_LOG.length-1; i>0 && tot>IMPLOG_MAX_CHARS*2; i--){ if(IMPORT_LOG[i].sheets){ IMPORT_LOG[i].sheets=null; IMPORT_LOG[i].tooBig=true; tot=JSON.stringify(IMPORT_LOG).length; } }
+  return entry.id; }
+function implogDate(iso){ const d=new Date(iso); return isNaN(d)?'—':`${fmtD(d)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+function srcRowsHtml(src){
+  if(!src||!src.sheets) return `<p class="small-muted">${L('No original record for this result (entered by hand or imported before this version).','ผลนี้ไม่มีข้อมูลต้นฉบับ (กรอกเอง หรือนำเข้าก่อนเวอร์ชันนี้)')}</p>`;
+  return Object.keys(src.sheets).map(n=>{ const x=src.sheets[n];
+    return `<div class="raw-data" style="font-weight:800;font-size:13.5px;margin:10px 0 6px;">${esc(n)} <span class="small-muted" style="font-weight:600;">${L('row','แถว')} ${x.line}</span></div>
+      <div class="tbl-wrap raw-data"><table><thead><tr><th>${L('Column','คอลัมน์')}</th><th>${L('Value in the file','ค่าในไฟล์')}</th></tr></thead><tbody>${x.cols.filter(c=>String(implogCell(c[1])).trim()!=='').map(c=>`<tr><td>${esc(c[0])}</td><td><b>${esc(String(implogCell(c[1])))}</b></td></tr>`).join('')}</tbody></table></div>`; }).join(''); }
+function openSampleSource(a, s){
+  const src=s&&s.src; const root=document.getElementById('modalRoot');
+  const used = s ? `<div class="abbr-box" style="font-size:13px;line-height:1.6;margin-top:12px;"><b>${L('Values used by the app','ค่าที่ระบบนำไปใช้')}:</b> BDV ${s.bdv??'—'} kV${s.bdvRaw&&s.bdvRaw.length>1?` (${L('mean of','เฉลี่ยจาก')} ${s.bdvRaw.join(', ')})`:''} · ${L('water','ความชื้น')} ${s.moisture??'—'} ppm${s.waterRaw&&s.waterRaw.length>1?` (${L('mean of','เฉลี่ยจาก')} ${s.waterRaw.join(', ')})`:''} · ${L('colour','สี')} ${s.colour??'—'} · ${GASES.map(g=>`${g} ${s.gases[g]}`).join(' · ')}</div>` : '';
+  root.innerHTML=`<div class="modal-overlay" id="modalOverlay"><div class="modal" style="max-width:760px;"><div class="card-head" style="margin-bottom:6px;"><h3 style="margin:0;">${L('Original test record','ข้อมูลต้นฉบับของผลตรวจ')} — ${esc(a.id)} · ${esc(s?s.date:'')}</h3><button class="btn btn-outline" id="srcClose">${L('Close','ปิด')}</button></div>
+    ${src&&src.file?`<p class="card-sub">${L('File','ไฟล์')}: <b>${esc(src.file)}</b>${src.at?` · ${L('imported','นำเข้าเมื่อ')} ${implogDate(src.at)}`:''}${src.log && IMPORT_LOG.some(l=>l.id===src.log&&l.sheets)?` · <button class="linklike" data-implog-open="${src.log}">${L('open the whole file','เปิดดูทั้งไฟล์')}</button>`:''}</p>`:''}
+    ${srcRowsHtml(src)}${used}</div></div>`;
+  document.getElementById('srcClose').addEventListener('click', closeModal);
+  document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); }); }
+function openImportLog(){
+  const root=document.getElementById('modalRoot');
+  const rows = IMPORT_LOG.map(l=>`<tr><td>${implogDate(l.at)}</td><td><b>${esc(l.file)}</b><div class="small-muted" style="font-size:12px;">${l.kind==='utility'?L('Utility test-record workbook','แบบฟอร์มผลตรวจของหน่วยงาน'):L('Excel / CSV (one row per result)','Excel / CSV (1 แถวต่อผล)')}</div></td>
+      <td style="font-size:12.5px;">${L('results','ผลแล็บ')} ${l.counts.samples||0}${l.counts.newAssets?` · ${L('new units','เครื่องใหม่')} ${l.counts.newAssets}`:''}${l.counts.updates?` · ${L('updated','อัปเดต')} ${l.counts.updates}`:''}${l.counts.dfr?` · DFR ${l.counts.dfr}`:''}${l.counts.skipped?` · <span style="color:var(--red);">${L('skipped','ข้าม')} ${l.counts.skipped}</span>`:''}</td>
+      <td style="white-space:nowrap;">${l.sheets?`<button class="btn btn-outline" data-implog-open="${l.id}" style="padding:4px 10px;font-size:12.5px;">${L('Open','เปิดดู')}</button> <button class="btn btn-ghost" data-implog-dl="${l.id}" style="padding:4px 10px;font-size:12.5px;">${L('Download','ดาวน์โหลด')}</button>`:`<span class="small-muted" style="font-size:12px;">${L('file too large to keep','ไฟล์ใหญ่เกินกว่าจะเก็บไว้')}</span>`}
+        <button class="btn btn-ghost" data-implog-del="${l.id}" style="padding:4px 8px;font-size:12.5px;color:var(--red);" title="${esc(L('Remove from history (results stay)','ลบออกจากประวัติ (ผลแล็บยังอยู่)'))}">✕</button></td></tr>`).join('')
+    || `<tr><td colspan="4" class="small-muted">${L('No imports yet','ยังไม่มีการนำเข้า')}</td></tr>`;
+  root.innerHTML=`<div class="modal-overlay" id="modalOverlay"><div class="modal" style="max-width:860px;"><div class="card-head" style="margin-bottom:6px;"><h3 style="margin:0;">${L('Import history','ประวัติการนำเข้าไฟล์ผลตรวจ')}</h3><button class="btn btn-outline" id="implogClose">${L('Close','ปิด')}</button></div>
+    <p class="card-sub">${L(`Each imported file is kept as it was read, so the source can be opened and checked. The latest ${IMPLOG_MAX} imports are kept in this browser (included in Backup).`,`เก็บไฟล์ที่นำเข้าไว้ตามที่อ่านได้ เพื่อเปิดดูและตรวจสอบย้อนหลัง เก็บ ${IMPLOG_MAX} ครั้งล่าสุดไว้ในเบราว์เซอร์นี้ (รวมอยู่ในไฟล์สำรองข้อมูล)`)}</p>
+    <div class="tbl-wrap"><table><thead><tr><th>${L('Imported','นำเข้าเมื่อ')}</th><th>${L('File','ไฟล์')}</th><th>${L('Result','ผล')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div></div>`;
+  document.getElementById('implogClose').addEventListener('click', closeModal);
+  document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); });
+  applyRole(); }
+function openImportFile(id, sheetName){
+  const l=IMPORT_LOG.find(x=>x.id===id); if(!l||!l.sheets){ toast(L('File not available','ไม่มีไฟล์นี้แล้ว')); return; }
+  const names=Object.keys(l.sheets); const cur = names.includes(sheetName) ? sheetName : names[0]; const tb=l.sheets[cur]||[];
+  const head=tb[0]||[], body=tb.slice(1);
+  const root=document.getElementById('modalRoot');
+  root.innerHTML=`<div class="modal-overlay" id="modalOverlay"><div class="modal" style="max-width:1100px;width:96vw;"><div class="card-head" style="margin-bottom:6px;"><h3 style="margin:0;">${esc(l.file)}</h3><div class="filter-row"><button class="btn btn-ghost" data-implog-dl="${l.id}">${L('Download','ดาวน์โหลด')}</button><button class="btn btn-outline" data-implog-back="1">${L('Back','กลับ')}</button><button class="btn btn-outline" id="impfClose">${L('Close','ปิด')}</button></div></div>
+    <p class="card-sub">${L('imported','นำเข้าเมื่อ')} ${implogDate(l.at)} · ${body.length} ${L('rows','แถว')}</p>
+    <div class="tabs raw-data" style="margin-bottom:8px;">${names.map(n=>`<button class="tab ${n===cur?'active':''}" data-implog-sheet="${esc(n)}" data-implog-id="${l.id}">${esc(n)}</button>`).join('')}</div>
+    <div class="tbl-wrap raw-data" style="max-height:60vh;overflow:auto;"><table style="font-size:12px;white-space:nowrap;"><thead><tr><th>#</th>${head.map(h=>`<th>${esc(String(h))}</th>`).join('')}</tr></thead>
+      <tbody>${body.map((r,i)=>`<tr><td class="small-muted">${i+2}</td>${head.map((h,j)=>`<td>${esc(String(implogCell(r[j])))}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div></div>`;
+  document.getElementById('impfClose').addEventListener('click', closeModal);
+  document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); }); }
+function downloadImportFile(id){
+  const l=IMPORT_LOG.find(x=>x.id===id); if(!l||!l.sheets) return;
+  const base=String(l.file).replace(/\.(xlsx|xls|csv)$/i,'');
+  if(typeof XLSX!=='undefined' && XLSX.utils){ const wb=XLSX.utils.book_new(); Object.keys(l.sheets).forEach(n=>XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(l.sheets[n]), n.slice(0,31))); XLSX.writeFile(wb, base+'.xlsx'); return; }
+  const n=Object.keys(l.sheets)[0]; downloadFile(base+'.csv', '﻿'+toCSV(l.sheets[n]), 'text/csv'); }
+document.addEventListener('click', e=>{
+  const o=e.target.closest('[data-implog-open]'); if(o){ e.preventDefault(); openImportFile(o.dataset.implogOpen); return; }
+  const sh=e.target.closest('[data-implog-sheet]'); if(sh){ e.preventDefault(); openImportFile(sh.dataset.implogId, sh.dataset.implogSheet); return; }
+  const dl=e.target.closest('[data-implog-dl]'); if(dl){ e.preventDefault(); downloadImportFile(dl.dataset.implogDl); return; }
+  const dv=e.target.closest('[data-implog-del]'); if(dv){ e.preventDefault(); if(!can('lab')) return; if(!confirm(L('Remove this file from the history? The lab results stay.','ลบไฟล์นี้ออกจากประวัติ? ผลแล็บยังอยู่'))) return; IMPORT_LOG=IMPORT_LOG.filter(x=>x.id!==dv.dataset.implogDel); saveData(); openImportLog(); return; }
+  if(e.target.closest('[data-implog-back]') || e.target.closest('[data-import-log]')){ e.preventDefault(); openImportLog(); return; }
+  const ss=e.target.closest('[data-sample-src]'); if(ss){ e.preventDefault(); const a=currentAsset(); const s=labFor(a)[+ss.dataset.sampleSrc]; openSampleSource(a, s); return; }
+});
+const srcBtn = (i)=> `<button type="button" class="btn btn-ghost" data-sample-src="${i}" style="padding:5px 10px;font-size:12.5px;">${L('Original record','ดูข้อมูลต้นฉบับ')}</button>`;
+
+/* build a believable import history from lab results already in the app (demo / simulated data) —
+   only attaches the original rows (src) and the log; no lab value is changed */
+let IMPLOG_SEEDED = false;
+function seedImportHistory(assets, maxRounds){
+  const TMON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const labs=assets.map(a=>[a,labFor(a)]); const n=Math.min(maxRounds||99, Math.max(0,...labs.map(x=>x[1].length)));
+  const r2=v=>Math.round(v*100)/100; const add=(d,k)=>{ const x=new Date(d.getTime()); x.setDate(x.getDate()+k); return x; };
+  for(let k=n-1;k>=0;k--){
+    const rows=labs.filter(([a,l])=>l[k]).map(([a,l])=>({a,s:l[k],prev:l[k+1]})); if(!rows.length) continue;
+    const dates=rows.map(x=>parseD(x.s.date)).filter(Boolean); const dMax=new Date(Math.max(...dates)); const at=add(dMax,6); at.setHours(9,30,0,0);
+    const splitId=id=>{ const i=id.indexOf('-'); return i>0?[id.slice(0,i),id.slice(i+1)]:[id,'']; };
+    const sh={dp:[UTIL_HEAD.dp], bdv:[UTIL_HEAD.bdv], dga:[UTIL_HEAD.dga], dfr:[UTIL_HEAD.dfr]};
+    const put=(key,obj)=>sh[key].push(UTIL_HEAD[key].map(h=>obj[h]??''));
+    rows.forEach(({a,s,prev})=>{ const [st,bay]=splitId(a.id); const d=parseD(s.date); const ds=isoD(d), dt=isoD(add(d,2));
+      put('dp',{'Station_Th':st,'Bay':bay,'Manufacturer':a.mfr||'','Rated_kV':a.volt||'','Rated_MVA':a.cap??'','TR_S/N.':a.serial||'','Year':a.year??'','Energize Date':a.installed||''});
+      const b=s.bdv, w=s.moisture; const bo=[-1.2,0.8,-0.4,1.1,-0.6,0.3], wo=[-0.5,0.8,-0.3];
+      const braw = b==null?[]:(b>3?bo.map(o=>r2(b+o)):[b,b,b,b,b,b]), wraw = w==null?[]:(w>1?wo.map(o=>r2(w+o)):[w,w,w]);
+      const bo2={}; braw.forEach((v,i)=>bo2['ค่า Breakdown voltage ครั้งที่ '+(i+1)]=v); wraw.forEach((v,i)=>bo2['ค่า Water Content ครั้งที่ '+(i+1)]=v);
+      put('bdv',Object.assign({'ประทับเวลา':`${dt} 10:15`,'Sampling Date':ds,'Test Date':dt,'RoomTemperature':25,'Oil Temperature':45,'เครื่อง Oil Tester':'BDV-01','Substation':st,'Rated Voltage(kV)':String(a.volt||'').split('/')[0],'Bay':bay,'Compartment':'Main Tank','Color Index':s.colour??'','เครื่องทดสอบ Water Content':'KF-01'},bo2));
+      const as=assessSample(s,prev,a); const g=s.gases; const tdcg=['H2','CH4','C2H6','C2H4','C2H2','CO'].reduce((t,x)=>t+(+g[x]||0),0);
+      put('dga',{'ประทับเวลา':`${dt} 13:40`,'Sampling Date':ds,'Test Date':dt,'Oil Temperature':45,'เครื่องทดสอบ DGA':'DGA-01','Substation':st,'Rated Voltage(kV)':String(a.volt||'').split('/')[0],'Bay':bay,'Compartment':'Main Tank',
+        H2:g.H2,CO2:g.CO2,CO:g.CO,C2H4:g.C2H4,C2H6:g.C2H6,CH4:g.CH4,C2H2:g.C2H2,TDCG:Math.round(tdcg*10)/10,"Duval's Condition":as.dga.code==='N'?'N':(as.dga.zone||as.dga.code)});
+      s.bdvRaw=braw; s.waterRaw=wraw;
+      if(k===0 && a.ctest && a.ctest.dfr!=null){ const v=a.ctest.dfr, td=a.ctest.dfrDate||a.ctest.date||ds;
+        [['H1',v],['H2',r2(Math.max(0.1,v-0.07))],['H3',r2(Math.max(0.1,v-0.12))],['X1',r2(Math.max(0.1,v-0.2))]].forEach(([ph,x])=>put('dfr',{'ประทับเวลา':`${td} 11:00`,'Test Date':td,'Station':st,'Bay':bay,'Phase':ph,'%DF@1Hz':x,'Section':ph[0]==='H'?'HV':'LV','OIP/RIP':'OIP','SubAndBay':st+bay})); }
+    });
+    if(sh.dfr.length===1) delete sh.dfr;
+    const r=analyseUtilityWorkbook(sh);
+    const file=`ผลตรวจน้ำมันหม้อแปลง_${TMON[dMax.getMonth()]}${dMax.getFullYear()+543}.xlsx`;
+    const logId=implogAdd(file,'utility',Object.fromEntries(Object.keys(sh).map(x=>[UTIL_SHEETS[x],sh[x]])),{samples:r.samples.length, newAssets:0, updates:r.updates.length, dfr:Object.keys(r.dfr).length, skipped:r.errors.length});
+    IMPORT_LOG[0].at=at.toISOString();
+    r.samples.forEach(x=>{ const s=(labFor(ASSETS.find(a=>a.id===x.id))||[]).find(y=>y.date===x.sample.date); if(s){ s.src=Object.assign({},x.sample.src,{file, at:at.toISOString(), log:logId}); s.utilDuval=x.sample.utilDuval; s.utilTdcg=x.sample.utilTdcg; } });
+  }
+}
+
+function snapshotData(){ return {baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, imp:IMPORT_LOG, impSeed:IMPLOG_SEEDED, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
 function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
 function applyData(d){
   if(!d || d.v!==3 || !Array.isArray(d.assets)) return false;
+  IMPORT_LOG = Array.isArray(d.imp) ? d.imp : []; IMPLOG_SEEDED = !!d.impSeed;
   ASSETS.splice(0, ASSETS.length, ...d.assets); LAB = d.lab||{}; FMEA_STORE = d.fmea||{}; MAINT_STORE = d.maint||{}; RCM_STORE = d.rcmStore||{};
   if(d.crit) CRIT = Object.assign(JSON.parse(JSON.stringify(CRIT_DEFAULT)), d.crit);
   if(d.notif) NOTIF = Object.assign({risk:true,dga:true,overdue:true}, d.notif);
@@ -2907,6 +3013,7 @@ function renderAssetsPage(){
   <div class="card">
     <div class="card-head"><h3>${t('assets_title')}</h3><div class="filter-row">
       <button class="btn btn-ghost" data-import-template="1">${gicon('download',0,'width:13px;height:13px')} ${L('Template','แม่แบบ')}</button>
+      <button class="btn btn-ghost" data-import-log="1">${L('Import history','ประวัติการนำเข้า')}</button>
       <button class="btn btn-outline" data-import-lab="1">${gicon('upload',0,'width:13px;height:13px')} ${L('Import lab results','นำเข้าผลแล็บ')}</button>
       <button class="btn btn-primary" id="btnAddAsset">${icon('box',' style="width:13px;height:13px"')} ${t('add_asset')}</button></div></div>
     <p class="small-muted" style="margin:-4px 0 12px;font-size:12.5px;">${L('Import the utility test-record workbook as it is (sheets DataPower Transformer, Breakdown-WaterContent-oil, DGA, DFR_Bushing) — or a one-row-per-result Excel / CSV. Transformer code = Station + Bay; new codes are created automatically. Download the template to see the columns.','นำเข้าแบบฟอร์มบันทึกผลตรวจของหน่วยงานได้ทั้งไฟล์ (ชีต DataPower Transformer, Breakdown-WaterContent-oil, DGA, DFR_Bushing) หรือไฟล์ Excel / CSV แบบ 1 แถวต่อผล 1 ครั้ง รหัสหม้อแปลง = สถานี + Bay และสร้างรหัสใหม่ให้อัตโนมัติ ดาวน์โหลดแม่แบบเพื่อดูคอลัมน์')}</p>
@@ -3503,7 +3610,7 @@ function detailHealthIndexTabBase(a){
     line(L('Duval Triangle','สามเหลี่ยม Duval'), d.code==='N'?L('not needed — gases normal','ไม่ต้องวินิจฉัย — ก๊าซปกติ'):dgaName(d.zone), [d.code==='N'?'—':d.zone, d.code==='N'?'var(--muted)':'var(--red)']);
   const pBody = (rows)=>rows.map(r=>line(r.p, r.res, word(r.score))).join('');
   return `
-  <div class="card-head" style="margin-bottom:8px;"><h3 style="margin:0;">${L('What makes up the score','ที่มาของคะแนน')} <span class="small-muted" style="font-weight:600;">${L('sample','ผลตรวจวันที่')} ${prof.sample.date}</span></h3><button class="btn btn-outline" data-add-lab="1" style="padding:6px 11px;font-size:13px;">${L('Add lab result','เพิ่มผลแล็บ')}</button></div>
+  <div class="card-head" style="margin-bottom:8px;"><h3 style="margin:0;">${L('What makes up the score','ที่มาของคะแนน')} <span class="small-muted" style="font-weight:600;">${L('sample','ผลตรวจวันที่')} ${prof.sample.date}</span></h3>${(()=>{ const i=labFor(a).indexOf(prof.sample); return i>=0 && prof.sample.src ? srcBtn(i)+' ' : ''; })()}<button class="btn btn-outline" data-add-lab="1" style="padding:6px 11px;font-size:13px;">${L('Add lab result','เพิ่มผลแล็บ')}</button></div>
   <div class="grid g3" style="margin-bottom:16px; align-items:stretch;">
     ${factorCard('FF', ffBody)}${factorCard('OQF', pBody(F.OQF.rows))}${factorCard('PCF', pBody(F.PCF.rows))}
   </div>
@@ -3590,6 +3697,7 @@ function detailDgaTabBase(a){
     <div class="filter-row">${subtabs.map(s=>`<button class="pill selectable ${state.dgaSubTab===s[0]?'pill-info on':''}" data-dga-tab="${s[0]}">${s[1]}</button>`).join('')}</div>
     <div class="filter-row">
       <select class="chip-input" id="dgaSamplingSelect">${DGA_SAMPLES.map((s,i)=>`<option value="${i}" ${i===state.dgaSampleIdx?'selected':''}>${t('sampling')}: ${s.date}</option>`).join('')}</select>
+      ${(labFor(a)[state.dgaSampleIdx||0]||{}).src ? srcBtn(state.dgaSampleIdx||0) : ''}
       <button class="btn btn-outline" id="btnAddDgaResult">${icon('box',' style="width:13px;height:13px"')} ${L('Add lab result','เพิ่มผลแล็บ')}</button>
       <button class="btn btn-outline" id="btnCompareDga">${t('compare')}</button>
     </div>
@@ -4662,7 +4770,7 @@ function analyseImport(table){
     if(bad.length){ errors.push(L(`Row ${line} (${id}): missing or invalid ${bad.join(', ')}`,`แถว ${line} (${id}): ค่าว่างหรือไม่ถูกต้อง ${bad.join(', ')}`)); return; }
     const fal=num('FAL_ppb');
     samples.push({id, sample:{date:fmtD(d), gases:{H2:num('H2'),CH4:num('CH4'),C2H6:num('C2H6'),C2H4:num('C2H4'),C2H2:num('C2H2'),CO:num('CO'),CO2:num('CO2')}, bdv:num('BDV_kV'), moisture:num('Water_ppm'), acidity:(v=>v===null||isNaN(v)?null:v)(num('Acidity')), ift:(v=>v===null||isNaN(v)?null:v)(num('IFT')), colour:num('Colour'), fal:(fal===null||isNaN(fal))?null:fal}});
-    if(!ASSETS.some(a=>a.id===id)){ const na=newAssets[id]||{id}; ['Location','Year','MVA','Voltage','InstallDate'].forEach(k=>{ if(String(o[k]??'').trim()!=='' && na[k]===undefined) na[k]=o[k]; }); newAssets[id]=na; }
+    samples[samples.length-1].sample.src={sheets:{[L('Imported sheet','ชีตที่นำเข้า')]:{line, cols:table[0].map((h,i)=>[String(h??''), implogCell(r[i])])}}}; if(!ASSETS.some(a=>a.id===id)){ const na=newAssets[id]||{id}; ['Location','Year','MVA','Voltage','InstallDate'].forEach(k=>{ if(String(o[k]??'').trim()!=='' && na[k]===undefined) na[k]=o[k]; }); newAssets[id]=na; }
   });
   return {errors, samples, newAssets:Object.values(newAssets)};
 }
@@ -4691,6 +4799,9 @@ function openImportModal(){
       r.samples.forEach(x=>{ const lab = LAB[x.id] || (LAB[x.id]=[]); const i=lab.findIndex(y=>y.date===x.sample.date); if(i>=0) lab.splice(i,1); lab.push(x.sample); });
       ids.forEach(id=>sortLab(LAB[id]));
       if(r.utility) applyUtilityExtras(r);
+      { const sheetsLog = r.utility ? Object.fromEntries(Object.keys(table.sheets).map(k=>[UTIL_SHEETS[k]||k, table.sheets[k]])) : {[f.name.replace(/\.[^.]+$/,'')]:table};
+        const logId = implogAdd(f.name, r.utility?'utility':'table', sheetsLog, {samples:r.samples.length, newAssets:r.newAssets.length, updates:(r.updates||[]).length, dfr:r.dfr?Object.keys(r.dfr).length:0, skipped:r.errors.length});
+        const at=new Date().toISOString(); r.samples.forEach(x=>{ if(x.sample.src){ x.sample.src.file=f.name; x.sample.src.at=at; x.sample.src.log=logId; } }); }
       render();
       const used = []; r.samples.forEach(x=>{ const a=ASSETS.find(y=>y.id===x.id); if(a) afterJobsOf(a, x.sample.date).forEach(no=>used.push(`${no} (${x.id})`)); });
       toast(L(`Imported ${r.samples.length} results — everything recalculated`,`นำเข้า ${r.samples.length} ผลแล้ว — คำนวณใหม่ทั้งหมด`)
@@ -5548,10 +5659,10 @@ function thText(t){
 }
 function localizeNode(root){
   if(state.lang!=='th' || !root) return;
-  if(root.nodeType===3){ const v=root.nodeValue, n=thText(v); if(n!==v) root.nodeValue=n; return; }
+  if(root.nodeType===3){ const pp=root.parentNode; if(pp && pp.closest && pp.closest('.raw-data')) return; const v=root.nodeValue, n=thText(v); if(n!==v) root.nodeValue=n; return; }
   if(root.nodeType!==1 || root.tagName==='SCRIPT' || root.tagName==='STYLE') return;
   const w=document.createTreeWalker(root, NodeFilter.SHOW_TEXT); const list=[]; let x; while((x=w.nextNode())) list.push(x);
-  list.forEach(nd=>{ const p=nd.parentNode; if(p && (p.tagName==='SCRIPT'||p.tagName==='STYLE'||p.tagName==='TEXTAREA')) return; const v=nd.nodeValue; if(!/[A-Za-z]/.test(v)) return; const n=thText(v); if(n!==v) nd.nodeValue=n; });
+  list.forEach(nd=>{ const p=nd.parentNode; if(p && (p.tagName==='SCRIPT'||p.tagName==='STYLE'||p.tagName==='TEXTAREA')) return; if(p && p.closest && p.closest('.raw-data')) return;   /* original file content: shown exactly as in the file */ const v=nd.nodeValue; if(!/[A-Za-z]/.test(v)) return; const n=thText(v); if(n!==v) nd.nodeValue=n; });
 }
 try{ new MutationObserver(ms=>{ if(state.lang!=='th') return; ms.forEach(m=>m.addedNodes.forEach(localizeNode)); }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
 
@@ -5569,6 +5680,8 @@ document.addEventListener('click', e=>{ const b=e.target.closest && e.target.clo
   plan.push({no:1+Math.max(0,...plan.map(x=>x.no)), task:'Oil filtration & degassing', type:'CM', start:fmtD(st), end:fmtD(c), dur:'3 days', m:MON[st.getMonth()], len:2,
     notes:'Sample record for demonstration', wo:{no:nextWoNo(), status:'Closed', issued:fmtD(st), assignee:'Maintenance Team', priority:'C', due:fmtD(c), instr:'', closed:fmtD(c), findings:'Oil filtered and degassed (sample record)'}});
 })();
+(function seedImportDemo(){ if(IMPLOG_SEEDED) return; IMPLOG_SEEDED = true; if(IMPORT_LOG.length) return;
+  const demo = ASSETS.filter(isDemoAsset); if(!demo.length || demo.length!==ASSETS.length) return; try{ seedImportHistory(demo, 3); saveData(); }catch(e){ console.warn(e); } })();
 /* ============ LOGIN GATE ============ */
 document.getElementById('loginTitle').textContent = t('login_title');
 document.getElementById('loginSub').textContent = t('login_sub');
