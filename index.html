@@ -1356,9 +1356,12 @@ function isLowLevel(l){ return ['Low','VG','G'].includes(l); }
 const COND_LIFE = {VG:['> 15 years','มากกว่า 15 ปี'], G:['> 10 years','มากกว่า 10 ปี'], C:['≤ 10 years','ไม่เกิน 10 ปี'], P:['< 3 years','น้อยกว่า 3 ปี'], VP:['End of life','สิ้นอายุการใช้งาน']};   /* Jahromi et al. (2009), Table 11 */
 function lifeOf(a){ const c=hiCat(a.hi).code; const x=COND_LIFE[c]; return x?L(x[0],x[1]):'—'; }
 function icOfMap(){ const m={}; try{ netCalc().ranked.forEach(u=>{ m[u.a.id]={IC:u.IC, rank:u.rank}; }); }catch(e){} return m; }
-const RISK_COL = {'Very high':['#B3261E','#ffffff'],'High':['#fde7d3','#b85a0c'],'Medium':['#fdf1d6','#b07d05'],'Low':['#e3f5ec','#178a5e'], VG:['#e3f5ec','#178a5e'], G:['#eef7e6','#4d8a1f'], C:['#fdf1d6','#b07d05'], P:['#fde7d3','#b85a0c'], VP:['#B3261E','#ffffff'], '—':['#eef0f3','#5b6573']};
+const RISK_COL = {'Very high':['#B3261E','#ffffff'],'High':['#F4A261','#5a2a00'],'Medium':['#FCE38A','#6b5200'],'Low':['#c9ecd9','#11643f'], VG:['#e3f5ec','#178a5e'], G:['#eef7e6','#4d8a1f'], C:['#fdf1d6','#b07d05'], P:['#fde7d3','#b85a0c'], VP:['#B3261E','#ffffff'], '—':['#eef0f3','#5b6573']};
 function riskName(l){ const c=HI_CATS.find(x=>x[1]===l); if(c) return `${L(c[2][0],c[2][1])} (${l})`; if(l==='—') return L('HI not calculated','ไม่คำนวณ HI'); return ({'Very high':L('Very high','สูงมาก'),'High':L('High','สูง'),'Medium':L('Medium','ปานกลาง'),'Low':L('Low','ต่ำ')})[l]; }
-function riskPill(l){ const c=RISK_COL[l]||RISK_COL['—']; return `<span class="pill" style="background:${c[0]};color:${c[1]};">${riskName(l)}</span>`; }
+function riskPill(l){ const c=RISK_COL[l]||RISK_COL['—'];
+  if(['VG','G','C','P','VP'].includes(l)){ const ring={VG:'#1fa571',G:'#6baa2e',C:'#d4a200',P:'#e0661a',VP:'#B3261E'}[l]; const tx={VG:'#11643f',G:'#3f6f17',C:'#7a5d00',P:'#a4470b',VP:'#B3261E'}[l];
+    return `<span class="pill" title="${esc(L('Condition level — used until 3 years of HI results exist','ระดับสภาพ — ใช้แทนระดับความเสี่ยงจนกว่าจะมีผล HI ครบ 3 ปี'))}" style="background:transparent;color:${tx};border:1.5px dashed ${ring};">${riskName(l)}</span>`; }
+  return `<span class="pill" style="background:${c[0]};color:${c[1]};font-weight:700;">${riskName(l)}</span>`; }
 /* single source for every page: what to do now + how often to resample, both from the risk level */
 const RISK_ACT = {'Very high':['Immediate action: detailed diagnosis, consider load reduction, decide replacement / refurbishment','ดำเนินการทันที: ตรวจวินิจฉัยเชิงลึก พิจารณาลดโหลด และตัดสินใจเปลี่ยน/ปรับปรุง'],'High':['Plan intervention in the next maintenance window','วางแผนเข้าแก้ไขในรอบบำรุงรักษาถัดไป'],'Medium':['Increase monitoring; extra tests as symptoms indicate','เพิ่มการติดตาม ตรวจเพิ่มเติมตามอาการ'],'Low':['Routine maintenance','บำรุงรักษาตามรอบ']};
 const SAMPLING_DAYS = {'Very high':14,'High':30,'Medium':90,'Low':180};
