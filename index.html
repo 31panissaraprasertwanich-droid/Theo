@@ -3697,7 +3697,7 @@ function duvalReadHtml(d, isNormal){
   const how = L('How to read: the triangle uses the share of CH₄, C₂H₄ and C₂H₂ (3 gases) and the zone where the point falls; the pentagon uses the share of all 5 gases, one per axis, and the zone of the centre (centroid) of the shape they make.',
                 'วิธีอ่าน: สามเหลี่ยมใช้สัดส่วนของ CH₄, C₂H₄ และ C₂H₂ (3 ชนิด) ดูว่าจุดตกโซนไหน ส่วนห้าเหลี่ยมใช้สัดส่วนของก๊าซทั้ง 5 ชนิด วางบนแกนละชนิด แล้วดูว่าจุดศูนย์กลางของรูปที่ได้ตกโซนไหน');
   let verdict, col;
-  if(isNormal){ verdict = L('All gases are within normal limits, so the zone is shown for reference only — neither method changes the grade.','ก๊าซทุกตัวอยู่ในเกณฑ์ปกติ โซนที่แสดงเป็นเพียงข้อมูลอ้างอิง ทั้งสองวิธีไม่ทำให้เกรดเปลี่ยน'); col='var(--green)'; }
+  if(isNormal){ verdict = L('The fault gases (H₂, CH₄, C₂H₆, C₂H₄, C₂H₂) are within normal limits, so the zone is shown for reference only — neither method changes the grade.','ก๊าซบ่งชี้ความผิดปกติ (H₂, CH₄, C₂H₆, C₂H₄, C₂H₂) อยู่ในเกณฑ์ปกติ โซนที่แสดงเป็นเพียงข้อมูลอ้างอิง ทั้งสองวิธีไม่ทำให้เกรดเปลี่ยน'); col='var(--green)'; }
   else if(TRI2PENT[tz] && TRI2PENT[tz]===pz){ verdict = L(`The two methods agree: ${tz} on the triangle corresponds to ${pz} on the pentagon (zone-mapping table).`,`สองวิธีให้ผลสอดคล้องกัน: ${tz} ในสามเหลี่ยมเทียบได้กับ ${pz} ในห้าเหลี่ยม (ตามตารางเทียบโซน)`); col='var(--green)'; }
   else if(famOf(tz) && famOf(tz)===famOf(pz)){ verdict = L(`Same fault family (${famOf(tz)==='T'?'thermal':famOf(tz)==='D'?'discharge':famOf(tz)}) but a different zone: ${tz} vs ${pz}. The grade may differ by one step.`,`ชนิดความผิดปกติกลุ่มเดียวกัน (${famOf(tz)==='T'?'ความร้อน':famOf(tz)==='D'?'ดิสชาร์จ':famOf(tz)}) แต่ต่างโซน: ${tz} กับ ${pz} เกรดอาจต่างกัน 1 ระดับ`); col='var(--amber)'; }
   else if(pz==='S'){ verdict = L(`Different: the pentagon reads stray gassing (S) — gas from the oil itself, not a fault — while the triangle, which has no S zone, reads ${tz}. Check with the engineer.`,`ไม่ตรงกัน: ห้าเหลี่ยมอ่านได้เป็น S (ก๊าซจากน้ำมันตามปกติ ไม่ใช่ความผิดปกติ) แต่สามเหลี่ยมไม่มีโซน S จึงอ่านเป็น ${tz} ควรให้วิศวกรพิจารณา`); col='var(--amber)'; }
@@ -3894,8 +3894,13 @@ function dgaSubTabContent(a){
   const gasResultsBlock = `
     <div class="card"><h3>${t('dga_gas_results')}</h3>
       <div class="tbl-wrap"><table><thead><tr><th>${t('gas')}</th><th>${t('result_ppm')}</th><th>${t('normal_range')}</th><th>${t('status')}</th></tr></thead><tbody>
-      ${gases.map(g=>`<tr><td><b>${g.g}</b></td><td>${g.v}</td><td>${g.range}</td><td>${g.status==='up'?icon('up',' style="width:14px;height:14px;color:var(--red)"'):g.status==='warn'?'<span style="color:var(--amber);font-weight:800;">●</span>':icon('down',' style="width:14px;height:14px;color:var(--green)"')}</td></tr>`).join('')}
-      </tbody></table></div></div>`;
+      ${gases.map(g=>{ const paper=g.g==='CO'||g.g==='CO2'; return `<tr><td><b>${g.g}</b>${paper?`<div class="small-muted" style="font-size:11px;font-weight:600;">${L('paper insulation','บ่งชี้กระดาษฉนวน')}</div>`:''}</td><td>${g.v}</td><td>${g.range}</td><td>${g.status==='up'?`<span class="pill pill-critical">${L('High','สูง')}</span>`:g.status==='warn'?`<span class="pill pill-warning">${L('Above limit','เกินเกณฑ์')}</span>`:`<span class="pill pill-healthy">${t('normal')}</span>`}</td></tr>`; }).join('')}
+      </tbody></table></div>
+      ${(()=>{ const hiCo=gases.filter(g=>(g.g==='CO'||g.g==='CO2') && g.status!=='ok'); if(!hiCo.length) return '';
+        const row=((prof.factors&&prof.factors.PCF&&prof.factors.PCF.rows)||[]).find(r=>r.key==='coco2'); const gs=prof.sample&&prof.sample.gases; const ratio = gs&&gs.CO>0 ? (gs.CO2/gs.CO).toFixed(1) : '—';
+        const faultOk = (FF_GASES||[]).every(x=>(d.lv||{})[x]<=1);
+        return `<div class="abbr-box" style="font-size:13px;line-height:1.6;margin-top:10px;border-left:4px solid var(--amber);"><b>${hiCo.map(g=>g.g).join(L(' and ',' และ '))} ${L('above limit','เกินเกณฑ์')}</b><br>${L('CO and CO₂ come from the paper insulation ageing, not from a thermal or electrical fault. They are therefore not used in the Duval fault diagnosis','CO และ CO₂ เกิดจากกระดาษฉนวนเสื่อม ไม่ได้บ่งชี้ความผิดปกติแบบความร้อนหรือไฟฟ้า จึงไม่นำมาใช้ในการวินิจฉัย Duval')}${faultOk?L(' (the fault gases are normal)',' (ก๊าซบ่งชี้ความผิดปกติอยู่ในเกณฑ์ปกติ)'):''}, ${L('but they are counted in the “Paper insulation” factor of the Health Index','แต่ถูกนำไปคิดในปัจจัย “ฉนวนกระดาษ” ของดัชนีสุขภาพ')}: CO₂/CO = ${ratio}${row&&row.score!=null?` → ${L('score','คะแนน')} ${row.score} ${L('(1 = good … 5 = poor)','(1 = ดี … 5 = แย่)')}`:''} (Tamma et al., 2021).</div>`; })()}
+    </div>`;
   const duvalBlock = `
     <div class="card" style="text-align:center;"><h3>${L('Duval Triangle 1 and Duval Pentagon','สามเหลี่ยม Duval 1 และห้าเหลี่ยม Duval')}</h3>
       <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;"><div style="flex:1 1 200px;"><div style="font-weight:700;font-size:13px;">${L('Triangle 1 (used for ranking)','สามเหลี่ยม 1 (ใช้จัดลำดับ)')}</div>${duvalTriangleSvg(prof)}</div><div style="flex:1 1 200px;"><div style="font-weight:700;font-size:13px;">${L('Pentagon (paper, for comparison)','ห้าเหลี่ยม (ตามงานวิจัย ใช้เปรียบเทียบ)')}</div>${duvalPentagonSvg(prof.dga, prof.code==='N')}</div></div>
@@ -4717,7 +4722,7 @@ function assetReportHtml(a){
         <table><tr><th>${L('Gas','ก๊าซ')}</th>${FF_GASES.map(g=>`<th>${g}</th>`).join('')}</tr>
         <tr><td>ppm</td>${FF_GASES.map(g=>`<td style="${d.lv[g]>1?'color:#c62d23;font-weight:700;':''}">${fmtPpm(prof.sample.gases[g])}</td>`).join('')}</tr>
         <tr><td>${L('Level','ระดับ')}</td>${FF_GASES.map(g=>`<td>${d.lv[g]}</td>`).join('')}</tr></table>
-        <div class="rbox" style="margin-top:5px;">${d.code==='N'?L('All fault gases within normal limits (grade A).','ก๊าซทุกตัวอยู่ในเกณฑ์ปกติ (เกรด A)'):`<b>${d.code} · ${dgaName(d.code)}</b> — ${L('gas grade','เกรดก๊าซ')} ${d.ff}${d.agree!==null?` · ${L('methods agreeing','วิธีที่ตรงกัน')} ${d.agree}/3`:''}`}</div>
+        <div class="rbox" style="margin-top:5px;">${d.code==='N'?L('Fault gases (H₂, CH₄, C₂H₆, C₂H₄, C₂H₂) within normal limits (grade A). CO / CO₂ are scored under paper insulation.','ก๊าซบ่งชี้ความผิดปกติ (H₂, CH₄, C₂H₆, C₂H₄, C₂H₂) อยู่ในเกณฑ์ปกติ (เกรด A) ส่วน CO / CO₂ คิดในปัจจัยฉนวนกระดาษ'):`<b>${d.code} · ${dgaName(d.code)}</b> — ${L('gas grade','เกรดก๊าซ')} ${d.ff}${d.agree!==null?` · ${L('methods agreeing','วิธีที่ตรงกัน')} ${d.agree}/3`:''}`}</div>
       </div>
     </div>
     <h2>${L('3 · Failure modes & RCM decision (priority: S = 5 first, then RPN)','3 · โหมดความล้มเหลวและการตัดสินใจ RCM (ลำดับ: S = 5 ก่อน แล้วตาม RPN)')}</h2>
