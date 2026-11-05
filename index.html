@@ -1560,7 +1560,7 @@ function openCompEdit(a){ const c=a.ctest||{};
    (DataPower Transformer · Breakdown-WaterContent-oil · DGA · DFR_Bushing)
    ===================================================================== */
 const UTIL_HEAD = {
-  dp:['Station_Th','Bay','Manufacturer','Rated_kV','Rated_MVA','TR_S/N.','Year','OLTC_Type','OLTC_S/N.','OLTC_Mfg.','Drive_Type','Drive_Mfg.','OFU_Type','OFU_Mfg.','Energize Date','Contract No.','AGE','Sub_Lat','Sub_Long'],
+  dp:['Substation','Station_Th','Bay','Manufacturer','Rated_kV','Rated_MVA','TR_S/N.','Year','OLTC_Type','OLTC_S/N.','OLTC_Mfg.','Drive_Type','Drive_Mfg.','OFU_Type','OFU_Mfg.','Energize Date','Contract No.','AGE','Sub_Lat','Sub_Long'],
   bdv:['ประทับเวลา','Sampling Date','Test Date','RoomTemperature','Oil Temperature','เครื่อง Oil Tester','Substation','Rated Voltage(kV)','Bay','Compartment','ค่า Breakdown voltage ครั้งที่ 1','ค่า Breakdown voltage ครั้งที่ 2','ค่า Breakdown voltage ครั้งที่ 3','ค่า Breakdown voltage ครั้งที่ 4','ค่า Breakdown voltage ครั้งที่ 5','ค่า Breakdown voltage ครั้งที่ 6','Summary and Comment','ค่า Water Content ครั้งที่ 1','ค่า Water Content ครั้งที่ 2','ค่า Water Content ครั้งที่ 3','เครื่องทดสอบ Water Content','Color Index'],
   dga:['ประทับเวลา','Sampling Date','Test Date','Oil Temperature','เครื่องทดสอบ DGA','Substation','Rated Voltage(kV)','Bay','Compartment','H2','H2O','CO2','CO','C2H4','C2H6','CH4','C2H2','TDCG','Summary and Comment','% Methane_CH4','% Ethylene_C2H4','% Acetylene_C2H2',"Duval's Condition"],
   dfr:['ประทับเวลา','Test Date','Station','Bay','Phase','Bushing Mfg.','Year','Type','Serial No.','%DF@1Hz','C@1Hz_pF','%DF@50Hz','C@50Hz_pF','Measument','Section','comment','OIP/RIP','Life Time','SubAndBay','Criteria'],
@@ -1582,19 +1582,27 @@ function analyseUtilityWorkbook(sh){
   const errors=[], samples=[], newAssets={}, updates={}, dfr={}; let skippedOltc=0;
   const dp=utilRows(sh.dp), bdv=utilRows(sh.bdv), dga=utilRows(sh.dga), dfrR=utilRows(sh.dfr);
   /* 1. nameplate */
-  dp.forEach(o=>{ const st=utilGet(o,'Station_Th'), bay=utilGet(o,'Bay'); if(!String(st??'').trim()||!String(bay??'').trim()){ errors.push(L(`DataPower row ${o._line}: no station or bay`,`DataPower แถว ${o._line}: ไม่มีสถานีหรือ Bay`)); return; }
-    const id=utilId(st,bay); const en=parseImportDate(utilGet(o,'Energize Date')); const kv=utilGet(o,'Rated_kV');
-    updates[id]={id, Location:String(st).trim(), Manufacturer:String(utilGet(o,'Manufacturer')??'').trim(), MVA:utilNum(utilGet(o,'Rated_MVA')), Voltage:String(kv??'').trim(), Year:utilNum(utilGet(o,'Year')), InstallDate:en?isoD(en):'', serial:String(utilGet(o,'TR_S/N.')??'').trim(), oltcType:String(utilGet(o,'OLTC_Type')??'').trim(), oltcMfg:String(utilGet(o,'OLTC_Mfg.')??'').trim()}; });
+  const nk=v=>String(v??'').toLowerCase().replace(/[\s._\-]/g,'');      /* loose key: 'TR.1' = 'TR1' = 'tr 1' */
+  const stAlias={}, dpIds={};
+  dp.forEach(o=>{ const code0=String(utilGet(o,'Substation')??'').trim(), th=String(utilGet(o,'Station_Th')??'').trim(), bay=String(utilGet(o,'Bay')??'').trim(); const code=code0||th;
+    if(!code||!bay){ errors.push(L(`DataPower row ${o._line}: no station or bay`,`DataPower แถว ${o._line}: ไม่มีสถานีหรือ Bay`)); return; }
+    stAlias[nk(code)]=code; if(th) stAlias[nk(th)]=code;
+    const id=utilId(code,bay); dpIds[nk(code)+'|'+nk(bay)]=id;
+    const en=parseImportDate(utilGet(o,'Energize Date')); const kv=utilGet(o,'Rated_kV');
+    const mvaAll=String(utilGet(o,'Rated_MVA')??'').match(/\d+(\.\d+)?/g)||[]; const mva=mvaAll.length?Math.max(...mvaAll.map(Number)):null;
+    let year=utilNum(utilGet(o,'Year')); const age=utilNum(utilGet(o,'AGE')); if(!year && age!=null && !en) year=new Date().getFullYear()-age;
+    updates[id]={id, Location:th||code, Station:code, Manufacturer:String(utilGet(o,'Manufacturer')??'').trim(), MVA:mva, MVAtext:String(utilGet(o,'Rated_MVA')??'').trim(), Voltage:String(kv??'').trim(), Year:year, InstallDate:en?isoD(en):'', serial:String(utilGet(o,'TR_S/N.')??'').trim(), oltcType:String(utilGet(o,'OLTC_Type')??'').trim(), oltcMfg:String(utilGet(o,'OLTC_Mfg.')??'').trim()}; });
+  const rid=(st,bay)=>{ const code=stAlias[nk(st)]||String(st??'').trim(); return dpIds[nk(code)+'|'+nk(bay)] || utilId(code,bay); };
   /* 2. oil BDV / water / colour (main tank only) */
   const oil={}; bdv.forEach(o=>{ if(!utilMain(utilGet(o,'Compartment'))){ skippedOltc++; return; }
-    const id=utilId(utilGet(o,'Substation'),utilGet(o,'Bay')); const d=parseImportDate(utilGet(o,'Sampling Date'))||parseImportDate(utilGet(o,'Test Date'));
+    const id=rid(utilGet(o,'Substation'),utilGet(o,'Bay')); const d=parseImportDate(utilGet(o,'Sampling Date'))||parseImportDate(utilGet(o,'Test Date'));
     if(!d){ errors.push(L(`BDV row ${o._line}: date not recognised`,`BDV แถว ${o._line}: อ่านวันที่ไม่ได้`)); return; }
     const raw=[1,2,3,4,5,6].map(i=>utilNum(utilGet(o,'ค่า Breakdown voltage ครั้งที่ '+i))).filter(x=>x!==null), wr=[1,2,3].map(i=>utilNum(utilGet(o,'ค่า Water Content ครั้งที่ '+i))).filter(x=>x!==null);
     (oil[id]=oil[id]||[]).push({d, bdv:utilMean(raw), bdvRaw:raw, moisture:utilMean(wr), waterRaw:wr, colour:utilNum(utilGet(o,'Color Index')), line:o._line, raw:o._raw}); });
   /* 3. DGA (main tank) + pair with the oil test of the same sample (±7 days) */
   const usedOil=new Set();
   dga.forEach(o=>{ if(!utilMain(utilGet(o,'Compartment'))){ skippedOltc++; return; }
-    const id=utilId(utilGet(o,'Substation'),utilGet(o,'Bay')); if(id==='-'){ errors.push(L(`DGA row ${o._line}: no substation or bay`,`DGA แถว ${o._line}: ไม่มีสถานีหรือ Bay`)); return; }
+    const id=rid(utilGet(o,'Substation'),utilGet(o,'Bay')); if(id==='-'){ errors.push(L(`DGA row ${o._line}: no substation or bay`,`DGA แถว ${o._line}: ไม่มีสถานีหรือ Bay`)); return; }
     const d=parseImportDate(utilGet(o,'Sampling Date'))||parseImportDate(utilGet(o,'Test Date')); if(!d){ errors.push(L(`DGA row ${o._line}: date not recognised`,`DGA แถว ${o._line}: อ่านวันที่ไม่ได้`)); return; }
     const gases={}; let bad=[]; GASES.forEach(g=>{ const v=utilNum(utilGet(o,g)); if(v===null||v<0) bad.push(g); gases[g]=v; });
     if(bad.length){ errors.push(L(`DGA row ${o._line} (${id}): missing ${bad.join(', ')}`,`DGA แถว ${o._line} (${id}): ไม่มีค่า ${bad.join(', ')}`)); return; }
@@ -1607,23 +1615,23 @@ function analyseUtilityWorkbook(sh){
   Object.keys(oil).forEach(id=>oil[id].forEach((x,k)=>{ if(!usedOil.has(id+'#'+k)) errors.push(L(`BDV row ${x.line} (${id}, ${fmtD(x.d)}): no DGA result within 7 days — skipped`,`BDV แถว ${x.line} (${id}, ${fmtD(x.d)}): ไม่มีผล DGA ที่ห่างไม่เกิน 7 วัน — ข้าม`)); }));
   /* 4. bushing DFR — worst HV phase of the latest test */
   dfrR.forEach(o=>{ const sec=String(utilGet(o,'Section')??'').trim(); if(sec && !/hv|h\b|primary|แรงสูง/i.test(sec)) return;
-    const id=utilId(utilGet(o,'Station'),utilGet(o,'Bay')); const d=parseImportDate(utilGet(o,'Test Date')); const v=utilNum(utilGet(o,'%DF@1Hz')); if(!d||v===null) return;
+    const id=rid(utilGet(o,'Station'),utilGet(o,'Bay')); const d=parseImportDate(utilGet(o,'Test Date')); const v=utilNum(utilGet(o,'%DF@1Hz')); if(!d||v===null) return;
     const cur=dfr[id]; if(!cur || d>cur.d) dfr[id]={d, v}; else if(+d===+cur.d && v>cur.v) cur.v=v; });
   const upd = Object.values(updates).filter(u=>ASSETS.some(a=>a.id===u.id));
   return {utility:true, errors, samples, newAssets:Object.values(newAssets), updates:upd, allUpdates:updates, dfr, skippedOltc};
 }
 function applyUtilityExtras(r){
   r.updates.forEach(u=>{ const a=ASSETS.find(x=>x.id===u.id); if(!a) return;
-    if(u.Manufacturer) a.mfr=u.Manufacturer; if(u.MVA) a.cap=u.MVA; if(u.Voltage) a.volt=u.Voltage; if(u.Year) a.year=u.Year; if(u.InstallDate) a.installed=u.InstallDate;
+    if(u.Location) a.loc=u.Location; if(u.Manufacturer) a.mfr=u.Manufacturer; if(u.MVA) a.cap=u.MVA; if(u.MVAtext) a.mvaText=u.MVAtext; if(u.Voltage) a.volt=u.Voltage; if(u.Year) a.year=u.Year; if(u.InstallDate) a.installed=u.InstallDate;
     if(u.serial) a.serial=u.serial; if(u.oltcType) a.oltcType=u.oltcType; if(u.oltcMfg) a.oltcMfg=u.oltcMfg; });
   r.newAssets.forEach(n=>{ const a=ASSETS.find(x=>x.id===n.id); if(!a) return; if(n.Manufacturer) a.mfr=n.Manufacturer; if(n.serial) a.serial=n.serial; if(n.oltcType) a.oltcType=n.oltcType; if(n.oltcMfg) a.oltcMfg=n.oltcMfg;
-    ensureNet(); const st=NET.stations.find(s=>s.name===n.Location); if(st && !st.trs.includes(a.id)) setStation(a.id, st.id); });
+    if(n.MVAtext) a.mvaText=n.MVAtext; ensureNet(); const st=NET.stations.find(s=>s.name===n.Location||s.id===n.Station||s.name===n.Station); if(st && !st.trs.includes(a.id)) setStation(a.id, st.id); });
   Object.keys(r.dfr).forEach(id=>{ const a=ASSETS.find(x=>x.id===id); if(!a) return; const v=r.dfr[id]; a.ctest=Object.assign({}, a.ctest||{}, {dfr:v.v, dfrDate:isoD(v.d)}); if(!a.ctest.date) a.ctest.date=isoD(v.d); });
 }
 function downloadUtilityTemplate(){
   if(typeof XLSX==='undefined' || !XLSX.utils){ downloadFile('lab_results_template.csv', '﻿'+importTemplateCsv(), 'text/csv'); return; }
   const ex = {
-    dp:['STATION-A','TR1','Manufacturer A','115/24',50,'SN-0001',2010,'','','','','','','','2010-06-01','','','',''],
+    dp:['STA','STATION-A','TR1','Manufacturer A','115/24',50,'SN-0001',2010,'','','','','','','','2010-06-01','','','',''],
     bdv:['','2026-03-15','2026-03-16',30,45,'','STATION-A',115,'TR1','Main Tank',72,74,71,73,75,72,'',8,9,8,'',0.6],
     dga:['','2026-03-15','2026-03-16',45,'','STATION-A',115,'TR1','Main Tank',12,'',1900,210,8,30,20,0,280,'','','','',''],
     dfr:['','2026-03-20','STATION-A','TR1','H1','','2010','','',0.42,'','','','','HV','','OIP','',''],
@@ -1717,7 +1725,7 @@ function seedImportHistory(assets, maxRounds){
     const sh={dp:[UTIL_HEAD.dp], bdv:[UTIL_HEAD.bdv], dga:[UTIL_HEAD.dga], dfr:[UTIL_HEAD.dfr]};
     const put=(key,obj)=>sh[key].push(UTIL_HEAD[key].map(h=>obj[h]??''));
     rows.forEach(({a,s,prev})=>{ const [st,bay]=splitId(a.id); const d=parseD(s.date); const ds=isoD(d), dt=isoD(add(d,2));
-      put('dp',{'Station_Th':st,'Bay':bay,'Manufacturer':a.mfr||'','Rated_kV':a.volt||'','Rated_MVA':a.cap??'','TR_S/N.':a.serial||'','Year':a.year??'','Energize Date':a.installed||''});
+      put('dp',{'Substation':st,'Station_Th':((stationOf(a.id)||{}).name||a.loc||st),'Bay':bay,'Manufacturer':a.mfr||'','Rated_kV':a.volt||'','Rated_MVA':a.cap??'','TR_S/N.':a.serial||'','Year':a.year??'','Energize Date':a.installed||''});
       const b=s.bdv, w=s.moisture; const bo=[-1.2,0.8,-0.4,1.1,-0.6,0.3], wo=[-0.5,0.8,-0.3];
       const braw = b==null?[]:(b>3?bo.map(o=>r2(b+o)):[b,b,b,b,b,b]), wraw = w==null?[]:(w>1?wo.map(o=>r2(w+o)):[w,w,w]);
       const bo2={}; braw.forEach((v,i)=>bo2['ค่า Breakdown voltage ครั้งที่ '+(i+1)]=v); wraw.forEach((v,i)=>bo2['ค่า Water Content ครั้งที่ '+(i+1)]=v);
