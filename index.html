@@ -3869,8 +3869,15 @@ function hiCalcDetail(prof){
     <p class="small-muted" style="font-size:12px;margin:10px 0 0;">${L(`Method: Tamma, Prasojo & Suwarno (2021), High Voltage 6:314–327. Step 1 uses ${CRIT.dpm==='pentagon'?'the paper’s Duval Pentagon rule':'Duval Triangle 1 mapped to the paper’s Pentagon conditions (adapted; change in Settings → Health Index)'}. Missing 2-FAL counts as score 1, as in the paper’s examples.`,`วิธีการ: Tamma, Prasojo & Suwarno (2021), High Voltage 6:314–327 ขั้นที่ 1 ใช้${CRIT.dpm==='pentagon'?'กฎห้าเหลี่ยม Duval ตามงานวิจัย':'สามเหลี่ยม Duval 1 เทียบกับระดับชนิดของห้าเหลี่ยมตามงานวิจัย (ปรับใช้ เปลี่ยนได้ที่ ตั้งค่า → ดัชนีสุขภาพ)'} หากไม่มีค่า 2-FAL ให้คะแนน 1 ตามตัวอย่างในงานวิจัย`)}</p>
   </div>`;
 }
-function detailDgaTab(a){ const s0=labFor(a)[0]; const d=a._as&&a._as.dga;
-  const note = (s0 && s0.utilDuval) ? `<div class="card" style="margin-bottom:12px;padding:10px 14px;border-left:4px solid var(--blue-bg);font-size:13px;"><b>${L('Utility record','ผลในแบบฟอร์มของหน่วยงาน')}</b> (${esc(s0.date)}): Duval's Condition <b>${esc(s0.utilDuval)}</b>${s0.utilTdcg!=null?` · TDCG ${fmtPpm(s0.utilTdcg)} ppm`:''} — ${L('this app','ระบบนี้')}: <b>${d?esc(d.code==='N'?L('Normal','ปกติ'):(d.zone||d.code)):'—'}</b>${d && s0.utilDuval && String(d.zone||d.code).toUpperCase()!==s0.utilDuval.toUpperCase() && !(d.code==='N' && /^n/i.test(s0.utilDuval)) ? ` <span class="pill pill-warning">${L('different — check','ไม่ตรงกัน — ควรตรวจสอบ')}</span>`:''}</div>` : '';
+function dgaZoneCode(txt){ const t=String(txt??'').toUpperCase().trim(); if(!t) return null;
+  if(/^(N|NORMAL|NO FAULT|ปกติ)\b/.test(t) || /^(N|ปกติ)$/.test(t)) return 'N';
+  const m=t.match(/\b(PD|D1|D2|DT|T1|T2|T3|S|O|C)\b/); return m ? m[1] : null; }
+function detailDgaTab(a){ const idx=state.dgaSampleIdx||0; const s0=labFor(a)[idx]; let d=null; try{ d=profileFor(a, idx).dga; }catch(e){ d=a._as&&a._as.dga; }
+  let note='';
+  if(s0 && s0.utilDuval){ const uz=dgaZoneCode(s0.utilDuval); const az = d ? (d.code==='N' ? 'N' : dgaZoneCode(d.zone||d.code)) : null;
+    const same = uz && az ? uz===az : null;
+    const pill = same===null ? '' : same ? ` <span class="pill pill-healthy">${L('same zone','ตรงกัน')}</span>` : ` <span class="pill pill-warning">${L('different — check','ไม่ตรงกัน — ควรตรวจสอบ')}</span>`;
+    note = `<div class="card" style="margin-bottom:12px;padding:10px 14px;border-left:4px solid ${same===false?'var(--amber)':'var(--green)'};font-size:13px;"><b>${L('Utility record','ผลในแบบฟอร์มของหน่วยงาน')}</b> (${esc(s0.date)}): Duval's Condition <b>${esc(s0.utilDuval)}</b>${s0.utilTdcg!=null?` · TDCG ${fmtPpm(s0.utilTdcg)} ppm`:''} — ${L('this app','ระบบนี้')}: <b>${d?esc(d.code==='N'?L('Normal (N)','ปกติ (N)'):(d.zone||d.code)):'—'}</b>${pill}</div>`; }
   return note + detailDgaTabBase(a); }
 function detailDgaTabBase(a){
   if(!['gas','ratio','trend'].includes(state.dgaSubTab)) state.dgaSubTab = state.dgaSubTab==='rogers'||state.dgaSubTab==='iec' ? 'ratio' : state.dgaSubTab==='trend' ? 'trend' : 'gas';
