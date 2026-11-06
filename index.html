@@ -2923,12 +2923,14 @@ function sldRealSvg(c, tYr){ tYr = tYr || 1;
     ${ds(x,62,HV,'DS')}${la(x,82,HV)}${cb(x,112,HV,'CB')}${ct(x,132,HV)}`).join('');
 
   /* transformer bays */
-  const bays = c.units.map((u,i)=>{ const x=cx(i), a=u.a, col=stCol(a), yT1=296, yT2=316, no=i+1;
+  const fr = stFocusRank(c);
+  const bays = c.units.map((u,i)=>{ const x=cx(i), a=u.a, col=stCol(a), yT1=296, yT2=316, no=i+1, rk=fr[a.id];
     return `
     ${ln(x,yBusHV,x,yT1-20,HV,2.4)}
     ${ds(x,yBusHV+22,HV,`DS-${no}`)}${cb(x,yBusHV+52,HV,`CB-${no}H`)}${ct(x,yBusHV+76,HV)}${la(x,yBusHV+92,HV,-1)}
     <g class="tr" data-view="${esc(a.id)}"><title>${esc(a.id)} — HI ${fmtHi(a.hi)} · ${trStatus(a.status)} · R(${tYr} ${L('yr','ปี')}) ${f4(u.R)} · λ ${f4(u.lam)}/${L('yr','ปี')} · I_C ${pctR(u.IC)}</title>
-      <rect class="trbox" x="${x-34}" y="${yT1-26}" width="${bay-40}" height="${yT2-yT1+78}" rx="10" fill="${col}" fill-opacity=".06" stroke="${col}" stroke-opacity=".35" stroke-dasharray="4 3"/>
+      <rect class="trbox" x="${x-34}" y="${yT1-26}" width="${bay-40}" height="${yT2-yT1+78}" rx="10" fill="#f6f8fa" stroke="#c3ccd4" stroke-dasharray="4 3"/>
+      <circle cx="${x+bay-86}" cy="${yT1-26}" r="11" fill="${rk===1?'#c62d23':'#2B4C6F'}"/><text x="${x+bay-86}" y="${yT1-22.5}" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">#${rk}</text>
       <circle cx="${x}" cy="${yT1}" r="18" fill="#fff"/><circle cx="${x}" cy="${yT2}" r="18" fill="#fff"/>
       <circle cx="${x}" cy="${yT1}" r="18" fill="none" stroke="${HV}" stroke-width="2.6"/>
       <circle cx="${x}" cy="${yT2}" r="18" fill="none" stroke="${LV}" stroke-width="2.6"/>
@@ -2940,7 +2942,7 @@ function sldRealSvg(c, tYr){ tYr = tYr || 1;
       <text x="${x+30}" y="${yT2+10}" font-size="11" font-weight="700" fill="#38434d">${kvHV}/${kvLV} kV · ${a.cap||'?'} MVA</text>
       <text x="${x+30}" y="${yT2+24}" font-size="9.5" fill="${MU}">${esc(a.mfr||'')}${a.year?` · ${a.year}`:''}${a.load!=null?` · ${L('load','โหลด')} ${a.load}%`:''}</text>
       <rect x="${x+30}" y="${yT2+32}" width="128" height="18" rx="9" fill="#fff" stroke="${rBand(u.R)}" stroke-width="1.8"/>
-      <text x="${x+40}" y="${yT2+45}" font-size="11" font-weight="800" fill="${rBand(u.R)}">R = ${f4(u.R)}<tspan font-size="9" font-weight="600" fill="${MU}"> · I</tspan><tspan font-size="7.5" dy="2" fill="${MU}">C</tspan><tspan dy="-2" font-size="9" font-weight="600" fill="${MU}"> ${pctR(u.IC)}</tspan></text>
+      <text x="${x+40}" y="${yT2+45}" font-size="11" font-weight="800" fill="${rBand(u.R)}">R = ${f4(u.R)}<tspan font-size="9" font-weight="700" fill="${rk===1?'#c62d23':MU}"> · I</tspan><tspan font-size="7.5" dy="2" fill="${rk===1?'#c62d23':MU}">C</tspan><tspan dy="-2" font-size="9" font-weight="700" fill="${rk===1?'#c62d23':MU}"> ${pctR(u.IC)}</tspan></text>
     </g>
     ${ln(x,yT2+18,x,yBusLV,LV,2.4)}
     ${ln(x+18,yT2+2,x+18,yT2+2,LV,0)}
@@ -2976,8 +2978,9 @@ function sldLegendHtml(){
     ${s(`<rect x="8" y="3" width="8" height="13" fill="#fff" stroke="${G}" stroke-width="1.6"/><path d="M12 5v8M10 11l2 3 2-3" stroke="${G}" fill="none"/><line x1="5" y1="19" x2="19" y2="19" stroke="${G}" stroke-width="2"/><line x1="8" y1="22" x2="16" y2="22" stroke="${G}" stroke-width="2"/>`, L('LA — surge arrester','LA — กับดักเสิร์จ'))}
     ${s(`<rect x="8" y="4" width="8" height="12" fill="#fff" stroke="${G}" stroke-width="1.6"/><line x1="5" y1="19" x2="19" y2="19" stroke="${G}" stroke-width="2"/>`, L('NGR — neutral grounding resistor','NGR — ตัวต้านทานต่อลงดินจุดนิวทรัล'))}
     <span class="sld-lg"><i style="background:#24476b"></i>${L('115 kV side','ด้าน 115 kV')}</span><span class="sld-lg"><i style="background:#0d7a68"></i>${L('24 kV side','ด้าน 24 kV')}</span>
-    <span class="sld-lg"><i style="background:#1fa571"></i>${t('healthy')}</span><span class="sld-lg"><i style="background:#d99012"></i>${t('warning')}</span><span class="sld-lg"><i style="background:#c62d23"></i>${t('critical')}</span>
-    <span class="sld-lg" style="margin-left:6px;">${L('R colour','สีค่า R')}: <b style="color:#1fa571;">≥ 0.95</b> · <b style="color:#d99012;">0.85–0.95</b> · <b style="color:#c62d23;">&lt; 0.85</b> — ${L('same values as the Reliability page','ค่าเดียวกับหน้าความเชื่อถือได้')}</span>
+    <span class="sld-lg">${L('HI label','ป้าย HI')}: <b style="color:#1fa571;">${t('healthy')}</b> · <b style="color:#d99012;">${t('warning')}</b> · <b style="color:#c62d23;">${t('critical')}</b></span>
+    <span class="sld-lg" style="margin-left:6px;">${L('R frame','กรอบ R')}: <b style="color:#1fa571;">≥ 0.95</b> · <b style="color:#d99012;">0.85–0.95</b> · <b style="color:#c62d23;">&lt; 0.85</b></span>
+    <span class="sld-lg" style="margin-left:6px;">${L('#1 #2 … = focus order in the substation (same as the System reliability tab)','#1 #2 … = ลำดับโฟกัสในสถานี (เหมือนแท็บความเชื่อถือได้ของระบบ)')}</span>
   </div>
   <p class="small-muted" style="font-size:12px;margin:6px 0 0;">${L('Typical arrangement drawn from the network settings (number of transformers, voltage, peak load). Switchgear, feeders and protection are representative, not as-built. Click a transformer to open it.','จัดวางตามรูปแบบทั่วไปจากข้อมูลเครือข่าย (จำนวนหม้อแปลง แรงดัน โหลดสูงสุด) อุปกรณ์ตัดตอน ฟีดเดอร์ และระบบป้องกันเป็นตัวอย่างประกอบ ไม่ใช่แบบติดตั้งจริง · กดที่หม้อแปลงเพื่อเปิดดู')}</p>`;
 }
