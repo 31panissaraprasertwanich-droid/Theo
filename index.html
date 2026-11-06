@@ -870,6 +870,8 @@ table.crit-t td{white-space:normal;vertical-align:top;font-size:13px;} table.cri
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
+var BLANK_START = true;   /* blank edition: starts with no transformers; everything is calculated from the data entered */
+
 /* ============ TRANSLATIONS ============ */
 const UI = {
  guide_title:['User Guide','คู่มือการใช้งาน'],
@@ -1932,7 +1934,7 @@ function loadData(){ try{ const raw=localStorage.getItem(STORE_KEY); return raw 
 
 /* ---------- Lab-result form ---------- */
 function labFormFields(p){
-  p = p || {date:fmtD(new Date()), gases:{H2:10,CH4:5,C2H6:5,C2H4:2,C2H2:0,CO:100,CO2:800}, bdv:75, moisture:6, acidity:0.02, ift:40, colour:0.5, fal:30};
+  p = p || (BLANK_START ? {date:fmtD(new Date()), gases:{H2:'',CH4:'',C2H6:'',C2H4:'',C2H2:'',CO:'',CO2:''}, bdv:'', moisture:'', acidity:'', ift:'', colour:'', fal:''} : {date:fmtD(new Date()), gases:{H2:10,CH4:5,C2H6:5,C2H4:2,C2H2:0,CO:100,CO2:800}, bdv:75, moisture:6, acidity:0.02, ift:40, colour:0.5, fal:30});   /* blank edition: no example values, so nothing is entered by accident */
   const num=(name,label,val,step,req=true)=>`<div class="formrow"><label>${label}</label><input name="${name}" type="number" min="0" step="${step||'any'}" value="${val??''}" ${req?'required':''}></div>`;
   return `<div class="formrow"><label>${L('Sampling date','วันที่เก็บตัวอย่าง')}</label><input name="date" type="date" value="${isoD(parseD(p.date)||new Date())}" required></div>
   <div style="font-weight:800;font-size:13.5px;margin:10px 0 4px;">${L('Dissolved gases (ppm)','ก๊าซที่ละลายในน้ำมัน (ppm)')}</div>
@@ -2649,7 +2651,7 @@ function netDefault(){
     {id:'LKB', name:'Lat Krabang IE SS', kv:'115/24 kV', peak:90, k:0, trs:['LKB-TR1','LKB-TR2','LKB-TR3']},
     {id:'CLK', name:'Chalong Krung SS', kv:'115/24 kV', peak:75, k:0, trs:['CLK-TR1','CLK-TR2','CLK-TR3']} ]};
 }
-function netArea(){ ensureNet(); return (NET.area||'').trim() || L('Lat Krabang Industrial Estate area','พื้นที่นิคมอุตสาหกรรมลาดกระบัง'); }
+function netArea(){ ensureNet(); return (NET.area||'').trim() || (BLANK_START ? L('All substations','ทุกสถานี') : L('Lat Krabang Industrial Estate area','พื้นที่นิคมอุตสาหกรรมลาดกระบัง')); }
 function ensureNet(){
   if(NET && Array.isArray(NET.stations)){ NET.stations.forEach(st=>{ if(st.id==='SS-1' && /^Lat Krabang/.test(st.name)) st.id='LKB'; else if(st.id==='SS-2' && /^Chalong Krung/.test(st.name)) st.id='CLK'; }); return NET; }
   NET = netDefault();
@@ -5067,6 +5069,7 @@ function attachDataButtons(){
   document.querySelectorAll('[data-import-lab]').forEach(el=>el.addEventListener('click', openImportModal));
   document.querySelectorAll('[data-import-template]').forEach(el=>el.addEventListener('click', downloadImportTemplate));
   document.querySelectorAll('[data-del-demo]').forEach(el=>el.addEventListener('click', deleteDemoAssets));
+  document.querySelectorAll('[data-add-asset]').forEach(el=>el.addEventListener('click', ()=>{ if(can('asset')) openAddAssetModal(); }));
 }
 
 /* =====================================================================
@@ -5562,8 +5565,8 @@ function settingsTabContent(){
         <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="export">${t('export_data')}</button>
         <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="backup">${t('backup_db')}</button>
         <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;" data-sys="restore">${t('restore_db')}</button>
-        <button class="btn btn-ghost" style="flex:1;justify-content:center;color:var(--red);" data-del-demo="1">${L('Remove sample transformers','ลบหม้อแปลงตัวอย่าง')}</button>
-        <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;color:var(--red);" data-sys="reset">${L('Reset demo data','รีเซ็ตข้อมูลตัวอย่าง')}</button>
+        ${BLANK_START?'':`<button class="btn btn-ghost" style="flex:1;justify-content:center;color:var(--red);" data-del-demo="1">${L('Remove sample transformers','ลบหม้อแปลงตัวอย่าง')}</button>`}
+        <button class="btn btn-ghost sys-btn" style="flex:1;justify-content:center;color:var(--red);" data-sys="reset">${BLANK_START?L('Clear all data','ล้างข้อมูลทั้งหมด'):L('Reset demo data','รีเซ็ตข้อมูลตัวอย่าง')}</button>
       </div>
       <input type="file" id="restoreFile" accept="application/json,.json" style="display:none;">
       <p class="small-muted" style="font-size:12.5px;margin:10px 0 0;">${L('Data is saved automatically in this browser (localStorage). Use Backup to move it to another computer.','ข้อมูลบันทึกอัตโนมัติในเบราว์เซอร์นี้ (localStorage) ใช้ “สำรองข้อมูล” เพื่อย้ายไปเครื่องอื่น')}</p>
@@ -5643,7 +5646,7 @@ function attachSettingsEvents(){
     if(kind==='export'){ downloadFile('rcm_export.csv', toCSV(fleetRows()), 'text/csv'); toast(t('toast_exported'),'success'); }
     else if(kind==='backup'){ try{ localStorage.setItem('rcm_last_backup', String(Date.now())); }catch(e){} notifRead=false; downloadFile('rcm_backup.json', JSON.stringify(snapshotData(), null, 2), 'application/json'); toast(t('toast_exported'),'success'); }
     else if(kind==='restore'){ document.getElementById('restoreFile').click(); }
-    else if(kind==='reset'){ if(confirm(L('Delete all saved changes and restore the demo data?','ลบการเปลี่ยนแปลงทั้งหมดและกลับไปใช้ข้อมูลตัวอย่าง?'))){ try{ localStorage.removeItem(STORE_KEY); }catch(e){} location.reload(); } }
+    else if(kind==='reset'){ if(confirm(BLANK_START ? L('Delete ALL data in this browser and start empty? Make a backup first if you need it.','ลบข้อมูลทั้งหมดในเบราว์เซอร์นี้และเริ่มใหม่แบบว่าง? ถ้าต้องการเก็บไว้ ให้สำรองข้อมูลก่อน') : L('Delete all saved changes and restore the demo data?','ลบการเปลี่ยนแปลงทั้งหมดและกลับไปใช้ข้อมูลตัวอย่าง?'))){ try{ localStorage.removeItem(STORE_KEY); }catch(e){} location.reload(); } }
   }));
 }
 
@@ -5731,7 +5734,7 @@ function roleName(k){ const r=ROLES[k||state.role]||ROLES.engineer; return L(r.n
 function can(p){ return (ROLES[state.role]||ROLES.engineer).perms.includes(p); }
 const ROLE_GATES = {
   lab:['[data-import-lab]','[data-add-lab]','#btnAddDgaResult','#btnCompEdit'],
-  asset:['#btnDeleteAsset','[data-del-asset]','#btnAddAsset','#btnEditAsset','[data-edit-asset]','[data-net-addtr]'],
+  asset:['#btnDeleteAsset','[data-del-asset]','#btnAddAsset','#btnEditAsset','[data-edit-asset]','[data-net-addtr]','[data-add-asset]'],
   fmea:['#btnAddFmea','[data-edit-fmea]'],
   rcm:['[data-rcm-undo]','#btnRcmReset','#btnRcmConfirm'],
   plan:['#btnCreateTask','[data-add-plan-sug]','[data-rcm-add]','#btnRcmToPlan','#btnBaToPlan','[data-wo-issue]','[data-wo-cancel]','[data-oldpm-edit]','#planFillBox'],
@@ -5773,7 +5776,11 @@ const MOCK_PAGES = ['overview','assets','detail','risk','reliability','reports',
 function mkKpi(label){ return `<div class="kpi"><div class="l">${label}</div><div class="v" style="color:var(--muted);">—</div><span class="small-muted" style="font-size:13px;">${L('no data yet','ยังไม่มีข้อมูล')}</span></div>`; }
 function mockChartCard(title, h){ return `<div class="card"><div class="card-head"><div style="font-weight:800;">${title}</div></div><div style="height:${h||220}px;border:2px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--muted);font-size:14px;"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>${L('Chart appears after data is imported','กราฟจะแสดงเมื่อนำเข้าข้อมูล')}</div></div>`; }
 function mkTable(title, cols){ return `<div class="card"><div class="card-head"><div style="font-weight:800;">${title}</div></div><div class="tbl-wrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody><tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:28px 8px;">${L('No data yet — import lab results to fill this table','ยังไม่มีข้อมูล — นำเข้าผลทดสอบเพื่อแสดงตารางนี้')}</td></tr></tbody></table></div></div>`; }
-function mockBanner(){ return `<div class="notebox" style="margin-bottom:16px;align-items:center;flex-wrap:wrap;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg><div style="flex:1;min-width:220px;"><b>${L('Mockup: the app before any data is imported','แบบจำลองหน้าเว็บตอนยังไม่มีข้อมูล')}</b><br><span class="small-muted">${L('Every box fills in once transformer data and lab results are imported.','ทุกช่องจะแสดงผลเมื่อนำเข้าข้อมูลหม้อแปลงและผลทดสอบ')}</span></div><button class="btn btn-primary" data-mock-toggle="1" style="padding:7px 14px;font-size:13.5px;">${L('View with sample data','ดูแบบจำลองเมื่อมีข้อมูล')}</button></div>`; }
+function mockBanner(){ if(ASSETS.length===0) return `<div class="card" style="margin-bottom:16px;border-left:5px solid var(--navy,#2B4C6F);"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+    <div style="flex:1;min-width:240px;"><div style="font-weight:800;font-size:16px;">${L('No data yet — start here','ยังไม่มีข้อมูล — เริ่มต้นที่นี่')}</div>
+      <div class="small-muted" style="font-size:13.5px;line-height:1.6;margin-top:4px;">${L('1) Import the test-record workbook (or add a transformer by hand) · 2) Set up substations in Reliability · 3) Every page — Health Index, risk, FMEA & RCM and the PM plan — is calculated automatically.','1) นำเข้าไฟล์ผลตรวจ (หรือเพิ่มหม้อแปลงเอง) · 2) ตั้งค่าสถานีที่หน้าความเชื่อถือได้ · 3) ทุกหน้า ทั้งดัชนีสุขภาพ ความเสี่ยง FMEA & RCM และแผน PM จะคำนวณให้อัตโนมัติ')}</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" data-import-lab="1">${L('Import test records','นำเข้าไฟล์ผลตรวจ')}</button><button class="btn btn-outline" data-add-asset="1">${L('Add transformer','เพิ่มหม้อแปลง')}</button><button class="btn btn-ghost" data-import-template="1">${L('Template','แม่แบบ')}</button></div></div></div>`;
+  return `<div class="notebox" style="margin-bottom:16px;align-items:center;flex-wrap:wrap;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg><div style="flex:1;min-width:220px;"><b>${L('Mockup: the app before any data is imported','แบบจำลองหน้าเว็บตอนยังไม่มีข้อมูล')}</b><br><span class="small-muted">${L('Every box fills in once transformer data and lab results are imported.','ทุกช่องจะแสดงผลเมื่อนำเข้าข้อมูลหม้อแปลงและผลทดสอบ')}</span></div><button class="btn btn-primary" data-mock-toggle="1" style="padding:7px 14px;font-size:13.5px;">${L('View with sample data','ดูแบบจำลองเมื่อมีข้อมูล')}</button></div>`; }
 function renderMock(page){
   const T=(en,th)=>L(en,th);
   let body='';
@@ -5809,7 +5816,8 @@ function render(){ chartFontDefaults();
   const content = document.getElementById('content');
   destroyCharts();
   updateMockToggle();
-  if(MOCK_EMPTY && MOCK_PAGES.includes(state.page)){ content.innerHTML = renderMock(state.page); attachDataButtons(); attachNetEvents(); applyRole(); return; }
+  const NO_DATA = ASSETS.length===0;
+  if((MOCK_EMPTY || NO_DATA) && MOCK_PAGES.includes(state.page) && !(NO_DATA && ['assets','reliability'].includes(state.page))){ content.innerHTML = renderMock(state.page); attachDataButtons(); attachNetEvents(); applyRole(); return; }
   if(state.page==='overview'){ content.innerHTML = renderOverview(); attachGlobalViewLinks(); attachOverviewEvents(); attachDataButtons(); initOverviewCharts(); }
   else if(state.page==='assets'){ content.innerHTML = renderAssetsPage(); attachGlobalViewLinks(); attachAssetsPageEvents(); attachDataButtons(); }
   else if(state.page==='detail'){ syncAssetData(); content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(currentAsset()); if(state.detailTab==='model3d') attach3dEvents(); }
@@ -5865,7 +5873,7 @@ function localizeNode(root){
 try{ new MutationObserver(ms=>{ if(state.lang!=='th') return; ms.forEach(m=>m.addedNodes.forEach(localizeNode)); }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
 
 try{ const sl=localStorage.getItem('rcm_lang'); if(sl==='th'||sl==='en') state.lang=sl; const sr=localStorage.getItem('rcm_role'); if(sr && ROLES[sr]) state.role=sr; }catch(e){}
-loadData();
+if(!loadData() && BLANK_START){ applyData({v:3, assets:[], lab:{}, fmea:{}, maint:{}, rcmStore:{}, imp:[], impSeed:true, baSeed:true, planV:2, focusV:2, fmeaV:3, net:{t:1, stations:[]}}); saveData(); }
 document.addEventListener('click', e=>{ const b=e.target.closest && e.target.closest('[data-samp-info]'); if(b){ e.preventDefault(); e.stopPropagation(); openSamplingInfo(); } }, true);
 /* sample record (demo data only): an oil-filtration work order on LKB-TR2, closed between two lab results */
 (function seedBaDemo(){
