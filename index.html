@@ -5729,7 +5729,7 @@ const ROLES = {
   admin:   {name:['Administrator','ผู้ดูแลระบบ'],                     perms:['lab','asset','fmea','rcm','plan','woClose','sampling','criteria','network','data'],
             can:['Everything, plus HI criteria, network settings, backup, restore and delete.','ทำได้ทุกอย่าง รวมถึงแก้เกณฑ์ HI ตั้งค่าเครือข่าย สำรอง กู้คืน และลบข้อมูล']},
 };
-state.role = 'engineer';
+state.role = BLANK_START ? 'admin' : 'engineer';   /* blank edition: whoever sets the system up needs admin rights (stations, backup, clear) */
 function roleName(k){ const r=ROLES[k||state.role]||ROLES.engineer; return L(r.name[0], r.name[1]); }
 function can(p){ return (ROLES[state.role]||ROLES.engineer).perms.includes(p); }
 const ROLE_GATES = {
