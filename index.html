@@ -5780,10 +5780,6 @@ function settingsTabContent(){
   </div>`;
   if(state.settingsTab==='sys') return `
   <div class="grid" style="grid-template-columns:1fr;">
-    <div class="card"><h3>${L('Data mode','โหมดข้อมูล')}</h3>
-      <p style="margin:0 0 10px;font-size:14px;">${L('Now using','ตอนนี้ใช้')}: <b>${BLANK_START?L('Blank — your own data','โหมดว่าง — ข้อมูลที่ใส่เอง'):L('Sample data (simulated)','ข้อมูลตัวอย่าง (จำลอง)')}</b></p>
-      <button class="btn btn-outline" data-mode-switch="${BLANK_START?'demo':'blank'}">${BLANK_START?L('Switch to sample data','เปลี่ยนเป็นข้อมูลตัวอย่าง'):L('Switch to blank mode','เปลี่ยนเป็นโหมดว่าง')}</button>
-      <p class="small-muted" style="font-size:12.5px;margin:8px 0 0;">${L('Switching clears the data saved in this browser. Make a backup first if you need it.','การเปลี่ยนโหมดจะล้างข้อมูลที่บันทึกในเบราว์เซอร์นี้ ถ้าต้องการเก็บไว้ ให้สำรองข้อมูลก่อน')}</p></div>
     <div class="card"><h3>${t('data_mgmt')}</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-ghost" style="flex:1;justify-content:center;" data-import-lab="1">${L('Import lab results','นำเข้าผลแล็บ')}</button>
