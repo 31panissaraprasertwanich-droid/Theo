@@ -821,6 +821,7 @@ table.crit-t td{white-space:normal;vertical-align:top;font-size:13px;} table.cri
   .hist-tbl{ max-height:340px; overflow:auto; border:1px solid var(--line,#e3e8ee); border-radius:8px; background:#fff; }
   .hist-tbl table{ font-size:12px; } .hist-tbl th{ white-space:nowrap; position:sticky; top:0; background:#eef2f6; z-index:1; } .hist-tbl td{ white-space:nowrap; }
   .hist-tbl tr.hist-app td{ color:#7a8591; font-style:italic; }
+  .hist-tbl tr.hist-fail td{ background:#fdeceb; }
   .hist-btn.on{ background:#2B4C6F; color:#fff; border-color:#2B4C6F; }
 </style>
 </head>
@@ -1701,8 +1702,8 @@ function openSampleSource(a, s){
   document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); }); }
 function openImportLog(){
   const root=document.getElementById('modalRoot');
-  const rows = IMPORT_LOG.map(l=>`<tr><td>${implogDate(l.at)}</td><td><b>${esc(l.file)}</b><div class="small-muted" style="font-size:12px;">${l.kind==='utility'?L('Utility test-record workbook','แบบฟอร์มผลตรวจของหน่วยงาน'):L('Excel / CSV (one row per result)','Excel / CSV (1 แถวต่อผล)')}</div></td>
-      <td style="font-size:12.5px;">${L('results','ผลแล็บ')} ${l.counts.samples||0}${l.counts.newAssets?` · ${L('new units','เครื่องใหม่')} ${l.counts.newAssets}`:''}${l.counts.updates?` · ${L('updated','อัปเดต')} ${l.counts.updates}`:''}${l.counts.dfr?` · DFR ${l.counts.dfr}`:''}${l.counts.skipped?` · <span style="color:var(--red);">${L('skipped','ข้าม')} ${l.counts.skipped}</span>`:''}</td>
+  const rows = IMPORT_LOG.map(l=>`<tr><td>${implogDate(l.at)}</td><td><b>${esc(l.file)}</b><div class="small-muted" style="font-size:12px;">${l.kind==='sr'?L('Service Request (work orders)','Service Request (ใบสั่งงาน)'):l.kind==='utility'?L('Utility test-record workbook','แบบฟอร์มผลตรวจของหน่วยงาน'):L('Excel / CSV (one row per result)','Excel / CSV (1 แถวต่อผล)')}</div></td>
+      <td style="font-size:12.5px;">${l.kind==='sr'?`${L('work orders','งาน')} ${l.counts.sr||0}`:`${L('results','ผลแล็บ')} ${l.counts.samples||0}`}${l.counts.newAssets?` · ${L('new units','เครื่องใหม่')} ${l.counts.newAssets}`:''}${l.counts.updates?` · ${L('updated','อัปเดต')} ${l.counts.updates}`:''}${l.counts.dfr?` · DFR ${l.counts.dfr}`:''}${l.counts.skipped?` · <span style="color:var(--red);">${L('skipped','ข้าม')} ${l.counts.skipped}</span>`:''}</td>
       <td style="white-space:nowrap;">${l.sheets?`<button class="btn btn-outline" data-implog-open="${l.id}" style="padding:4px 10px;font-size:12.5px;">${L('Open','เปิดดู')}</button> <button class="btn btn-ghost" data-implog-dl="${l.id}" style="padding:4px 10px;font-size:12.5px;">${L('Download','ดาวน์โหลด')}</button>`:`<span class="small-muted" style="font-size:12px;">${L('file too large to keep','ไฟล์ใหญ่เกินกว่าจะเก็บไว้')}</span>`}
         <button class="btn btn-ghost" data-implog-del="${l.id}" style="padding:4px 8px;font-size:12.5px;color:var(--red);" title="${esc(L('Remove from history (results stay)','ลบออกจากประวัติ (ผลแล็บยังอยู่)'))}">✕</button></td></tr>`).join('')
     || `<tr><td colspan="4" class="small-muted">${L('No imports yet','ยังไม่มีการนำเข้า')}</td></tr>`;
@@ -1931,7 +1932,7 @@ function ovTrendHead(){ const s=ovTrendStats(); if(!s) return '';
   const chip=(lab,val,c)=>`<div class="ovtr-chip"><span>${lab}</span><b style="color:${c||'var(--text)'};">${val}</b></div>`;
   return `<div class="ovtr-chips">${chip(L('Latest average','ค่าเฉลี่ยล่าสุด'), `${fmtHi(s.last.v)} <small>(${hiCat(s.last.v).code})</small>`)}${chip(L(`Change since ${state.lang==='th'?s.first.x+543:s.first.x}`,`เปลี่ยนแปลงตั้งแต่ ${state.lang==='th'?'พ.ศ. '+(s.first.x+543):s.first.x}`), `${d<0?'▼':'▲'} ${Math.abs(d).toFixed(1)}`, d<0?'var(--red)':'var(--green)')}${chip(L('Decline rate (slope)','อัตราการเปลี่ยน (ความชัน)'), `${s.slope>=0?'+':''}${s.slope.toFixed(2)} <small>${L('pts/yr','คะแนน/ปี')}</small>`, col)}</div>`; }
 
-function snapshotData(){ return {utilRaw:UTIL_RAW, rcmConfSeed:RCM_CONF_SEEDED, baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, imp:IMPORT_LOG, impSeed:IMPLOG_SEEDED, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
+function snapshotData(){ return {sr:SR_LOG, srRule:SR_RULE, utilRaw:UTIL_RAW, rcmConfSeed:RCM_CONF_SEEDED, baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, imp:IMPORT_LOG, impSeed:IMPLOG_SEEDED, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
 function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
 function applyData(d){
   if(!d || d.v!==3 || !Array.isArray(d.assets)) return false;
@@ -1942,7 +1943,7 @@ function applyData(d){
   OLD_PM = d.oldPm ? JSON.parse(JSON.stringify(d.oldPm)) : JSON.parse(JSON.stringify(OLD_PM_DEFAULT)); PLAN_START_M = d.planStart ? JSON.parse(JSON.stringify(d.planStart)) : {};
   Object.assign(SAMPLING_DAYS, SAMPLING_DEFAULT); if(d.samp) Object.keys(SAMPLING_DEFAULT).forEach(k=>{ const v=+d.samp[k]; if(v>=1&&v<=730) SAMPLING_DAYS[k]=Math.round(v); });
   if(d.planV!==2) Object.values(MAINT_STORE).forEach(markPastDone);
-  NET = d.net || null; BA_SEEDED = !!d.baSeed; RCM_CONF_SEEDED = !!d.rcmConfSeed; UTIL_RAW = (d.utilRaw && typeof d.utilRaw==='object') ? d.utilRaw : {};
+  NET = d.net || null; BA_SEEDED = !!d.baSeed; RCM_CONF_SEEDED = !!d.rcmConfSeed; UTIL_RAW = (d.utilRaw && typeof d.utilRaw==='object') ? d.utilRaw : {}; SR_LOG = Array.isArray(d.sr) ? d.sr : []; SR_RULE = (d.srRule && Array.isArray(d.srRule.types) && Array.isArray(d.srRule.pri)) ? d.srRule : JSON.parse(JSON.stringify(SR_RULE_DEF));
   if(d.fmeaV!==3){ FMEA_STORE = {}; RCM_STORE = {}; }   /* failure-mode list changed to the 10 modes of the report */
   if(d.focusV!==2){ /* focus on 2 substations: keep only their 4 transformers */
     const keep = ['LKB-TR1','LKB-TR2','LKB-TR3','CLK-TR1','CLK-TR2','CLK-TR3'];
@@ -2739,11 +2740,78 @@ function ensureNet(){
 /* reference date = latest lab result in the fleet (not today), so results stay the same until new data is added */
 function netRefDate(){ const ds = ASSETS.map(a=>parseD(a.last)).filter(Boolean); return ds.length ? new Date(Math.max(...ds)) : new Date(); }
 function opYears(a){ const i = installDate(a); if(!i) return 0; return Math.max(0.1, (netRefDate().getTime() - i.getTime()) / (365.25*864e5)); }
+/* ---------- Service Request (work orders) → failures r and record period T ----------
+   r = number of work orders that match the failure rule (default: CM with Priority 1) for the unit;
+   T = record period of the file (Jan of the first year → month of the latest work order). */
+const SR_HEAD = ['Service Request','Summary','สถานที่ติดตั้ง','Failure Code','Problem Code','Cause','Priority','Actual Start','Actual Finish','Work Center','Status','Reported','Reported By'];
+const SR_RULE_DEF = {types:['CM'], pri:[1]};
+var SR_LOG = [];                                   /* {sr, unit, type, pri, code, start (ISO), cells:[...SR_HEAD]} */
+var SR_RULE = JSON.parse(JSON.stringify(SR_RULE_DEF));
+function srIsFile(table){ const h=((table&&table[0])||[]).map(utilNorm); return ['Service Request','Failure Code','Priority'].every(c=>h.includes(utilNorm(c))); }
+const srKey = v=>String(v??'').toLowerCase().replace(/[\s._\-]/g,'');
+function srMatchUnit(loc){ const s=String(loc??'').trim(); const m=s.match(/\(([^)]+)\)\s*$/);
+  for(const c of [m?m[1]:null, s].filter(Boolean)){ const a=ASSETS.find(x=>srKey(x.id)===srKey(c)); if(a) return a.id; } return null; }
+function srCounts(r){ return SR_RULE.types.includes(r.type) && SR_RULE.pri.includes(r.pri); }
+function srRuleText(){ return `${SR_RULE.types.join(' + ')||'—'} · Priority ${SR_RULE.pri.join(', ')||'—'}`; }
+function srHas(id){ return SR_LOG.some(r=>r.unit===id); }
+function srWindow(){ if(!SR_LOG.length) return null; const ds=SR_LOG.map(r=>new Date(r.start)).filter(d=>!isNaN(d)); if(!ds.length) return null;
+  const y0=Math.min(...ds.map(d=>d.getFullYear())), last=new Date(Math.max(...ds)); const months=(last.getFullYear()-y0)*12+last.getMonth()+1; return {y0, last, months, T:months/12}; }
+function srFails(id, upTo){ return SR_LOG.filter(r=>r.unit===id && srCounts(r) && (!upTo || new Date(r.start)<=upTo)).length; }
+function analyseSR(table){
+  const head=table[0].map(utilNorm), col=h=>head.indexOf(utilNorm(h)); const errors=[], rows=[], unmatched={};
+  table.slice(1).forEach((r,i)=>{ if(!r.some(c=>String(c??'').trim()!=='')) return; const g=h=>{ const j=col(h); return j<0?'':r[j]; };
+    const sr=String(g('Service Request')).trim(); const d=parseImportDate(g('Actual Start'))||parseImportDate(g('Reported'));
+    if(!d){ errors.push(L(`Row ${i+2}: date not recognised`,`แถว ${i+2}: อ่านวันที่ไม่ได้`)); return; }
+    const loc=String(g('สถานที่ติดตั้ง')).trim(), unit=srMatchUnit(loc); if(!unit){ unmatched[loc||'—']=(unmatched[loc||'—']||0)+1; return; }
+    const tm=String(g('Summary')).match(/^\s*\[(CM|PM)\]/i);
+    rows.push({sr:sr||('row'+(i+2)), unit, type:tm?tm[1].toUpperCase():'?', pri:utilNum(g('Priority')), code:String(g('Failure Code')).trim(), start:d.toISOString(), cells:SR_HEAD.map(h=>implogCell(g(h)))}); });
+  return {rows, errors, unmatched}; }
 function trRel(a, t){
-  const r = Math.max(0, Math.floor(+a.fails || 0)), T = opYears(a);
+  const W = srHas(a.id) ? srWindow() : null;
+  const r = W ? srFails(a.id) : Math.max(0, Math.floor(+a.fails || 0)), T = W ? W.T : opYears(a);
   const lam = T>0 ? (r>0 ? r/T : NET_ZERO_K/T) : 0;
-  return {a, r, T, lam, zero:r===0, R: Math.exp(-lam*t)};
+  return {a, r, T, lam, zero:r===0, R: Math.exp(-lam*t), src: W?'sr':'manual'};
 }
+/* year-by-year R from the Service Request file: λ = failures so far ÷ record period so far */
+function srYearly(N){ const W=srWindow(); if(!W) return null; const out=[];
+  for(let y=W.y0; y<=W.last.getFullYear(); y++){ const lastY = y===W.last.getFullYear(); const months = lastY ? W.months : 12*(y-W.y0+1);
+    const end = lastY ? W.last : new Date(y,11,31,23,59,59); const T=months/12;
+    const st = N.sts.map(c=>{ const rs=c.units.map(u=>{ if(!srHas(u.a.id)) return u.R; const n=srFails(u.a.id,end); const lam=n>0?n/T:NET_ZERO_K/T; return Math.exp(-lam*N.t); });
+      return c.units.length ? koutofn(rs, c.k) : 0; });
+    out.push({y, months, st, sys: st.reduce((x,v)=>x*v,1)}); }
+  return out; }
+function srYearCard(N){
+  const W=srWindow(); const rows=srYearly(N); const pc=v=>(v*100).toFixed(2)+'%';
+  const head=`<div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('Reliability by year — from Service Requests','ความเชื่อถือได้รายปี — จาก Service Request')}</h3><div class="filter-row"><button class="btn btn-outline" data-import-sr="1" style="padding:6px 12px;font-size:13px;">${L('Import Service Request','นำเข้า Service Request')}</button></div></div>`;
+  if(!W) return `<div class="card" style="margin-bottom:16px;">${head}<p class="small-muted" style="margin:0;font-size:13px;">${L('Import the Service Request (work order) file to count failures r per transformer automatically. Until then r is entered in Settings → Network.','นำเข้าไฟล์ Service Request (ใบสั่งงาน) เพื่อให้ระบบนับจำนวนครั้งที่เสีย r ของหม้อแปลงแต่ละลูกเอง จนกว่าจะนำเข้า r มาจากที่กรอกในตั้งค่า → เครือข่าย')}</p></div>`;
+  const yrs=Math.floor(W.months/12), mo=W.months%12;
+  return `<div class="card" style="margin-bottom:16px;">${head}
+    <p class="small-muted" style="margin:-4px 0 10px;font-size:12.5px;">${L(`${SR_LOG.length} work orders · counted as failure: ${srRuleText()} · record period ${W.y0} – ${fmtD(W.last)} · each year uses failures so far ÷ years so far · t = ${N.t} yr`,`${SR_LOG.length} งาน · นับเป็นการเสีย: ${srRuleText()} · ช่วงที่มีบันทึก ${W.y0} – ${fmtD(W.last)} (${yrs} ปี${mo?` ${mo} เดือน`:''}) · แต่ละปีใช้ จำนวนครั้งที่เสียสะสม ÷ จำนวนปีสะสม · t = ${N.t} ปี`)}</p>
+    <div class="tbl-wrap"><table><thead><tr><th>${L('Year','ปี')}</th>${N.sts.map(c=>`<th>R ${esc(c.st.id)} <span class="small-muted" style="text-transform:none;font-weight:600;">(${c.k}-out-of-${c.units.length})</span></th>`).join('')}<th>R ${L('system','ระบบ')}</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td><b>${r.y}</b>${r.months%12 && r===rows[rows.length-1]?` <span class="small-muted">(${r.months%12} ${L('mo','เดือน')})</span>`:''}</td>${r.st.map(v=>`<td style="color:${rBand(v)};font-weight:700;">${pc(v)}</td>`).join('')}<td style="color:${rBand(r.sys)};font-weight:800;">${pc(r.sys)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <p class="small-muted" style="font-size:12px;margin:8px 0 0;">${L('The last row equals the values used on this page. Transformers without work orders in the file keep the r entered in Settings.','แถวสุดท้ายคือค่าที่ใช้ในหน้านี้ · หม้อแปลงที่ไม่มีงานในไฟล์ ใช้ค่า r ที่กรอกในหน้าตั้งค่า')}</p></div>`; }
+function openSRImport(){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='.xlsx,.xls,.csv';
+  inp.addEventListener('change',()=>{ const f=inp.files&&inp.files[0]; if(!f) return;
+    readImportFile(f, table=>{ if(!table || table.utility || !srIsFile(table)){ toast(L('This is not a Service Request file (needs columns Service Request, Failure Code, Priority)','ไม่ใช่ไฟล์ Service Request (ต้องมีคอลัมน์ Service Request, Failure Code, Priority)')); return; }
+      const r=analyseSR(table); const units=[...new Set(r.rows.map(x=>x.unit))].sort();
+      const per=units.map(id=>{ const xs=r.rows.filter(x=>x.unit===id); return `<tr><td><b>${esc(id)}</b></td><td>${xs.length}</td><td>${xs.filter(x=>x.type==='CM').length}</td><td>${xs.filter(x=>x.type==='PM').length}</td><td><b>${xs.filter(srCounts).length}</b></td></tr>`; }).join('');
+      const um=Object.keys(r.unmatched);
+      openModal(L('Import Service Request','นำเข้า Service Request'), `<p style="margin:0 0 8px;"><b>${esc(f.name)}</b> · ${r.rows.length} ${L('work orders matched','งานที่จับคู่หม้อแปลงได้')} · ${L('counted as failure','นับเป็นการเสีย')}: <b>${srRuleText()}</b></p>
+        <div class="tbl-wrap"><table><thead><tr><th>${t('asset')}</th><th>${L('All','ทั้งหมด')}</th><th>CM</th><th>PM</th><th>${L('Failures r','นับเป็นการเสีย r')}</th></tr></thead><tbody>${per||`<tr><td colspan="5" class="small-muted">—</td></tr>`}</tbody></table></div>
+        ${um.length?`<div class="notebox" style="margin-top:10px;background:var(--amber-bg);">${gicon('help',16)}<div>${L('Not matched to any transformer (skipped)','จับคู่หม้อแปลงไม่ได้ (ข้าม)')}: ${um.map(k=>`${esc(k)} (${r.unmatched[k]})`).join(' · ')}<br>${L('The transformer code must appear in “สถานที่ติดตั้ง”, e.g. คอต่อ (KO-TR.3).','รหัสหม้อแปลงต้องอยู่ในคอลัมน์ “สถานที่ติดตั้ง” เช่น คอต่อ (KO-TR.3)')}</div></div>`:''}
+        ${r.errors.length?`<p class="small-muted" style="color:var(--red);">${r.errors.slice(0,5).map(esc).join('<br>')}${r.errors.length>5?'<br>…':''}</p>`:''}
+        <p class="small-muted" style="font-size:12.5px;">${L('Work orders with the same number replace the old ones. The failure rule can be changed later in Settings → Network.','งานที่เลข Service Request ซ้ำกับของเดิมจะแทนที่ของเดิม · เปลี่ยนเกณฑ์การนับได้ภายหลังที่ ตั้งค่า → เครือข่าย')}</p>`,
+        ()=>{ if(!r.rows.length){ toast(L('Nothing to import','ไม่มีข้อมูลให้นำเข้า')); return; }
+          const ids=new Set(r.rows.map(x=>x.sr)); SR_LOG = SR_LOG.filter(x=>!ids.has(x.sr)).concat(r.rows).sort((p,q)=>p.start<q.start?-1:1);
+          implogAdd(f.name,'sr',{[f.name.replace(/\.[^.]+$/,'')]:table},{sr:r.rows.length, skipped:Object.values(r.unmatched).reduce((x,v)=>x+v,0)+r.errors.length});
+          ASSETS.forEach(a=>{ delete a._risk; }); saveData(); render(); toast(L(`Imported ${r.rows.length} work orders`,`นำเข้า ${r.rows.length} งาน`),'success'); }); }); });
+  inp.click(); }
+document.addEventListener('click', e=>{ const b=e.target.closest('[data-import-sr]'); if(b){ e.preventDefault(); if(!can('network')) return; openSRImport(); return; }
+  const c=e.target.closest('[data-sr-clear]'); if(c){ e.preventDefault(); if(!can('network')) return; if(!confirm(L('Remove all Service Request data? r goes back to the values entered by hand.','ลบข้อมูล Service Request ทั้งหมด? ค่า r จะกลับไปใช้ค่าที่กรอกเอง'))) return; SR_LOG=[]; saveData(); render(); } });
+document.addEventListener('change', e=>{ const cb=e.target.closest('[data-sr-rule]'); if(!cb) return; if(!can('network')) return; const [k,v]=cb.dataset.srRule.split(':'); const key=k==='type'?'types':'pri'; const val=k==='type'?v:Number(v);
+  const set=new Set(SR_RULE[key]); if(cb.checked) set.add(val); else set.delete(val); SR_RULE[key]=[...set].sort(); saveData(); render(); });
 function koutofn(rs, k){ const n=rs.length; let tot=0; for(let m=0;m<(1<<n);m++){ let up=0, pr=1; for(let i=0;i<n;i++){ if((m>>i)&1){ up++; pr*=rs[i]; } else pr*=1-rs[i]; } if(up>=k) tot+=pr; } return tot; }
 function autoK(units, peak){ if(!units.length) return 1; const caps = units.map(u=>+u.a.cap||0).sort((x,y)=>x-y); let sum=0; for(let k=1;k<=caps.length;k++){ sum+=caps[k-1]; if(sum >= (+peak||0)) return k; } return caps.length; }
 function netCalc(){
@@ -2924,25 +2992,23 @@ function sldRealSvg(c, tYr){ tYr = tYr || 1;
 
   /* transformer bays */
   const fr = stFocusRank(c);
-  const bays = c.units.map((u,i)=>{ const x=cx(i), a=u.a, col=stCol(a), yT1=296, yT2=316, no=i+1, rk=fr[a.id];
+  const bays = c.units.map((u,i)=>{ const x=cx(i), a=u.a, col=stCol(a), rC=rBand(u.R), yT1=296, yT2=316, no=i+1, rk=fr[a.id];
     return `
     ${ln(x,yBusHV,x,yT1-20,HV,2.4)}
     ${ds(x,yBusHV+22,HV,`DS-${no}`)}${cb(x,yBusHV+52,HV,`CB-${no}H`)}${ct(x,yBusHV+76,HV)}${la(x,yBusHV+92,HV,-1)}
     <g class="tr" data-view="${esc(a.id)}"><title>${esc(a.id)} — HI ${fmtHi(a.hi)} · ${trStatus(a.status)} · R(${tYr} ${L('yr','ปี')}) ${f4(u.R)} · λ ${f4(u.lam)}/${L('yr','ปี')} · I_C ${pctR(u.IC)}</title>
-      <rect class="trbox" x="${x-34}" y="${yT1-26}" width="${bay-40}" height="${yT2-yT1+78}" rx="10" fill="#f6f8fa" stroke="#c3ccd4" stroke-dasharray="4 3"/>
+      <rect class="trbox" x="${x-34}" y="${yT1-26}" width="${bay-40}" height="${yT2-yT1+78}" rx="10" fill="${rC}" fill-opacity=".07" stroke="${rC}" stroke-opacity=".45" stroke-dasharray="4 3"/>
       <circle cx="${x+bay-86}" cy="${yT1-26}" r="11" fill="${rk===1?'#c62d23':'#2B4C6F'}"/><text x="${x+bay-86}" y="${yT1-22.5}" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">#${rk}</text>
       <circle cx="${x}" cy="${yT1}" r="18" fill="#fff"/><circle cx="${x}" cy="${yT2}" r="18" fill="#fff"/>
-      <circle cx="${x}" cy="${yT1}" r="18" fill="none" stroke="${HV}" stroke-width="2.6"/>
-      <circle cx="${x}" cy="${yT2}" r="18" fill="none" stroke="${LV}" stroke-width="2.6"/>
+      <circle cx="${x}" cy="${yT1}" r="18" fill="none" stroke="${rC}" stroke-width="2.8"/>
+      <circle cx="${x}" cy="${yT2}" r="18" fill="none" stroke="${rC}" stroke-width="2.8"/>
       <path d="M${x} ${yT1-12} L${x} ${yT1-4} M${x} ${yT1-4} L${x-6} ${yT1+1} M${x} ${yT1-4} L${x+6} ${yT1+1}" stroke="${HV}" stroke-width="1.5" fill="none"/>
       <path d="M${x-7} ${yT2+10} L${x} ${yT2-1} L${x+7} ${yT2+10} Z" stroke="${LV}" stroke-width="1.5" fill="none"/>
       <text x="${x+30}" y="${yT1-6}" font-size="13.5" font-weight="800" fill="#1E2A33">${esc(a.id)}</text>
-      <rect x="${x+30}" y="${yT1+2}" width="${Math.max(92, 46+String(fmtHi(a.hi)).length*7+trStatus(a.status).length*6.2)}" height="18" rx="9" fill="${col}"/>
-      <text x="${x+38}" y="${yT1+15}" font-size="11" font-weight="800" fill="#fff">HI ${fmtHi(a.hi)} · ${trStatus(a.status)}</text>
-      <text x="${x+30}" y="${yT2+10}" font-size="11" font-weight="700" fill="#38434d">${kvHV}/${kvLV} kV · ${a.cap||'?'} MVA</text>
-      <text x="${x+30}" y="${yT2+24}" font-size="9.5" fill="${MU}">${esc(a.mfr||'')}${a.year?` · ${a.year}`:''}${a.load!=null?` · ${L('load','โหลด')} ${a.load}%`:''}</text>
-      <rect x="${x+30}" y="${yT2+32}" width="128" height="18" rx="9" fill="#fff" stroke="${rBand(u.R)}" stroke-width="1.8"/>
-      <text x="${x+40}" y="${yT2+45}" font-size="11" font-weight="800" fill="${rBand(u.R)}">R = ${f4(u.R)}<tspan font-size="9" font-weight="700" fill="${rk===1?'#c62d23':MU}"> · I</tspan><tspan font-size="7.5" dy="2" fill="${rk===1?'#c62d23':MU}">C</tspan><tspan dy="-2" font-size="9" font-weight="700" fill="${rk===1?'#c62d23':MU}"> ${pctR(u.IC)}</tspan></text>
+      <text x="${x+30}" y="${yT1+16}" font-size="18" font-weight="800" fill="${rC}">R = ${f4(u.R)}</text>
+      <text x="${x+30}" y="${yT2+12}" font-size="10.5" font-weight="700" fill="#38434d">λ ${f4(u.lam)}/${L('yr','ปี')} · <tspan fill="${rk===1?'#c62d23':'#38434d'}">I</tspan><tspan font-size="8" dy="2" fill="${rk===1?'#c62d23':'#38434d'}">C</tspan><tspan dy="-2" fill="${rk===1?'#c62d23':'#38434d'}"> ${pctR(u.IC)}</tspan></text>
+      <text x="${x+30}" y="${yT2+26}" font-size="9.5" fill="${MU}">${kvHV}/${kvLV} kV · ${a.cap||'?'} MVA · ${esc(a.mfr||'')}${a.year?` · ${a.year}`:''}</text>
+      <circle cx="${x+34}" cy="${yT2+37}" r="3.5" fill="${col}"/><text x="${x+42}" y="${yT2+40.5}" font-size="9.5" fill="${MU}">HI ${fmtHi(a.hi)} · ${trStatus(a.status)}${a.load!=null?` · ${L('load','โหลด')} ${a.load}%`:''}</text>
     </g>
     ${ln(x,yT2+18,x,yBusLV,LV,2.4)}
     ${ln(x+18,yT2+2,x+18,yT2+2,LV,0)}
@@ -2978,8 +3044,8 @@ function sldLegendHtml(){
     ${s(`<rect x="8" y="3" width="8" height="13" fill="#fff" stroke="${G}" stroke-width="1.6"/><path d="M12 5v8M10 11l2 3 2-3" stroke="${G}" fill="none"/><line x1="5" y1="19" x2="19" y2="19" stroke="${G}" stroke-width="2"/><line x1="8" y1="22" x2="16" y2="22" stroke="${G}" stroke-width="2"/>`, L('LA — surge arrester','LA — กับดักเสิร์จ'))}
     ${s(`<rect x="8" y="4" width="8" height="12" fill="#fff" stroke="${G}" stroke-width="1.6"/><line x1="5" y1="19" x2="19" y2="19" stroke="${G}" stroke-width="2"/>`, L('NGR — neutral grounding resistor','NGR — ตัวต้านทานต่อลงดินจุดนิวทรัล'))}
     <span class="sld-lg"><i style="background:#24476b"></i>${L('115 kV side','ด้าน 115 kV')}</span><span class="sld-lg"><i style="background:#0d7a68"></i>${L('24 kV side','ด้าน 24 kV')}</span>
-    <span class="sld-lg">${L('HI label','ป้าย HI')}: <b style="color:#1fa571;">${t('healthy')}</b> · <b style="color:#d99012;">${t('warning')}</b> · <b style="color:#c62d23;">${t('critical')}</b></span>
-    <span class="sld-lg" style="margin-left:6px;">${L('R frame','กรอบ R')}: <b style="color:#1fa571;">≥ 0.95</b> · <b style="color:#d99012;">0.85–0.95</b> · <b style="color:#c62d23;">&lt; 0.85</b></span>
+    <span class="sld-lg">${L('Transformer colour = R','สีหม้อแปลง = ค่า R')}: <b style="color:#1fa571;">≥ 0.95</b> · <b style="color:#d99012;">0.85–0.95</b> · <b style="color:#c62d23;">&lt; 0.85</b></span>
+    <span class="sld-lg" style="margin-left:6px;">${L('small dot = HI status','จุดเล็ก = สถานะ HI')}</span>
     <span class="sld-lg" style="margin-left:6px;">${L('#1 #2 … = focus order in the substation (same as the System reliability tab)','#1 #2 … = ลำดับโฟกัสในสถานี (เหมือนแท็บความเชื่อถือได้ของระบบ)')}</span>
   </div>
   <p class="small-muted" style="font-size:12px;margin:6px 0 0;">${L('Typical arrangement drawn from the network settings (number of transformers, voltage, peak load). Switchgear, feeders and protection are representative, not as-built. Click a transformer to open it.','จัดวางตามรูปแบบทั่วไปจากข้อมูลเครือข่าย (จำนวนหม้อแปลง แรงดัน โหลดสูงสุด) อุปกรณ์ตัดตอน ฟีดเดอร์ และระบบป้องกันเป็นตัวอย่างประกอบ ไม่ใช่แบบติดตั้งจริง · กดที่หม้อแปลงเพื่อเปิดดู')}</p>`;
@@ -3019,7 +3085,7 @@ function netHtml(){
       L(`How likely each unit is to run ${tt} ${yr} without failing.`,`โอกาสที่หม้อแปลงแต่ละตัวจะใช้งานได้ตลอด ${tt} ${yr} โดยไม่เสีย`),
       `<div class="fx">λ = r ÷ T &nbsp;→&nbsp; R(t) = e<sup>−λ·t</sup></div>
       <div class="tbl-wrap"><table><thead><tr><th>${L('Transformer','หม้อแปลง')}</th><th>${L('Substation','สถานี')}</th><th>${L('Failures','ครั้งที่เสีย')} <span style="text-transform:none">r</span></th><th>${L('In service','ใช้งานมา')} <span style="text-transform:none">T</span> (${L('yr','ปี')})</th><th style="text-transform:none">λ = r ÷ T</th><th style="text-transform:none">R(${tt}) = e<sup>−λt</sup></th></tr></thead><tbody>
-      ${units.map(u=>`<tr><td><b>${esc(u.a.id)}</b></td><td><span class="st-code">${esc(u.c.st.id)}</span></td><td>${u.r}${u.zero?'*':''}</td><td>${u.T.toFixed(2)}</td>
+      ${units.map(u=>`<tr><td><b>${esc(u.a.id)}</b></td><td><span class="st-code">${esc(u.c.st.id)}</span></td><td>${u.r}${u.zero?'*':''}${u.src==='sr'?` <span class="small-muted" style="font-size:11px;">SR</span>`:''}</td><td>${u.T.toFixed(2)}</td>
         <td><div class="cv">${f4(u.lam)}</div><div class="cf">${u.zero?'0.693':u.r} ÷ ${u.T.toFixed(2)}</div></td>
         <td><div class="cv" style="color:${rBand(u.R)};">${f4(u.R)}</div><div class="cf">e<sup>−${f4(u.lam)}×${tt}</sup></div></td></tr>`).join('')}
       </tbody></table></div>
@@ -3069,6 +3135,7 @@ function netHtml(){
     <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>#</th><th>${L('Transformer','หม้อแปลง')}</th><th>${L('Substation','สถานี')}</th><th>R(${tt})</th><th style="min-width:200px;">${L('If the system fails: chance this unit failed and caused it','ถ้าระบบล้ม: โอกาสที่ตัวนี้เสียและเป็นต้นเหตุ')} (I<sub>C</sub>)</th><th>HI</th><th>${L('Impact on supply','ผลต่อการจ่ายไฟ')}</th></tr></thead><tbody>${rank||`<tr><td colspan="7" class="small-muted">—</td></tr>`}</tbody></table></div>
     <p class="legend1">${L('Impact on supply from failure history and station connection — not the maintenance order.','ผลต่อการจ่ายไฟจากประวัติการเสียและการต่อของสถานี — ไม่ใช่ลำดับการบำรุงรักษา')} <button class="linklike" data-goto-page="risk" style="font-size:13px;">${L('Maintenance priority →','ลำดับการบำรุงรักษา →')}</button></p>
   </div>
+  ${srYearCard(N)}
   <details class="card calc-fold" style="margin-bottom:16px;"><summary class="card-head"><h3>ⓘ ${L('Model assumptions','สมมติฐานของแบบจำลอง')}</h3><span class="small-muted">${L('Show','แสดง')}</span></summary>
     <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;">
       <li>${L('115 kV lines, breakers and busbars are assumed not to fail (R = 1); only transformers are modelled.','สายส่ง 115 kV เบรกเกอร์ และบัสบาร์ ถือว่าไม่เสีย (R = 1) แบบจำลองคิดเฉพาะหม้อแปลง')}</li>
@@ -3155,11 +3222,14 @@ function netSettingsHtml(){
     <p class="small-muted" style="margin:0;">${L('Substations and their transformers are drawn on the Overview. k = how many transformers must be in service to carry the peak load: Auto picks it from the MVA ratings (k = 1 means the units back each other up).','สถานีและหม้อแปลงจะแสดงเป็นแผนภาพที่หน้าแรก · k = จำนวนหม้อแปลงที่ต้องใช้งานเพื่อรับโหลดสูงสุด · อัตโนมัติจะคำนวณจากพิกัด MVA (k = 1 คือสำรองกันได้)')}</p></div>
     ${stCards}
     <div class="card"><div class="card-head"><h3>${L('Failure history','ประวัติการเสีย')}</h3><span class="small-muted">λ = r ÷ T</span></div>
-      <p class="small-muted" style="font-size:13px;margin:0 0 8px;">${L('Count r by defect code: count T016 (transformer trip) and T015 (failed transformer replaced); do not count oil-leak codes T006–T011 (response code C, no outage).','นับ r ตามรหัสความผิดปกติ: นับ T016 (หม้อแปลง Trip) และ T015 (เปลี่ยนหม้อแปลงชำรุด) ไม่นับรหัสน้ำมันรั่วซึม T006–T011 (ระยะเวลาเข้าแก้ไขระดับ C และไม่ต้องหยุดจ่ายไฟ)')}</p>
+      <div class="notebox" style="margin:0 0 10px;flex-wrap:wrap;">${gicon('help',16)}<div style="flex:1;min-width:240px;"><b>Service Request</b> — ${SR_LOG.length?L(`${SR_LOG.length} work orders loaded · r is counted from the file for the units in it; T = record period (${srWindow().T.toFixed(2)} yr)`,`มี ${SR_LOG.length} งาน · หม้อแปลงที่อยู่ในไฟล์นับ r จากไฟล์เอง และ T = ช่วงที่มีบันทึก (${srWindow().T.toFixed(2)} ปี)`):L('not imported — r is entered by hand below','ยังไม่ได้นำเข้า — r มาจากที่กรอกในตารางด้านล่าง')}
+        <div style="margin-top:6px;font-size:13px;">${L('Count as failure','นับเป็นการเสีย')}: ${['CM','PM'].map(v=>`<label style="margin-right:10px;white-space:nowrap;"><input type="checkbox" data-sr-rule="type:${v}" ${SR_RULE.types.includes(v)?'checked':''}> ${v}</label>`).join('')} · Priority ${[1,2,3,4].map(v=>`<label style="margin-right:8px;white-space:nowrap;"><input type="checkbox" data-sr-rule="pri:${v}" ${SR_RULE.pri.includes(v)?'checked':''}> ${v}</label>`).join('')}</div></div>
+        <div class="filter-row"><button class="btn btn-outline" data-import-sr="1" style="padding:6px 12px;font-size:13px;">${L('Import Service Request','นำเข้า Service Request')}</button>${SR_LOG.length?`<button class="btn btn-ghost" data-sr-clear="1" style="padding:6px 12px;font-size:13px;color:var(--red);">${L('Remove','ลบข้อมูล')}</button>`:''}</div></div>
+      ${SR_LOG.length?'':`<p class="small-muted" style="font-size:13px;margin:0 0 8px;">${L('Count r by defect code: count T016 (transformer trip) and T015 (failed transformer replaced); do not count oil-leak codes T006–T011 (response code C, no outage).','นับ r ตามรหัสความผิดปกติ: นับ T016 (หม้อแปลง Trip) และ T015 (เปลี่ยนหม้อแปลงชำรุด) ไม่นับรหัสน้ำมันรั่วซึม T006–T011 (ระยะเวลาเข้าแก้ไขระดับ C และไม่ต้องหยุดจ่ายไฟ)')}</p>`}
       <div class="tbl-wrap"><table><thead><tr><th>${t('asset')}</th><th>${L('Installation date','วันที่ติดตั้ง')}</th><th>${L('Outage failures','ครั้งที่ขัดข้องจนหลุดจากระบบ')} <span style="text-transform:none;">r</span></th><th>T (${L('yr','ปี')})</th><th style="text-transform:none;">λ (/${L('yr','ปี')})</th></tr></thead><tbody>
-      ${units.map(u=>`<tr><td><b>${u.a.id}</b></td><td><input type="date" style="width:140px;" data-net-a="installed" data-id="${u.a.id}" value="${esc(u.a.installed||'')}"></td><td><input type="number" min="0" step="1" style="width:80px;" data-net-a="fails" data-id="${u.a.id}" value="${+u.a.fails||0}"></td><td>${u.T.toFixed(1)}</td><td>${f4(u.lam)}${u.zero?'*':''}</td></tr>`).join('') || `<tr><td colspan="5" class="small-muted">—</td></tr>`}
+      ${units.map(u=>`<tr><td><b>${u.a.id}</b></td><td><input type="date" style="width:140px;" data-net-a="installed" data-id="${u.a.id}" value="${esc(u.a.installed||'')}"></td><td>${u.src==='sr'?`<b>${u.r}</b> <span class="small-muted" style="font-size:11.5px;">${L('from Service Request','จาก Service Request')}</span>`:`<input type="number" min="0" step="1" style="width:80px;" data-net-a="fails" data-id="${u.a.id}" value="${+u.a.fails||0}">`}</td><td>${u.T.toFixed(1)}</td><td>${f4(u.lam)}${u.zero?'*':''}</td></tr>`).join('') || `<tr><td colspan="5" class="small-muted">—</td></tr>`}
       </tbody></table></div>
-      <p class="small-muted" style="font-size:12px;margin:8px 0 0;">${L('Count only failures that took the transformer out of service. * zero failures → λ ≈ 0.693 ÷ T.','นับเฉพาะความล้มเหลวที่ทำให้หม้อแปลงหยุดจ่ายไฟ · * ไม่เคยเสีย → λ ≈ 0.693 ÷ T')}</p></div>`;
+      <p class="small-muted" style="font-size:12px;margin:8px 0 0;">${SR_LOG.length?L('Units in the Service Request file: r = work orders that match the rule above, T = record period. Others: r entered here, T = years in service. * zero failures → λ ≈ 0.693 ÷ T.','หม้อแปลงที่อยู่ในไฟล์ Service Request: r = จำนวนงานที่ตรงเกณฑ์ด้านบน, T = ช่วงที่มีบันทึก · ลูกอื่น: r ที่กรอกเอง, T = ปีที่ใช้งาน · * ไม่เคยเสีย → λ ≈ 0.693 ÷ T'):L('Count only failures that took the transformer out of service. * zero failures → λ ≈ 0.693 ÷ T.','นับเฉพาะความล้มเหลวที่ทำให้หม้อแปลงหยุดจ่ายไฟ · * ไม่เคยเสีย → λ ≈ 0.693 ÷ T')}</p></div>`;
 }
 function attachNetEvents(){
   const ar=document.getElementById('netArea'); if(ar) ar.addEventListener('change',()=>{ NET.area = ar.value.trim(); render(); toast(t('toast_saved'),'success'); });
@@ -3273,8 +3343,11 @@ function assetSortFn(){ const s=state.assetSort; if(!s) return (x,y)=>(RISK_ORDE
   const val = {id:a=>String(a.id), mfr:a=>String(a.mfr||'').toLowerCase(), cap:a=>+a.cap||0, age:a=>{ const g=ageingOf(a); return g?g.age:-1; }, hi:a=>a.hi, risk:a=>-RISK_ORDER[riskOf(a).level], last:a=>+(parseD(a.last)||0), next:a=>+(parseD(a.next)||0)}[s.k];
   return (x,y)=>{ const p=val(x), q=val(y); return (p<q?-1:p>q?1:0)*s.d; }; }
 /* ---------- per-transformer oil-test history, in the utility workbook's own columns ---------- */
-const HIST_SHEETS = ['bdv','dga'];
+const HIST_SHEETS = ['bdv','dga','sr'];
+const histHead = k=> k==='sr' ? SR_HEAD : UTIL_HEAD[k];
+const histName = k=> k==='sr' ? 'Service Request' : UTIL_SHEETS[k];
 function histRowsOf(a, k){
+  if(k==='sr') return SR_LOG.filter(r=>r.unit===a.id).map(r=>({cells:r.cells, src:'file', fail:srCounts(r), t:+new Date(r.start)})).sort((p,q)=>q.t-p.t);
   const head=UTIL_HEAD[k], idx=h=>head.indexOf(h), out=[], seen=new Set();
   const push=(cells, src)=>{ const sig=JSON.stringify(cells); if(seen.has(sig)) return; seen.add(sig);
     const d=parseImportDate(cells[idx('Sampling Date')])||parseImportDate(cells[idx('Test Date')]); out.push({cells, src, t:d?+d:0}); };
@@ -3294,20 +3367,20 @@ function histRowsOf(a, k){
   return out.sort((p,q)=>q.t-p.t); }
 function openAssetHist(id, k){
   const a=ASSETS.find(x=>x.id===id); if(!a) return; if(!HIST_SHEETS.includes(k)) k=HIST_SHEETS[0];
-  const rows=histRowsOf(a,k), head=UTIL_HEAD[k], nApp=rows.filter(r=>r.src==='app').length;
+  const rows=histRowsOf(a,k), head=histHead(k), nApp=rows.filter(r=>r.src==='app').length, nFail=rows.filter(r=>r.fail).length;
   const root=document.getElementById('modalRoot');
-  root.innerHTML=`<div class="modal-overlay" id="modalOverlay"><div class="modal" style="max-width:1100px;width:96vw;"><div class="card-head" style="margin-bottom:6px;"><h3 style="margin:0;">${L('Oil-test history','ประวัติผลตรวจน้ำมัน')} — ${esc(a.id)}</h3><div class="filter-row"><button class="btn btn-ghost" data-hist-dl="${esc(a.id)}">${L('Download','ดาวน์โหลด')}</button><button class="btn btn-outline" id="histClose">${L('Close','ปิด')}</button></div></div>
-    <p class="card-sub">${esc(a.loc||'')}${a.loc?' · ':''}${rows.length} ${L('rows','แถว')} · ${L('newest first','เรียงล่าสุดก่อน')}${nApp?` · <i>${L('grey italic rows were entered in the app','แถวตัวเอียงสีเทา = กรอกในระบบ ไม่ได้มาจากไฟล์')}</i>`:''}</p>
-    <div class="tabs raw-data" style="margin-bottom:8px;">${HIST_SHEETS.map(x=>`<button class="tab ${x===k?'active':''}" data-hist-sheet="${x}" data-hist-id="${esc(a.id)}">${esc(UTIL_SHEETS[x])} <span class="small-muted">(${histRowsOf(a,x).length})</span></button>`).join('')}</div>
+  root.innerHTML=`<div class="modal-overlay" id="modalOverlay"><div class="modal" style="max-width:1100px;width:96vw;"><div class="card-head" style="margin-bottom:6px;"><h3 style="margin:0;">${L('Test & work-order history','ประวัติผลตรวจน้ำมันและงานซ่อม')} — ${esc(a.id)}</h3><div class="filter-row"><button class="btn btn-ghost" data-hist-dl="${esc(a.id)}">${L('Download','ดาวน์โหลด')}</button><button class="btn btn-outline" id="histClose">${L('Close','ปิด')}</button></div></div>
+    <p class="card-sub">${esc(a.loc||'')}${a.loc?' · ':''}${rows.length} ${L('rows','แถว')} · ${L('newest first','เรียงล่าสุดก่อน')}${nApp?` · <i>${L('grey italic rows were entered in the app','แถวตัวเอียงสีเทา = กรอกในระบบ ไม่ได้มาจากไฟล์')}</i>`:''}${k==='sr'?` · <span style="background:#fdeceb;padding:1px 6px;border-radius:4px;">${L(`shaded = counted as failure (${srRuleText()}): ${nFail}`,`แถวสีแดงอ่อน = นับเป็นการเสีย (${srRuleText()}) ${nFail} งาน`)}</span>`:''}</p>
+    <div class="tabs raw-data" style="margin-bottom:8px;">${HIST_SHEETS.map(x=>`<button class="tab ${x===k?'active':''}" data-hist-sheet="${x}" data-hist-id="${esc(a.id)}">${esc(histName(x))} <span class="small-muted">(${histRowsOf(a,x).length})</span></button>`).join('')}</div>
     ${rows.length?`<div class="tbl-wrap raw-data hist-tbl" style="max-height:60vh;overflow:auto;"><table style="font-size:12px;white-space:nowrap;"><thead><tr><th>#</th>${head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
-      <tbody>${rows.map((r,i)=>`<tr${r.src==='app'?` class="hist-app" title="${esc(L('Entered in the app — not from an imported file','กรอกในระบบ — ไม่ได้มาจากไฟล์ที่นำเข้า'))}"`:''}><td class="small-muted">${i+1}</td>${r.cells.map(c=>`<td>${esc(String(c))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
+      <tbody>${rows.map((r,i)=>`<tr${r.fail?' class="hist-fail"':''}${r.src==='app'?` class="hist-app" title="${esc(L('Entered in the app — not from an imported file','กรอกในระบบ — ไม่ได้มาจากไฟล์ที่นำเข้า'))}"`:''}><td class="small-muted">${i+1}</td>${r.cells.map(c=>`<td>${esc(String(c))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
       :`<p class="small-muted">${L('No records for this transformer','ยังไม่มีข้อมูลของหม้อแปลงนี้')}</p>`}</div></div>`;
   document.getElementById('histClose').addEventListener('click', closeModal);
   document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); }); }
 function downloadAssetHist(id){
   const a=ASSETS.find(x=>x.id===id); if(!a) return; const name='oil_history_'+a.id.replace(/[^\w\-.]+/g,'_');
-  const aoa=k=>[UTIL_HEAD[k], ...histRowsOf(a,k).map(r=>r.cells)];
-  if(typeof XLSX!=='undefined' && XLSX.utils){ const wb=XLSX.utils.book_new(); HIST_SHEETS.forEach(k=>XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa(k)), UTIL_SHEETS[k].slice(0,31))); XLSX.writeFile(wb, name+'.xlsx'); return; }
+  const aoa=k=>[histHead(k), ...histRowsOf(a,k).map(r=>r.cells)];
+  if(typeof XLSX!=='undefined' && XLSX.utils){ const wb=XLSX.utils.book_new(); HIST_SHEETS.forEach(k=>XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa(k)), histName(k).slice(0,31))); XLSX.writeFile(wb, name+'.xlsx'); return; }
   HIST_SHEETS.forEach(k=>downloadFile(name+'_'+k+'.csv', '\ufeff'+toCSV(aoa(k)), 'text/csv')); }
 document.addEventListener('click', e=>{
   const sh=e.target.closest('[data-hist-sheet]'); if(sh){ e.preventDefault(); openAssetHist(sh.dataset.histId, sh.dataset.histSheet); return; }
@@ -3371,6 +3444,7 @@ function renameAsset(a, newId){
   labFor(a); getFmeaFor(a); getMaintFor(a);                       /* materialise generated sample data under the old code first */
   [LAB, FMEA_STORE, MAINT_STORE, RCM_STORE, UTIL_RAW].forEach(st=>{ if(st[old]!==undefined){ st[newId]=st[old]; delete st[old]; } });
   ensureNet(); NET.stations.forEach(st=>{ st.trs = st.trs.map(x=>x===old?newId:x); });
+  SR_LOG.forEach(r=>{ if(r.unit===old) r.unit=newId; });
   a.id = newId; if(state.assetId===old) state.assetId = newId;
 }
 function stationSelect(cur){ ensureNet(); return `<select name="station"><option value="">${L('— not in a substation —','— ไม่อยู่ในสถานี —')}</option>${NET.stations.map(st=>`<option value="${st.id}" ${cur===st.id?'selected':''}>${esc(st.name)}</option>`).join('')}</select>`; }
@@ -5871,10 +5945,10 @@ const ROLE_GATES = {
   woClose:['[data-wo-close]'],
   criteria:['#btnCritEdit','#btnCritReset'],
   sampling:['#btnSampSave','#btnSampReset'],
-  network:['[data-net-addst]','#btnNetAdd','[data-net-edit]','[data-net-del]'],
+  network:['[data-net-addst]','#btnNetAdd','[data-net-edit]','[data-net-del]','[data-import-sr]','[data-sr-clear]'],
   data:['[data-mode-switch]','[data-del-demo]','.sys-btn[data-sys="backup"]','.sys-btn[data-sys="restore"]','.sys-btn[data-sys="reset"]'],
 };
-const ROLE_LOCKS = { sampling:['[data-samp]'], plan:['[data-mstart]'], rcm:['[data-rcm-k]','[data-rcm-set]'], network:['[data-net-f]','[data-net-tr]','[data-net-a]','[data-net-code]','#netArea'] };   /* shown but not usable */
+const ROLE_LOCKS = { sampling:['[data-samp]'], plan:['[data-mstart]'], rcm:['[data-rcm-k]','[data-rcm-set]'], network:['[data-net-f]','[data-net-tr]','[data-net-a]','[data-net-code]','#netArea','[data-sr-rule]'] };   /* shown but not usable */
 function applyRole(){
   Object.keys(ROLE_GATES).forEach(p=>{ if(can(p)) return; ROLE_GATES[p].forEach(sel=> document.querySelectorAll(sel).forEach(el=>{ el.style.display='none'; })); });
   Object.keys(ROLE_LOCKS).forEach(p=>{ if(can(p)) return; ROLE_LOCKS[p].forEach(sel=> document.querySelectorAll(sel).forEach(el=>{ el.disabled=true; el.style.opacity='.5'; el.style.pointerEvents='none'; el.title=L('Not available in this role','บทบาทนี้ทำไม่ได้'); })); });
@@ -5953,7 +6027,9 @@ function render(){ if(!BLANK_START && !RCM_CONF_SEEDED && ASSETS.length) seedRcm
   else if(state.page==='detail'){ syncAssetData(); content.innerHTML = renderDetail(); attachDetailEvents(); initDetailCharts(currentAsset()); if(state.detailTab==='model3d') attach3dEvents(); }
   else if(state.page==='risk'){ content.innerHTML = renderRiskPage(); attachGlobalViewLinks(); initRiskCharts(); }
   else if(state.page==='reliability'){ const dg = state.relTab==='diagram';
-    content.innerHTML = `<div class="tabs">${[['system',L('System reliability','ความเชื่อถือได้ของระบบ')],['diagram',L('Single-line diagram','แผนภาพวงจร')]].map(([k,n])=>`<button class="tab ${(dg?'diagram':'system')===k?'active':''}" data-reltab="${k}">${n}</button>`).join('')}</div>` + (dg ? schematicHtml() : netHtml());
+    content.innerHTML = `<div class="tabs">${[['system',L('System reliability','ความเชื่อถือได้ของระบบ')],['diagram',L('Single-line diagram','แผนภาพวงจร')]].map(([k,n])=>`<button class="tab ${(dg?'diagram':'system')===k?'active':''}" data-reltab="${k}">${n}</button>`).join('')}</div>`
+      + `<div class="notebox" style="margin-bottom:14px;">${gicon('help',16)}<div><b>${L('R and HI measure different things','R กับ HI วัดคนละเรื่อง')}:</b> ${L('R comes from the failure history (number of failures ÷ years in service), while HI comes from the present condition (latest oil tests). The two do not have to agree — a unit can have a good HI but a lower R, or the other way round. Both are combined in Risk & priority.','R มาจากประวัติการเสีย (จำนวนครั้งที่เสีย ÷ ปีที่ใช้งาน) ส่วน HI มาจากสภาพปัจจุบัน (ผลตรวจน้ำมันล่าสุด) สองค่าจึงไม่จำเป็นต้องไปทางเดียวกัน หม้อแปลงอาจมี HI ดีแต่ R ต่ำ หรือกลับกันก็ได้ ทั้งสองค่าถูกนำมารวมกันในหน้าความเสี่ยงและลำดับ')}</div></div>`
+      + (dg ? schematicHtml() : netHtml());
     document.querySelectorAll('[data-reltab]').forEach(b=> b.addEventListener('click',()=>{ state.relTab=b.dataset.reltab; render(); }));
     attachGlobalViewLinks(); const fold=document.getElementById('relCalcFold'); if(fold) fold.addEventListener('toggle',()=>{ state.relCalcOpen=fold.open; const h=fold.querySelector('.calc-fold-hint'); if(h) h.textContent = fold.open?L('Hide','ซ่อน'):L('Show','แสดง'); });  }
   else if(state.page==='reports'){ content.innerHTML = renderReports(); initReportsCharts(); attachReportsEvents(); }
