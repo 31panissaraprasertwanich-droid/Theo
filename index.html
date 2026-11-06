@@ -1906,7 +1906,7 @@ function ovTrendHead(){ const s=ovTrendStats(); if(!s) return '';
   const chip=(lab,val,c)=>`<div class="ovtr-chip"><span>${lab}</span><b style="color:${c||'var(--text)'};">${val}</b></div>`;
   return `<div class="ovtr-chips">${chip(L('Latest average','ค่าเฉลี่ยล่าสุด'), `${fmtHi(s.last.v)} <small>(${hiCat(s.last.v).code})</small>`)}${chip(L(`Change since ${state.lang==='th'?s.first.x+543:s.first.x}`,`เปลี่ยนแปลงตั้งแต่ ${state.lang==='th'?'พ.ศ. '+(s.first.x+543):s.first.x}`), `${d<0?'▼':'▲'} ${Math.abs(d).toFixed(1)}`, d<0?'var(--red)':'var(--green)')}${chip(L('Decline rate (slope)','อัตราการเปลี่ยน (ความชัน)'), `${s.slope>=0?'+':''}${s.slope.toFixed(2)} <small>${L('pts/yr','คะแนน/ปี')}</small>`, col)}</div>`; }
 
-function snapshotData(){ return {baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, imp:IMPORT_LOG, impSeed:IMPLOG_SEEDED, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
+function snapshotData(){ return {rcmConfSeed:RCM_CONF_SEEDED, baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, imp:IMPORT_LOG, impSeed:IMPLOG_SEEDED, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
 function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
 function applyData(d){
   if(!d || d.v!==3 || !Array.isArray(d.assets)) return false;
@@ -1917,7 +1917,7 @@ function applyData(d){
   OLD_PM = d.oldPm ? JSON.parse(JSON.stringify(d.oldPm)) : JSON.parse(JSON.stringify(OLD_PM_DEFAULT)); PLAN_START_M = d.planStart ? JSON.parse(JSON.stringify(d.planStart)) : {};
   Object.assign(SAMPLING_DAYS, SAMPLING_DEFAULT); if(d.samp) Object.keys(SAMPLING_DEFAULT).forEach(k=>{ const v=+d.samp[k]; if(v>=1&&v<=730) SAMPLING_DAYS[k]=Math.round(v); });
   if(d.planV!==2) Object.values(MAINT_STORE).forEach(markPastDone);
-  NET = d.net || null; BA_SEEDED = !!d.baSeed;
+  NET = d.net || null; BA_SEEDED = !!d.baSeed; RCM_CONF_SEEDED = !!d.rcmConfSeed;
   if(d.fmeaV!==3){ FMEA_STORE = {}; RCM_STORE = {}; }   /* failure-mode list changed to the 10 modes of the report */
   if(d.focusV!==2){ /* focus on 2 substations: keep only their 4 transformers */
     const keep = ['LKB-TR1','LKB-TR2','LKB-TR3','CLK-TR1','CLK-TR2','CLK-TR3'];
@@ -1928,6 +1928,7 @@ function applyData(d){
   }
   return true;
 }
+var RCM_CONF_SEEDED = false;
 function loadData(){ try{ const raw=localStorage.getItem(STORE_KEY); return raw ? applyData(JSON.parse(raw)) : false; }catch(e){ return false; } }
 
 /* ---------- Lab-result form ---------- */
@@ -2042,15 +2043,17 @@ const RCM_AUTO_TABLE = ()=> `<table style="font-size:12.5px;margin-top:6px;"><th
 function rcmAutoBox(a, f, ev, ans){
   const opts = ['CBM','COMB','PM','PMD','FFT','BM','RD'];
   const decName = (k)=> L(RCM_DEC[k].name[0], RCM_DEC[k].name[1]);
+  const isCond = ev.decision==='CBM'||ev.decision==='COMB', pdmUp = isCond && ['Winding','Oil'].includes(f.comp) && hiRateOf(a).enough;
+  const shortLbl = (k)=> ({COMB:pdmUp?'PdM + PM':'CBM + PM',CBM:pdmUp?'PdM':'CBM',FFT:'PM + FFT',PMD:'PM',RD:L('Redesign','ออกแบบใหม่')})[k]||k;
   return `<div class="rcm-out" style="margin-bottom:10px;">
     <div class="ro-h"><span class="rs-n" style="background:var(--navy,#2B4C6F);color:#fff;">R</span><div><div class="small-muted" style="font-weight:700;">${ev.override?L('Chosen by the engineer','วิศวกรเลือกเอง'):L('Selected from the RPN criteria','ระบบเลือกจากเกณฑ์ RPN')}</div>
       <div style="margin-top:3px;font-size:14px;">S${f.s} × O${f.o} × D${f.d} = RPN <b>${f.rpn}</b> ${riskPill(f.risk||rpnLevel(f.rpn))}</div></div></div>
-    <p style="margin:8px 0 4px;font-size:14px;">→ ${ev.rule}${ev.sev?`<br>→ <b>${ev.sev}</b>`:''}</p>
+    <p style="margin:8px 0 4px;font-size:14px;">→ ${ev.rule}${ev.sev?`<br>→ <b>${ev.sev}</b>`:''}${pdmUp?`<br>→ ${L('This part is followed by oil tests / HI and has ≥ 3 years of HI history, so the on-condition task is done as PdM','ชิ้นส่วนนี้ติดตามได้ด้วยผลน้ำมัน/HI และมีประวัติ HI ≥ 3 ปี งานตามสภาพจึงทำแบบคาดการณ์')} → <b>${shortLbl(ev.decision)}</b>`:''}</p>
     ${ev.override?`<p style="margin:4px 0;font-size:13.5px;color:var(--amber);"><b>${L('Changed from','เปลี่ยนจาก')} ${decName(ev.autoDec)}</b>${ev.why?` — ${esc(ev.why)}`:''}</p>`:''}
     ${ev.redesign?`<div class="notebox" style="margin:6px 0;background:var(--red-bg);font-size:13px;"><b>${L('S = 5 and O ≥ 4','S = 5 และ O ≥ 4')}</b> — ${L('maintenance alone may not be enough: also review the design or plan a replacement.','การบำรุงรักษาอย่างเดียวอาจไม่พอ ควรทบทวนการออกแบบหรือวางแผนเปลี่ยนด้วย')}</div>`:''}
     <div class="filter-row" style="flex-wrap:wrap;gap:8px;margin-top:8px;">
       <label class="small-muted" for="rcmOvSel" style="font-size:13px;">${L('Change the task type','เปลี่ยนประเภทงาน')}</label>
-      <select id="rcmOvSel" data-rcm-ov="1"><option value="">${L('Use the RPN result','ใช้ผลจาก RPN')} (${({COMB:'CBM + PM',FFT:'PM + FFT',PMD:'PM',RD:L('Redesign','ออกแบบใหม่')})[ev.autoDec||ev.decision]||(ev.autoDec||ev.decision)})</option>${opts.map(k=>`<option value="${k}" ${ans._ov===k?'selected':''}>${decName(k)}</option>`).join('')}</select>
+      <select id="rcmOvSel" data-rcm-ov="1"><option value="">${L('Use the RPN result','ใช้ผลจาก RPN')} (${shortLbl(ev.autoDec||ev.decision)})</option>${opts.map(k=>`<option value="${k}" ${ans._ov===k?'selected':''}>${decName(k)}</option>`).join('')}</select>
       ${ev.override?`<input id="rcmOvWhy" data-rcm-ovwhy="1" placeholder="${esc(L('Reason (e.g. found in the field)','เหตุผล (เช่น จากการตรวจหน้างาน)'))}" value="${esc(ans._ovWhy||'')}" style="flex:1;min-width:180px;">`:''}
 </div>
     <details class="tip-more" style="margin-top:8px;"><summary>${L('Selection criteria','เกณฑ์การเลือกงานจาก RPN')}</summary>${RCM_AUTO_TABLE()}</details></div>`;
@@ -2157,6 +2160,7 @@ function rcmUnconfirm(ans){ ['_by','_at','_g','_risk'].forEach(k=>delete ans[k])
 function rcmState(a, f, e){
   const ans=rcmAnsFor(a,f); if(!rcmNeedsDecision(f)) return {k:'monitor'}; if(!e || !e.decision) return {k:'pending'}; if(!ans._by) return {k:'default'};
   const now=rcmSnapshot(a,f), why=[];
+  if(ans._seed){ ans._g=now.g; ans._risk=now.risk; delete ans._seed; }   /* sample confirmation: take the evidence as it is when first checked */
   if((ans._g||'')!==now.g) why.push(L(`lab-result grade changed ${ans._g||'—'} → ${now.g||'—'}`,`เกรดจากผลแล็บเปลี่ยน ${ans._g||'—'} → ${now.g||'—'}`));
   if(ans._risk && ans._risk!==now.risk) why.push(L(`RPN level changed ${ans._risk} → ${now.risk}`,`ระดับ RPN เปลี่ยน ${trRisk(ans._risk)} → ${trRisk(now.risk)}`));
   return why.length ? {k:'review', why} : {k:'confirmed'};
@@ -4322,6 +4326,7 @@ function newPlanOf(a, f){
   const old = oldPmOf(f);
   if(!rcmNeedsDecision(f)) return {k:'keep', type:old.type, task:L(old.task[0],old.task[1]), m:old.m, note:L(`RPN ${f.rpn} < ${RPN_MED}`,`RPN ${f.rpn} < ${RPN_MED}`)};
   const ev = rcmEvaluate(rcmAnsFor(a,f)); if(!ev.decision) return {k:'pending'};
+  if(rcmState(a,f,ev).k==='default') return {k:'pending'};   /* proposed by the RPN criteria only: not in the new plan until an engineer confirms */
   const st = rcmStrategy(a,f,ev);
   if(st.redesign) return {k:'rd', type:'RD', task:L('Redesign / modification','ออกแบบใหม่/ปรับปรุง'), m:null};
   const tk = rcmTaskFor(f, ev.decision) || ['—','—'];
@@ -4329,7 +4334,7 @@ function newPlanOf(a, f){
   return {k: st.types[0]==='BM' ? 'bm' : 'new', type: st.types.join('+') + (st.fft?' (FFT)':''), task: tk[0], m: ms.length?Math.min(...ms):null, mTxt: tk[1]};
 }
 function planCmp(old, nw){
-  if(nw.k==='pending') return {c:'pend', t:L('Task not selected yet','ยังไม่ได้เลือกงาน')};
+  if(nw.k==='pending') return {c:'pend', t:L('Not in the new plan until an engineer confirms the task','ยังไม่เข้าแผนใหม่จนกว่าวิศวกรจะยืนยันงาน')};
   if(nw.k==='keep') return {c:'same', t:L('Keep the current plan','คงแผนเดิม')};
   if(nw.k==='rd') return {c:'rd', t:L('Redesign — outside the maintenance plan','ออกแบบใหม่ — อยู่นอกแผนบำรุงรักษา')};
   if(nw.k==='bm') return {c:'stop', t:L('Stop the scheduled task — run to failure','ยกเลิกงานตามรอบ — ใช้งานจนเสียแล้วซ่อม')};
@@ -4341,7 +4346,7 @@ function planCmp(old, nw){
   return {c, t: parts.length? parts.join(' · ') : L('Same as the current plan','เหมือนแผนเดิม')};
 }
 const CMP_STYLE = {same:['#eef0f3','#5b6573'], type:['#efe8fa','#6f3fc0'], more:['#fbe8e6','#c62d23'], less:['#e5f5ee','#178a5e'], stop:['#fcf1dc','#a86a00'], rd:['#fbe8e6','#c62d23'], pend:['#F1F4F7','#2B4C6F']};
-const CMP_NAME = ()=>({same:L('Keep','คงเดิม'), type:L('Change type','เปลี่ยนประเภท'), more:L('More often','ถี่ขึ้น'), less:L('Less often','ห่างขึ้น'), stop:L('Stop scheduled task','ยกเลิกงานตามรอบ'), rd:L('Redesign','ออกแบบใหม่'), pend:L('Pending','รอตัดสินใจ')});
+const CMP_NAME = ()=>({same:L('Keep','คงเดิม'), type:L('Change type','เปลี่ยนประเภท'), more:L('More often','ถี่ขึ้น'), less:L('Less often','ห่างขึ้น'), stop:L('Stop scheduled task','ยกเลิกงานตามรอบ'), rd:L('Redesign','ออกแบบใหม่'), pend:L('Waiting for confirmation','รอยืนยัน')});
 /* expected effect of the new plan = FMEA "action results": S stays, O / D are re-scored by simple rules (an estimate to confirm with the engineer and later lab results) */
 function planEffect(f, old, nw){
   let o=f.o, d=f.d; const why=[]; const cap=(v)=>Math.max(1,Math.min(5,v));
@@ -4385,7 +4390,7 @@ function planRevSummaryHtml(rows){
       <div style="font-size:13.5px;line-height:1.9;">${L('Current plan','แผนเดิม')}: ${Object.keys(oldType).map(k=>`${typePill(k)} ${oldType[k]} ${L('tasks','งาน')}`).join(' ')}<br>${L('New plan','แผนใหม่')}: ${Object.keys(byType).length?Object.keys(byType).map(k=>`${typePill(k)} ${byType[k]} ${L('tasks','งาน')}`).join(' '):'<span class="small-muted">—</span>'}</div></div></div>`;
 }
 const EFF_STYLE = {better:['#e5f5ee','#178a5e'], leaner:['#e8eef4','#2B4C6F'], same:['#eef0f3','#5b6573'], worse:['#fbe8e6','#c62d23'], pend:['#F1F4F7','#2B4C6F']};
-const EFF_NAME = ()=>({better:L('Better','ดีขึ้น'), leaner:L('Same risk, less work','ความเสี่ยงเท่าเดิม งานลดลง'), same:L('No change','เท่าเดิม'), worse:L('Worse','แย่ลง'), pend:L('Pending','รอตัดสินใจ')});
+const EFF_NAME = ()=>({better:L('Better','ดีขึ้น'), leaner:L('Same risk, less work','ความเสี่ยงเท่าเดิม งานลดลง'), same:L('No change','เท่าเดิม'), worse:L('Worse','แย่ลง'), pend:L('Waiting for confirmation','รอยืนยัน')});
 function effCell(r){ const e=r.eff, f=r.f;
   if(e.v==='pend') return `<span class="pill" style="background:${EFF_STYLE.pend[0]};color:${EFF_STYLE.pend[1]};">${EFF_NAME().pend}</span>`;
   const fmtW=(w)=> w===null?'—':(Math.round(w*10)/10);
@@ -4400,7 +4405,7 @@ function planRevTableHtml(rows, showAsset){
   ${rows.map(r=>`<tr>${showAsset?`<td><button class="linklike" data-goto-detail="${esc(r.a.id)}|plan" style="font-weight:800;">${esc(r.a.id)}</button></td>`:''}
     <td><b>${r.f.code}</b> · ${esc(r.f.comp)}<div class="small-muted" style="white-space:normal;">${esc(r.f.mode)} · RPN ${r.f.rpn}</div></td>
     <td style="white-space:normal;">${typePill(r.old.type)} ${esc(L(r.old.task[0],r.old.task[1]))}<div class="small-muted">${fmtM(r.old.m)}</div></td>
-    <td style="white-space:normal;">${r.nw.k==='pending'?`<button class="linklike" data-goto-detail="${esc(r.a.id)}|rcm">${L('Open the RCM decision →','ไปที่การตัดสินใจ RCM →')}</button>`:`${typePill(r.nw.type)} ${esc(r.nw.task)}<div class="small-muted">${r.nw.k==='bm'?L('no scheduled task','ไม่มีงานตามรอบ'):r.nw.m!==null?fmtM(r.nw.m):esc(r.nw.mTxt||'—')}${r.nw.note?' · '+r.nw.note:''}</div>`}</td>
+    <td style="white-space:normal;">${r.nw.k==='pending'?`<span class="pill" style="background:#eef0f3;color:#5b6573;">${L('Waiting for engineer confirmation','รอวิศวกรยืนยัน')}</span><div><button class="linklike" data-goto-detail="${esc(r.a.id)}|rcm">${L('Check and confirm →','ไปตรวจและยืนยัน →')}</button></div>`:`${typePill(r.nw.type)} ${esc(r.nw.task)}<div class="small-muted">${r.nw.k==='bm'?L('no scheduled task','ไม่มีงานตามรอบ'):r.nw.m!==null?fmtM(r.nw.m):esc(r.nw.mTxt||'—')}${r.nw.note?' · '+r.nw.note:''}</div>`}</td>
     <td style="white-space:normal;"><span class="pill" style="background:${CMP_STYLE[r.cmp.c][0]};color:${CMP_STYLE[r.cmp.c][1]};">${CMP_NAME()[r.cmp.c]}</span><div style="font-size:12.5px;margin-top:3px;">${r.cmp.t}</div></td><td style="white-space:normal;">${editStart?startInput(r):''}${actCell(r, ctxOf(r.a, r.f.code))}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
@@ -5281,7 +5286,7 @@ function taskSummaryHtml(r){
     <div class="tbl-wrap"><table><thead><tr><th>${L('Type','ประเภทงาน')}</th><th style="min-width:180px;">${L('Current plan (tasks)','แผนเดิม (งาน)')}</th><th style="min-width:180px;">${L('New plan (tasks)','แผนใหม่ (งาน)')}</th></tr></thead><tbody>
     ${types.map(k=>`<tr><td><span class="pill" style="background:${TYPE_COLOR[k]}22;color:${TYPE_COLOR[k]};">${k}</span> <span class="small-muted">${names[k]}</span></td><td>${bar(oldC[k],'#9aa6b2')}</td><td>${bar(newC[k],TYPE_COLOR[k])}</td></tr>`).join('')}
     </tbody></table></div>
-    <p class="small-muted" style="font-size:12.5px;margin:8px 0 0;">${L(`One task per failure mode of each transformer.${rd?` Redesign (outside the plan): ${rd}.`:''}${pend?` Waiting for the RCM decision: ${pend}.`:''}`,`นับ 1 งานต่อ 1 โหมดของแต่ละเครื่อง${rd?` · ออกแบบใหม่ (นอกแผน) ${rd} โหมด`:''}${pend?` · ยังไม่ได้เลือกงาน ${pend} โหมด`:''}`)} <button class="linklike" data-goto-page="planall">${L('Open the PM review plan →','ดูแผนทบทวน PM →')}</button></p>
+    <p class="small-muted" style="font-size:12.5px;margin:8px 0 0;">${L(`One task per failure mode of each transformer.${rd?` Redesign (outside the plan): ${rd}.`:''}${pend?` Waiting for engineer confirmation: ${pend}.`:''}`,`นับ 1 งานต่อ 1 โหมดของแต่ละเครื่อง${rd?` · ออกแบบใหม่ (นอกแผน) ${rd} โหมด`:''}${pend?` · รอวิศวกรยืนยัน ${pend} โหมด`:''}`)} <button class="linklike" data-goto-page="planall">${L('Open the PM review plan →','ดูแผนทบทวน PM →')}</button></p>
   </div>`;
 }
 function reportScopeAssets(){ const sc = state.repScope || 'all'; if(sc==='all') return ASSETS.slice();
@@ -5439,7 +5444,7 @@ const GUIDE_DETAIL = [
  { /* 5 */
   user:[['Filter by substation or one transformer.','กรองตามสถานี หรือเลือกหม้อแปลงเครื่องเดียว'],
         ['Press “Edit current plan” once to enter the PM done today (task, type, interval). It is the same for every transformer.','กด “แก้ไขแผนเดิม” เพื่อกรอกงาน PM ที่ทำอยู่ (งาน ประเภท รอบ) ครั้งเดียว ใช้เหมือนกันทุกเครื่อง'],
-        ['Rows marked “Task not selected yet” need their RCM decision first (step 3).','แถวที่ขึ้น “ยังไม่ได้เลือกงาน” ต้องไปที่การตัดสินใจ RCM ก่อน (ขั้นที่ 3)'],
+        ['Rows marked “Waiting for engineer confirmation” enter the new plan only after an engineer confirms the task in the RCM decision (step 3).','แถวที่ขึ้น “รอวิศวกรยืนยัน” จะเข้าแผนใหม่หลังวิศวกรยืนยันงานในหน้าการตัดสินใจ RCM (ขั้นที่ 3)'],
         ['Press PDF to save the comparison for the meeting.','กด PDF เพื่อบันทึกตารางเปรียบเทียบไว้ใช้ประชุม']],
   sys:[['Current plan = the time-based PM of each failure mode. New plan = the strategy from the RCM decision; modes below the RPN threshold keep the current plan.','แผนเดิม = งาน PM ตามรอบเวลาของแต่ละโหมด · แผนใหม่ = กลยุทธ์จากการตัดสินใจ RCM โหมดที่ RPN ต่ำกว่าเกณฑ์คงแผนเดิม'],
        ['Compares the two: keep, change type, more often, less often, stop the scheduled task (run to failure), or redesign.','เปรียบเทียบสองแผน: คงเดิม เปลี่ยนประเภท ถี่ขึ้น ห่างขึ้น ยกเลิกงานตามรอบ (ใช้จนเสีย) หรือออกแบบใหม่'],
@@ -5844,7 +5849,7 @@ function updateMockToggle(){ const b=document.getElementById('mockToggle'); if(b
 function setMock(v){ MOCK_EMPTY=v; try{ localStorage.setItem('rcm_mock_empty', v?'1':'0'); }catch(e){} render(); }
 document.addEventListener('click', e=>{ const t=e.target.closest('[data-mock-toggle],#mockToggle'); if(t){ e.preventDefault(); setMock(!MOCK_EMPTY); } });
 
-function render(){ chartFontDefaults();
+function render(){ if(!RCM_CONF_SEEDED && ASSETS.length) seedRcmConfDemo(); chartFontDefaults();
   if(state.page==='schematic'){ state.page='reliability'; state.relTab='diagram'; } // old links keep working
   if(/-overview$/.test(state.page)) state.page='fmearcm';
   ensureNet(); recomputeAll(); saveData();
@@ -5929,6 +5934,12 @@ document.addEventListener('click', e=>{ const b=e.target.closest && e.target.clo
 })();
 (function seedImportDemo(){ if(IMPLOG_SEEDED) return; IMPLOG_SEEDED = true; if(IMPORT_LOG.length) return;
   const demo = ASSETS.filter(isDemoAsset); if(!demo.length || demo.length!==ASSETS.length) return; try{ seedImportHistory(demo, 3); saveData(); }catch(e){ console.warn(e); } })();
+/* sample data only: the demo units' RCM decisions are shown as already confirmed (by a simulated engineer), except CLK-TR3 which is left for the user to confirm */
+function seedRcmConfDemo(){ if(RCM_CONF_SEEDED) return; RCM_CONF_SEEDED = true;
+  try{ const at = fmtD(new Date(Date.now()-14*864e5));
+    ASSETS.filter(isDemoAsset).filter(a=>a.id!=='CLK-TR3').forEach(a=> getFmeaFor(a).forEach(f=>{ const ev=rcmEvaluate(rcmAnsFor(a,f)); if(rcmState(a,f,ev).k!=='default') return;
+      const ans=rcmAnsFor(a,f); ans._by='วิศวกร (ข้อมูลจำลอง)'; ans._at=at; ans._seed=1; }));
+    saveData(); }catch(e){ console.warn(e); } }
 /* ============ LOGIN GATE ============ */
 document.getElementById('loginTitle').textContent = t('login_title');
 document.getElementById('loginSub').textContent = t('login_sub');
