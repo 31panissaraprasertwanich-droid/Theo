@@ -1932,7 +1932,7 @@ function ovTrendHead(){ const s=ovTrendStats(); if(!s) return '';
   const chip=(lab,val,c)=>`<div class="ovtr-chip"><span>${lab}</span><b style="color:${c||'var(--text)'};">${val}</b></div>`;
   return `<div class="ovtr-chips">${chip(L('Latest average','ค่าเฉลี่ยล่าสุด'), `${fmtHi(s.last.v)} <small>(${hiCat(s.last.v).code})</small>`)}${chip(L(`Change since ${state.lang==='th'?s.first.x+543:s.first.x}`,`เปลี่ยนแปลงตั้งแต่ ${state.lang==='th'?'พ.ศ. '+(s.first.x+543):s.first.x}`), `${d<0?'▼':'▲'} ${Math.abs(d).toFixed(1)}`, d<0?'var(--red)':'var(--green)')}${chip(L('Decline rate (slope)','อัตราการเปลี่ยน (ความชัน)'), `${s.slope>=0?'+':''}${s.slope.toFixed(2)} <small>${L('pts/yr','คะแนน/ปี')}</small>`, col)}</div>`; }
 
-function snapshotData(){ return {sr:SR_LOG, srRule:SR_RULE, srRuleV:3, utilRaw:UTIL_RAW, rcmConfSeed:RCM_CONF_SEEDED, baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, imp:IMPORT_LOG, impSeed:IMPLOG_SEEDED, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
+function snapshotData(){ return {sr:SR_LOG, srRule:SR_RULE, srRuleV:4, utilRaw:UTIL_RAW, rcmConfSeed:RCM_CONF_SEEDED, baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, imp:IMPORT_LOG, impSeed:IMPLOG_SEEDED, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
 function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
 function applyData(d){
   if(!d || d.v!==3 || !Array.isArray(d.assets)) return false;
@@ -1943,7 +1943,7 @@ function applyData(d){
   OLD_PM = d.oldPm ? JSON.parse(JSON.stringify(d.oldPm)) : JSON.parse(JSON.stringify(OLD_PM_DEFAULT)); PLAN_START_M = d.planStart ? JSON.parse(JSON.stringify(d.planStart)) : {};
   Object.assign(SAMPLING_DAYS, SAMPLING_DEFAULT); if(d.samp) Object.keys(SAMPLING_DEFAULT).forEach(k=>{ const v=+d.samp[k]; if(v>=1&&v<=730) SAMPLING_DAYS[k]=Math.round(v); });
   if(d.planV!==2) Object.values(MAINT_STORE).forEach(markPastDone);
-  NET = d.net || null; BA_SEEDED = !!d.baSeed; RCM_CONF_SEEDED = !!d.rcmConfSeed; UTIL_RAW = (d.utilRaw && typeof d.utilRaw==='object') ? d.utilRaw : {}; SR_LOG = Array.isArray(d.sr) ? d.sr : []; SR_RULE = (d.srRuleV===3 && d.srRule && Array.isArray(d.srRule.types) && Array.isArray(d.srRule.pri)) ? d.srRule : JSON.parse(JSON.stringify(SR_RULE_DEF)); SR_CACHE=null;
+  NET = d.net || null; BA_SEEDED = !!d.baSeed; RCM_CONF_SEEDED = !!d.rcmConfSeed; UTIL_RAW = (d.utilRaw && typeof d.utilRaw==='object') ? d.utilRaw : {}; SR_LOG = Array.isArray(d.sr) ? d.sr : []; SR_RULE = (d.srRuleV===4 && d.srRule && Array.isArray(d.srRule.cm)) ? d.srRule : JSON.parse(JSON.stringify(SR_RULE_DEF)); SR_CACHE=null;
   if(d.fmeaV!==3){ FMEA_STORE = {}; RCM_STORE = {}; }   /* failure-mode list changed to the 10 modes of the report */
   if(d.focusV!==2){ /* focus on 2 substations: keep only their 4 transformers */
     const keep = ['LKB-TR1','LKB-TR2','LKB-TR3','CLK-TR1','CLK-TR2','CLK-TR3'];
@@ -2744,14 +2744,16 @@ function opYears(a){ const i = installDate(a); if(!i) return 0; return Math.max(
    r = number of work orders that match the failure rule (default: CM with Priority 1) for the unit;
    T = record period of the file (Jan of the first year → month of the latest work order). */
 const SR_HEAD = ['Service Request','Summary','สถานที่ติดตั้ง','Failure Code','Problem Code','Cause','Priority','Actual Start','Actual Finish','Work Center','Status','Reported','Reported By'];
-const SR_RULE_DEF = {types:['CM'], pri:[1]};   /* corrective work orders with Priority 1 (agreed rule; same MTBF method as the RAM analysis) */
+const SR_RULE_DEF = {cm:[1], pm:false};   /* corrective work orders with Priority 1 (agreed rule; same MTBF method as the RAM analysis) */
 var SR_LOG = [];                                   /* {sr, unit, type, pri, code, start (ISO), cells:[...SR_HEAD]} */
 var SR_RULE = JSON.parse(JSON.stringify(SR_RULE_DEF));
 function srIsFile(table){ const h=((table&&table[0])||[]).map(utilNorm); return ['Service Request','Failure Code','Priority'].every(c=>h.includes(utilNorm(c))); }
 const srKey = v=>String(v??'').toLowerCase().replace(/[\s._\-]/g,'');
 function srMatchUnit(loc){ const s=String(loc??'').trim(); const m=s.match(/\(([^)]+)\)\s*$/);
   for(const c of [m?m[1]:null, s].filter(Boolean)){ const a=ASSETS.find(x=>srKey(x.id)===srKey(c)); if(a) return a.id; } return null; }
-function srCounts(r){ return SR_RULE.types.includes(r.type) && SR_RULE.pri.includes(r.pri); }
+/* CM work orders by priority (1 = urgent, 2 = general corrective) + optionally all PM work orders */
+const SR_PRI_TXT = {1:['urgent','เร่งด่วน'], 2:['general repair','แก้ไขทั่วไป']};
+function srCounts(r){ return (r.type==='CM' && SR_RULE.cm.includes(r.pri)) || (r.type==='PM' && SR_RULE.pm); }
 function srDT(v){ if(v instanceof Date) return isNaN(v)?null:v; if(typeof v==='number' && v>20000 && v<80000) return new Date(Math.round((v-25569)*864e5));
   const t=String(v??'').trim(); if(!t) return null; let m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
   if(m) return new Date(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));
@@ -2778,7 +2780,7 @@ const ramR = (mtbf, tYr)=> mtbf ? Math.exp(-tYr*H_YEAR/mtbf) : null;
 const ramM = (mttr, tYr)=> mttr==null ? null : mttr>0 ? 1-Math.exp(-(tYr<1?12:24)/mttr) : 1;
 function tTxt(t){ return Math.abs(t-T_MONTH)<1e-9 ? L('1 month','1 เดือน') : `${t} ${L(t>1?'yrs':'yr','ปี')}`; }
 function tHours(t){ return Math.abs(t-T_MONTH)<1e-9 ? H_MONTH : t*H_YEAR; }
-function srRuleText(){ const all=[1,2,3,4].every(p=>SR_RULE.pri.includes(p)); return `${SR_RULE.types.join(' + ')||'—'}${all?L(' · all priorities',' · ทุก Priority'):` · Priority ${SR_RULE.pri.join(', ')||'—'}`}`; }
+function srRuleText(){ const p=[...SR_RULE.cm].sort().map(v=>`CM Priority ${v}`); if(SR_RULE.pm) p.push('PM'); return p.join(' + ')||'—'; }
 function srHas(id){ return SR_LOG.some(r=>r.unit===id); }
 function srWindow(){ if(!SR_LOG.length) return null; const ds=SR_LOG.map(r=>new Date(r.start)).filter(d=>!isNaN(d)); if(!ds.length) return null;
   const y0=Math.min(...ds.map(d=>d.getFullYear())), last=new Date(Math.max(...ds)); const months=(last.getFullYear()-y0)*12+last.getMonth()+1; return {y0, last, months, T:months/12}; }
@@ -2866,8 +2868,9 @@ function openSRImport(){
   inp.click(); }
 document.addEventListener('click', e=>{ const b=e.target.closest('[data-import-sr]'); if(b){ e.preventDefault(); if(!can('network')) return; openSRImport(); return; }
   const c=e.target.closest('[data-sr-clear]'); if(c){ e.preventDefault(); if(!can('network')) return; if(!confirm(L('Remove all Service Request data? r goes back to the values entered by hand.','ลบข้อมูล Service Request ทั้งหมด? ค่า r จะกลับไปใช้ค่าที่กรอกเอง'))) return; SR_LOG=[]; SR_CACHE=null; saveData(); render(); } });
-document.addEventListener('change', e=>{ const cb=e.target.closest('[data-sr-rule]'); if(!cb) return; if(!can('network')) return; const [k,v]=cb.dataset.srRule.split(':'); const key=k==='type'?'types':'pri'; const val=k==='type'?v:Number(v);
-  const set=new Set(SR_RULE[key]); if(cb.checked) set.add(val); else set.delete(val); SR_RULE[key]=[...set].sort(); SR_CACHE=null; saveData(); render(); });
+document.addEventListener('change', e=>{ const cb=e.target.closest('[data-sr-rule]'); if(!cb) return; if(!can('network')) return; const v=cb.dataset.srRule;
+  if(v==='pm') SR_RULE.pm=cb.checked; else { const set=new Set(SR_RULE.cm); if(cb.checked) set.add(+v); else set.delete(+v); SR_RULE.cm=[...set].sort(); }
+  SR_CACHE=null; saveData(); render(); });
 function koutofn(rs, k){ const n=rs.length; let tot=0; for(let m=0;m<(1<<n);m++){ let up=0, pr=1; for(let i=0;i<n;i++){ if((m>>i)&1){ up++; pr*=rs[i]; } else pr*=1-rs[i]; } if(up>=k) tot+=pr; } return tot; }
 function autoK(units, peak){ if(!units.length) return 1; const caps = units.map(u=>+u.a.cap||0).sort((x,y)=>x-y); let sum=0; for(let k=1;k<=caps.length;k++){ sum+=caps[k-1]; if(sum >= (+peak||0)) return k; } return caps.length; }
 function netCalc(){
@@ -3279,7 +3282,11 @@ function netSettingsHtml(){
     ${stCards}
     <div class="card"><div class="card-head"><h3>${L('Failure history','ประวัติการเสีย')}</h3><span class="small-muted">λ = r ÷ T</span></div>
       <div class="notebox" style="margin:0 0 10px;flex-wrap:wrap;">${gicon('help',16)}<div style="flex:1;min-width:240px;"><b>Service Request</b> — ${SR_LOG.length?L(`${SR_LOG.length} work orders loaded · λ of the units in it comes from the MTBF of the counted work orders`,`มี ${SR_LOG.length} งาน · หม้อแปลงที่อยู่ในไฟล์คิด λ จาก MTBF ของงานที่ตรงเกณฑ์`):L('not imported — r is entered by hand below','ยังไม่ได้นำเข้า — r มาจากที่กรอกในตารางด้านล่าง')}
-        <div style="margin-top:6px;font-size:13px;">${L('Count as failure','นับเป็นการเสีย')}: ${['CM','PM'].map(v=>`<label style="margin-right:10px;white-space:nowrap;"><input type="checkbox" data-sr-rule="type:${v}" ${SR_RULE.types.includes(v)?'checked':''}> ${v}</label>`).join('')} · Priority ${[1,2,3,4].map(v=>`<label style="margin-right:8px;white-space:nowrap;"><input type="checkbox" data-sr-rule="pri:${v}" ${SR_RULE.pri.includes(v)?'checked':''}> ${v}</label>`).join('')}</div>${srColsHtml()}</div>
+        <div style="margin-top:8px;font-size:13px;"><b>${L('Count as failure','นับเป็นการเสีย')}:</b>
+          <div style="display:grid;gap:4px;margin-top:4px;">
+            ${[1,2].map(v=>`<label style="display:flex;gap:8px;align-items:baseline;"><input type="checkbox" data-sr-rule="${v}" ${SR_RULE.cm.includes(v)?'checked':''}><span><b>CM Priority ${v}</b> — ${L(SR_PRI_TXT[v][0],SR_PRI_TXT[v][1])} <span class="small-muted raw-data">${v===1?L('(e.g. tripping relay failed, OLTC cannot change tap, oil leak at bushing)','(เช่น Tripping relay ชำรุด, OLTC เปลี่ยน Tap ไม่ได้, น้ำมันรั่วที่ Bushing)'):L('(e.g. fan failed, oil-temperature gauge failed, control-desk lamp blown)','(เช่น พัดลมชำรุด, Oil temp ชำรุด, หลอดไฟ Control desk ขาด)')}</span></span></label>`).join('')}
+            <label style="display:flex;gap:8px;align-items:baseline;"><input type="checkbox" data-sr-rule="pm" ${SR_RULE.pm?'checked':''}><span><b>PM</b> — ${L('planned maintenance','งานบำรุงรักษาตามแผน')} <span class="small-muted raw-data">${L('(e.g. silica gel, oil top-up, gauge replacement — normally not counted)','(เช่น เปลี่ยนซิลิกาเจล เติมน้ำมัน เปลี่ยนเกจ — ปกติไม่นับเป็นการเสีย)')}</span></span></label>
+          </div></div>${srColsHtml()}</div>
         <div class="filter-row" style="flex-basis:100%;padding-left:26px;">${srButtons()}${SR_LOG.length?`<button class="btn btn-ghost" data-sr-clear="1" style="padding:6px 12px;font-size:13px;color:var(--red);">${L('Remove','ลบข้อมูล')}</button>`:''}</div></div>
       ${SR_LOG.length?'':`<p class="small-muted" style="font-size:13px;margin:0 0 8px;">${L('Count r by defect code: count T016 (transformer trip) and T015 (failed transformer replaced); do not count oil-leak codes T006–T011 (response code C, no outage).','นับ r ตามรหัสความผิดปกติ: นับ T016 (หม้อแปลง Trip) และ T015 (เปลี่ยนหม้อแปลงชำรุด) ไม่นับรหัสน้ำมันรั่วซึม T006–T011 (ระยะเวลาเข้าแก้ไขระดับ C และไม่ต้องหยุดจ่ายไฟ)')}</p>`}
       <div class="tbl-wrap"><table><thead><tr><th>${t('asset')}</th><th>${L('Installation date','วันที่ติดตั้ง')}</th><th>${L('Outage failures','ครั้งที่ขัดข้องจนหลุดจากระบบ')} <span style="text-transform:none;">r</span></th><th>T (${L('yr','ปี')})</th><th style="text-transform:none;">λ (/${L('yr','ปี')})</th></tr></thead><tbody>
