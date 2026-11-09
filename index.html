@@ -2067,6 +2067,32 @@ const RCM_AUTO_TABLE = ()=> `<table style="font-size:12.5px;margin-top:6px;"><th
   <tr><td>${L('Medium','ปานกลาง')} ${RPN_MED}–${RPN_HIGH-1}</td><td>CBM</td><td>PM</td></tr>
   <tr><td>${L('Low','ต่ำ')} &lt; ${RPN_MED}</td><td>BM</td><td>BM</td></tr></tbody></table>
   <div style="font-size:12.5px;margin-top:6px;">${L('S = 5 is never BM (at least PM) · S = 5 and O ≥ 4 → also review the design / plan a replacement · CBM becomes PdM when the part is followed by oil tests and there are ≥ 3 years of HI history.','S = 5 ห้ามเป็น BM (อย่างน้อย PM) · S = 5 และ O ≥ 4 → ทบทวนการออกแบบหรือวางแผนเปลี่ยนเพิ่ม · CBM เป็น PdM เมื่อชิ้นส่วนติดตามด้วยผลน้ำมันและมีประวัติ HI ≥ 3 ปี')}</div>`;
+/* fallback options when the proposed task cannot be done — set by the author from the default-action principle of SAE JA1011 / IEC 60300-3-11
+   and the action guidance of IEEE C57.104, IEC 60422, IEEE C57.91; the intervals are the author's and should be reviewed with the utility */
+const RCM_ALT = {
+  COMB:[{when:['The outage for the PM part cannot be arranged in this round','ดับไฟทำงาน PM ไม่ได้ในรอบนี้'], use:'CBM', how:['Keep condition monitoring and sample DGA more often (every 1–3 months) until an outage is available','ติดตามสภาพต่อ และเก็บตัวอย่าง DGA ถี่ขึ้น (ทุก 1–3 เดือน) จนกว่าจะดับไฟได้'], ref:'SAE JA1011; IEEE C57.104-2019'}],
+  CBM:[{when:['No monitoring equipment, or the lab cannot test in time','ไม่มีเครื่องมือติดตามสภาพ หรือแล็บรับตัวอย่างไม่ทัน'], use:'PM', how:['Do the scheduled task at a shorter interval instead','ทำงานตามรอบเวลาแทน โดยใช้รอบที่สั้นลง'], ref:'SAE JA1011; IEC 60300-3-11'}],
+  PM:[{when:['The outage cannot be arranged','ดับไฟทำงานไม่ได้'], use:'CBM', how:['Monitor oil condition (DGA, BDV, water) more often until the outage','ติดตามสภาพน้ำมัน (DGA, BDV, ความชื้น) ถี่ขึ้นจนกว่าจะดับไฟได้'], ref:'IEEE C57.104-2019; IEC 60422'}],
+  PMD:[{when:['No spare part available yet','ยังไม่มีอะไหล่สำหรับเปลี่ยน'], use:'CBM', how:['Monitor the part until the spare arrives, then replace','ติดตามสภาพชิ้นส่วนจนกว่าอะไหล่มาถึง แล้วจึงเปลี่ยน'], ref:'SAE JA1011; IEC 60300-3-11'}],
+  FFT:[{when:['The outage for the functional test cannot be arranged','ดับไฟเพื่อทดสอบการทำงานไม่ได้'], use:'CBM', how:['Reduce load and monitor more closely; do the test in the next outage','ลดโหลดและเฝ้าระวังเพิ่ม แล้วทดสอบในรอบดับไฟถัดไป'], ref:'IEEE C57.91-2011; IEEE C57.104-2019'}],
+  BM:[{when:['The consequence turns out higher than assessed (safety or supply)','ผลกระทบสูงกว่าที่ประเมิน (ความปลอดภัยหรือการจ่ายไฟ)'], use:'PM', how:['Do not run to failure — add a scheduled task','ไม่ปล่อยให้ใช้งานจนเสีย ให้เพิ่มงานตามรอบ'], ref:'SAE JA1011; Moubray (1997)'}],
+  RD:[{when:['Redesign or replacement cannot be done yet','ยังออกแบบใหม่หรือเปลี่ยนไม่ได้'], use:'COMB', how:['Monitor condition and do the scheduled task meanwhile','ติดตามสภาพและทำงานตามรอบไประหว่างรอ'], ref:'SAE JA1011'}] };
+const RCM_ALT_ALL = [
+  {when:['Results are very poor and no other transformer can take the load','ผลตรวจแย่มาก และไม่มีหม้อแปลงลูกอื่นรับโหลดแทน'], how:['Keep the unit in service with reduced load, DGA every 14 days and a load-transfer plan ready','ใช้งานต่อโดยลดโหลด ตรวจ DGA ทุก 14 วัน และเตรียมแผนย้ายโหลด'], ref:'IEEE C57.91-2011; IEEE C57.104-2019'},
+  {when:['Deciding between repair, refurbishment or replacement','ต้องตัดสินใจระหว่างซ่อม ฟื้นฟู หรือเปลี่ยนหม้อแปลง'], how:['Use a condition assessment of the whole unit before deciding','ประเมินสภาพทั้งลูกก่อนตัดสินใจ'], ref:'IEEE C57.140-2017; CIGRE TB 761 (2019)'} ];
+function rcmAltHtml(ev){ const base=ev.autoDec||ev.decision; const alts=RCM_ALT[base]||[];
+  const row=(x,i)=>`<div style="border-top:1px solid var(--line,#e3e8ee);padding:8px 0;font-size:13px;">
+      <div><b>${L('If','ถ้า')}:</b> ${L(x.when[0],x.when[1])}</div>
+      <div><b>${L('Use instead','ใช้แทน')}:</b> ${x.use?`<b>${esc(rcmShortDec(x.use))}</b> — `:''}${L(x.how[0],x.how[1])}</div>
+      <div class="small-muted raw-data" style="font-size:12px;">${L('Reference','อ้างอิง')}: ${esc(x.ref)}</div>
+      ${x.use&&i!=null?`<button class="btn btn-outline" data-rcm-alt="${i}" style="padding:4px 10px;font-size:12.5px;margin-top:4px;">${L('Use this option','ใช้ทางเลือกนี้')}</button>`:''}</div>`;
+  return `<details class="tip-more" style="margin-top:8px;"><summary>${L('Fallback options — if the proposed task cannot be done','ทางเลือกสำรอง — ถ้างานที่เสนอทำไม่ได้')}</summary>
+    ${alts.map((x,i)=>row(x,i)).join('')}${RCM_ALT_ALL.map(x=>row(x,null)).join('')}
+    <p class="small-muted" style="font-size:12px;margin:6px 0 0;">${L('Fallback options set by the author from the default-action principle of SAE JA1011 / IEC 60300-3-11 and the action guidance of IEEE C57.104, IEC 60422 and IEEE C57.91; the intervals should be reviewed with the utility.','ทางเลือกสำรองกำหนดโดยผู้จัดทำ ตามหลัก default action ของ SAE JA1011 / IEC 60300-3-11 และแนวทางการดำเนินการของ IEEE C57.104, IEC 60422 และ IEEE C57.91 · ระยะเวลาที่ระบุควรทบทวนร่วมกับหน่วยงาน')}</p></details>`; }
+document.addEventListener('click', e=>{ const b=e.target.closest('[data-rcm-alt]'); if(!b) return; e.preventDefault(); if(!can('rcm')) return;
+  const a=currentAsset(); const f=FMEA.find(x=>x.code===state.rcmFm) || fmeaPriority(FMEA)[0]; if(!a||!f) return; const ans=rcmAnsFor(a,f);
+  const base=rcmEvaluate(ans); const x=(RCM_ALT[base.autoDec||base.decision]||[])[+b.dataset.rcmAlt]; if(!x) return;
+  ans._ov=x.use; ans._ovWhy=`${x.when[1]} → ${x.how[1]} (อ้างอิง: ${x.ref})`; rcmUnconfirm(ans); saveData(); render(); toast(L('Option applied — confirm it to put it in the plan','ใช้ทางเลือกแล้ว — กดยืนยันเพื่อนำเข้าแผน'),'success'); });
 function rcmAutoBox(a, f, ev, ans){
   const opts = ['CBM','COMB','PM','PMD','FFT','BM','RD'];
   const decName = (k)=> L(RCM_DEC[k].name[0], RCM_DEC[k].name[1]);
@@ -2083,6 +2109,7 @@ function rcmAutoBox(a, f, ev, ans){
       <select id="rcmOvSel" data-rcm-ov="1"><option value="">${L('Use the RPN result','ใช้ผลจาก RPN')} (${shortLbl(ev.autoDec||ev.decision)})</option>${opts.map(k=>`<option value="${k}" ${ans._ov===k?'selected':''}>${decName(k)}</option>`).join('')}</select>
       ${ev.override?`<input id="rcmOvWhy" data-rcm-ovwhy="1" placeholder="${esc(L('Reason (e.g. found in the field)','เหตุผล (เช่น จากการตรวจหน้างาน)'))}" value="${esc(ans._ovWhy||'')}" style="flex:1;min-width:180px;">`:''}
 </div>
+    ${rcmAltHtml(ev)}
     <details class="tip-more" style="margin-top:8px;"><summary>${L('Selection criteria','เกณฑ์การเลือกงานจาก RPN')}</summary>${RCM_AUTO_TABLE()}</details></div>`;
 }
 function rcmEvaluateLogic(ans){
@@ -2187,7 +2214,8 @@ function rcmUnconfirm(ans){ ['_by','_at','_g','_risk'].forEach(k=>delete ans[k])
 function rcmState(a, f, e){
   const ans=rcmAnsFor(a,f); if(!rcmNeedsDecision(f)) return {k:'monitor'}; if(!e || !e.decision) return {k:'pending'}; if(!ans._by) return {k:'default'};
   const now=rcmSnapshot(a,f), why=[];
-  if(ans._seed){ ans._g=now.g; ans._risk=now.risk; delete ans._seed; }   /* sample confirmation: take the evidence as it is when first checked */
+  if(ans._seed){ ans._g=now.g; ans._risk=now.risk; ans._dec=e.decision; delete ans._seed; }
+  if(!ans._dec) ans._dec=e.decision;   /* confirmations saved before the decision was stored */   /* sample confirmation: take the evidence as it is when first checked */
   if((ans._g||'')!==now.g) why.push(L(`lab-result grade changed ${ans._g||'—'} → ${now.g||'—'}`,`เกรดจากผลแล็บเปลี่ยน ${ans._g||'—'} → ${now.g||'—'}`));
   if(ans._risk && ans._risk!==now.risk) why.push(L(`RPN level changed ${ans._risk} → ${now.risk}`,`ระดับ RPN เปลี่ยน ${trRisk(ans._risk)} → ${trRisk(now.risk)}`));
   return why.length ? {k:'review', why} : {k:'confirmed'};
@@ -4533,11 +4561,17 @@ function intervalM(s){ if(s===null||s===undefined) return null; const t=String(s
   const n=+m[1], u=m[2]; return u.startsWith('month')||u==='เดือน' ? n : u.startsWith('year')||u==='ปี' ? n*12 : u.startsWith('week')||u==='สัปดาห์' ? n/4.345 : n/30; }
 function fmtM(m){ if(m===null||m===undefined) return '—'; if(m>=12 && Math.abs(m/12-Math.round(m/12))<1e-6) return L(`every ${m/12} yr`,`ทุก ${m/12} ปี`); if(m<1) return L(`every ${Math.round(m*4.345)} wk`,`ทุก ${Math.round(m*4.345)} สัปดาห์`); return L(`every ${Math.round(m*10)/10} mo`,`ทุก ${Math.round(m*10)/10} เดือน`); }
 function fmOfAsset(a){ return (a.id===state.assetId && state.page==='detail') ? FMEA : getFmeaFor(a); }
+const rcmShortDec = k=> ({COMB:'CBM + PM',FFT:'PM + FFT',CBM:'CBM',PM:'PM',BM:'BM',PMD:'PM',RD:L('Redesign','ออกแบบใหม่')})[k] || k;
 function newPlanOf(a, f){
   const old = oldPmOf(f);
   if(!rcmNeedsDecision(f)) return {k:'keep', type:old.type, task:L(old.task[0],old.task[1]), m:old.m, note:L(`RPN ${f.rpn} < ${RPN_MED}`,`RPN ${f.rpn} < ${RPN_MED}`)};
   const ev = rcmEvaluate(rcmAnsFor(a,f)); if(!ev.decision) return {k:'pending'};
-  if(rcmState(a,f,ev).k==='default') return {k:'pending'};   /* proposed by the RPN criteria only: not in the new plan until an engineer confirms */
+  const cs = rcmState(a,f,ev); if(cs.k==='default') return {k:'pending'};   /* proposed by the RPN criteria only: not in the new plan until an engineer confirms */
+  if(cs.k==='review'){ const ans=rcmAnsFor(a,f); const p=newPlanFrom(a,f, ans._dec && RCM_DEC[ans._dec] ? Object.assign({},ev,{decision:ans._dec}) : ev);
+    return Object.assign(p, {review:cs.why, proposed: ev.decision!==(ans._dec||ev.decision) ? ev.decision : null}); }
+  return newPlanFrom(a,f,ev);
+}
+function newPlanFrom(a, f, ev){
   const st = rcmStrategy(a,f,ev);
   if(st.redesign) return {k:'rd', type:'RD', task:L('Redesign / modification','ออกแบบใหม่/ปรับปรุง'), m:null};
   const tk = rcmTaskFor(f, ev.decision) || ['—','—'];
@@ -4616,7 +4650,7 @@ function planRevTableHtml(rows, showAsset){
   ${rows.map(r=>`<tr>${showAsset?`<td><button class="linklike" data-goto-detail="${esc(r.a.id)}|plan" style="font-weight:800;">${esc(r.a.id)}</button></td>`:''}
     <td><b>${r.f.code}</b> · ${esc(r.f.comp)}<div class="small-muted" style="white-space:normal;">${esc(r.f.mode)} · RPN ${r.f.rpn}</div></td>
     <td style="white-space:normal;">${typePill(r.old.type)} ${esc(L(r.old.task[0],r.old.task[1]))}<div class="small-muted">${fmtM(r.old.m)}</div></td>
-    <td style="white-space:normal;">${r.nw.k==='pending'?`<span class="pill" style="background:#eef0f3;color:#5b6573;">${L('Waiting for engineer confirmation','รอวิศวกรยืนยัน')}</span><div><button class="linklike" data-goto-detail="${esc(r.a.id)}|rcm">${L('Check and confirm →','ไปตรวจและยืนยัน →')}</button></div>`:`${typePill(r.nw.type)} ${esc(r.nw.task)}<div class="small-muted">${r.nw.k==='bm'?L('no scheduled task','ไม่มีงานตามรอบ'):r.nw.m!==null?fmtM(r.nw.m):esc(r.nw.mTxt||'—')}${r.nw.note?' · '+r.nw.note:''}</div>`}</td>
+    <td style="white-space:normal;">${r.nw.k==='pending'?`<span class="pill" style="background:#eef0f3;color:#5b6573;">${L('Waiting for engineer confirmation','รอวิศวกรยืนยัน')}</span><div><button class="linklike" data-goto-detail="${esc(r.a.id)}|rcm">${L('Check and confirm →','ไปตรวจและยืนยัน →')}</button></div>`:`${typePill(r.nw.type)} ${esc(r.nw.task)}<div class="small-muted">${r.nw.k==='bm'?L('no scheduled task','ไม่มีงานตามรอบ'):r.nw.m!==null?fmtM(r.nw.m):esc(r.nw.mTxt||'—')}${r.nw.note?' · '+r.nw.note:''}</div>${r.nw.review?`<div style="margin-top:4px;"><span class="pill pill-warning" title="${esc(r.nw.review.join(' · '))}">${L('Review needed — new test results','ควรทบทวน — มีผลตรวจใหม่')}</span><div class="small-muted" style="font-size:12px;margin-top:2px;">${esc(r.nw.review.join(' · '))}${r.nw.proposed?` · ${L('RPN now proposes','RPN ตอนนี้เสนอ')} <b>${esc(rcmShortDec(r.nw.proposed))}</b>`:''}</div><button class="linklike" data-goto-detail="${esc(r.a.id)}|rcm">${L('Review and confirm again →','ไปทบทวนและยืนยันใหม่ →')}</button><div class="small-muted raw-data" style="font-size:11.5px;">${L('Reference','อ้างอิง')}: IEC 60300-3-11; SAE JA1012</div></div>`:''}`}</td>
     <td style="white-space:normal;"><span class="pill" style="background:${CMP_STYLE[r.cmp.c][0]};color:${CMP_STYLE[r.cmp.c][1]};">${CMP_NAME()[r.cmp.c]}</span><div style="font-size:12.5px;margin-top:3px;">${r.cmp.t}</div></td><td style="white-space:normal;">${editStart?startInput(r):''}${actCell(r, ctxOf(r.a, r.f.code))}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
@@ -5085,7 +5119,7 @@ function attachDetailEvents(){ attachPlanRevEvents(); { const ce=document.getEle
   const rcmPrint = document.getElementById('btnRcmPrint'); if(rcmPrint) rcmPrint.addEventListener('click', ()=>{ const a=currentAsset(), f=curF(); savePdf(document.getElementById('detailBody'), `${a.id}_RCM_${f?f.code:'analysis'}_${pdfDate()}.pdf`, {skipButtons:true, orientation:'landscape', title:`${a.id} · ${L('RCM analysis','การวิเคราะห์ RCM')} · ${f?f.code+' '+f.comp+' — '+f.mode:''}`}); });
   document.querySelectorAll('[data-rcm-k]').forEach(el=> el.addEventListener('click',()=>{ const ans=rcmAnsFor(currentAsset(), curF()); ans[el.dataset.rcmK] = el.dataset.rcmV; rcmUnconfirm(ans); render(); }));
   const rcf = document.getElementById('btnRcmConfirm'); if(rcf) rcf.addEventListener('click',()=>{ const a=currentAsset(), f=curF(), ans=rcmAnsFor(a,f), sn=rcmSnapshot(a,f);
-    ans._by = `${(USERS[0]&&USERS[0].name) || 'User'} (${roleName()})`; ans._at = fmtD(new Date()); ans._g = sn.g; ans._risk = sn.risk; render(); toast(L('Decision confirmed','ยืนยันการตัดสินใจแล้ว'),'success'); });
+    ans._by = `${(USERS[0]&&USERS[0].name) || 'User'} (${roleName()})`; ans._at = fmtD(new Date()); ans._g = sn.g; ans._risk = sn.risk; ans._dec = rcmEvaluate(ans).decision; render(); toast(L('Decision confirmed','ยืนยันการตัดสินใจแล้ว'),'success'); });
   document.querySelectorAll('[data-rcm-set]').forEach(el=> el.addEventListener('click',()=>{
     const ans = rcmAnsFor(currentAsset(), curF()); const k = el.dataset.rcmSet, v = el.dataset.rcmV; if(ans[k]===v && !el.closest('.rcm-step.cur')) return;
     const i = RCM_ORDER.indexOf(k); RCM_ORDER.slice(i+1).forEach(x=>delete ans[x]); ans[k] = v; rcmUnconfirm(ans); render(); }));
@@ -5999,7 +6033,7 @@ const ROLE_GATES = {
   lab:['[data-import-lab]','[data-add-lab]','#btnAddDgaResult','#btnCompEdit'],
   asset:['#btnDeleteAsset','[data-del-asset]','#btnAddAsset','#btnEditAsset','[data-edit-asset]','[data-net-addtr]','[data-add-asset]'],
   fmea:['#btnAddFmea','[data-edit-fmea]'],
-  rcm:['[data-rcm-undo]','#btnRcmReset','#btnRcmConfirm','#rcmOvSel','#rcmOvWhy'],
+  rcm:['[data-rcm-undo]','[data-rcm-alt]','#btnRcmReset','#btnRcmConfirm','#rcmOvSel','#rcmOvWhy'],
   plan:['#btnCreateTask','[data-add-plan-sug]','[data-rcm-add]','#btnRcmToPlan','#btnBaToPlan','[data-wo-issue]','[data-wo-cancel]','[data-oldpm-edit]','#planFillBox'],
   woClose:['[data-wo-close]'],
   criteria:['#btnCritEdit','#btnCritReset'],
