@@ -1859,7 +1859,7 @@ function renderRepDash(){
   const list=ASSETS.slice(); const withHi=list.filter(a=>a.hi!==null&&a.hi!==undefined);
   const avg=withHi.length? Math.round(withHi.reduce((t,a)=>t+a.hi,0)/withHi.length*10)/10 : null;
   const good=withHi.filter(a=>a.hi>=70).length, fair=withHi.filter(a=>a.hi>=50&&a.hi<70).length, poor=withHi.filter(a=>a.hi<50).length, nohi=list.length-withHi.length;
-  const over=list.filter(a=>sampleOverdueDays(a)>0).length; let rs=null; try{ rs=netCalc().Rsys; }catch(e){}
+  const over=list.filter(a=>sampleOverdueDays(a)>0).length; let rs=null, rsT=1; try{ const nc=netCalc(); rs=nc.Rsys; rsT=nc.t; }catch(e){}
   const fac=(k)=>list.map(a=>({id:a.id, p: a._as&&a._as.factors&&a._as.factors[k] ? a._as.factors[k].sf/4*100 : null}));
   const comp=(k)=>list.map(a=>{ const s=compScore(a,k); return {id:a.id, p: s===null?null:(s-1)/4*100}; });
   const actN=list.filter(a=>{ const l=riskOf(a).level; return l==='Very high'||l==='High'||l==='VP'||l==='P'; }).length;
@@ -1869,7 +1869,7 @@ function renderRepDash(){
     ${kpi(L('Transformers in poor condition','หม้อแปลงสภาพแย่'), `${poor} <span style="font-size:15px;color:var(--muted);font-weight:600;">/ ${withHi.length}</span>`, L('Health Index below 50','ดัชนีสุขภาพต่ำกว่า 50'), poor?'var(--red)':'var(--green)')}
     ${kpi(L('Must act first','ต้องดำเนินการก่อน'), actN, L('high / very high risk','ความเสี่ยงสูง / สูงมาก'), actN?'var(--red)':'var(--green)')}
     ${kpi(L('Oil sampling overdue','เก็บตัวอย่างน้ำมันเลยกำหนด'), over, L('transformers','เครื่อง'), over?'var(--red)':'var(--green)')}
-    ${kpi(L('Chance of no supply interruption (1 yr)','โอกาสจ่ายไฟได้ไม่สะดุดใน 1 ปี'), rs===null?'—':(rs*100).toFixed(1)+'%', L(`system reliability ${rs===null?'—':rs.toFixed(4)}`,`ความเชื่อถือได้ของระบบ ${rs===null?'—':rs.toFixed(4)}`))}
+    ${kpi(L(`Chance of no supply interruption (${tTxt(rsT)})`,`โอกาสจ่ายไฟได้ไม่สะดุดใน ${tTxt(rsT)}`), rs===null?'—':(rs*100).toFixed(1)+'%', L(`system reliability ${rs===null?'—':rs.toFixed(4)}`,`ความเชื่อถือได้ของระบบ ${rs===null?'—':rs.toFixed(4)}`))}
   </div>
   <div class="grid" style="grid-template-columns:1fr 1.45fr;gap:16px;align-items:stretch;margin-bottom:16px;">
     <div class="card"><h3>${L('Condition of each transformer','สภาพหม้อแปลงแต่ละเครื่อง')}</h3><p class="card-sub">${L('Health Index 0–100 (higher = better) · worst first · tap a row to open','ดัชนีสุขภาพ 0–100 (ยิ่งสูงยิ่งดี) · เรียงจากแย่สุด · แตะเพื่อเปิดดู')}</p>
@@ -3147,7 +3147,7 @@ function schematicHtml(){
         <button class="btn btn-outline" data-net-addtr="${esc(c.st.id)}" style="padding:6px 12px;font-size:13px;">+ ${L('Add transformer','เพิ่มหม้อแปลง')}</button></div>
       <div class="net-st sld-wrap">${sldRealSvg(c, N.t)}</div>
       <div class="small-muted" style="font-size:12.5px;margin-bottom:8px;">${netRedundancyText(c)}</div>
-      <div class="tbl-wrap"><table class="rowlink sch-tbl"><thead><tr><th>${L('Transformer','หม้อแปลง')}</th><th>MVA</th><th>${L('Voltage','แรงดัน')}</th><th>${L('Manufacturer','ผู้ผลิต')}</th><th>${L('Year','ปีผลิต')}</th><th>HI</th><th>${t('status')}</th><th>${L('Load','โหลด')} %</th><th>R (${N.t} ${L('yr','ปี')})</th><th>λ /${L('yr','ปี')}</th><th>I<sub>C</sub></th></tr></thead><tbody>
+      <div class="tbl-wrap"><table class="rowlink sch-tbl"><thead><tr><th>${L('Transformer','หม้อแปลง')}</th><th>MVA</th><th>${L('Voltage','แรงดัน')}</th><th>${L('Manufacturer','ผู้ผลิต')}</th><th>${L('Year','ปีผลิต')}</th><th>HI</th><th>${t('status')}</th><th>${L('Load','โหลด')} %</th><th>R (${tTxt(N.t)})</th><th>λ /${L('yr','ปี')}</th><th>I<sub>C</sub></th></tr></thead><tbody>
       ${c.units.map(u=>`<tr data-view="${esc(u.a.id)}" style="cursor:pointer;"><td><b>${esc(u.a.id)}</b></td><td>${u.a.cap||'—'}</td><td>${esc(u.a.volt||'—')} kV</td><td>${esc(u.a.mfr||'—')}</td><td>${u.a.year||'—'}</td><td style="color:${hiColor(u.a.hi)};font-weight:800;">${fmtHi(u.a.hi)}</td><td><span class="pill ${statusPillClass(u.a.status)}">${trStatus(u.a.status)}</span></td><td>${u.a.load??'—'}</td><td style="color:${rBand(u.R)};font-weight:800;">${f4(u.R)}</td><td>${f4(u.lam)}</td><td>${pctR(u.IC)}</td></tr>`).join('') || `<tr><td colspan="11" class="small-muted">${L('No transformer yet','ยังไม่มีหม้อแปลง')}</td></tr>`}
       </tbody></table></div></div>`).join('');
   return `<div class="card" style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
@@ -3379,7 +3379,7 @@ function renderOverview(){
     <div class="k"><span>${t('healthy')}</span><b style="color:var(--green);">${healthy}</b></div>
     <div class="k"><span>${t('warning')}</span><b style="color:var(--amber);">${warning}</b></div>
     <div class="k" ${critical?'data-goto-risk="1" style="cursor:pointer;"':''}><span>${t('critical')}</span><b style="color:var(--red);">${critical}</b></div>
-    <div class="k k-r" data-goto-rel="1"><span>${L(`System reliability over ${NC.t} ${NC.t>1?'years':'year'}`,`ความเชื่อถือได้ของระบบ ${NC.t} ปี`)}</span><b style="color:${rBand(NC.Rsys)};">${NC.sts.length?f4(NC.Rsys):'—'}</b><em>${NC.sts.length?L(`${pctR(NC.Rsys)} chance that every substation keeps supplying its load`,`โอกาส ${pctR(NC.Rsys)} ที่ทุกสถานีจ่ายไฟได้ตลอดช่วงเวลา`):''}${top?L(` · key unit ${esc(top.a.id)}`,` · ตัวหลัก ${esc(top.a.id)}`):''}</em></div>
+    <div class="k k-r" data-goto-rel="1"><span>${L('System reliability','ความเชื่อถือได้ของระบบ')} ${tTxt(NC.t)}</span><b style="color:${rBand(NC.Rsys)};">${NC.sts.length?f4(NC.Rsys):'—'}</b><em>${NC.sts.length?L(`${pctR(NC.Rsys)} chance that every substation keeps supplying its load`,`โอกาส ${pctR(NC.Rsys)} ที่ทุกสถานีจ่ายไฟได้ตลอดช่วงเวลา`):''}${top?L(` · key unit ${esc(top.a.id)}`,` · ตัวหลัก ${esc(top.a.id)}`):''}</em></div>
   </div>
   <div class="ov-grid">
     <section class="card">
