@@ -1932,7 +1932,7 @@ function ovTrendHead(){ const s=ovTrendStats(); if(!s) return '';
   const chip=(lab,val,c)=>`<div class="ovtr-chip"><span>${lab}</span><b style="color:${c||'var(--text)'};">${val}</b></div>`;
   return `<div class="ovtr-chips">${chip(L('Latest average','ค่าเฉลี่ยล่าสุด'), `${fmtHi(s.last.v)} <small>(${hiCat(s.last.v).code})</small>`)}${chip(L(`Change since ${state.lang==='th'?s.first.x+543:s.first.x}`,`เปลี่ยนแปลงตั้งแต่ ${state.lang==='th'?'พ.ศ. '+(s.first.x+543):s.first.x}`), `${d<0?'▼':'▲'} ${Math.abs(d).toFixed(1)}`, d<0?'var(--red)':'var(--green)')}${chip(L('Decline rate (slope)','อัตราการเปลี่ยน (ความชัน)'), `${s.slope>=0?'+':''}${s.slope.toFixed(2)} <small>${L('pts/yr','คะแนน/ปี')}</small>`, col)}</div>`; }
 
-function snapshotData(){ return {sr:SR_LOG, srRule:SR_RULE, utilRaw:UTIL_RAW, rcmConfSeed:RCM_CONF_SEEDED, baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, imp:IMPORT_LOG, impSeed:IMPLOG_SEEDED, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
+function snapshotData(){ return {sr:SR_LOG, srRule:SR_RULE, srRuleV:3, utilRaw:UTIL_RAW, rcmConfSeed:RCM_CONF_SEEDED, baSeed:BA_SEEDED, v:3, assets:ASSETS.map(a=>{ const {_as,_risk,...rest}=a; return rest; }), lab:LAB, fmea:FMEA_STORE, maint:MAINT_STORE, rcmStore:RCM_STORE, crit:CRIT, notif:NOTIF, imp:IMPORT_LOG, impSeed:IMPLOG_SEEDED, samp:SAMPLING_DAYS, oldPm:OLD_PM, planStart:PLAN_START_M, planV:2, net:NET, focusV:2, fmeaV:3}; }
 function saveData(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshotData())); }catch(e){} }
 function applyData(d){
   if(!d || d.v!==3 || !Array.isArray(d.assets)) return false;
@@ -1943,7 +1943,7 @@ function applyData(d){
   OLD_PM = d.oldPm ? JSON.parse(JSON.stringify(d.oldPm)) : JSON.parse(JSON.stringify(OLD_PM_DEFAULT)); PLAN_START_M = d.planStart ? JSON.parse(JSON.stringify(d.planStart)) : {};
   Object.assign(SAMPLING_DAYS, SAMPLING_DEFAULT); if(d.samp) Object.keys(SAMPLING_DEFAULT).forEach(k=>{ const v=+d.samp[k]; if(v>=1&&v<=730) SAMPLING_DAYS[k]=Math.round(v); });
   if(d.planV!==2) Object.values(MAINT_STORE).forEach(markPastDone);
-  NET = d.net || null; BA_SEEDED = !!d.baSeed; RCM_CONF_SEEDED = !!d.rcmConfSeed; UTIL_RAW = (d.utilRaw && typeof d.utilRaw==='object') ? d.utilRaw : {}; SR_LOG = Array.isArray(d.sr) ? d.sr : []; SR_RULE = (d.srRule && Array.isArray(d.srRule.types) && Array.isArray(d.srRule.pri)) ? d.srRule : JSON.parse(JSON.stringify(SR_RULE_DEF));
+  NET = d.net || null; BA_SEEDED = !!d.baSeed; RCM_CONF_SEEDED = !!d.rcmConfSeed; UTIL_RAW = (d.utilRaw && typeof d.utilRaw==='object') ? d.utilRaw : {}; SR_LOG = Array.isArray(d.sr) ? d.sr : []; SR_RULE = (d.srRuleV===3 && d.srRule && Array.isArray(d.srRule.types) && Array.isArray(d.srRule.pri)) ? d.srRule : JSON.parse(JSON.stringify(SR_RULE_DEF)); SR_CACHE=null;
   if(d.fmeaV!==3){ FMEA_STORE = {}; RCM_STORE = {}; }   /* failure-mode list changed to the 10 modes of the report */
   if(d.focusV!==2){ /* focus on 2 substations: keep only their 4 transformers */
     const keep = ['LKB-TR1','LKB-TR2','LKB-TR3','CLK-TR1','CLK-TR2','CLK-TR3'];
@@ -2712,7 +2712,7 @@ function heroBannerHtml(){
       <div class="chips">${N.sts.map(c=>`<button class="chip" data-goto-sch="${esc(c.st.id)}"><span class="st-code">${esc(c.st.id)}</span><span><b>${esc(c.st.name)}</b> · ${c.units.length} ${L('units','ตัว')}</span><span style="font-weight:800;color:${rBand(c.R)};">R<sub>SS</sub> ${f4(c.R)}</span></button>`).join('')}</div>
     </div>
     <div class="side">
-      <div class="kpi"><div class="l">${L('System reliability','ความเชื่อถือได้ของระบบ')} R<sub>sys</sub> (${N.t} ${L(N.t>1?'yrs':'yr','ปี')})</div><div class="v" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</div>${N.ranked[0]?`<div style="font-size:12.5px;margin-top:2px;">${L('Most critical to supply','สำคัญต่อระบบมากที่สุด')}: <b>${esc(N.ranked[0].a.id)}</b> (${pctR(N.ranked[0].IC)})</div>`:''}<button class="linklike" data-goto-rel="1" style="font-size:13px;text-align:left;">${L('How it is calculated →','ดูวิธีคำนวณ →')}</button></div>
+      <div class="kpi"><div class="l">${L('System reliability','ความเชื่อถือได้ของระบบ')} R<sub>sys</sub> (${tTxt(N.t)})</div><div class="v" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</div>${N.ranked[0]?`<div style="font-size:12.5px;margin-top:2px;">${L('Most critical to supply','สำคัญต่อระบบมากที่สุด')}: <b>${esc(N.ranked[0].a.id)}</b> (${pctR(N.ranked[0].IC)})</div>`:''}<button class="linklike" data-goto-rel="1" style="font-size:13px;text-align:left;">${L('How it is calculated →','ดูวิธีคำนวณ →')}</button></div>
       <div class="kpi"><div class="l">${L('Critical transformers','หม้อแปลงวิกฤต')}</div><div class="v" style="color:${urgent?'#c62d23':'#1fa571'};">${urgent}</div>${urgent?`<button class="linklike" data-goto-risk="1" style="font-size:13px;text-align:left;">${L('See priority →','ดูลำดับความสำคัญ →')}</button>`:`<span class="small-muted" style="font-size:13px;">${L('none','ไม่มี')}</span>`}</div>
     </div>
   </section>`;
@@ -2744,7 +2744,7 @@ function opYears(a){ const i = installDate(a); if(!i) return 0; return Math.max(
    r = number of work orders that match the failure rule (default: CM with Priority 1) for the unit;
    T = record period of the file (Jan of the first year → month of the latest work order). */
 const SR_HEAD = ['Service Request','Summary','สถานที่ติดตั้ง','Failure Code','Problem Code','Cause','Priority','Actual Start','Actual Finish','Work Center','Status','Reported','Reported By'];
-const SR_RULE_DEF = {types:['CM'], pri:[1]};
+const SR_RULE_DEF = {types:['CM'], pri:[1]};   /* corrective work orders with Priority 1 (agreed rule; same MTBF method as the RAM analysis) */
 var SR_LOG = [];                                   /* {sr, unit, type, pri, code, start (ISO), cells:[...SR_HEAD]} */
 var SR_RULE = JSON.parse(JSON.stringify(SR_RULE_DEF));
 function srIsFile(table){ const h=((table&&table[0])||[]).map(utilNorm); return ['Service Request','Failure Code','Priority'].every(c=>h.includes(utilNorm(c))); }
@@ -2752,7 +2752,33 @@ const srKey = v=>String(v??'').toLowerCase().replace(/[\s._\-]/g,'');
 function srMatchUnit(loc){ const s=String(loc??'').trim(); const m=s.match(/\(([^)]+)\)\s*$/);
   for(const c of [m?m[1]:null, s].filter(Boolean)){ const a=ASSETS.find(x=>srKey(x.id)===srKey(c)); if(a) return a.id; } return null; }
 function srCounts(r){ return SR_RULE.types.includes(r.type) && SR_RULE.pri.includes(r.pri); }
-function srRuleText(){ return `${SR_RULE.types.join(' + ')||'—'} · Priority ${SR_RULE.pri.join(', ')||'—'}`; }
+function srDT(v){ if(v instanceof Date) return isNaN(v)?null:v; if(typeof v==='number' && v>20000 && v<80000) return new Date(Math.round((v-25569)*864e5));
+  const t=String(v??'').trim(); if(!t) return null; let m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(m) return new Date(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));
+  m=t.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?:\s+(\d{1,2}):(\d{2}))?/); if(m){ let y=+m[3]; if(y>2400) y-=543; return new Date(y,+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0)); }
+  const d=new Date(t); return isNaN(d)?null:d; }
+const srCell = v=> (v instanceof Date && !isNaN(v)) ? `${isoD(v)} ${String(v.getHours()).padStart(2,'0')}:${String(v.getMinutes()).padStart(2,'0')}` : (v===null||v===undefined?'':v);
+const H_YEAR = 8760, H_MONTH = 720, T_MONTH = H_MONTH/H_YEAR;
+var SR_CACHE = null;
+/* counted events with valid times; year = only work orders that start in that year */
+function srEvents(year){ return SR_LOG.filter(r=>srCounts(r) && r.fin).map(r=>({u:r.unit, f:new Date(r.start), t:new Date(r.fin)}))
+  .filter(e=>!isNaN(e.f) && !isNaN(e.t) && e.t>=e.f && (e.t-e.f)/36e5<=H_YEAR && (!year || e.f.getFullYear()===year)); }
+function srStats(year){
+  const key=(year||'all'); if(SR_CACHE && SR_CACHE[key]) return SR_CACHE[key];
+  const evs=srEvents(year), by={}; evs.forEach(e=>(by[e.u]=by[e.u]||[]).push(e));
+  const units={}; let mtW=0, nW=0, aSum=0;
+  Object.keys(by).forEach(u=>{ const a=by[u].sort((p,q)=>p.f-q.f); const gaps=[];
+    for(let i=1;i<a.length;i++){ const g=(a[i].f-a[i-1].t)/36e5; if(g>0) gaps.push(g); }
+    const mtbf=gaps.length?gaps.reduce((x,v)=>x+v,0)/gaps.length:null, mttr=a.reduce((x,e)=>x+(e.t-e.f)/36e5,0)/a.length;
+    units[u]={n:a.length, gaps:gaps.length, mtbf, mttr, A: mtbf!=null ? mtbf/(mtbf+mttr) : null};
+    if(mtbf!=null) a.forEach(e=>{ mtW+=mtbf; nW++; aSum+=mtbf/(mtbf+(e.t-e.f)/36e5); }); });
+  const out={n:evs.length, units, mtbf: nW?mtW/nW:null, mttr: evs.length?evs.reduce((x,e)=>x+(e.t-e.f)/36e5,0)/evs.length:null, A: nW?aSum/nW:null};
+  (SR_CACHE=SR_CACHE||{})[key]=out; return out; }
+const ramR = (mtbf, tYr)=> mtbf ? Math.exp(-tYr*H_YEAR/mtbf) : null;
+const ramM = (mttr, tYr)=> mttr==null ? null : mttr>0 ? 1-Math.exp(-(tYr<1?12:24)/mttr) : 1;
+function tTxt(t){ return Math.abs(t-T_MONTH)<1e-9 ? L('1 month','1 เดือน') : `${t} ${L(t>1?'yrs':'yr','ปี')}`; }
+function tHours(t){ return Math.abs(t-T_MONTH)<1e-9 ? H_MONTH : t*H_YEAR; }
+function srRuleText(){ const all=[1,2,3,4].every(p=>SR_RULE.pri.includes(p)); return `${SR_RULE.types.join(' + ')||'—'}${all?L(' · all priorities',' · ทุก Priority'):` · Priority ${SR_RULE.pri.join(', ')||'—'}`}`; }
 function srHas(id){ return SR_LOG.some(r=>r.unit===id); }
 function srWindow(){ if(!SR_LOG.length) return null; const ds=SR_LOG.map(r=>new Date(r.start)).filter(d=>!isNaN(d)); if(!ds.length) return null;
   const y0=Math.min(...ds.map(d=>d.getFullYear())), last=new Date(Math.max(...ds)); const months=(last.getFullYear()-y0)*12+last.getMonth()+1; return {y0, last, months, T:months/12}; }
@@ -2760,37 +2786,45 @@ function srFails(id, upTo){ return SR_LOG.filter(r=>r.unit===id && srCounts(r) &
 function analyseSR(table){
   const head=table[0].map(utilNorm), col=h=>head.indexOf(utilNorm(h)); const errors=[], rows=[], unmatched={};
   table.slice(1).forEach((r,i)=>{ if(!r.some(c=>String(c??'').trim()!=='')) return; const g=h=>{ const j=col(h); return j<0?'':r[j]; };
-    const sr=String(g('Service Request')).trim(); const d=parseImportDate(g('Actual Start'))||parseImportDate(g('Reported'));
+    const sr=String(g('Service Request')).trim(); const d=srDT(g('Actual Start'))||srDT(g('Reported')), fin=srDT(g('Actual Finish'));
     if(!d){ errors.push(L(`Row ${i+2}: date not recognised`,`แถว ${i+2}: อ่านวันที่ไม่ได้`)); return; }
     const loc=String(g('สถานที่ติดตั้ง')).trim(), unit=srMatchUnit(loc); if(!unit){ unmatched[loc||'—']=(unmatched[loc||'—']||0)+1; return; }
     const tm=String(g('Summary')).match(/^\s*\[(CM|PM)\]/i);
-    rows.push({sr:sr||('row'+(i+2)), unit, type:tm?tm[1].toUpperCase():'?', pri:utilNum(g('Priority')), code:String(g('Failure Code')).trim(), start:d.toISOString(), cells:SR_HEAD.map(h=>implogCell(g(h)))}); });
+    rows.push({sr:sr||('row'+(i+2)), unit, type:tm?tm[1].toUpperCase():'?', pri:utilNum(g('Priority')), code:String(g('Failure Code')).trim(), start:d.toISOString(), fin:fin?fin.toISOString():null, cells:SR_HEAD.map(h=>srCell(g(h)))}); });
   return {rows, errors, unmatched}; }
 function trRel(a, t){
   const W = srHas(a.id) ? srWindow() : null;
-  const r = W ? srFails(a.id) : Math.max(0, Math.floor(+a.fails || 0)), T = W ? W.T : opYears(a);
+  if(W){ const st=srStats().units[a.id];
+    if(st && st.mtbf){ const lam=H_YEAR/st.mtbf; return {a, r:st.n, T:W.T, mtbf:st.mtbf, mttr:st.mttr, A:st.A, lam, zero:false, R:Math.exp(-lam*t), src:'sr'}; }
+    const r=st?st.n:0, lam=(r>0?r:NET_ZERO_K)/W.T; return {a, r, T:W.T, mtbf:null, mttr:st?st.mttr:null, lam, zero:r===0, R:Math.exp(-lam*t), src:'sr'}; }
+  const r = Math.max(0, Math.floor(+a.fails || 0)), T = opYears(a);
   const lam = T>0 ? (r>0 ? r/T : NET_ZERO_K/T) : 0;
-  return {a, r, T, lam, zero:r===0, R: Math.exp(-lam*t), src: W?'sr':'manual'};
+  return {a, r, T, lam, zero:r===0, R: Math.exp(-lam*t), src:'manual'};
 }
-/* year-by-year R from the Service Request file: λ = failures so far ÷ record period so far */
-function srYearly(N){ const W=srWindow(); if(!W) return null; const out=[];
-  for(let y=W.y0; y<=W.last.getFullYear(); y++){ const lastY = y===W.last.getFullYear(); const months = lastY ? W.months : 12*(y-W.y0+1);
-    const end = lastY ? W.last : new Date(y,11,31,23,59,59); const T=months/12;
-    const st = N.sts.map(c=>{ const rs=c.units.map(u=>{ if(!srHas(u.a.id)) return u.R; const n=srFails(u.a.id,end); const lam=n>0?n/T:NET_ZERO_K/T; return Math.exp(-lam*N.t); });
-      return c.units.length ? koutofn(rs, c.k) : 0; });
-    out.push({y, months, st, sys: st.reduce((x,v)=>x*v,1)}); }
-  return out; }
+/* R / A / M from the Service Request file — per year (work orders that start in that year) and for the whole period */
+function srRamRow(N, year){ const S=srStats(year), tH=tHours(N.t), tY=tH/H_YEAR;
+  const st=N.sts.map(c=>{ if(!c.units.length) return null; const rs=c.units.map(u=>{ if(!srHas(u.a.id)) return u.R; const x=S.units[u.a.id]; return x&&x.mtbf ? Math.exp(-tH/x.mtbf) : null; });
+    return rs.some(v=>v==null) ? null : koutofn(rs, c.k); });
+  return {year, n:S.n, mtbf:S.mtbf, mttr:S.mttr, A:S.A, R:ramR(S.mtbf,tY), M:ramM(S.mttr,tY), st, sys: st.some(v=>v==null)?null:st.reduce((x,v)=>x*v,1)}; }
 function srYearCard(N){
-  const W=srWindow(); const rows=srYearly(N); const pc=v=>(v*100).toFixed(2)+'%';
-  const head=`<div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('Reliability by year — from Service Requests','ความเชื่อถือได้รายปี — จาก Service Request')}</h3><div class="filter-row">${srButtons()}</div></div>`;
-  if(!W) return `<div class="card" style="margin-bottom:16px;">${head}<p class="small-muted" style="margin:0;font-size:13px;">${L('Import the Service Request (work order) file to count failures r per transformer automatically. Until then r is entered in Settings → Network.','นำเข้าไฟล์ Service Request (ใบสั่งงาน) เพื่อให้ระบบนับจำนวนครั้งที่เสีย r ของหม้อแปลงแต่ละลูกเอง จนกว่าจะนำเข้า r มาจากที่กรอกในตั้งค่า → เครือข่าย')}</p>${srColsHtml()}</div>`;
-  const yrs=Math.floor(W.months/12), mo=W.months%12;
+  const W=srWindow(); const pc=v=>v==null?'—':(v*100).toFixed(2)+'%';
+  const head=`<div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('Reliability from Service Requests','ความเชื่อถือได้จาก Service Request')}</h3><div class="filter-row">${srButtons()}</div></div>`;
+  if(!W) return `<div class="card" style="margin-bottom:16px;">${head}<p class="small-muted" style="margin:0;font-size:13px;">${L('Import the Service Request (work order) file: R of each transformer is then calculated from its MTBF. Until then r is entered in Settings → Network.','นำเข้าไฟล์ Service Request (ใบสั่งงาน) แล้วระบบจะคิด R ของหม้อแปลงแต่ละลูกจาก MTBF · จนกว่าจะนำเข้า r มาจากที่กรอกในตั้งค่า → เครือข่าย')}</p>${srColsHtml()}</div>`;
+  if(!SR_LOG.some(r=>r.fin)) return `<div class="card" style="margin-bottom:16px;">${head}<div class="notebox" style="background:var(--amber-bg);">${gicon('help',16)}<div>${L('The Service Request data was imported by an older version without repair times. Import the file again to calculate MTBF.','ข้อมูล Service Request นำเข้าจากเวอร์ชันเก่าที่ยังไม่เก็บเวลาซ่อม ให้นำเข้าไฟล์อีกครั้งเพื่อคำนวณ R')}</div></div></div>`;
+  const all=srRamRow(N,null), yrs=[]; for(let y=W.last.getFullYear(); y>=W.y0; y--) yrs.push(srRamRow(N,y));
+  const tH=tHours(N.t), mH=N.t<1?12:24;
+  const tile=(k,name,v,sub,fx,bg,col)=>`<div style="flex:1 1 200px;border-radius:12px;padding:14px 16px;background:${bg};"><div style="font-weight:800;color:${col};font-size:13px;">${k} · ${name}</div><div style="font-size:28px;font-weight:800;color:${col};line-height:1.25;">${pc(v)}</div><div class="small-muted" style="font-size:12px;">${sub}</div><div class="small-muted" style="font-size:12px;">${fx}</div></div>`;
   return `<div class="card" style="margin-bottom:16px;">${head}
-    <p class="small-muted" style="margin:-4px 0 10px;font-size:12.5px;">${L(`${SR_LOG.length} work orders · counted as failure: ${srRuleText()} · record period ${W.y0} – ${fmtD(W.last)} · each year uses failures so far ÷ years so far · t = ${N.t} yr`,`${SR_LOG.length} งาน · นับเป็นการเสีย: ${srRuleText()} · ช่วงที่มีบันทึก ${W.y0} – ${fmtD(W.last)} (${yrs} ปี${mo?` ${mo} เดือน`:''}) · แต่ละปีใช้ จำนวนครั้งที่เสียสะสม ÷ จำนวนปีสะสม · t = ${N.t} ปี`)}</p>
-    <div class="tbl-wrap"><table><thead><tr><th>${L('Year','ปี')}</th>${N.sts.map(c=>`<th>R ${esc(c.st.id)} <span class="small-muted" style="text-transform:none;font-weight:600;">(${c.k}-out-of-${c.units.length})</span></th>`).join('')}<th>R ${L('system','ระบบ')}</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr><td><b>${r.y}</b>${r.months%12 && r===rows[rows.length-1]?` <span class="small-muted">(${r.months%12} ${L('mo','เดือน')})</span>`:''}</td>${r.st.map(v=>`<td style="color:${rBand(v)};font-weight:700;">${pc(v)}</td>`).join('')}<td style="color:${rBand(r.sys)};font-weight:800;">${pc(r.sys)}</td></tr>`).join('')}
+    <p class="small-muted" style="margin:-4px 0 10px;font-size:12.5px;">${L(`${all.n} work orders counted (${srRuleText()}) · ${W.y0} – ${fmtD(W.last)} · average per transformer · t = ${tTxt(N.t)}`,`นับ ${all.n} งาน (${srRuleText()}) · ${W.y0} – ${fmtD(W.last)} · ค่าเฉลี่ยต่อหม้อแปลง 1 ลูก · t = ${tTxt(N.t)}`)}</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+      ${tile('R',L('Reliability — average of one transformer','Reliability — เฉลี่ยต่อหม้อแปลง 1 ลูก'),all.R,L(`no failure for ${tH.toLocaleString('en-US')} h (${tTxt(N.t)})`,`ไม่เสียเลยตลอด ${tH.toLocaleString('en-US')} ชม. (${tTxt(N.t)})`),`R = e<sup>−${tH.toLocaleString('en-US')} ÷ ${all.mtbf?all.mtbf.toFixed(1):'—'}</sup> × 100`,'#eaf1fb','#1f5fbf')}
+    </div>
+    <div class="tbl-wrap"><table><thead><tr><th>${L('Year','ปี')}</th><th>${L('Failures counted','งานที่นับ')}</th><th>R ${L('avg / unit','เฉลี่ยต่อลูก')}</th>${N.sts.map(c=>`<th>R ${esc(c.st.id)} <span class="small-muted" style="text-transform:none;font-weight:600;">(${c.k}-out-of-${c.units.length})</span></th>`).join('')}<th>R ${L('system','ระบบ')}</th></tr></thead><tbody>
+    ${[all].concat(state.srYears?yrs:[]).map(r=>`<tr${r===all?' style="background:#f3f6fa;"':''}><td><b>${r===all?L(`All years (${W.last.getFullYear()-W.y0+1})`,`ทุกปี (${W.last.getFullYear()-W.y0+1} ปี)`):r.year}</b></td><td>${r.n}</td>
+      <td style="color:${r.R==null?'inherit':rBand(r.R)};font-weight:800;">${pc(r.R)}</td>${r.st.map(v=>`<td style="color:${v==null?'inherit':rBand(v)};font-weight:700;">${pc(v)}</td>`).join('')}<td style="color:${r.sys==null?'inherit':rBand(r.sys)};font-weight:800;">${pc(r.sys)}</td></tr>`).join('')}
     </tbody></table></div>
-    <p class="small-muted" style="font-size:12px;margin:8px 0 0;">${L('The last row equals the values used on this page. Transformers without work orders in the file keep the r entered in Settings.','แถวสุดท้ายคือค่าที่ใช้ในหน้านี้ · หม้อแปลงที่ไม่มีงานในไฟล์ ใช้ค่า r ที่กรอกในหน้าตั้งค่า')}</p>${srColsHtml()}</div>`; }
+    <div style="margin-top:8px;"><button class="linklike" data-sr-years="1">${state.srYears?L('▴ Hide year-by-year','▴ ซ่อนค่ารายปี'):L('▾ Show year-by-year (work orders that start in each year)','▾ ดูค่ารายปี (เฉพาะงานที่เริ่มในปีนั้น)')}</button>${state.srYears?` <span class="small-muted" style="font-size:12px;">${L('Years with only a few failures give unstable values — use the “All years” row.','ปีที่มีงานน้อย ค่าจะแกว่งมาก ให้ใช้แถว “ทุกปี” เป็นหลัก')}</span>`:''}</div>
+    <p class="small-muted" style="font-size:12px;margin:8px 0 0;">${L('MTBF of a transformer = mean gap from the Actual Finish of one work order to the Actual Start of the next (gaps > 0). Average = mean of each work order’s transformer MTBF. A transformer with fewer than 2 work orders in a year has no MTBF (—). The “All years” row is used on this page.','MTBF ของหม้อแปลง = ค่าเฉลี่ยช่วงห่างจาก Actual Finish ของงานก่อนหน้า ถึง Actual Start ของงานถัดไป (นับเฉพาะช่วงที่มากกว่า 0) · ค่าเฉลี่ย = ค่าเฉลี่ยของ MTBF ของหม้อแปลงในทุกงาน · ปีที่หม้อแปลงมีงานน้อยกว่า 2 ครั้ง หา MTBF ไม่ได้ (—) · แถว “ทุกปี” คือค่าที่ใช้ในหน้านี้')}</p>${srColsHtml()}</div>`; }
 function srColsHtml(){ return `<div class="small-muted" style="font-size:12px;margin-top:6px;line-height:1.9;">${L('Columns','หัวคอลัมน์')}: <span class="raw-data">${SR_HEAD.map(h=>`<code style="background:#eef2f6;border-radius:4px;padding:1px 6px;font-size:11.5px;white-space:nowrap;">${esc(h)}</code>`).join(' ')}</span></div>`; }
 function srButtons(){ return `<button class="btn btn-ghost" data-sr-template="1" style="padding:6px 12px;font-size:13px;">${L('Template','แม่แบบ')}</button>${SR_LOG.length?`<button class="btn btn-outline" data-sr-view="1" style="padding:6px 12px;font-size:13px;">${L('View Service Requests','เปิดดู Service Request')}</button>`:''}<button class="btn btn-outline" data-import-sr="1" style="padding:6px 12px;font-size:13px;">${L('Import Service Request','นำเข้า Service Request')}</button>`; }
 function downloadSRTemplate(){ const ex=['SR-2026-00001','[CM] KO-TR.1 Tripping relay ชำรุด ตรวจสอบและแก้ไขวงจร','คอต่อ (KO-TR.1)','T106','P-TRIP','C-MOISTURE',1,'2026-03-08 21:30','2026-03-09 07:00','KO-TR-MAINT','CLOSED','2026-03-08 20:10','KO-OPERATOR-01'];
@@ -2810,7 +2844,7 @@ function openSRView(unit){
 function downloadSRView(unit){ const rows=SR_LOG.filter(r=>!unit||r.unit===unit).slice().sort((p,q)=>p.start<q.start?-1:1); const aoa=[SR_HEAD, ...rows.map(r=>r.cells)]; const name='service_request'+(unit?'_'+unit.replace(/[^\w\-.]+/g,'_'):'');
   if(typeof XLSX!=='undefined' && XLSX.utils){ const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'Service Request'); XLSX.writeFile(wb, name+'.xlsx'); return; }
   downloadFile(name+'.csv','﻿'+toCSV(aoa),'text/csv'); }
-document.addEventListener('click', e=>{ const v=e.target.closest('[data-sr-view]'); if(v){ e.preventDefault(); openSRView(v.dataset.srUnit||''); return; }
+document.addEventListener('click', e=>{ const yb=e.target.closest('[data-sr-years]'); if(yb){ e.preventDefault(); state.srYears=!state.srYears; render(); return; } const v=e.target.closest('[data-sr-view]'); if(v){ e.preventDefault(); openSRView(v.dataset.srUnit||''); return; }
   const d=e.target.closest('[data-sr-dl]'); if(d){ e.preventDefault(); downloadSRView(d.dataset.srDl||''); return; }
   const tp=e.target.closest('[data-sr-template]'); if(tp){ e.preventDefault(); downloadSRTemplate(); } });
 function openSRImport(){
@@ -2827,13 +2861,13 @@ function openSRImport(){
         <p class="small-muted" style="font-size:12.5px;">${L('Work orders with the same number replace the old ones. The failure rule can be changed later in Settings → Network.','งานที่เลข Service Request ซ้ำกับของเดิมจะแทนที่ของเดิม · เปลี่ยนเกณฑ์การนับได้ภายหลังที่ ตั้งค่า → เครือข่าย')}</p>`,
         ()=>{ if(!r.rows.length){ toast(L('Nothing to import','ไม่มีข้อมูลให้นำเข้า')); return; }
           const ids=new Set(r.rows.map(x=>x.sr)); SR_LOG = SR_LOG.filter(x=>!ids.has(x.sr)).concat(r.rows).sort((p,q)=>p.start<q.start?-1:1);
-          implogAdd(f.name,'sr',{[f.name.replace(/\.[^.]+$/,'')]:table},{sr:r.rows.length, skipped:Object.values(r.unmatched).reduce((x,v)=>x+v,0)+r.errors.length});
+          SR_CACHE=null; implogAdd(f.name,'sr',{[f.name.replace(/\.[^.]+$/,'')]:table},{sr:r.rows.length, skipped:Object.values(r.unmatched).reduce((x,v)=>x+v,0)+r.errors.length});
           ASSETS.forEach(a=>{ delete a._risk; }); saveData(); render(); toast(L(`Imported ${r.rows.length} work orders`,`นำเข้า ${r.rows.length} งาน`),'success'); }); }); });
   inp.click(); }
 document.addEventListener('click', e=>{ const b=e.target.closest('[data-import-sr]'); if(b){ e.preventDefault(); if(!can('network')) return; openSRImport(); return; }
-  const c=e.target.closest('[data-sr-clear]'); if(c){ e.preventDefault(); if(!can('network')) return; if(!confirm(L('Remove all Service Request data? r goes back to the values entered by hand.','ลบข้อมูล Service Request ทั้งหมด? ค่า r จะกลับไปใช้ค่าที่กรอกเอง'))) return; SR_LOG=[]; saveData(); render(); } });
+  const c=e.target.closest('[data-sr-clear]'); if(c){ e.preventDefault(); if(!can('network')) return; if(!confirm(L('Remove all Service Request data? r goes back to the values entered by hand.','ลบข้อมูล Service Request ทั้งหมด? ค่า r จะกลับไปใช้ค่าที่กรอกเอง'))) return; SR_LOG=[]; SR_CACHE=null; saveData(); render(); } });
 document.addEventListener('change', e=>{ const cb=e.target.closest('[data-sr-rule]'); if(!cb) return; if(!can('network')) return; const [k,v]=cb.dataset.srRule.split(':'); const key=k==='type'?'types':'pri'; const val=k==='type'?v:Number(v);
-  const set=new Set(SR_RULE[key]); if(cb.checked) set.add(val); else set.delete(val); SR_RULE[key]=[...set].sort(); saveData(); render(); });
+  const set=new Set(SR_RULE[key]); if(cb.checked) set.add(val); else set.delete(val); SR_RULE[key]=[...set].sort(); SR_CACHE=null; saveData(); render(); });
 function koutofn(rs, k){ const n=rs.length; let tot=0; for(let m=0;m<(1<<n);m++){ let up=0, pr=1; for(let i=0;i<n;i++){ if((m>>i)&1){ up++; pr*=rs[i]; } else pr*=1-rs[i]; } if(up>=k) tot+=pr; } return tot; }
 function autoK(units, peak){ if(!units.length) return 1; const caps = units.map(u=>+u.a.cap||0).sort((x,y)=>x-y); let sum=0; for(let k=1;k<=caps.length;k++){ sum+=caps[k-1]; if(sum >= (+peak||0)) return k; } return caps.length; }
 function netCalc(){
@@ -2860,7 +2894,7 @@ function netStationSvg(c, mode){
   const n = Math.max(1, c.units.length); const slot = 200; const W = Math.max(400, 20 + n*slot), H = 250;
   const busY = 34, lvY = 196; const x0 = (W - n*slot)/2;
   const items = c.units.map((u,i)=>{ const x = x0 + i*slot + 62, col = sld ? stCol(u.a) : rBand(u.R), top = !sld && u.rank===1, tx = x + 27;
-    return `<g class="tr" data-view="${u.a.id}"><title>${u.a.id} — R(${NET.t}y) ${f4(u.R)}</title>
+    return `<g class="tr" data-view="${u.a.id}"><title>${u.a.id} — R(${tTxt(+NET.t||1)}) ${f4(u.R)}</title>
       <rect x="${x-50}" y="${busY+40}" width="${slot-12}" height="80" fill="transparent"/>
       <line x1="${x}" y1="${busY}" x2="${x}" y2="${lvY}" stroke="#8A959E" stroke-width="2"/>
       <rect x="${x-7}" y="${busY+16}" width="14" height="14" fill="#fff" stroke="#2B4C6F" stroke-width="2"/>
@@ -2894,7 +2928,7 @@ function netRedundancyText(c){
 function netSummaryHtml(){
   const N = netCalc(); const top = N.ranked[0];
   return `<div class="card" style="margin-bottom:16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;">
-    <div style="display:flex;align-items:center;gap:12px;">${badge('reliability',40)}<div><div class="label" style="font-weight:700;color:var(--muted);font-size:13.5px;">${L('System reliability','ความเชื่อถือได้ของระบบ')} R<sub>sys</sub>(${N.t} ${L(N.t>1?'yrs':'yr','ปี')})</div><div style="font-size:24px;font-weight:800;color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</div></div></div>
+    <div style="display:flex;align-items:center;gap:12px;">${badge('reliability',40)}<div><div class="label" style="font-weight:700;color:var(--muted);font-size:13.5px;">${L('System reliability','ความเชื่อถือได้ของระบบ')} R<sub>sys</sub>(${tTxt(N.t)})</div><div style="font-size:24px;font-weight:800;color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</div></div></div>
     <div style="flex:1;min-width:220px;font-size:14px;">${top?`${L('Most critical to supply','สำคัญต่อระบบมากที่สุด')}: <b>${top.a.id}</b> (${esc(top.c.st.name)}) · ${L(`${pctR(top.IC)} chance it is the cause if the system fails`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่สาเหตุมาจากตัวนี้`)}<div class="small-muted">${N.sts.map(c=>`${esc(c.st.name)} R<sub>SS</sub> ${f4(c.R)}`).join(' · ')}</div>`:`<span class="small-muted">${L('No substation set up yet.','ยังไม่ได้ตั้งค่าสถานี')}</span>`}</div>
     <button class="btn btn-primary" data-goto-rel="1">${L('Open reliability page →','เปิดหน้าความเชื่อถือได้ →')}</button></div>`;
 }
@@ -2945,7 +2979,7 @@ function relRealSvg(N){
   /* system result */
   const rx = W - RW + 6, ry = 120;
   parts.push(`<rect x="${rx}" y="${ry}" width="${RW-24}" height="170" rx="14" fill="#f3f6f9" stroke="#d6dde4"/>
-    ${tx(rx+16,ry+26,L(`System reliability · ${N.t} ${N.t>1?'years':'year'}`,`ความเชื่อถือได้ของระบบ · ${N.t} ปี`),{fs:11,fw:700})}
+    ${tx(rx+16,ry+26,`${L('System reliability','ความเชื่อถือได้ของระบบ')} · ${tTxt(N.t)}`,{fs:11,fw:700})}
     ${tx(rx+16,ry+64,N.sts.length?f4(N.Rsys):'—',{fs:30,fw:800,c:rBand(N.Rsys)})}${tx(rx+RW-40,ry+64,L('system','ระบบ'),{a:'end',fs:9.5})}
     ${tx(rx+16,ry+88,`R<tspan font-size="9" dy="2">sys</tspan><tspan dy="-2"> = ${N.sts.map(c=>`R<tspan font-size="9" dy="2">${esc(c.st.id)}</tspan><tspan dy="-2"></tspan>`).join(' × ')}</tspan>`,{fs:10.5,c:'#38434d'})}
     ${tx(rx+16,ry+106,N.sts.map(c=>f4(c.R)).join(' × '),{fs:10.5,c:'#38434d'})}
@@ -3018,7 +3052,7 @@ function sldRealSvg(c, tYr){ tYr = tYr || 1;
     return `
     ${ln(x,yBusHV,x,yT1-20,HV,2.4)}
     ${ds(x,yBusHV+22,HV,`DS-${no}`)}${cb(x,yBusHV+52,HV,`CB-${no}H`)}${ct(x,yBusHV+76,HV)}${la(x,yBusHV+92,HV,-1)}
-    <g class="tr" data-view="${esc(a.id)}"><title>${esc(a.id)} — HI ${fmtHi(a.hi)} · ${trStatus(a.status)} · R(${tYr} ${L('yr','ปี')}) ${f4(u.R)} · λ ${f4(u.lam)}/${L('yr','ปี')} · I_C ${pctR(u.IC)}</title>
+    <g class="tr" data-view="${esc(a.id)}"><title>${esc(a.id)} — HI ${fmtHi(a.hi)} · ${trStatus(a.status)} · R(${tTxt(tYr)}) ${f4(u.R)} · λ ${f4(u.lam)}/${L('yr','ปี')} · I_C ${pctR(u.IC)}</title>
       <rect class="trbox" x="${x-34}" y="${yT1-26}" width="${bay-40}" height="${yT2-yT1+78}" rx="10" fill="${rC}" fill-opacity=".07" stroke="${rC}" stroke-opacity=".45" stroke-dasharray="4 3"/>
       <circle cx="${x+bay-86}" cy="${yT1-26}" r="11" fill="${rk===1?'#c62d23':'#2B4C6F'}"/><text x="${x+bay-86}" y="${yT1-22.5}" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">#${rk}</text>
       <circle cx="${x}" cy="${yT1}" r="18" fill="#fff"/><circle cx="${x}" cy="${yT2}" r="18" fill="#fff"/>
@@ -3052,7 +3086,7 @@ function sldRealSvg(c, tYr){ tYr = tYr || 1;
     ${lvBus}${ties}
     ${tx(mL-40,yBusLV-10,`${kvLV} kV BUS`,{fs:10.5,fw:800,c:LV})}
     ${tx(mL-40,H-14,L(`${totalF} outgoing ${kvLV} kV feeders · peak load ${+c.st.peak||0} MVA`,`ฟีดเดอร์ขาออก ${kvLV} kV ${totalF} วงจร · โหลดสูงสุด ${+c.st.peak||0} MVA`),{fs:10.5,fw:700,c:'#38434d'})}
-    ${c.units.length?`<rect x="${W-mR-196}" y="${H-34}" width="196" height="26" rx="13" fill="${rBand(c.R)}"/>${tx(W-mR-98,H-16,`R<tspan font-size="9" dy="2">SS</tspan><tspan dy="-2"> = ${f4(c.R)} · ${c.k}-out-of-${c.units.length} · ${tYr} ${L(tYr>1?'yrs':'yr','ปี')}</tspan>`,{a:'middle',fs:11.5,fw:800,c:'#fff'})}`:''}
+    ${c.units.length?`<rect x="${W-mR-196}" y="${H-34}" width="196" height="26" rx="13" fill="${rBand(c.R)}"/>${tx(W-mR-98,H-16,`R<tspan font-size="9" dy="2">SS</tspan><tspan dy="-2"> = ${f4(c.R)} · ${c.k}-out-of-${c.units.length} · ${tTxt(tYr)}</tspan>`,{a:'middle',fs:11.5,fw:800,c:'#fff'})}`:''}
   </svg>`;
 }
 function sldLegendHtml(){
@@ -3104,12 +3138,12 @@ function netHtml(){
   const units = N.sts.flatMap(c=>c.units);
   const step = (n, title, why, body)=>`<div class="calc-step"><div class="sh"><span class="sn">${n}</span><h4>${title}</h4></div><p class="why">${why}</p>${body}</div>`;
   const s1 = step(1, L('Reliability of each transformer','ความเชื่อถือได้ของหม้อแปลงแต่ละตัว'),
-      L(`How likely each unit is to run ${tt} ${yr} without failing.`,`โอกาสที่หม้อแปลงแต่ละตัวจะใช้งานได้ตลอด ${tt} ${yr} โดยไม่เสีย`),
-      `<div class="fx">λ = r ÷ T &nbsp;→&nbsp; R(t) = e<sup>−λ·t</sup></div>
+      L(`How likely each unit is to run ${tTxt(tt)} without failing.`,`โอกาสที่หม้อแปลงแต่ละตัวจะใช้งานได้ตลอด ${tTxt(tt)} โดยไม่เสีย`),
+      `<div class="fx">${SR_LOG.length?`λ = 8,760 ÷ MTBF (${L('h','ชม.')}) &nbsp;→&nbsp; R(t) = e<sup>−λ·t</sup> = e<sup>−t(${L('h','ชม.')}) ÷ MTBF</sup>`:'λ = r ÷ T &nbsp;→&nbsp; R(t) = e<sup>−λ·t</sup>'}</div>
       <div class="tbl-wrap"><table><thead><tr><th>${L('Transformer','หม้อแปลง')}</th><th>${L('Substation','สถานี')}</th><th>${L('Failures','ครั้งที่เสีย')} <span style="text-transform:none">r</span></th><th>${L('In service','ใช้งานมา')} <span style="text-transform:none">T</span> (${L('yr','ปี')})</th><th style="text-transform:none">λ = r ÷ T</th><th style="text-transform:none">R(${tt}) = e<sup>−λt</sup></th></tr></thead><tbody>
-      ${units.map(u=>`<tr><td><b>${esc(u.a.id)}</b></td><td><span class="st-code">${esc(u.c.st.id)}</span></td><td>${u.r}${u.zero?'*':''}${u.src==='sr'?` <span class="small-muted" style="font-size:11px;">SR</span>`:''}</td><td>${u.T.toFixed(2)}</td>
-        <td><div class="cv">${f4(u.lam)}</div><div class="cf">${u.zero?'0.693':u.r} ÷ ${u.T.toFixed(2)}</div></td>
-        <td><div class="cv" style="color:${rBand(u.R)};">${f4(u.R)}</div><div class="cf">e<sup>−${f4(u.lam)}×${tt}</sup></div></td></tr>`).join('')}
+      ${units.map(u=>`<tr><td><b>${esc(u.a.id)}</b></td><td><span class="st-code">${esc(u.c.st.id)}</span></td><td>${u.r}${u.zero?'*':''}${u.src==='sr'?` <span class="small-muted" style="font-size:11px;">SR</span>`:''}</td><td>${u.mtbf?`<span class="small-muted" style="font-size:11.5px;">MTBF</span> ${u.mtbf.toFixed(1)} ${L('h','ชม.')}`:u.T.toFixed(2)}</td>
+        <td><div class="cv">${f4(u.lam)}</div><div class="cf">${u.mtbf?`8,760 ÷ ${u.mtbf.toFixed(1)}`:`${u.zero?'0.693':u.r} ÷ ${u.T.toFixed(2)}`}</div></td>
+        <td><div class="cv" style="color:${rBand(u.R)};">${f4(u.R)}</div><div class="cf">e<sup>−${f4(u.lam)}×${+(+tt).toFixed(4)}</sup></div></td></tr>`).join('')}
       </tbody></table></div>
       <p class="small-muted" style="font-size:12px;margin:6px 0 0;">* ${L('No failure recorded yet: 0.693 is used instead of 0 (median estimate, χ²<sub>0.50,2</sub> ÷ 2) so R is not 100 %.','ยังไม่เคยเสีย: ใช้ 0.693 แทน 0 (ค่าประมาณกลาง χ²<sub>0.50,2</sub> ÷ 2) เพื่อไม่ให้ R เป็น 100%')} ${L(`T is counted from the installation date to the latest lab result (${fmtD(netRefDate())}). r counts only failures that took the transformer out of service (defect codes T016 trip and T015 replacement; oil-leak codes T006–T011 are not counted); history before 2025 (B.E. 2568) comes from interviews with substation staff because the CMMS records start in 2025 — the values shown are placeholders until confirmed.`,`T นับจากวันที่ติดตั้งถึงวันที่ผลแล็บล่าสุด (${fmtD(netRefDate())}) · r นับเฉพาะการขัดข้องที่ทำให้หม้อแปลงหลุดออกจากระบบ (รหัส T016 หม้อแปลง Trip และ T015 เปลี่ยนหม้อแปลงชำรุด ไม่นับรหัสน้ำมันรั่วซึม T006–T011) · ประวัติก่อนปี 2568 ได้จากการสัมภาษณ์เจ้าหน้าที่สถานี เพราะระบบ CMMS เริ่มบันทึกในปี 2568 — ค่าที่แสดงเป็นค่าสมมติจนกว่าจะยืนยัน`)}</p>${refNote('Constant failure rate λ = r ÷ T and R(t) = e<sup>−λt</sup> (exponential model): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley.','อัตราการเสียคงที่ λ = r ÷ T และ R(t) = e<sup>−λt</sup> (แบบเอกซ์โพเนนเชียล): Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley')}`);
   const s2 = step(2, L('Reliability of each substation','ความเชื่อถือได้ของแต่ละสถานี'),
@@ -3124,7 +3158,7 @@ function netHtml(){
       </tbody></table></div>${refNote('Series, parallel and k-out-of-n structures: Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley. k = units needed to carry the peak load (N-1 criterion).','โครงสร้างอนุกรม ขนาน และ k-out-of-n: Rausand &amp; Høyland (2004), <i>System Reliability Theory</i>, 2nd ed., Wiley · k = จำนวนหม้อแปลงที่ต้องใช้รับโหลดสูงสุด (เกณฑ์ N-1)')}`);
   const s3 = step(3, L('Reliability of the whole system','ความเชื่อถือได้ของทั้งระบบ'),
       L('Every substation must be able to supply its load, so the substations are multiplied (series).','ทุกสถานีต้องจ่ายไฟได้ จึงนำค่าของแต่ละสถานีมาคูณกัน (อนุกรม)'),
-      `<div class="calc-res"><span>R<sub>sys</sub> = ${N.sts.map(c=>`R<sub>${esc(c.st.id)}</sub>`).join(' × ')}</span><span>= ${N.sts.map(c=>f4(c.R)).join(' × ')}</span><span>=</span><span class="eq" style="color:${rBand(N.Rsys)};">${f4(N.Rsys)}</span><span class="small-muted">(${L(`${pctR(N.Rsys)} chance the whole system runs ${tt} ${yr} without a supply loss`,`โอกาส ${pctR(N.Rsys)} ที่ระบบจะจ่ายไฟได้ตลอด ${tt} ${yr}`)})</span></div>`);
+      `<div class="calc-res"><span>R<sub>sys</sub> = ${N.sts.map(c=>`R<sub>${esc(c.st.id)}</sub>`).join(' × ')}</span><span>= ${N.sts.map(c=>f4(c.R)).join(' × ')}</span><span>=</span><span class="eq" style="color:${rBand(N.Rsys)};">${f4(N.Rsys)}</span><span class="small-muted">(${L(`${pctR(N.Rsys)} chance the whole system runs ${tTxt(tt)} without a supply loss`,`โอกาส ${pctR(N.Rsys)} ที่ระบบจะจ่ายไฟได้ตลอด ${tTxt(tt)}`)})</span></div>`);
   const s4 = step(4, L('Importance — which transformer to focus on','ความสำคัญ — ควรโฟกัสตัวไหน'),
       L('I_B: how much the system depends on this unit (system R if it never fails − if it has failed). I_C: if the system fails, the chance that this unit has failed and is what brought the system down = I_B × (1 − R) ÷ (1 − R_sys). The I_C values need not add up to 100 %.','I<sub>B</sub>: ระบบพึ่งพาหม้อแปลงตัวนี้มากแค่ไหน (R ระบบเมื่อตัวนี้ไม่เสีย − เมื่อตัวนี้เสีย) · I<sub>C</sub>: ถ้าระบบล้มเหลว มีโอกาสเท่าไรที่ตัวนี้เสียและเป็นตัวที่ทำให้ระบบล้ม = I<sub>B</sub> × (1 − R) ÷ (1 − R<sub>sys</sub>) · ผลรวม I<sub>C</sub> ไม่จำเป็นต้องเท่ากับ 100%'),
       `<div class="tbl-wrap"><table><thead><tr><th>#</th><th>${L('Transformer','หม้อแปลง')}</th><th style="text-transform:none">R<sub>sys</sub> ${L('if it never fails','ถ้าตัวนี้ไม่เสีย')}</th><th style="text-transform:none">R<sub>sys</sub> ${L('if it fails','ถ้าตัวนี้เสีย')}</th><th style="text-transform:none">I<sub>B</sub> (${L('difference','ผลต่าง')})</th><th style="text-transform:none">${L('Chance it fails','โอกาสเสีย')} 1 − R</th><th style="text-transform:none">I<sub>C</sub></th></tr></thead><tbody>
@@ -3134,10 +3168,10 @@ function netHtml(){
   return `<div class="card" style="margin-bottom:16px;">
     <div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('System reliability — which unit matters most for supply','ความเชื่อถือได้ของระบบ — หม้อแปลงตัวไหนสำคัญต่อการจ่ายไฟมากที่สุด')}</h3>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span class="small-muted">${L('Mission time','ช่วงเวลา')} t</span>
-      <div class="seg">${[1,3,5].map(v=>`<button class="${+NET.t===v?'on':''}" data-net-t="${v}">${v} ${L(v>1?'yrs':'yr','ปี')}</button>`).join('')}</div>
+      <div class="seg">${[T_MONTH,1,3,5].map(v=>`<button class="${Math.abs(+NET.t-v)<1e-9?'on':''}" data-net-t="${v}">${tTxt(v)}</button>`).join('')}</div>
       <button class="btn btn-primary" data-net-addst="1" style="padding:6px 12px;font-size:13px;">+ ${L('Add substation','เพิ่มสถานี')}</button>
       <button class="btn btn-outline" data-net-edit="1" style="padding:6px 12px;font-size:13px;">${L('Edit network','แก้ไขเครือข่าย')}</button></div></div>
-    <div class="net-sys"><span>${L('System reliability','ความเชื่อถือได้ของระบบ')} R<sub>sys</sub>(${tt} ${yr}) ${tip(L('R_sys = chance that every substation can supply its peak load for the whole period. R_SS is the same for one substation. I_C = if the system fails, the chance this unit failed and caused it.','R_sys = โอกาสที่ทุกสถานีจ่ายโหลดสูงสุดได้ตลอดช่วงเวลา · R_SS คือค่าเดียวกันของสถานีเดียว · I_C = ถ้าระบบล้ม โอกาสที่ตัวนี้เสียและเป็นต้นเหตุ'))} <b class="big" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</b></span>
+    <div class="net-sys"><span>${L('System reliability','ความเชื่อถือได้ของระบบ')} R<sub>sys</sub>(${tTxt(tt)}) ${tip(L('R_sys = chance that every substation can supply its peak load for the whole period. R_SS is the same for one substation. I_C = if the system fails, the chance this unit failed and caused it.','R_sys = โอกาสที่ทุกสถานีจ่ายโหลดสูงสุดได้ตลอดช่วงเวลา · R_SS คือค่าเดียวกันของสถานีเดียว · I_C = ถ้าระบบล้ม โอกาสที่ตัวนี้เสียและเป็นต้นเหตุ'))} <b class="big" style="color:${rBand(N.Rsys)};">${N.sts.length?f4(N.Rsys):'—'}</b></span>
       ${top?`<span>${L('Most critical to supply','สำคัญต่อระบบมากที่สุด')}: <b>${esc(top.a.id)}</b> (${esc(top.c.st.name)}) — ${L(`if the system fails, there is a ${pctR(top.IC)} chance that this unit has failed and is what brought the system down`,`ถ้าระบบล้มเหลว มีโอกาส ${pctR(top.IC)} ที่ตัวนี้เสียและเป็นตัวที่ทำให้ระบบล้ม`)}</span>`:''}</div>
     <div style="margin:4px 0 10px;">${stHtml || `<p class="small-muted">${L('No substation yet — press “+ Add substation”.','ยังไม่มีสถานี — กด “+ เพิ่มสถานี”')}</p>`}</div>
     <div class="net-legend"><span><i style="background:#1fa571"></i>R ≥ 0.95</span><span><i style="background:#d99012"></i>0.85–0.95</span><span><i style="background:#c62d23"></i>&lt; 0.85</span><span>${state.relView==='rbd' ? L('Reliability block diagram: blocks side by side = series (all needed) · stacked = parallel (back each other up). Click a block to open the transformer.','แผนภาพบล็อกความเชื่อถือได้ (RBD): บล็อกเรียงต่อกัน = อนุกรม (ต้องใช้ทุกตัว) · บล็อกซ้อนกัน = ขนาน (สำรองกันได้) · กดที่บล็อกเพื่อเปิดหม้อแปลง') : L('Transformers are drawn as they are connected. Colour = R(t) of each unit; #1, #2… = focus order inside each substation (higher I_C first). k-out-of-n = how many units must work to carry the peak load. Click a transformer to open it.','หม้อแปลงวาดตามการต่อจริง · สี = R(t) ของแต่ละตัว · #1, #2… = ลำดับที่ต้องโฟกัสในแต่ละสถานี (I_C สูงก่อน) · k-out-of-n = ต้องมีกี่ตัวทำงานจึงรับโหลดสูงสุดได้ · กดที่หม้อแปลงเพื่อเปิดดู')}</span><button class="linklike" data-goto-sch="1" style="font-size:12.5px;">${L('See the single-line diagram →','ดูแผนภาพวงจร →')}</button></div>
@@ -3154,7 +3188,7 @@ function netHtml(){
   ${N.sts.length ? stationFocusHtml(N) : ''}
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head"><h3>${L('Importance ranking','อันดับความสำคัญต่อระบบ')}</h3><span class="small-muted">${L('by criticality importance I_C','เรียงตาม Criticality importance (I<sub>C</sub>)')}</span></div>
-    <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>#</th><th>${L('Transformer','หม้อแปลง')}</th><th>${L('Substation','สถานี')}</th><th>R(${tt})</th><th style="min-width:200px;">${L('If the system fails: chance this unit failed and caused it','ถ้าระบบล้ม: โอกาสที่ตัวนี้เสียและเป็นต้นเหตุ')} (I<sub>C</sub>)</th><th>HI</th><th>${L('Impact on supply','ผลต่อการจ่ายไฟ')}</th></tr></thead><tbody>${rank||`<tr><td colspan="7" class="small-muted">—</td></tr>`}</tbody></table></div>
+    <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>#</th><th>${L('Transformer','หม้อแปลง')}</th><th>${L('Substation','สถานี')}</th><th>R(${tTxt(tt)})</th><th style="min-width:200px;">${L('If the system fails: chance this unit failed and caused it','ถ้าระบบล้ม: โอกาสที่ตัวนี้เสียและเป็นต้นเหตุ')} (I<sub>C</sub>)</th><th>HI</th><th>${L('Impact on supply','ผลต่อการจ่ายไฟ')}</th></tr></thead><tbody>${rank||`<tr><td colspan="7" class="small-muted">—</td></tr>`}</tbody></table></div>
     <p class="legend1">${L('Impact on supply from failure history and station connection — not the maintenance order.','ผลต่อการจ่ายไฟจากประวัติการเสียและการต่อของสถานี — ไม่ใช่ลำดับการบำรุงรักษา')} <button class="linklike" data-goto-page="risk" style="font-size:13px;">${L('Maintenance priority →','ลำดับการบำรุงรักษา →')}</button></p>
   </div>
   ${srYearCard(N)}
@@ -3165,7 +3199,7 @@ function netHtml(){
       <li>${L('λ = r ÷ T, where r is the number of failures recorded for the unit in Settings → Network. State what you count as a failure: if every forced outage is counted, λ is well above the major-failure rates of roughly 0.5–1 % per year reported in utility surveys (check the source before citing).','λ = r ÷ T โดย r คือจำนวนครั้งที่เสียซึ่งบันทึกไว้ใน ตั้งค่า → เครือข่าย ควรระบุนิยามของ “เสีย” ให้ชัด: ถ้านับทุกครั้งที่ต้องหยุดฉุกเฉิน (forced outage) ค่า λ จะสูงกว่าอัตราเสียหายหนักในผลสำรวจของการไฟฟ้า ซึ่งอยู่ราว 0.5–1% ต่อปี (ควรตรวจกับเอกสารต้นฉบับก่อนอ้างอิง)')}</li>
       <li>${L('Reliability here uses failure history only, not oil-test condition (HI). Condition-based priority is on the Risk & Priority page.','ความเชื่อถือได้ในหน้านี้ใช้ประวัติการเสียเท่านั้น ไม่ได้ใช้ผลตรวจน้ำมัน (HI) ลำดับตามสภาพอยู่ที่หน้าความเสี่ยงและลำดับความสำคัญ')}</li>
     </ul></details>
-  ${N.sts.length?`<details class="card calc-fold" id="relCalcFold" ${state.relCalcOpen?'open':''}><summary class="card-head"><h3>${L('How it is calculated — step by step','วิธีคำนวณ — ทีละขั้น')}</h3><span class="small-muted">t = ${tt} ${yr} · <span class="calc-fold-hint">${state.relCalcOpen?L('Hide','ซ่อน'):L('Show','แสดง')}</span></span></summary>${s1}${s2}${s3}${s4}</details>`:''}`;
+  ${N.sts.length?`<details class="card calc-fold" id="relCalcFold" ${state.relCalcOpen?'open':''}><summary class="card-head"><h3>${L('How it is calculated — step by step','วิธีคำนวณ — ทีละขั้น')}</h3><span class="small-muted">t = ${tTxt(tt)} · <span class="calc-fold-hint">${state.relCalcOpen?L('Hide','ซ่อน'):L('Show','แสดง')}</span></span></summary>${s1}${s2}${s3}${s4}</details>`:''}`;
 }
 
 /* focus order inside each substation: by I_C (then lower HI), with a plain reason for each rank */
@@ -3190,9 +3224,9 @@ function stationFocusHtml(N){
       : L(`needs ${c.k} of ${c.units.length} units for the peak load — ${spare} spare`,`ต้องใช้ ${c.k} จาก ${c.units.length} ตัวเพื่อรับโหลดสูงสุด มีตัวสำรอง ${spare} ตัว`);
     return `<div class="card" style="margin-bottom:12px;">
       <div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3 style="margin:0;"><span class="st-code">${esc(c.st.id)}</span> ${esc(c.st.name)}</h3>
-        <span class="small-muted">${L('Substation reliability','ความเชื่อถือได้ของสถานี')} R<sub>SS</sub>(${tt} ${yr}) <b style="color:${rBand(c.R)};">${f4(c.R)}</b> · ${L('share of system failures','สัดส่วนที่ทำให้ระบบล้ม')} ≈ <b>${pctR(shareSys(c))}</b>${N.sts.length>1?` · ${L('substation focus','ลำดับสถานี')} <b>#${si+1}</b>`:''}</span></div>
+        <span class="small-muted">${L('Substation reliability','ความเชื่อถือได้ของสถานี')} R<sub>SS</sub>(${tTxt(tt)}) <b style="color:${rBand(c.R)};">${f4(c.R)}</b> · ${L('share of system failures','สัดส่วนที่ทำให้ระบบล้ม')} ≈ <b>${pctR(shareSys(c))}</b>${N.sts.length>1?` · ${L('substation focus','ลำดับสถานี')} <b>#${si+1}</b>`:''}</span></div>
       <p class="small-muted" style="margin:0 0 8px;font-size:13px;">${spareTxt}</p>
-      <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${L('Focus','ลำดับโฟกัส')}</th><th>${L('Transformer','หม้อแปลง')}</th><th>R(${tt})<div style="font-size:10.5px;font-weight:600;text-transform:none;color:var(--muted);">${L('reliability','ความเชื่อถือได้')}</div></th><th>I<sub>B</sub><div style="font-size:10.5px;font-weight:600;text-transform:none;color:var(--muted);">${L('Birnbaum importance','ความสำคัญเชิงโครงสร้าง')}</div></th><th>I<sub>C</sub><div style="font-size:10.5px;font-weight:600;text-transform:none;color:var(--muted);">${L('criticality importance','ความสำคัญเชิงวิกฤต')}</div></th><th>HI<div style="font-size:10.5px;font-weight:600;text-transform:none;color:var(--muted);">${L('health index','ดัชนีสุขภาพ')}</div></th><th>${L('Why','เหตุผล')}</th></tr></thead><tbody>${rows}</tbody></table></div></div>`; }).join('');
+      <div class="tbl-wrap"><table class="rowlink"><thead><tr><th>${L('Focus','ลำดับโฟกัส')}</th><th>${L('Transformer','หม้อแปลง')}</th><th>R(${tTxt(tt)})<div style="font-size:10.5px;font-weight:600;text-transform:none;color:var(--muted);">${L('reliability','ความเชื่อถือได้')}</div></th><th>I<sub>B</sub><div style="font-size:10.5px;font-weight:600;text-transform:none;color:var(--muted);">${L('Birnbaum importance','ความสำคัญเชิงโครงสร้าง')}</div></th><th>I<sub>C</sub><div style="font-size:10.5px;font-weight:600;text-transform:none;color:var(--muted);">${L('criticality importance','ความสำคัญเชิงวิกฤต')}</div></th><th>HI<div style="font-size:10.5px;font-weight:600;text-transform:none;color:var(--muted);">${L('health index','ดัชนีสุขภาพ')}</div></th><th>${L('Why','เหตุผล')}</th></tr></thead><tbody>${rows}</tbody></table></div></div>`; }).join('');
   return `<div class="card" style="margin-bottom:16px;background:var(--blue-bg);">
     <div class="card-head"><h3>${L('Which unit to focus on in each substation','หม้อแปลงที่ต้องโฟกัสในแต่ละสถานี')}</h3></div>
     <p class="legend1" style="margin:0 0 10px;">${L('Order inside a substation: higher I_C first (the unit most likely to have caused a system failure); if I_C is equal, lower HI first. Substations are ordered by their unreliability (1 − R_SS). This is the order for supply impact — maintenance priority also uses the HI risk level.','ลำดับภายในสถานี: I<sub>C</sub> สูงก่อน (ตัวที่มีโอกาสเป็นต้นเหตุให้ระบบล้มมากที่สุด) ถ้า I<sub>C</sub> เท่ากัน HI ต่ำกว่าก่อน · ลำดับสถานีเรียงตามโอกาสที่สถานีจ่ายไฟไม่ได้ (1 − R<sub>SS</sub>) · นี่คือลำดับด้านผลกระทบต่อการจ่ายไฟ ส่วนลำดับการบำรุงรักษาใช้ระดับความเสี่ยงจาก HI ร่วมด้วย')}</p>
@@ -3244,14 +3278,14 @@ function netSettingsHtml(){
     <p class="small-muted" style="margin:0;">${L('Substations and their transformers are drawn on the Overview. k = how many transformers must be in service to carry the peak load: Auto picks it from the MVA ratings (k = 1 means the units back each other up).','สถานีและหม้อแปลงจะแสดงเป็นแผนภาพที่หน้าแรก · k = จำนวนหม้อแปลงที่ต้องใช้งานเพื่อรับโหลดสูงสุด · อัตโนมัติจะคำนวณจากพิกัด MVA (k = 1 คือสำรองกันได้)')}</p></div>
     ${stCards}
     <div class="card"><div class="card-head"><h3>${L('Failure history','ประวัติการเสีย')}</h3><span class="small-muted">λ = r ÷ T</span></div>
-      <div class="notebox" style="margin:0 0 10px;flex-wrap:wrap;">${gicon('help',16)}<div style="flex:1;min-width:240px;"><b>Service Request</b> — ${SR_LOG.length?L(`${SR_LOG.length} work orders loaded · r is counted from the file for the units in it; T = record period (${srWindow().T.toFixed(2)} yr)`,`มี ${SR_LOG.length} งาน · หม้อแปลงที่อยู่ในไฟล์นับ r จากไฟล์เอง และ T = ช่วงที่มีบันทึก (${srWindow().T.toFixed(2)} ปี)`):L('not imported — r is entered by hand below','ยังไม่ได้นำเข้า — r มาจากที่กรอกในตารางด้านล่าง')}
+      <div class="notebox" style="margin:0 0 10px;flex-wrap:wrap;">${gicon('help',16)}<div style="flex:1;min-width:240px;"><b>Service Request</b> — ${SR_LOG.length?L(`${SR_LOG.length} work orders loaded · λ of the units in it comes from the MTBF of the counted work orders`,`มี ${SR_LOG.length} งาน · หม้อแปลงที่อยู่ในไฟล์คิด λ จาก MTBF ของงานที่ตรงเกณฑ์`):L('not imported — r is entered by hand below','ยังไม่ได้นำเข้า — r มาจากที่กรอกในตารางด้านล่าง')}
         <div style="margin-top:6px;font-size:13px;">${L('Count as failure','นับเป็นการเสีย')}: ${['CM','PM'].map(v=>`<label style="margin-right:10px;white-space:nowrap;"><input type="checkbox" data-sr-rule="type:${v}" ${SR_RULE.types.includes(v)?'checked':''}> ${v}</label>`).join('')} · Priority ${[1,2,3,4].map(v=>`<label style="margin-right:8px;white-space:nowrap;"><input type="checkbox" data-sr-rule="pri:${v}" ${SR_RULE.pri.includes(v)?'checked':''}> ${v}</label>`).join('')}</div>${srColsHtml()}</div>
         <div class="filter-row" style="flex-basis:100%;padding-left:26px;">${srButtons()}${SR_LOG.length?`<button class="btn btn-ghost" data-sr-clear="1" style="padding:6px 12px;font-size:13px;color:var(--red);">${L('Remove','ลบข้อมูล')}</button>`:''}</div></div>
       ${SR_LOG.length?'':`<p class="small-muted" style="font-size:13px;margin:0 0 8px;">${L('Count r by defect code: count T016 (transformer trip) and T015 (failed transformer replaced); do not count oil-leak codes T006–T011 (response code C, no outage).','นับ r ตามรหัสความผิดปกติ: นับ T016 (หม้อแปลง Trip) และ T015 (เปลี่ยนหม้อแปลงชำรุด) ไม่นับรหัสน้ำมันรั่วซึม T006–T011 (ระยะเวลาเข้าแก้ไขระดับ C และไม่ต้องหยุดจ่ายไฟ)')}</p>`}
       <div class="tbl-wrap"><table><thead><tr><th>${t('asset')}</th><th>${L('Installation date','วันที่ติดตั้ง')}</th><th>${L('Outage failures','ครั้งที่ขัดข้องจนหลุดจากระบบ')} <span style="text-transform:none;">r</span></th><th>T (${L('yr','ปี')})</th><th style="text-transform:none;">λ (/${L('yr','ปี')})</th></tr></thead><tbody>
-      ${units.map(u=>`<tr><td><b>${u.a.id}</b></td><td><input type="date" style="width:140px;" data-net-a="installed" data-id="${u.a.id}" value="${esc(u.a.installed||'')}"></td><td>${u.src==='sr'?`<b>${u.r}</b> <span class="small-muted" style="font-size:11.5px;">${L('from Service Request','จาก Service Request')}</span>`:`<input type="number" min="0" step="1" style="width:80px;" data-net-a="fails" data-id="${u.a.id}" value="${+u.a.fails||0}">`}</td><td>${u.T.toFixed(1)}</td><td>${f4(u.lam)}${u.zero?'*':''}</td></tr>`).join('') || `<tr><td colspan="5" class="small-muted">—</td></tr>`}
+      ${units.map(u=>`<tr><td><b>${u.a.id}</b></td><td><input type="date" style="width:140px;" data-net-a="installed" data-id="${u.a.id}" value="${esc(u.a.installed||'')}"></td><td>${u.src==='sr'?`<b>${u.r}</b> <span class="small-muted" style="font-size:11.5px;">${L('from Service Request','จาก Service Request')}</span>`:`<input type="number" min="0" step="1" style="width:80px;" data-net-a="fails" data-id="${u.a.id}" value="${+u.a.fails||0}">`}</td><td>${u.mtbf?`MTBF ${u.mtbf.toFixed(1)} ${L('h','ชม.')}`:u.T.toFixed(1)}</td><td>${f4(u.lam)}${u.zero?'*':''}</td></tr>`).join('') || `<tr><td colspan="5" class="small-muted">—</td></tr>`}
       </tbody></table></div>
-      <p class="small-muted" style="font-size:12px;margin:8px 0 0;">${SR_LOG.length?L('Units in the Service Request file: r = work orders that match the rule above, T = record period. Others: r entered here, T = years in service. * zero failures → λ ≈ 0.693 ÷ T.','หม้อแปลงที่อยู่ในไฟล์ Service Request: r = จำนวนงานที่ตรงเกณฑ์ด้านบน, T = ช่วงที่มีบันทึก · ลูกอื่น: r ที่กรอกเอง, T = ปีที่ใช้งาน · * ไม่เคยเสีย → λ ≈ 0.693 ÷ T'):L('Count only failures that took the transformer out of service. * zero failures → λ ≈ 0.693 ÷ T.','นับเฉพาะความล้มเหลวที่ทำให้หม้อแปลงหยุดจ่ายไฟ · * ไม่เคยเสีย → λ ≈ 0.693 ÷ T')}</p></div>`;
+      <p class="small-muted" style="font-size:12px;margin:8px 0 0;">${SR_LOG.length?L('Units in the Service Request file: r = work orders that match the rule above, λ = 8,760 ÷ MTBF (h). Others: r entered here, T = years in service. * zero failures → λ ≈ 0.693 ÷ T.','หม้อแปลงที่อยู่ในไฟล์ Service Request: r = จำนวนงานที่ตรงเกณฑ์ด้านบน, λ = 8,760 ÷ MTBF (ชม.) · ลูกอื่น: r ที่กรอกเอง, λ = r ÷ ปีที่ใช้งาน · * ไม่เคยเสีย → λ ≈ 0.693 ÷ T'):L('Count only failures that took the transformer out of service. * zero failures → λ ≈ 0.693 ÷ T.','นับเฉพาะความล้มเหลวที่ทำให้หม้อแปลงหยุดจ่ายไฟ · * ไม่เคยเสีย → λ ≈ 0.693 ÷ T')}</p></div>`;
 }
 function attachNetEvents(){
   const ar=document.getElementById('netArea'); if(ar) ar.addEventListener('change',()=>{ NET.area = ar.value.trim(); render(); toast(t('toast_saved'),'success'); });
@@ -3466,7 +3500,7 @@ function renameAsset(a, newId){
   labFor(a); getFmeaFor(a); getMaintFor(a);                       /* materialise generated sample data under the old code first */
   [LAB, FMEA_STORE, MAINT_STORE, RCM_STORE, UTIL_RAW].forEach(st=>{ if(st[old]!==undefined){ st[newId]=st[old]; delete st[old]; } });
   ensureNet(); NET.stations.forEach(st=>{ st.trs = st.trs.map(x=>x===old?newId:x); });
-  SR_LOG.forEach(r=>{ if(r.unit===old) r.unit=newId; });
+  SR_LOG.forEach(r=>{ if(r.unit===old) r.unit=newId; }); SR_CACHE=null;
   a.id = newId; if(state.assetId===old) state.assetId = newId;
 }
 function stationSelect(cur){ ensureNet(); return `<select name="station"><option value="">${L('— not in a substation —','— ไม่อยู่ในสถานี —')}</option>${NET.stations.map(st=>`<option value="${st.id}" ${cur===st.id?'selected':''}>${esc(st.name)}</option>`).join('')}</select>`; }
