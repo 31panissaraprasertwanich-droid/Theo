@@ -815,6 +815,8 @@ table.crit-t td{white-space:normal;vertical-align:top;font-size:13px;} table.cri
 .repbar-h{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-bottom:5px;}
 .repbar-t{height:12px;border-radius:999px;background:var(--border);overflow:hidden;} .repbar-t>div{height:100%;border-radius:999px;transition:width .4s ease;}
 @media (max-width:720px){ .repkpi div:nth-child(2){font-size:22px !important;} }
+  .dhint{ font-size:11.5px; color:#5b6573; margin-left:4px; white-space:nowrap; }
+  .dhint:empty{ display:none; }
   .hist-row > td{ background:#f6f8fa; padding:14px 16px !important; cursor:default; }
   .hist-row:hover > td{ background:#f6f8fa !important; }
   .hist-box{ width:0; min-width:100%; }   /* does not widen the transformer table; the inner table scrolls */
@@ -2086,7 +2088,8 @@ function rcmAltHtml(ev){ const base=ev.autoDec||ev.decision; const alts=RCM_ALT[
       <div><b>${L('Use instead','ใช้แทน')}:</b> ${x.use?`<b>${esc(rcmShortDec(x.use))}</b> — `:''}${L(x.how[0],x.how[1])}</div>
       <div class="small-muted raw-data" style="font-size:12px;">${L('Reference','อ้างอิง')}: ${esc(x.ref)}</div>
       ${x.use&&i!=null?`<button class="btn btn-outline" data-rcm-alt="${i}" style="padding:4px 10px;font-size:12.5px;margin-top:4px;">${L('Use this option','ใช้ทางเลือกนี้')}</button>`:''}</div>`;
-  return `<details class="tip-more" style="margin-top:8px;"><summary>${L('Fallback options — if the proposed task cannot be done','ทางเลือกสำรอง — ถ้างานที่เสนอทำไม่ได้')}</summary>
+  const _open = state.rcmAltOpen && state.rcmAltOpen===state.rcmFm; if(_open) setTimeout(()=>{ state.rcmAltOpen=null; const d=document.getElementById('rcmAltBox'); if(d) d.scrollIntoView({block:'center'}); },60);
+  return `<details class="tip-more" id="rcmAltBox" style="margin-top:8px;" ${_open?'open':''}><summary>${L('Fallback options — if the proposed task cannot be done','ทางเลือกสำรอง — ถ้างานที่เสนอทำไม่ได้')}</summary>
     ${alts.map((x,i)=>row(x,i)).join('')}${RCM_ALT_ALL.map(x=>row(x,null)).join('')}
     <p class="small-muted" style="font-size:12px;margin:6px 0 0;">${L('Fallback options set by the author from the default-action principle of SAE JA1011 / IEC 60300-3-11 and the action guidance of IEEE C57.104, IEC 60422 and IEEE C57.91; the intervals should be reviewed with the utility.','ทางเลือกสำรองกำหนดโดยผู้จัดทำ ตามหลัก default action ของ SAE JA1011 / IEC 60300-3-11 และแนวทางการดำเนินการของ IEEE C57.104, IEC 60422 และ IEEE C57.91 · ระยะเวลาที่ระบุควรทบทวนร่วมกับหน่วยงาน')}</p></details>`; }
 document.addEventListener('click', e=>{ const b=e.target.closest('[data-rcm-alt]'); if(!b) return; e.preventDefault(); if(!can('rcm')) return;
@@ -2216,7 +2219,9 @@ function rcmState(a, f, e){
   const now=rcmSnapshot(a,f), why=[];
   if(ans._seed){ ans._g=now.g; ans._risk=now.risk; ans._dec=e.decision; delete ans._seed; }
   if(!ans._dec) ans._dec=e.decision;   /* confirmations saved before the decision was stored */   /* sample confirmation: take the evidence as it is when first checked */
-  if((ans._g||'')!==now.g) why.push(L(`lab-result grade changed ${ans._g||'—'} → ${now.g||'—'}`,`เกรดจากผลแล็บเปลี่ยน ${ans._g||'—'} → ${now.g||'—'}`));
+  if((ans._g||'')!==now.g){ const r0 = (!f.oManual && G2O[ans._g] && f.s && f.d) ? f.s*G2O[ans._g]*f.d : null;
+    const rp = r0!==null && r0!==f.rpn ? L(` (RPN ${r0} → ${f.rpn}, compared with the last confirmation)`,` (RPN ${r0} → ${f.rpn} เทียบกับตอนยืนยันล่าสุด)`) : '';
+    why.push(L(`lab-result grade changed ${ans._g||'—'} → ${now.g||'—'}`,`เกรดจากผลแล็บเปลี่ยน ${ans._g||'—'} → ${now.g||'—'}`)+rp); }
   if(ans._risk && ans._risk!==now.risk) why.push(L(`RPN level changed ${ans._risk} → ${now.risk}`,`ระดับ RPN เปลี่ยน ${trRisk(ans._risk)} → ${trRisk(now.risk)}`));
   return why.length ? {k:'review', why} : {k:'confirmed'};
 }
@@ -2702,6 +2707,16 @@ function renderNav(){
 
 /* ============ OVERVIEW PAGE ============ */
 /* ============ CATEGORY OVERVIEW PAGES (Health Index / FMEA / RCM) ============ */
+document.addEventListener('click', e=>{ const b=e.target.closest('[data-alt-goto]'); if(!b) return; e.preventDefault(); const [id,code]=b.dataset.altGoto.split('|');
+  state.rcmFm=code; state.rcmAltOpen=code; goToAssetDetail(id,'rcm'); });
+/* a native date box shows the browser's own format (e.g. mm/dd/yyyy, CE) — show the same date the way the rest of the app writes it */
+function dateHintText(v){ const d = v ? new Date(v+'T00:00:00') : null; return d && !isNaN(d) ? '= '+fmtD(d) : ''; }
+function annotateDates(){ document.querySelectorAll('input[type=date]').forEach(el=>{ let h=el.nextElementSibling;
+  if(!h || !h.classList.contains('dhint')){ h=document.createElement('span'); h.className='dhint'; el.insertAdjacentElement('afterend', h); }
+  const t=dateHintText(el.value); if(h.textContent!==t) h.textContent=t; }); }
+document.addEventListener('input', e=>{ if(e.target.matches && e.target.matches('input[type=date]')) annotateDates(); });
+document.addEventListener('change', e=>{ if(e.target.matches && e.target.matches('input[type=date]')) annotateDates(); });
+let _dhRaf=0; new MutationObserver(()=>{ if(_dhRaf) return; _dhRaf=requestAnimationFrame(()=>{ _dhRaf=0; annotateDates(); }); }).observe(document.documentElement,{childList:true,subtree:true});
 function goToAssetDetail(id, tab){ state.baJob = 0; state.assetId = id; state.page='detail'; if(tab==='rcm'){ state.detailTab='fmearcm'; state.fmView='rcm'; } else state.detailTab = tab; render(); window.scrollTo(0,0); }
 function renderFmeaRcmOverview(){
   const rows = riskList().map(({a,r})=>{ const fm=getFmeaFor(a); const top=fmeaPriority(fm)[0]; const c={}; let pend=0, rd=0, conf=0;
@@ -4576,7 +4591,12 @@ function newPlanFrom(a, f, ev){
   if(st.redesign) return {k:'rd', type:'RD', task:L('Redesign / modification','ออกแบบใหม่/ปรับปรุง'), m:null};
   const tk = rcmTaskFor(f, ev.decision) || ['—','—'];
   const ms = String(tk[1]).split('/').map(intervalM).filter(x=>x!==null);
-  return {k: st.types[0]==='BM' ? 'bm' : 'new', type: st.types.join('+') + (st.fft?' (FFT)':''), task: tk[0], m: ms.length?Math.min(...ms):null, mTxt: tk[1]};
+  const bm = st.types[0]==='BM';
+  const why = !bm ? '' : ev.override ? L(`chosen by the engineer${ev.why?': '+ev.why:''}`,`วิศวกรเลือกเอง${ev.why?': '+ev.why:''}`)
+    : (()=>{ const ans=rcmAnsFor(a,f); const r0 = (!f.oManual && ans._g && G2O[ans._g]) ? f.s*G2O[ans._g]*f.d : f.rpn;
+        const base = L(`RPN ${r0} < ${RPN_MED} (low) and S = ${f.s} < 5 (no safety consequence) → a scheduled task is not worth doing`,`RPN ${r0} < ${RPN_MED} (ต่ำ) และ S = ${f.s} < 5 (ไม่กระทบความปลอดภัย) → งานตามรอบไม่คุ้มค่า`);
+        return r0!==f.rpn ? L(`when confirmed: ${base} — now RPN ${f.rpn}, so review it`,`ตอนยืนยัน: ${base} — ตอนนี้ RPN ${f.rpn} จึงควรทบทวน`) : base; })();
+  return {k: bm ? 'bm' : 'new', type: st.types.join('+') + (st.fft?' (FFT)':''), task: tk[0], m: ms.length?Math.min(...ms):null, mTxt: tk[1], why};
 }
 function planCmp(old, nw){
   if(nw.k==='pending') return {c:'pend', t:L('Not in the new plan until an engineer confirms the task','ยังไม่เข้าแผนใหม่จนกว่าวิศวกรจะยืนยันงาน')};
@@ -4650,11 +4670,11 @@ function planRevTableHtml(rows, showAsset){
   ${rows.map(r=>`<tr>${showAsset?`<td><button class="linklike" data-goto-detail="${esc(r.a.id)}|plan" style="font-weight:800;">${esc(r.a.id)}</button></td>`:''}
     <td><b>${r.f.code}</b> · ${esc(r.f.comp)}<div class="small-muted" style="white-space:normal;">${esc(r.f.mode)} · RPN ${r.f.rpn}</div></td>
     <td style="white-space:normal;">${typePill(r.old.type)} ${esc(L(r.old.task[0],r.old.task[1]))}<div class="small-muted">${fmtM(r.old.m)}</div></td>
-    <td style="white-space:normal;">${r.nw.k==='pending'?`<span class="pill" style="background:#eef0f3;color:#5b6573;">${L('Waiting for engineer confirmation','รอวิศวกรยืนยัน')}</span><div><button class="linklike" data-goto-detail="${esc(r.a.id)}|rcm">${L('Check and confirm →','ไปตรวจและยืนยัน →')}</button></div>`:`${typePill(r.nw.type)} ${esc(r.nw.task)}<div class="small-muted">${r.nw.k==='bm'?L('no scheduled task','ไม่มีงานตามรอบ'):r.nw.m!==null?fmtM(r.nw.m):esc(r.nw.mTxt||'—')}${r.nw.note?' · '+r.nw.note:''}</div>${r.nw.review?`<div style="margin-top:4px;"><span class="pill pill-warning" title="${esc(r.nw.review.join(' · '))}">${L('Review needed — new test results','ควรทบทวน — มีผลตรวจใหม่')}</span><div class="small-muted" style="font-size:12px;margin-top:2px;">${esc(r.nw.review.join(' · '))}${r.nw.proposed?` · ${L('RPN now proposes','RPN ตอนนี้เสนอ')} <b>${esc(rcmShortDec(r.nw.proposed))}</b>`:''}</div><button class="linklike" data-goto-detail="${esc(r.a.id)}|rcm">${L('Review and confirm again →','ไปทบทวนและยืนยันใหม่ →')}</button><div class="small-muted raw-data" style="font-size:11.5px;">${L('Reference','อ้างอิง')}: IEC 60300-3-11; SAE JA1012</div></div>`:''}`}</td>
+    <td style="white-space:normal;">${r.nw.k==='pending'?`<span class="pill" style="background:#eef0f3;color:#5b6573;">${L('Waiting for engineer confirmation','รอวิศวกรยืนยัน')}</span><div><button class="linklike" data-goto-detail="${esc(r.a.id)}|rcm">${L('Check and confirm →','ไปตรวจและยืนยัน →')}</button></div>`:`${typePill(r.nw.type)} ${esc(r.nw.task)}<div class="small-muted">${r.nw.k==='bm'?L('no scheduled task','ไม่มีงานตามรอบ'):r.nw.m!==null?fmtM(r.nw.m):esc(r.nw.mTxt||'—')}${r.nw.note?' · '+r.nw.note:''}</div>${r.nw.k==='bm'?`<div style="font-size:12px;margin-top:3px;"><b>${L('Why','เหตุผล')}:</b> ${esc(r.nw.why||'')}</div><div class="small-muted" style="font-size:11.5px;">${L('If the consequence turns out higher (safety or supply) → add a scheduled task (PM)','ถ้าพบว่าผลกระทบสูงกว่าที่ประเมิน (ความปลอดภัยหรือการจ่ายไฟ) → เพิ่มงานตามรอบ (PM)')}</div>`:''}${r.nw.k==='new'?`<div><button class="linklike" data-alt-goto="${esc(r.a.id)}|${r.f.code}" style="font-size:12px;">${L('Cannot be done? See fallback options →','ทำไม่ได้? ดูทางเลือกสำรอง →')}</button></div>`:''}${r.nw.review?`<div style="margin-top:4px;"><span class="pill pill-warning" title="${esc(r.nw.review.join(' · '))}">${L('Review needed — new test results','ควรทบทวน — มีผลตรวจใหม่')}</span><div class="small-muted" style="font-size:12px;margin-top:2px;">${esc(r.nw.review.join(' · '))}${r.nw.proposed?` · ${L('RPN now proposes','RPN ตอนนี้เสนอ')} <b>${esc(rcmShortDec(r.nw.proposed))}</b>`:''}</div><button class="linklike" data-goto-detail="${esc(r.a.id)}|rcm">${L('Review and confirm again →','ไปทบทวนและยืนยันใหม่ →')}</button><div class="small-muted raw-data" style="font-size:11.5px;">${L('Reference','อ้างอิง')}: IEC 60300-3-11; SAE JA1012</div></div>`:''}`}</td>
     <td style="white-space:normal;"><span class="pill" style="background:${CMP_STYLE[r.cmp.c][0]};color:${CMP_STYLE[r.cmp.c][1]};">${CMP_NAME()[r.cmp.c]}</span><div style="font-size:12.5px;margin-top:3px;">${r.cmp.t}</div></td><td style="white-space:normal;">${editStart?startInput(r):''}${actCell(r, ctxOf(r.a, r.f.code))}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
-function planRevNote(){ return `<p class="small-muted" style="font-size:12.5px;margin:8px 0 0;">${L(`Current plan = the time-based PM done today (starting values, same for every unit — edit them with “Edit current plan”). New plan = the strategy from the RCM decision; modes with RPN < ${RPN_MED} and S < 5 keep the current plan. The project proposes the new plan only; it does not issue work orders.`,`แผนเดิม = งาน PM ตามรอบเวลาที่ทำอยู่ (ค่าตั้งต้น ใช้เหมือนกันทุกเครื่อง แก้ได้ที่ปุ่ม “แก้ไขแผนเดิม”) · แผนใหม่ = กลยุทธ์จากการตัดสินใจ RCM โหมดที่ RPN < ${RPN_MED} และ S < 5 คงแผนเดิม · โครงงานนี้เสนอแผนใหม่เท่านั้น ไม่ได้ออกใบสั่งงาน`)}</p>`; }
+function planRevNote(){ return `<p class="small-muted" style="font-size:12.5px;margin:8px 0 0;">${L('“Actual result” compares the last lab result before the plan started with the latest one, so its RPN can differ from the FMEA & RCM tab, which compares with the last engineer confirmation.','คอลัมน์ “สภาพหลังใช้แผนใหม่” เทียบผลแล็บก่อนวันเริ่มแผนกับผลล่าสุด ค่า RPN จึงอาจต่างจากหน้า FMEA & RCM ซึ่งเทียบกับตอนวิศวกรยืนยันล่าสุด')}</p><p class="small-muted" style="font-size:12.5px;margin:4px 0 0;">${L(`Current plan = the time-based PM done today (starting values, same for every unit — edit them with “Edit current plan”). New plan = the strategy from the RCM decision; modes with RPN < ${RPN_MED} and S < 5 keep the current plan. The project proposes the new plan only; it does not issue work orders.`,`แผนเดิม = งาน PM ตามรอบเวลาที่ทำอยู่ (ค่าตั้งต้น ใช้เหมือนกันทุกเครื่อง แก้ได้ที่ปุ่ม “แก้ไขแผนเดิม”) · แผนใหม่ = กลยุทธ์จากการตัดสินใจ RCM โหมดที่ RPN < ${RPN_MED} และ S < 5 คงแผนเดิม · โครงงานนี้เสนอแผนใหม่เท่านั้น ไม่ได้ออกใบสั่งงาน`)}</p>`; }
 function openOldPmModal(){
   if(!can('plan')) return;
   const codes = [...new Set([...Object.keys(OLD_PM), ...ASSETS.flatMap(a=>getFmeaFor(a).map(f=>f.code))])].sort();
@@ -4716,7 +4736,7 @@ function actualCtx(a, st){ if(st===undefined) st=firstStart(a); if(!st) return {
   return {k:'ok', sd, bi, ai, B:assessAt(a,bi), A:assessAt(a,ai), bDate:lab[bi].date, aDate:lab[ai].date, n:after.length}; }
 function actualRpn(a, f, as){ if(f.oManual) return null; const ev=fmeaEvidence(a,f,as); return ev ? f.s*G2O[ev.g]*f.d : null; }
 function startInput(r){ const own=(PLAN_START_M[r.a.id]||{})[r.f.code];
-  return `<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;font-size:11.5px;" class="small-muted">${L('Start date','วันเริ่ม')} <input type="date" data-mstart="${r.f.code}" value="${own||''}" style="font-size:12px;padding:1px 4px;${own?'':'border-color:#E0A400;'}"></div>`; }
+  return `<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;font-size:11.5px;" class="small-muted"><span style="white-space:nowrap;">${L('Start date','วันเริ่ม')}</span> <input type="date" data-mstart="${r.f.code}" value="${own||''}" style="font-size:12px;padding:1px 4px;${own?'':'border-color:#E0A400;'}"></div>`; }
 function actCell(r, ctx){
   if(ctx.k==='nostart') return `<span class="small-muted" style="font-size:12.5px;">${L('enter this task’s start date','กรอกวันเริ่มของงานนี้')}</span>`;
   if(ctx.k==='nobefore') return `<span class="small-muted" style="font-size:12.5px;">${L('no lab result before the start','ไม่มีผลแล็บก่อนวันเริ่ม')}</span>`;
@@ -4725,7 +4745,7 @@ function actCell(r, ctx){
   if(b===null||a2===null) return `<span class="pill" style="background:#eef0f3;color:#5b6573;">${L('Not shown by lab results','ผลแล็บวัดไม่ได้')}</span><div class="small-muted" style="font-size:11.5px;">${L('use failure history / inspection','ดูจากประวัติขัดข้อง/ผลตรวจ')}</div>`;
   const v = a2<b?'better':a2>b?'worse':'same';
   return `<span class="pill" style="background:${EFF_STYLE[v][0]};color:${EFF_STYLE[v][1]};">${v==='better'?'▼ '+L('Condition better','สภาพดีขึ้น'):v==='worse'?'▲ '+L('Condition worse','สภาพแย่ลง'):L('Condition unchanged','สภาพเท่าเดิม')}</span>
-    <div style="font-size:12.5px;margin-top:4px;">RPN <b>${b}</b> → <b style="color:${EFF_STYLE[v][1]};">${a2}</b></div><div class="small-muted" style="font-size:11.5px;">${ctx.bDate} → ${ctx.aDate}</div>`; }   /* transformer id → date the new plan started (yyyy-mm-dd) */
+    <div style="font-size:12.5px;margin-top:4px;">RPN <b>${b}</b> → <b style="color:${EFF_STYLE[v][1]};">${a2}</b></div><div class="small-muted" style="font-size:11.5px;">${L(`last result before the start (${ctx.bDate}) → latest result (${ctx.aDate})`,`ผลก่อนวันเริ่มแผน (${ctx.bDate}) → ผลล่าสุด (${ctx.aDate})`)}</div>`; }   /* transformer id → date the new plan started (yyyy-mm-dd) */
 function planActualHtml(a){
   const lab = labFor(a), st = firstStart(a), sd = st ? new Date(st+'T00:00:00') : null;
   const head = `<div class="card-head" style="flex-wrap:wrap;gap:8px;"><h3>${L('Measured condition before and after the new plan','สภาพจริงก่อนและหลังใช้แผนใหม่')}</h3>
@@ -5271,6 +5291,27 @@ function analyseImport(table){
   });
   return {errors, samples, newAssets:Object.values(newAssets)};
 }
+/* typo check before import: values far outside what an oil test normally gives (warn only, the user decides) */
+const IMPORT_RANGE = { H2:[0,5000], CH4:[0,5000], C2H6:[0,5000], C2H4:[0,5000], C2H2:[0,500], CO:[0,5000], CO2:[0,30000], bdv:[10,100], moisture:[0,100], colour:[0,8], acidity:[0,1], ift:[5,60], fal:[0,20000] };
+const IMPORT_RANGE_NAME = ()=>({ bdv:'BDV (kV)', moisture:L('Water (ppm)','ความชื้น (ppm)'), colour:L('Colour','สี'), acidity:L('Acidity','ความเป็นกรด'), ift:'IFT', fal:'2-FAL (ppb)' });
+function importWarnings(x){ const s=x.sample, w=[]; const chk=(k,v)=>{ const r=IMPORT_RANGE[k]; if(v===null||v===undefined||!r) return; if(v<r[0]||v>r[1]) w.push(`${IMPORT_RANGE_NAME()[k]||k} = ${v} (${L('usual range','ช่วงปกติ')} ${r[0]}–${r[1]})`); };
+  Object.entries(s.gases||{}).forEach(([k,v])=>chk(k,v)); ['bdv','moisture','colour','acidity','ift','fal'].forEach(k=>chk(k,s[k]));
+  const d=parseD(s.date); if(d && d>new Date()) w.push(L('date is in the future','วันที่อยู่ในอนาคต'));
+  return w; }
+/* HI of each imported result, computed the same way as after import, without changing any data */
+function importPreviewHi(x){ try{ const a=ASSETS.find(y=>y.id===x.id); if(!a) return {before:null, after:null};
+  const lab = isDemoAsset(a) ? [] : labFor(a).filter(y=>y.date!==x.sample.date); const d=parseD(x.sample.date);
+  const prev = lab.filter(y=>(parseD(y.date)||0) < d).sort((p,q)=>(parseD(q.date)||0)-(parseD(p.date)||0))[0] || null;
+  const as = assessSample(x.sample, prev, a); const latest = !lab.some(y=>(parseD(y.date)||0) > d);
+  return {before: isDemoAsset(a) ? null : a.hi, after: as.hi===null?null:Math.round(as.hi*10)/10, latest}; }catch(e){ return {before:null, after:null}; } }
+function importPreviewHtml(r){ if(!r.samples.length) return '';
+  const rows = r.samples.slice(0,12).map(x=>{ const s=x.sample, g=s.gases||{}, h=importPreviewHi(x), w=importWarnings(x); const f=(v)=>v===null||v===undefined?'—':v;
+    const hiTxt = h.after===null ? '—' : (h.before!==null && h.latest ? `${Math.round(h.before*10)/10} → <b>${h.after}</b>` : `<b>${h.after}</b>`);
+    return `<tr${w.length?' style="background:#fff6e0;"':''}><td><b>${esc(x.id)}</b></td><td>${esc(s.date)}</td><td>${f(s.bdv)}</td><td>${f(s.moisture)}</td><td>${f(g.CO)}</td><td>${f(g.CO2)}</td><td>${f(g.C2H2)}</td><td>${f(s.fal)}</td><td>${hiTxt}</td></tr>${w.length?`<tr style="background:#fff6e0;"><td colspan="9" style="color:var(--amber);font-size:12px;">⚠ ${L('Check this value','ตรวจค่านี้')}: ${w.map(esc).join(' · ')}</td></tr>`:''}`; }).join('');
+  const nw = r.samples.filter(x=>importWarnings(x).length).length;
+  return `<div style="font-weight:800;font-size:13px;margin:10px 0 4px;">${L('Preview','ตัวอย่างข้อมูลที่จะนำเข้า')}${r.samples.length>12?` <span class="small-muted">(${L('first 12','12 แถวแรก')})</span>`:''}</div>
+    <div class="tbl-wrap" style="max-height:240px;overflow:auto;"><table style="font-size:12px;"><thead><tr><th>${t('asset')}</th><th>${L('Date','วันที่')}</th><th>BDV</th><th>${L('Water','ความชื้น')}</th><th>CO</th><th>CO₂</th><th>C₂H₂</th><th>2-FAL</th><th>HI ${L('now → after','ปัจจุบัน → หลังนำเข้า')}</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${nw?`<p style="font-size:12.5px;color:var(--amber);margin:6px 0 0;"><b>⚠ ${L(`${nw} result(s) have values outside the usual range — check for typing errors (e.g. 440 instead of 44) before saving. They are still imported if you save.`,`มี ${nw} ผลที่ค่าอยู่นอกช่วงปกติ — ตรวจว่าพิมพ์ผิดหรือไม่ (เช่น 440 แทน 44) ก่อนกดบันทึก ถ้ากดบันทึกระบบจะนำเข้าตามที่เห็น`)}</b></p>`:''}`; }
 function openImportModal(){
   const inp=document.createElement('input'); inp.type='file'; inp.accept='.csv,.xlsx,.xls,text/csv';
   inp.addEventListener('change',()=>{ const f=inp.files[0]; if(!f) return; readImportFile(f, (table)=>{
@@ -5289,6 +5330,7 @@ function openImportModal(){
       ${r.errors.length?`<div class="small-muted" style="font-size:12.5px;max-height:130px;overflow:auto;margin-top:8px;">${r.errors.slice(0,15).map(e=>'• '+esc(e)).join('<br>')}${r.errors.length>15?'<br>…':''}</div>`:''}
       ${r.newAssets.some(x=>!x.InstallDate&&!x.Year)?`<p class="small-muted" style="font-size:12.5px;color:var(--amber);">${L('Some new transformers have no InstallDate — their age cannot be scored until you set it (Edit transformer).','หม้อแปลงใหม่บางตัวไม่มีวันที่ติดตั้ง (InstallDate) — จะยังคิดคะแนนอายุไม่ได้จนกว่าจะกรอก (แก้ไขข้อมูลหม้อแปลง)')}</p>`:''}
       ${r.utility?`<p class="small-muted" style="font-size:12.5px;">${L('BDV = mean of the 6 readings, water = mean of the 3 readings. The workbook has no acidity, IFT or 2-FAL — the Health Index is calculated from the factors available (weights re-normalised) and they can be added later in each lab result.','BDV = ค่าเฉลี่ย 6 ครั้ง ความชื้น = ค่าเฉลี่ย 3 ครั้ง แบบฟอร์มนี้ไม่มีความเป็นกรด IFT และ 2-FAL — ดัชนีสุขภาพจะคิดจากปัจจัยที่มี (ปรับน้ำหนักให้รวมเท่าเดิม) และเพิ่มค่าเหล่านี้ภายหลังได้ในผลแล็บแต่ละครั้ง')}</p>`:''}
+      ${importPreviewHtml(r)}
       <p class="small-muted" style="font-size:12.5px;">${L('A result with the same transformer and date as an existing one replaces it.','ผลที่หม้อแปลงและวันที่ซ้ำกับของเดิมจะแทนที่ของเดิม')}</p>`,
     ()=>{ if(!r.samples.length && !(r.utility && (r.updates.length || Object.keys(r.dfr).length))){ toast(L('Nothing to import','ไม่มีข้อมูลให้นำเข้า')); return; }
       r.newAssets.forEach(n=>ASSETS.push({id:n.id, loc:String(n.Location||'—'), cap:Number(n.MVA)||0, volt:String(n.Voltage||'—'), hi:0, status:'Healthy', last:'—', next:'—', mfr:'—', year:Number(n.Year)||null, installed:(()=>{ const d=n.InstallDate?parseImportDate(n.InstallDate):null; return d?isoD(d):undefined; })(), type:'—', load:null, topOil:null, amb:null, demo:false}));
@@ -5303,6 +5345,7 @@ function openImportModal(){
       const used = []; r.samples.forEach(x=>{ const a=ASSETS.find(y=>y.id===x.id); if(a) afterJobsOf(a, x.sample.date).forEach(no=>used.push(`${no} (${x.id})`)); });
       toast(L(`Imported ${r.samples.length} results — everything recalculated`,`นำเข้า ${r.samples.length} ผลแล้ว — คำนวณใหม่ทั้งหมด`)
         + (used.length ? L(` · used as the after-work result of ${used.join(', ')}`,` · ใช้เป็นผลหลังทำงานของ ${used.join(', ')} แล้ว`) : ''),'success'); });
+    { const _m=document.querySelector('#modalRoot .modal'); if(_m) _m.style.maxWidth='860px'; }
   }); });
   inp.click();
 }
